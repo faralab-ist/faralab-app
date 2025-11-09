@@ -84,7 +84,8 @@ export default function CreateButtons({
             <button onClick={() => loadPreset('dipole')}>Dipole</button>
             <button onClick={() => loadPreset('tripole')}>Tripole</button>
             <button onClick={() => loadPreset('infiniteWire')}>Wire</button>
-            <button onClick={() => loadPreset('cylinder')}>Cylinder</button>
+           {/* <button onClick={() => loadPreset('cylinder')}>Cylinder</button> */}
+            <div className="spacer" />
             <div className="spacer" />
             <button onClick={() => loadPreset('singlePlane')}>1 Plane</button>
             <button onClick={() => loadPreset('parallelPlanes')}>2 Planes</button>

@@ -1,4 +1,4 @@
-  import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
   import { Canvas } from '@react-three/fiber'
   import { OrbitControls } from '@react-three/drei'
   import './App.css'
@@ -67,6 +67,11 @@ import FieldLines from './hooks/useFieldLines.jsx'
     const [dragOwnerId, setDragOwnerId] = useState(null)
     const [isPanelMinimized, setIsPanelMinimized] = useState(false)
     const [creativeMode, setCreativeMode] = useState(false)  // stays here (single source)
+    const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
+    const [vectorScale, setVectorScale] = useState(1)
+    //const [lineMin, setLineMin] = useState(24)
+    //const [lineSpacing, setLineSpacing] = useState(0.15)
+    const [showFieldLines, setShowFieldLines] = useState(true)
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -173,7 +178,7 @@ import FieldLines from './hooks/useFieldLines.jsx'
               <ObjectComponent
                 key={obj.id}
                 {...obj}
-                creativeMode={creativeMode}            // NEW
+                creativeMode={creativeMode}           
                 selectedId={selectedId}
                 setSelectedId={handleSelect}
                 setIsDragging={handleDragging}
@@ -188,9 +193,14 @@ import FieldLines from './hooks/useFieldLines.jsx'
           })}
 
         {showField && (
-          <FieldArrows objects={sceneObjects} 
-          showOnlyGaussianField={showOnlyGaussianField} fieldThreshold={0.1} gridSize={10} step={1}
-          />
+          <FieldArrows
+  key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}`}
+  objects={sceneObjects}
+  showOnlyGaussianField={showOnlyGaussianField}
+  minThreshold={vectorMinTsl}
+  scaleMultiplier={vectorScale}
+  // ...existing props...
+/>
         )}
 
         {showLines && (
@@ -204,7 +214,7 @@ import FieldLines from './hooks/useFieldLines.jsx'
           )}
         </Canvas>
 
-        <SettingsButtons
+        <SettingsButtons //epa, ya its ugly, i know - yours truly, gabriel
           showField={showField}
           showLines={showLines}
           onToggleField={toggleField}
@@ -212,16 +222,22 @@ import FieldLines from './hooks/useFieldLines.jsx'
           showEquipotentialSurface={showEquipotentialSurface}
           onToggleEquipotentialSurface={() => setShowEquipotentialSurface(v => !v)}
           showOnlyGaussianField={showOnlyGaussianField}
-          onToggleOnlyGaussianField={toggleOnlyGaussianField}
           setOnlyGaussianField={setShowOnlyGaussianField}
-          hasSurfaces={(counts?.surface ?? 0) > 0}
           creativeMode={creativeMode}
           addObject={addObject}
           sceneObjects={sceneObjects}
           setSceneObjects={setSceneObjects}
           selectedObjectId={selectedId}
-          potentialTarget={equipotentialTarget}                 // NEW
-          setPotentialTarget={setEquipotentialTarget}           // NEW
+          potentialTarget={equipotentialTarget}                 
+          setPotentialTarget={setEquipotentialTarget}           
+          vectorMinTsl={vectorMinTsl}
+          setVectorMinTsl={setVectorMinTsl}
+          vectorScale={vectorScale}
+          setVectorScale={setVectorScale}
+          //lineMin={lineMin}
+          //setLineMin={setLineMin}
+         // lineScale={lineStep}
+          //setLineScale={setLineScale} 
         />
       </div>
     )

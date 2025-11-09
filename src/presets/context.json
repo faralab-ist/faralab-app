@@ -33,24 +33,24 @@
     ]
   },
   "infiniteWire": {
-    "context": { "lambda": 5, "r": 3, "h": 8 },
+    "context": { "lambda": 0.1, "r": 3, "h": 8 },
     "camera": {
       "position": [8, 6, 12],
       "target": [0, 0, 0]
     },
     "objects": [
-      { "type": "wire",     "props": { "position": [0, 0, 0], "charge_density": "$lambda", "infinite": true } }
+      { "type": "wire", "props": { "position": [0, 0, 0], "charge_density": "$lambda", "infinite": true } }
       
     ]
   },
   "singlePlane": {
-    "context": {"size": 8 },
+    "context": {"size": 8, "sigma": 0.1 },
     "camera": {
       "position": [17, 3.6, 0],
       "target": [0, 0, 0]
     },
     "objects": [
-      { "type": "plane", "props": { "position": [0, 0, 0], "charge_density": 5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } }
+      { "type": "plane", "props": { "position": [0, 0, 0], "charge_density": "$sigma", "infinite": true, "dimensions": ["$size", "$size", 0.1] } }
     ]
   },
   "parallelPlanes": {
@@ -65,7 +65,7 @@
     ]
   },
   "sphere": {
-    "context": { "r": 2, "lambda": 5},
+    "context": { "r": 1.8, "lambda": 5},
     "camera": {
       "position": [7, 5, 7],
       "target": [0, 0, 0]

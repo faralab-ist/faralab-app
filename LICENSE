@@ -1,0 +1,57 @@
+# Academic Open Collaboration License (AOCL) v1.0  
+Copyright (c) 2025 FaraLAB
+
+---
+
+## 1. Purpose  
+This license governs the use, modification, and redistribution of this software and associated files.  
+It is intended to promote academic and scientific collaboration while restricting any commercial use.
+
+---
+
+## 2. Permissions  
+Permission is hereby granted, free of charge, to any person or institution obtaining a copy of this software and associated documentation files (the “Software”), to:  
+- Use the Software for academic, educational, and research purposes.  
+- Modify the Software and create derivative works under the terms of this License.  
+- Publish public forks of the Software without prior authorization.  
+- Use the Software internally within academic or research institutions.  
+- Include the Software in educational materials or demonstrations.
+
+---
+
+## 3. Conditions  
+Users of the Software must comply with the following conditions:  
+- Explicitly acknowledge the original authors in any use, fork, derivative, or publication.  
+- Make the complete source code of any modified version publicly available.  
+- Notify the original authors of any substantial modifications or improvements.  
+- Include this License in all copies or substantial portions of the Software.  
+- Cite the Software appropriately in any scientific or technical publications making use of it.
+
+---
+
+## 4. Restrictions  
+The following actions are strictly prohibited:  
+- Any commercial use, whether direct or indirect, including sale, paid licensing, or integration into commercial products or services.  
+- Removal of copyright notices, author credits, or license text.  
+- Redistribution under more permissive terms than those stated herein.  
+- Sub-licensing or re-licensing without prior written consent from the authors.
+
+---
+
+## 5. Patents  
+No patent rights are granted under this License.  
+The authors agree not to assert patent claims against legitimate users or contributors of the Software.
+
+---
+
+## 6. Disclaimer of Warranty  
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.  
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+## 7. Governing Law  
+This License shall be governed by and construed in accordance with the laws of **[Jurisdiction, e.g., Portugal or European Union]**.  
+Any disputes arising under this License shall be subject to the exclusive jurisdiction of the competent courts of that jurisdiction.
+
+---

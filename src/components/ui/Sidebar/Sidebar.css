@@ -120,6 +120,7 @@
   flex-direction: column;
   gap: 4px;
 }
+.object-row-wrapper
 
 .object-row {
   display: grid;
@@ -130,12 +131,42 @@
   border: 1px solid #202020;
   border-radius: 8px;
   background: #121212;
+  cursor: pointer;
+
+  /* new: smooth transitions for hover/focus state */
+  transition: background .12s ease, border-color .12s ease, transform .06s ease, box-shadow .12s ease;
 }
 
-.name {
-  text-transform: capitalize;
-  opacity: 0.95;
+/* Highlight whole row on hover and visible focus (keyboard) */
+.object-row:hover,
+.object-row:focus-visible {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-color: #2b2b2b;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  transform: translateY(-2px);
 }
+
+/* Subtle active press effect */
+.object-row:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+}
+
+/* Tidy child tweaks when row is highlighted */
+.object-row:hover .name,
+.object-row:focus-visible .name {
+  color: #fff;
+  font-weight: 600;
+}
+
+.object-row:hover .pill,
+.object-row:focus-visible .pill {
+  filter: brightness(1.05);
+  border-color: rgba(255,255,255,0.04);
+}
+
+/* Keep expand button visuals independent and usable */
+.expand-btn { z-index: 2; }
 
 /* Botão da setinha de expandir */
 .expand-btn {
@@ -145,10 +176,9 @@
   font-size: 16px;
   cursor: pointer;
   transition: color 0.15s ease;
+  padding: 5px 20px;
 }
-.expand-btn:hover {
-  color: #fff;
-}
+
 
 /* Detalhes expandidos */
 .object-details {
