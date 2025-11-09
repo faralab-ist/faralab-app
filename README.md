@@ -43,10 +43,10 @@ We welcome contributions from students, educators, and researchers.
 5. Open a Pull Request.  
 
 **Guidelines**  
-- Follow existing style and structure.  
-- Keep components modular and documented.  
-- Minimize dependencies.  
-- Maintain backward compatibility.  
+- Follow existing style and structure.
+- Keep components modular and documented.
+- Minimize dependencies.
+- Maintain backward compatibility.
 
 All contributions follow the **Academic Open Collaboration License (AOCL) v1.0**.  
 If your work leads to a publication, please cite *Faralab* and its authors.  
@@ -54,7 +54,7 @@ If your work leads to a publication, please cite *Faralab* and its authors.
 Issues or suggestions: [GitHub Issues](https://github.com/[your-org]/faralab/issues)  
 Contact: **faralab@tecnico.ulisboa.pt**
 
-## Authors  
+## Authors
 
 **Faralab Development Team**  
 Instituto Superior Técnico (IST) – Lisbon, Portugal  
@@ -73,7 +73,7 @@ Instituto Superior Técnico (IST) – Lisbon, Portugal
 
 Developed at the **Department of Physics, Instituto Superior Técnico (IST)** as part of an initiative to enhance the teaching and visualization of electromagnetism through interactive 3D simulation.
 
-Special thanks to Professor Pedro Abreu, Professor Luís Melo, and all professors, researchers, and students who contributed to the conception, design, and testing of Faralab.
+Special thanks to Professor Pedro Abreu, and all professors, researchers, and students who contributed to the conception, design, and testing of Faralab.
 
 ## **LICENSE**
 
