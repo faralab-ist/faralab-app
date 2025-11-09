@@ -23,6 +23,7 @@ import React, { useState, useEffect, useMemo } from 'react'
   import FieldArrows from './hooks/useFieldArrows.jsx'
   import useCameraPreset from './hooks/useCameraPreset.jsx'
   import EquipotentialSurface from './components/models/surfaces/EquipotentialSurface.jsx'
+import FieldLines from './hooks/useFieldLines.jsx'
 
   function CameraFnsMount({ onReady }) {
     const { setCameraPreset, animateCameraPreset } = useCameraPreset()
@@ -59,6 +60,7 @@ import React, { useState, useEffect, useMemo } from 'react'
     const [selectedId, setSelectedId] = useState(null)
     const [isDragging, setIsDragging] = useState(false)
     const [showField, setShowField] = useState(false)
+    const [showLines, setShowLines] = useState(false)
     const [showOnlyGaussianField, setShowOnlyGaussianField] = useState(false)
     const [showEquipotentialSurface, setShowEquipotentialSurface] = useState(false)
     const [equipotentialTarget, setEquipotentialTarget] = useState(5.0) 
@@ -101,14 +103,17 @@ import React, { useState, useEffect, useMemo } from 'react'
     }, [counts.surface, showOnlyGaussianField])
     const [camFns, setCamFns] = useState(null)
 
-    
+    const toggleLines = () => setShowLines(v => !v)
+
     return (
       <div id="canvas-container">
         <CreateButtons
           addObject={addObject}
           setSceneObjects={setSceneObjects}
           showField={showField}
+          showLines={showLines}
           onToggleField={toggleField}
+          onToggleLines={toggleLines}
           showOnlyGaussianField={showOnlyGaussianField}
           onToggleOnlyGaussianField={toggleOnlyGaussianField}
           showEquipotentialSurface={showEquipotentialSurface}
@@ -198,6 +203,12 @@ import React, { useState, useEffect, useMemo } from 'react'
 />
         )}
 
+        {showLines && (
+          <FieldLines charges={sceneObjects} 
+          stepsPerLine={30} stepSize={0.5} minStrength={0.1} linesPerCharge={20}
+          />
+        )}
+
           {showEquipotentialSurface && (
             <EquipotentialSurface objects={sceneObjects} targetValue={equipotentialTarget} /> 
           )}
@@ -205,7 +216,9 @@ import React, { useState, useEffect, useMemo } from 'react'
 
         <SettingsButtons //epa, ya its ugly, i know - yours truly, gabriel
           showField={showField}
-          onToggleField={() => setShowField(f => !f)}
+          showLines={showLines}
+          onToggleField={toggleField}
+          onToggleLines={toggleLines} 
           showEquipotentialSurface={showEquipotentialSurface}
           onToggleEquipotentialSurface={() => setShowEquipotentialSurface(v => !v)}
           showOnlyGaussianField={showOnlyGaussianField}
@@ -225,8 +238,6 @@ import React, { useState, useEffect, useMemo } from 'react'
           //setLineMin={setLineMin}
          // lineScale={lineStep}
           //setLineScale={setLineScale} 
-          showFieldLines={showFieldLines}
-          onToggleFieldLines={() => setShowFieldLines(v => !v)}
         />
       </div>
     )

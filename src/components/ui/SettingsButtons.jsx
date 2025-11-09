@@ -9,6 +9,8 @@ import flux from '../../assets/flux.svg'
 export default function SettingsButtons({
   showField,
   onToggleField,
+  showLines,        // NEW
+  onToggleLines,    // NEW
   showEquipotentialSurface,
   onToggleEquipotentialSurface,
   showOnlyGaussianField,
@@ -162,6 +164,7 @@ export default function SettingsButtons({
   return (
     <>
       <div ref={rootRef} className="settings-buttons-root horizontal">
+
         <div className="settings-group">
           <button
             className={`settings-main big ${open === 'field' ? 'open' : ''}`}
@@ -171,12 +174,14 @@ export default function SettingsButtons({
           </button>
           {open === 'field' && (
             <div className="settings-panel up">
-              <button onClick={onToggleField}>
-                {showField ? 'Hide Field' : 'Show Field'}
-              </button>
-              <button onClick={onToggleFieldLines}>
-                {showFieldLines ? 'Hide Field Lines' : 'Show Field Lines'}
-              </button>
+              <div className="field-buttons-row">
+                <button onClick={onToggleField}>
+                  {showField ? 'Hide Field' : 'Show Field'}
+                </button>
+                <button onClick={onToggleLines}>
+                  {showLines ? 'Hide Lines' : 'Show Lines'}
+                </button>
+              
 
               {/* E-Field visualization controls */}
               <div className="efield-section">

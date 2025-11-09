@@ -7,6 +7,7 @@ import { Instance, Instances } from '@react-three/drei';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import vertexShaderSource from '../shaders/arrowVertex.glsl';
 import fragmentShaderSource from '../shaders/arrowFragment.glsl';
+import { min } from 'mathjs';
 
 export default function FieldArrows({ 
     objects, 
