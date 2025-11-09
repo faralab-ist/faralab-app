@@ -8,10 +8,19 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import vertexShaderSource from '../shaders/arrowVertex.glsl';
 import fragmentShaderSource from '../shaders/arrowFragment.glsl';
 
-export default function FieldArrows({ objects, showOnlyPlane = false, showOnlyGaussianField = false, fieldThreshold = 0.1, gridSize = 10, step = 1 }) {
+export default function FieldArrows({ 
+    objects, 
+    showOnlyPlane = false, 
+    showOnlyGaussianField = false, 
+    fieldThreshold = 0.1, 
+    gridSize = 10, 
+    step = 1, 
+    minThreshold, 
+    scaleMultiplier
+}) {
     
-    const vectors = useMemo( // TODO definir min threshold
-        () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, 1),
+    const vectors = useMemo( 
+        () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold),
         [objects, showOnlyPlane, showOnlyGaussianField]
     );
 
@@ -65,7 +74,7 @@ export default function FieldArrows({ objects, showOnlyPlane = false, showOnlyGa
         directions[i * 3 + 2] = dir.z;
 
         const parameter = 1 - Math.exp(-logMag);
-        scales[i] = Math.min(Math.max(parameter, 0), 1.0);
+        scales[i] = (Math.min(Math.max(parameter, 0), 1.0)) * scaleMultiplier;
 
         colors[i * 3] = color.r;
         colors[i * 3 + 1] = color.g;

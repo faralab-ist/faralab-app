@@ -3,6 +3,8 @@ import './SettingsButtons.css'
 import sphereIcon from '../../assets/sphere.svg'
 import cylinderIcon from '../../assets/cylinder.svg'
 import cuboidIcon from '../../assets/cuboid.svg'
+import flux from '../../assets/flux.svg'
+
 
 export default function SettingsButtons({
   showField,
@@ -16,8 +18,18 @@ export default function SettingsButtons({
   sceneObjects,
   setSceneObjects,
   selectedObjectId,
-  potentialTarget,            // NEW
-  setPotentialTarget          // NEW
+  potentialTarget,
+  setPotentialTarget,
+  vectorMinTsl,
+  setVectorMinTsl,
+  vectorScale,
+  setVectorScale,
+  lineMinTsl,
+  setLineMinTsl,
+  lineSpacing,
+  setLineSpacing,
+  showFieldLines,
+  onToggleFieldLines
 }) {
   const [open, setOpen] = useState(null)
   const toggle = (k) => setOpen(p => p === k ? null : k)
@@ -162,6 +174,67 @@ export default function SettingsButtons({
               <button onClick={onToggleField}>
                 {showField ? 'Hide Field' : 'Show Field'}
               </button>
+              <button onClick={onToggleFieldLines}>
+                {showFieldLines ? 'Hide Field Lines' : 'Show Field Lines'}
+              </button>
+
+              {/* E-Field visualization controls */}
+              <div className="efield-section">
+                <div className="efield-section-title">Vectors</div>
+                <div className="efield-row compact">
+                  <label className="efield-label">
+                    <span className="label-text">Min Threshold</span>
+                    <input
+                      type="number"
+                      min={0.00}
+                      step={0.05}
+                      value={vectorMinTsl}
+                      onChange={e => setVectorMinTsl(Number(e.target.value))}
+                    />
+                  </label>
+                  <label className="efield-label">
+                    <span className="label-text">Scale</span>
+                    <input
+                      type="number"
+                      min={0.1}
+                      max={2}
+                      step={0.1}
+                      value={vectorScale}
+                      onChange={e => setVectorScale(Number(e.target.value))}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="efield-section">
+                <div className="efield-section-title">Lines</div>
+                <div className="efield-row compact">
+                  <label className="efield-label">
+                    <span className="label-text">Count</span>
+                    <input
+                      type="number"
+                      min={4}
+                      step={1}
+                      value={lineMinTsl}
+                      onChange={e => setLineMinTsl(Number(e.target.value))}
+                      disabled={!showFieldLines}
+                      placeholder="24"
+                    />
+                  </label>
+                  <label className="efield-label">
+                    <span className="label-text">Step</span>
+                    <input
+                      type="number"
+                      min={0.01}
+                      step={0.01}
+                      value={lineSpacing}
+                      onChange={e => setLineSpacing(Number(e.target.value))}
+                      disabled={!showFieldLines}
+                      placeholder="0.15"
+                    />
+                  </label>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -179,7 +252,7 @@ export default function SettingsButtons({
                 {showEquipotentialSurface ? 'Hide Equipotential' : 'Show Equipotential'}
               </button>
 
-              {/* NEW: target value slider (supports negative/positive) */}
+             
               <div className="slider-row">
                 <label className="slider-label">
                   Target V: <span className="slider-value">{Number(potentialTarget).toFixed(2)}</span>
@@ -237,16 +310,19 @@ export default function SettingsButtons({
                 </button>
               </div>
 
-              <div className={`flux-toggle ${anyGaussian ? '' : 'disabled'}`}>
-                <label>
-                  <input
-                    type="checkbox"
-                    disabled={!anyGaussian}
-                    checked={showOnlyGaussianField}
-                    onChange={e => setOnlyGaussianField?.(e.target.checked)}
-                  />
-                  Show Flux
-                </label>
+              {/* separator between Gaussian surface buttons and Flux control */}
+              <div className="gaussian-sep" />
+
+              <div className={`flux-button-row ${anyGaussian ? '' : 'disabled'}`}>
+                <button
+                  className={`flux-icon-btn ${showOnlyGaussianField ? 'active' : ''}`}
+                  disabled={!anyGaussian}
+                  onClick={() => setOnlyGaussianField?.(!showOnlyGaussianField)}
+                  title={showOnlyGaussianField ? 'Hide Flux' : 'Show Flux'}
+                >
+                  <img src={flux} alt="Flux" />
+                  <span>{showOnlyGaussianField ? 'Hide Flux' : 'Show Flux'}</span>
+                </button>
               </div>
             </div>
           )}
