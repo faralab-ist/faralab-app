@@ -2,6 +2,7 @@ import * as THREE from 'three';
 
 import infinitePlaneField from './infinitePlaneField.js';
 import infiniteWireField from './infiniteWireField.js';
+import finitePlaneField from './finitePlaneField.js';
 import { K_E } from './constants.js';
 
 // gets an array of charges {position: Vector3, charge: number} and a target position Vector3
@@ -38,7 +39,12 @@ export default function calculateFieldAtPoint(objects, targetPos) {
           resultFieldAtPoint.add(fieldFromSheet);
           break;
       }
-    } else {
+    } else if (obj.type === 'plane') {
+      const fieldFromFinitePlane =
+          finitePlaneField(sourcePosition, obj.direction, obj.dimensions, chargeDensity, targetPos);
+      resultFieldAtPoint.add(fieldFromFinitePlane);
+    }
+    /*else {
       for (const c of obj.charges) {
         const chargePos = new THREE.Vector3(
             sourcePosition.x + (c.position?.[0] || 0),
@@ -51,7 +57,7 @@ export default function calculateFieldAtPoint(objects, targetPos) {
         const fieldMagnitude = multiplier * c.charge / rSq;
         resultFieldAtPoint.addScaledVector(rVec.normalize(), fieldMagnitude);
       }
-    }
+    }*/
   }
 
   return resultFieldAtPoint;

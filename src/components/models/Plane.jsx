@@ -17,6 +17,7 @@ function Plane({
   updateDirection,
   gridDimensions,
   dimensions,
+  direction,
   creativeMode            // NEW
 }) {
   const isSelected = id === selectedId

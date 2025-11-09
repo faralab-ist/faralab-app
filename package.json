@@ -28,5 +28,21 @@
     "globals": "^16.4.0",
     "vite": "^7.2.2",
     "vite-plugin-glsl": "^1.5.4"
-  }
+  },
+  "description": "",
+  "main": "eslint.config.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faralab-ist/faralab-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/faralab-ist/faralab-app/issues"
+  },
+  "homepage": "https://github.com/faralab-ist/faralab-app#readme"
 }
