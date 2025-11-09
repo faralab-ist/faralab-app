@@ -269,8 +269,10 @@ import React, { useState, useEffect, useMemo } from 'react'
         )}
 
         {showLines && (
-          <FieldLines charges={sceneObjects} 
-          stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
+          <FieldLines 
+            key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id).join('-')}`}      // BUGFIX
+            charges={sceneObjects} 
+            stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
           />
         )}
 
