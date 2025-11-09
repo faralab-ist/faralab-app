@@ -1,0 +1,132 @@
+import React, { useRef, useEffect, useState, useMemo } from 'react'
+import { PivotControls } from '@react-three/drei'
+import * as THREE from 'three'
+import NormalArrow from './NormalArrow'
+
+
+
+export default function Sphere({
+  id,
+  position,
+  radius = 2,
+  opacity = 0.5,
+  selectedId,
+  setSelectedId,
+  setIsDragging,
+  updatePosition,
+  fixed = false,
+  dragOwnerId = null,
+  creativeMode
+}) {
+  const isSelected = id === selectedId
+  const meshRef = useRef()
+  const pivotRef = useRef()
+  const rootRef = useRef() // 👈 move this group, not just the mesh
+  const [center, setCenter] = useState([0, 0, 0])
+  const clickArmed = useRef(false)
+  const arrowLen = useMemo(() => Math.max(0.1, radius * 0.35), [radius])
+
+  // Use a diagonal direction by default (not at the poles)
+  const normalUnitDir = useMemo(
+    () => new THREE.Vector3(1, 1, 1).normalize(),
+    []
+  )
+
+  // One normal at that diagonal spot on the surface
+  const mainNormal = useMemo(
+    () => ({
+      origin: normalUnitDir.clone().multiplyScalar(radius),
+      dir: normalUnitDir.clone(),
+    }),
+    [normalUnitDir, radius]
+  )
+
+  // ⚙️ Recalcula o centro da geometria sempre que o raio muda
+  useEffect(() => {
+    if (meshRef.current?.geometry) {
+      meshRef.current.geometry.computeBoundingBox()
+      const box = meshRef.current.geometry.boundingBox
+      const centerVec = new THREE.Vector3()
+      box.getCenter(centerVec)
+      setCenter([centerVec.x, centerVec.y, centerVec.z])
+    }
+  }, [radius])
+
+  // 👇 sync world position via root group so gizmo + arrow follow
+  useEffect(() => {
+    if (rootRef.current) rootRef.current.position.set(...position)
+  }, [position])
+
+  return (
+    <PivotControls
+      ref={pivotRef}
+      anchor={center} // ✅ gizmo centrado geometricamente
+      visible={isSelected}
+      enabled={!fixed && (dragOwnerId === null || dragOwnerId === id) && creativeMode} // 👈 ativa se não houver drag de outro
+      disableRotations={true}
+      disableScaling={true}
+      depthTest={false}
+      onDragStart={() => setIsDragging(true)}
+      onDrag={(matrix) => {
+        const newPos = new THREE.Vector3().setFromMatrixPosition(matrix)
+        updatePosition(id, [newPos.x, newPos.y, newPos.z])
+        if (rootRef.current) rootRef.current.position.copy(newPos) // keep gizmo + arrow together
+      }}
+      onDragEnd={() => setIsDragging(false)}
+    >
+      <group ref={rootRef} position={position}>
+        <mesh
+          ref={meshRef}
+          userData={{ id, type: 'surface' }}
+          position={[0, 0, 0]}
+          // ✅ seleção adiada; ignora se outro objeto está em drag
+          onPointerDown={(e) => {
+            if (e.button !== undefined && e.button !== 0) return
+            if (dragOwnerId !== null && dragOwnerId !== id) return
+            clickArmed.current = true
+          }}
+          onPointerUp={(e) => {
+            if (!clickArmed.current) return
+            clickArmed.current = false
+            if (dragOwnerId !== null && dragOwnerId !== id) return
+            if (!fixed) e.stopPropagation()
+            setSelectedId(id)
+          }}
+          // ✅ ignora raycast se outro objeto está em drag; mantém "pass-through" de cliques
+          raycast={(raycaster, intersects) => {
+            if (!meshRef.current) return
+            if (dragOwnerId !== null && dragOwnerId !== id) return
+            const hitsBefore = intersects.length
+            THREE.Mesh.prototype.raycast.call(meshRef.current, raycaster, intersects)
+            if (intersects.length > hitsBefore + 1) {
+              intersects.splice(hitsBefore, 1)
+            }
+          }}
+        >
+          <sphereGeometry args={[radius, 32, 32]} />
+          <meshStandardMaterial
+            color={isSelected ? 'lightblue' : 'white'}
+            transparent
+            opacity={opacity}
+            depthWrite={false}
+            depthTest={true}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {isSelected && (
+          <group name="sphere-normal">
+            <NormalArrow
+              origin={mainNormal.origin}
+              dir={mainNormal.dir}
+              length={arrowLen}
+              color="red"
+              opacity={opacity}
+            />
+          </group>
+        )}
+      </group>
+    </PivotControls>
+  )
+}
+

@@ -1,0 +1,58 @@
+import * as THREE from 'three';
+
+import infinitePlaneField from './infinitePlaneField.js';
+import infiniteWireField from './infiniteWireField.js';
+import { K_E } from './constants.js';
+
+// gets an array of charges {position: Vector3, charge: number} and a target position Vector3
+// superposition principle
+export default function calculateFieldAtPoint(objects, targetPos) {
+  const multiplier = K_E;
+  let resultFieldAtPoint = new THREE.Vector3(0, 0, 0);
+  for (const obj of objects) {
+    const sourcePosition = new THREE.Vector3(...obj.position);
+    const charge = obj.charge;
+    const chargeDensity = obj.charge_density;
+
+    if (obj.type === 'charge') {
+      const rVec = new THREE.Vector3().subVectors(targetPos, sourcePosition);
+      const rSq = rVec.lengthSq();
+      if (rSq < 1e-6) continue;
+      const fieldMagnitude = multiplier * charge / rSq;
+      resultFieldAtPoint.addScaledVector(rVec.normalize(), fieldMagnitude);
+    } else if (obj.infinite) {
+      switch (obj.type) {
+        case 'wire':
+          const fieldFromWire =
+              infiniteWireField(sourcePosition, chargeDensity, targetPos, obj.direction);
+          resultFieldAtPoint.add(fieldFromWire);
+          break;
+        case 'plane':
+          const dist = new THREE.Vector3().subVectors(targetPos, sourcePosition).dot(new THREE.Vector3(...obj.direction).normalize());
+          if (Math.abs(dist) < 1e-6) {
+            resultFieldAtPoint = new THREE.Vector3(0, 0, 0);
+            return resultFieldAtPoint;
+          }
+          const fieldFromSheet =
+              infinitePlaneField(sourcePosition, chargeDensity, targetPos, obj.direction);
+          resultFieldAtPoint.add(fieldFromSheet);
+          break;
+      }
+    } else {
+      for (const c of obj.charges) {
+        const chargePos = new THREE.Vector3(
+            sourcePosition.x + (c.position?.[0] || 0),
+            sourcePosition.y + (c.position?.[1] || 0),
+            sourcePosition.z + (c.position?.[2] || 0),
+        );
+        const rVec = new THREE.Vector3().subVectors(targetPos, chargePos);
+        const rSq = rVec.lengthSq();
+        if (rSq < 1e-6) continue;
+        const fieldMagnitude = multiplier * c.charge / rSq;
+        resultFieldAtPoint.addScaledVector(rVec.normalize(), fieldMagnitude);
+      }
+    }
+  }
+
+  return resultFieldAtPoint;
+}

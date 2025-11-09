@@ -1,0 +1,87 @@
+{
+  "monopole": {
+    "context": { "r": 0.1, "q": 1 },
+    "camera": {
+      "position": [5, 4, 5],
+      "target": [0, 0, 0]
+    },
+    "objects": [
+      { "type": "charge", "props": { "position": [0, 0, 0], "charge": "$q", "radius": "$r"} }
+    ]
+  },
+  "dipole": {
+    "context": { "r": 0.1, "d": 3, "q": 1 },
+    "camera": {
+      "position": [0, 1, 5],
+      "target": [0, 0, 0]
+    },
+    "objects": [
+      { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },
+      { "type": "charge", "props": { "position": ["$d", 0, 0], "charge": "$(-q)", "radius": "$r" } }
+    ]
+  },
+  "tripole": {
+    "context": {  "r": 0.1, "d": 3, "q": 1, "tq": 2 },
+    "camera": {
+      "position": [0, 2.7, 7],
+      "target": [0, 0, 0]
+    },
+    "objects": [
+      { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },
+      { "type": "charge", "props": { "position": ["$d", 0, 0], "charge": "$(q)", "radius": "$r" } },
+      { "type": "charge", "props": { "position": [0, "$d", 0], "charge": "$(-tq)", "radius": "$r" } }
+    ]
+  },
+  "infiniteWire": {
+    "context": { "lambda": 5, "r": 3, "h": 8 },
+    "camera": {
+      "position": [8, 6, 12],
+      "target": [0, 0, 0]
+    },
+    "objects": [
+      { "type": "wire",     "props": { "position": [0, 0, 0], "charge_density": "$lambda", "infinite": true } }
+      
+    ]
+  },
+  "singlePlane": {
+    "context": {"size": 8 },
+    "camera": {
+      "position": [17, 3.6, 0],
+      "target": [0, 0, 0]
+    },
+    "objects": [
+      { "type": "plane", "props": { "position": [0, 0, 0], "charge_density": 5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } }
+    ]
+  },
+  "parallelPlanes": {
+    "context": { "distanceY": 4, "size": 8 },
+    "camera": {
+      "position": [17, 3.6, 0],
+      "target": [0, 0, 0]
+    },
+    "objects": [
+      { "type": "plane", "props": { "position": [0, "$(distanceY + 0.01)", 0], "charge_density": 5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } },
+      { "type": "plane", "props": { "position": [0, 0, 0], "charge_density": -5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } }
+    ]
+  },
+  "sphere": {
+    "context": { "r": 2, "lambda": 5},
+    "camera": {
+      "position": [7, 5, 7],
+      "target": [0, 0, 0]
+    },
+    "objects": [
+      { "type": "charge", "props": { "position": [0, 0, 0], "charge": "$lambda", "radius": "$r"} }
+    ]
+  },
+  "cylinder": {
+    "context": { "r": 1, "h": 3, "lambda": 5},
+    "camera": {
+      "position": [7, 5, 7],
+      "target": [0, 0, 0]
+    },
+    "objects": [
+      { "type": "wire", "props": { "position": [0, 0, 0], "charge": "$lambda", "radius": "$r", "height": "$h"} }
+    ]
+  }
+}

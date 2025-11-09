@@ -1,0 +1,234 @@
+.create-buttons-container {
+  position: fixed;
+  top: 180px;     /* moved below preset panel */
+  left: 20px;
+  z-index: 1000;
+
+  /* 👇 adicionado para permitir rolagem se for muito alto */
+  max-height: 90vh; /* altura máxima visível (viewport height) */
+  overflow-y: auto; /* ativa o scroll vertical */
+  padding-right: 6px; /* evita corte do conteúdo */
+}
+
+.create-buttons {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+}
+
+.create-buttons button {
+  padding: 8px 16px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.create-buttons button:hover {
+  background: #1976d2;
+}
+
+.gaussian-surfaces,
+.field-objects, .fields, 
+.presets {
+  background: rgba(20, 20, 20, 0.9);
+  padding: 12px;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+}
+
+h4 {
+  color: #76baff;
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.buttons-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+button {
+  background: #1a1a1a;
+  color: white;
+  border: 1px solid #333;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  width: 120px;
+}
+
+button:hover {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+/* Subtle toggle button (overrides the global button styling) */
+.create-buttons-container .creative-toggle {
+  width: auto;                /* override global width */
+  padding: 4px 8px;           /* smaller */
+  font-size: 0.8rem;          /* smaller */
+  background: transparent;    /* ghost */
+  color: #bdbdbd;
+  border: 1px solid #3a3a3a;
+  border-radius: 9999px;      /* pill */
+}
+
+.create-buttons-container .creative-toggle:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #4a4a4a;
+  color: #d6d6d6;
+}
+
+/* Active state stays subtle */
+.create-buttons-container .creative-toggle.on {
+  background: rgba(46, 116, 255, 0.08);
+  border-color: rgba(46, 116, 255, 0.35);
+  color: #9ec3ff;
+}
+
+/* Tiny status dot */
+.create-buttons-container .creative-toggle::before {
+  content: '●';
+  font-size: 0.7em;
+  margin-right: 6px;
+  color: #666;
+}
+.create-buttons-container .creative-toggle.on::before {
+  color: #76baff;
+}
+
+/* Vertical main buttons that expand horizontally */
+.preset-expand-list {
+  display: flex;
+  flex-direction: column; /* stack Multipole and Gaussian */
+  gap: 8px;
+}
+
+.preset-row {
+  position: relative;     /* anchor for the horizontal panel */
+  display: inline-block;  /* width fits the button */
+}
+
+.group-toggle {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  min-width: 160px;
+  text-align: left;
+}
+.group-toggle.open {
+  background: #242c3a;
+  border-color: #3d5a80;
+}
+
+
+.create-buttons-container .toolbar {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1200;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Subtle pill for Clear canvas (matches creative-toggle style) */
+.create-buttons-container .clear-canvas-btn {
+  width: auto;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  background: transparent;
+  color: #bdbdbd;
+  border: 1px solid #3a3a3a;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.create-buttons-container .clear-canvas-btn:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: #4a4a4a;
+  color: #d6d6d6;
+}
+
+/* Top-left standalone Presets button (container removed) */
+.presets-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1400;
+  padding: 12px 24px;
+  font-size: 0.95rem;
+   letter-spacing: .45px;
+  background: #1a1a1a;
+  color: #e6e6e6;
+  border: 1px solid #333;
+  border-radius: 3px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background .15s, border-color .15s, color .15s;
+}
+.presets-btn:hover {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #ffffff;
+}
+
+/* Dropdown under Presets button */
+.preset-dropdown.tl {
+  position: fixed;
+  top: 20px; /* just below button */
+  left: 150px;
+  z-index: 1450;
+}
+.preset-dropdown.tl .expanded-panel {
+  animation: presetMenuIn .22s cubic-bezier(.25,.8,.3,1);
+  will-change: transform, opacity;
+}
+
+@keyframes presetMenuIn {
+  0% { opacity: 0; transform: translateX(10px) scale(.96); }
+  60% { opacity: 1; transform: translateX(0) scale(1.01); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+.preset-dropdown.tl .expanded-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 8px;
+  background: rgba(19, 19, 19, 0.92);
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+}
+
+.preset-dropdown.tl .expanded-panel button {
+  width: 110px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  background: transparent;
+  color: white;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.preset-dropdown.tl .expanded-panel button:hover {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+/* Remove obsolete panel (no longer used) */
+.preset-panel { display: none; }
+
