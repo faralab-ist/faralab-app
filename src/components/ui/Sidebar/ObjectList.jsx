@@ -15,7 +15,7 @@ export default function ObjectList({ items }) {
   };
 
   if (!items?.length) {
-    return <p className="muted">Ainda não existem objetos.</p>;
+    return <p className="muted">No objects yet</p>;
   }
 
   return (

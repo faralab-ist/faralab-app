@@ -10,6 +10,7 @@ export default function ObjectPopup({
   isMinimized,
   setIsMinimized,
   setSelectedId,
+  sidebarOpen, // <- nova prop
 }) {
   if (!selectedObject) return null;
 
@@ -103,9 +104,22 @@ export default function ObjectPopup({
     default: SpecificPanel = <div>Unknown Type</div>
   }
 
+  const sidebarWidth = 320; // px
+  const sidebarExtraOffset = 70; // px — ajuste à vontade
+  const totalSidebarOffset = sidebarOpen ? sidebarWidth + sidebarExtraOffset : 0;
+
   const style = screenPosition
-    ? { position: "absolute", left: `${screenPosition.left}px`, top: `${screenPosition.top}px`, transform: "translate(0, 0)" }
-    : { position: "absolute", right: "20px", top: "20px" }
+    ? {
+        position: "absolute",
+        left: `${Math.max(8, screenPosition.left - totalSidebarOffset)}px`,
+        top: `${screenPosition.top}px`,
+        transform: "translate(0, 0)"
+      }
+    : {
+        position: "absolute",
+        right: sidebarOpen ? `calc(20px + ${totalSidebarOffset}px)` : "20px",
+        top: "20px"
+      };
 
   const handleToggleFixed = () => {
     updateObject(selectedObject.id, { fixed: !selectedObject.fixed })

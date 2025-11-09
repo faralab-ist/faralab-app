@@ -8,8 +8,7 @@ import "./Sidebar.css";
  * - Largura 320px
  * - Conteúdo com lista de objetos (agora com expansão individual)
  */
-export default function Sidebar({ objects, counts }) {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Sidebar({ objects, counts, isOpen, setIsOpen }) {
   const togglePanel = () => setIsOpen((p) => !p);
 
   return (
@@ -26,15 +25,24 @@ export default function Sidebar({ objects, counts }) {
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
         <div className="panel-content">
           <header className="panel-header">
-            <h3>Objetos ({counts.total})</h3>
-            <div className="legend">
-              <span className="pill charge">Charge {counts.charge}</span>
-              <span className="pill wire">Wire {counts.wire}</span>
-              <span className="pill plane">Plane {counts.plane}</span>
-              <span className="pill surface">Surface {counts.surface}</span>
+            <div className="header-left">
+              <h3 className="panel-title">Panel</h3>
+              <p className="panel-sub">Manage scene objects</p>
+            </div>
+            <div className="header-pills">
+              <span className="pill objects">
+                <strong>Objects</strong>
+                <span className="count">{counts.total}</span>
+              </span>
+              <span className="pill surface">
+                <strong>Surface</strong>
+                <span className="count">{counts.surface}</span>
+              </span>
             </div>
           </header>
-
+ 
+          
+ 
           <ObjectList items={objects} />
         </div>
       </div>

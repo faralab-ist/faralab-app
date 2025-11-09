@@ -58,6 +58,7 @@ import React, { useState, useEffect, useMemo } from 'react'
     
     const [selectedId, setSelectedId] = useState(null)
     const [isDragging, setIsDragging] = useState(false)
+    const [sidebarOpen, setSidebarOpen] = useState(false) // <- novo estado para a sidebar
     const [showField, setShowField] = useState(false)
     const [showOnlyGaussianField, setShowOnlyGaussianField] = useState(false)
     const [showEquipotentialSurface, setShowEquipotentialSurface] = useState(false)
@@ -118,7 +119,8 @@ import React, { useState, useEffect, useMemo } from 'react'
           setCameraPreset={camFns?.setCameraPreset}
           animateCameraPreset={camFns?.animateCameraPreset}
           creativeMode={creativeMode}
-          setCreativeMode={setCreativeMode}            // pass setter down
+          setCreativeMode={setCreativeMode}
+          sidebarOpen={sidebarOpen} // <- passe o estado da sidebar aqui
         />
         
         <ObjectPopup
@@ -129,11 +131,14 @@ import React, { useState, useEffect, useMemo } from 'react'
           isMinimized={isPanelMinimized}
           setIsMinimized={setIsPanelMinimized}
           setSelectedId={setSelectedId}
+          sidebarOpen={sidebarOpen} // <- passe o estado da sidebar para o popup
         />
       
         <Sidebar 
           objects={sceneObjects}
           counts={counts}
+          isOpen={sidebarOpen}       // CORRETO: camelCase
+          setIsOpen={setSidebarOpen} // CORRETO: passar o setter do estado criado
         />
 
         <Canvas onPointerMissed={handleBackgroundClick}>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import './CreateButtons.css'
 import { applyPresetByName } from '../../presets/loader'
 
@@ -14,14 +14,16 @@ export default function CreateButtons({
   setCameraPreset,
   animateCameraPreset,
   creativeMode,
-  setCreativeMode
+  setCreativeMode,
+  sidebarOpen = false
 }) {
   const [openGroup, setOpenGroup] = useState(null)
   const hasSurfaces = (counts?.surface ?? 0) > 0
 
-  // Refs for outside-click
+  // Refs
   const panelRef = useRef(null)
   const presetBtnRef = useRef(null)
+  const toolbarRef = useRef(null)
 
   const toggleGroup = (g) => setOpenGroup(prev => prev === g ? null : g)
 
@@ -33,7 +35,6 @@ export default function CreateButtons({
     setOpenGroup(null)
   }
 
-  // Clear canvas (confirm if >= 2 items)
   const totalObjects = sceneObjects.length
   const handleClearCanvas = () => {
     if (totalObjects >= 2) {
@@ -43,7 +44,6 @@ export default function CreateButtons({
     setSceneObjects?.([])
   }
 
-  // Outside click + Escape to close presets dropdown
   useEffect(() => {
     if (openGroup !== 'presets') return
     const handleDown = (e) => {
@@ -51,9 +51,7 @@ export default function CreateButtons({
       if (presetBtnRef.current?.contains(e.target)) return
       setOpenGroup(null)
     }
-    const handleKey = (e) => {
-      if (e.key === 'Escape') setOpenGroup(null)
-    }
+    const handleKey = (e) => { if (e.key === 'Escape') setOpenGroup(null) }
     window.addEventListener('mousedown', handleDown)
     window.addEventListener('touchstart', handleDown, { passive: true })
     window.addEventListener('keydown', handleKey)
@@ -64,9 +62,35 @@ export default function CreateButtons({
     }
   }, [openGroup])
 
+  // OFFSET — exatamente a largura da sidebar (não exagerar)
+  const sidebarWidth = 320
+  const sidebarExtraOffset = 70 // deixar 0 para deslocar exactamente a sidebar; ajustar se quiser pequeno gap
+  const totalSidebarOffset = sidebarOpen ? sidebarWidth + sidebarExtraOffset : 0
+
+  const [appliedOffset, setAppliedOffset] = useState(0)
+
+  const computeOffset = () => {
+    const rect = toolbarRef.current?.getBoundingClientRect()
+    const anchorLeft = rect?.left ?? window.innerWidth * 0.1
+    const maxMove = Math.max(0, anchorLeft - 8) // nunca mover além da margem esquerda (8px)
+    setAppliedOffset(Math.min(totalSidebarOffset, maxMove))
+  }
+
+  useLayoutEffect(() => {
+    computeOffset()
+    window.addEventListener('resize', computeOffset)
+    return () => window.removeEventListener('resize', computeOffset)
+  }, [totalSidebarOffset])
+
+  useEffect(() => { computeOffset() }, [sidebarOpen, openGroup])
+
+  const toolbarStyle = appliedOffset > 0
+    ? { transform: `translateX(-${appliedOffset}px)`, transition: 'transform 140ms ease', zIndex: 1000 }
+    : { transition: 'transform 140ms ease', zIndex: 1000 }
+
   return (
     <>
-      {/* Top-left Presets button (no container) */}
+      {/* Presets (não deslocar) */}
       <button
         ref={presetBtnRef}
         className="presets-btn"
@@ -76,7 +100,7 @@ export default function CreateButtons({
         Presets
       </button>
 
-      {/* Presets dropdown */}
+      {/* Presets dropdown (não desloca) */}
       {openGroup === 'presets' && (
         <div ref={panelRef} className="preset-dropdown tl" role="menu" aria-label="Presets">
           <div className="expanded-panel">
@@ -84,7 +108,6 @@ export default function CreateButtons({
             <button onClick={() => loadPreset('dipole')}>Dipole</button>
             <button onClick={() => loadPreset('tripole')}>Tripole</button>
             <button onClick={() => loadPreset('infiniteWire')}>Wire</button>
-           {/* <button onClick={() => loadPreset('cylinder')}>Cylinder</button> */}
             <div className="spacer" />
             <div className="spacer" />
             <button onClick={() => loadPreset('singlePlane')}>1 Plane</button>
@@ -96,8 +119,9 @@ export default function CreateButtons({
       )}
 
       <div className="create-buttons-container">
-        <div className="toolbar">
-          {creativeMode && (                                   // SHOW ONLY IN CREATIVE MODE
+        {/* Toolbar com Clear + Creative (SÓ ESTES são deslocados) */}
+        <div ref={toolbarRef} className="toolbar" style={toolbarStyle}>
+          {creativeMode && (
             <button
               className="clear-canvas-btn"
               onClick={handleClearCanvas}
@@ -117,6 +141,7 @@ export default function CreateButtons({
           </button>
         </div>
 
+        {/* Field objects — NÃO deslocar */}
         {creativeMode && (
           <div className="field-objects">
             <h4>Field Objects</h4>
