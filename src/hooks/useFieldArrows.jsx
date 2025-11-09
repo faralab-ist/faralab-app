@@ -37,15 +37,15 @@ export default function FieldArrows({
     const logMax = MAX_L > 0 ? Math.log1p(MAX_L) : 1;
     
     const arrowGeometry = useMemo(() => { 
-        const shaft = new THREE.CylinderGeometry(0.01, 0.01, 0.8, 6)
+        const shaft = new THREE.CylinderGeometry(0.01, 0.01, 0.8* scaleMultiplier, 6)
         const head = new THREE.ConeGeometry(0.05, 0.2, 8)
-        head.translate(0, 0.5, 0)
+        head.translate(0, 0.4* scaleMultiplier, 0)
         const merged = BufferGeometryUtils.mergeGeometries([shaft, head]);
         // ensure lighting/shaders that use normals work
         // howver they do not work
         merged.computeVertexNormals();
         // move the geometry so base is at y=0 (optional but often needed)
-        merged.translate(0, 0.4, 0);
+        merged.translate(0, 0.4* scaleMultiplier  , 0);
         merged.computeBoundingSphere();
         return merged;
     }, [])
@@ -74,7 +74,7 @@ export default function FieldArrows({
         directions[i * 3 + 2] = dir.z;
 
         const parameter = 1 - Math.exp(-logMag);
-        scales[i] = (Math.min(Math.max(parameter, 0), 1.0)) * scaleMultiplier;
+        scales[i] = (Math.min(Math.max(parameter, 0), 1.0));
 
         colors[i * 3] = color.r;
         colors[i * 3 + 1] = color.g;

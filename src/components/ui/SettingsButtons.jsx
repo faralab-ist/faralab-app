@@ -197,7 +197,7 @@ export default function SettingsButtons({
                     <input
                       type="number"
                       min={0.1}
-                      max={2}
+                      max={5}
                       step={0.1}
                       value={vectorScale}
                       onChange={e => setVectorScale(Number(e.target.value))}
