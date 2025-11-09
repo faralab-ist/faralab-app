@@ -7,11 +7,12 @@ import { Instance, Instances } from '@react-three/drei';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import vertexShaderSource from '../shaders/arrowVertex.glsl';
 import fragmentShaderSource from '../shaders/arrowFragment.glsl';
+import { min } from 'mathjs';
 
-export default function FieldArrows({ objects, showOnlyPlane = false, showOnlyGaussianField = false, fieldThreshold = 0.1, gridSize = 10, step = 1 }) {
+export default function FieldArrows({ objects, showOnlyPlane = false, showOnlyGaussianField = false, fieldThreshold = 0.1, gridSize = 10, step = 1, minStrength = 1, Scaling = 1}) {
     
     const vectors = useMemo( // TODO definir min threshold
-        () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, 1),
+        () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minStrength),
         [objects, showOnlyPlane, showOnlyGaussianField]
     );
 
