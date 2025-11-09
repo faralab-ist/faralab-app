@@ -1,6 +1,6 @@
 # Faralab  
 
-**Faralab** is an academic open-source web application developed at the **Department of Physics, Instituto Superior Técnico (IST)**.  
+**Faralab** is an academic open-source web application developed at the **Instituto Superior Técnico (IST)**.  
 It provides an **interactive 3D environment for visualizing and exploring electromagnetism**, allowing students and teachers to create virtual experiments, observe field behavior, and intuitively understand theoretical concepts.
 
 ---
