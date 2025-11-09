@@ -208,8 +208,10 @@ import FieldLines from './hooks/useFieldLines.jsx'
         )}
 
         {showLines && (
-          <FieldLines charges={sceneObjects} 
-          stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
+          <FieldLines 
+            key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id).join('-')}`}      // BUGFIX
+            charges={sceneObjects} 
+            stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
           />
         )}
 
