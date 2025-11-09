@@ -1,0 +1,192 @@
+/* === WRAPPER DO PAINEL (mantém o botão sempre visível) === */
+.sidebar-wrap {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 0;
+  z-index: 100;
+  pointer-events: none;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* Botão lateral fixo (abre/fecha o painel) */
+.toggle-tab {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 0;
+  width: 28px;
+  height: 56px;
+  border: 1px solid #2a2a2a;
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  background: #171717;
+  color: #eaeaea;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  pointer-events: auto;
+}
+
+.sidebar-wrap.open .toggle-tab {
+  right: 400px; /* igual à largura do painel */
+}
+
+/* Painel lateral fixo */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  background: #101010;
+  color: #eaeaea;
+  border-left: 1px solid #2a2a2a;
+  transform: translateX(100%);
+  transition: transform 0.25s ease;
+  overflow: hidden;
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+}
+
+.panel-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: 12px 14px 16px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid #232323;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.legend {
+  display: flex;
+  gap: 6px;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid #2a2a2a;
+  font-size: 12px;
+  line-height: 1.6;
+  background: #161616;
+}
+
+.pill.charge {
+  border-color: #682c00;
+  color: #e98000;
+}
+
+.pill.wire {
+  border-color: #5a0000;
+  color: #ff7070;
+}
+
+.pill.plane {
+  border-color: #037813;
+  color: #3fe244cf;
+}
+
+.pill.surface {
+  border-color: #00566e;
+  color: #84b5ff;
+}
+
+/* === LISTA DE OBJETOS === */
+.object-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px 0 0;
+  display: grid;
+  gap: 8px;
+}
+
+.object-row-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.object-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #202020;
+  border-radius: 8px;
+  background: #121212;
+}
+
+.name {
+  text-transform: capitalize;
+  opacity: 0.95;
+}
+
+/* Botão da setinha de expandir */
+.expand-btn {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+.expand-btn:hover {
+  color: #fff;
+}
+
+/* Detalhes expandidos */
+.object-details {
+  margin-top: 4px;
+  border: 1px solid #222;
+  border-radius: 6px;
+  background: #181818;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #222;
+  padding: 2px 0;
+}
+
+.detail-key {
+  color: #999;
+  text-transform: capitalize;
+}
+
+.detail-value {
+  color: #eee;
+  font-family: monospace;
+}
+
+.muted {
+  opacity: 0.6;
+}
+
+
+
