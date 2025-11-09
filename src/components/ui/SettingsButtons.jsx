@@ -9,8 +9,8 @@ import flux from '../../assets/flux.svg'
 export default function SettingsButtons({
   showField,
   onToggleField,
-  showLines,        // NEW
-  onToggleLines,    // NEW
+  showLines,        // result of Field Lines first merge
+  onToggleLines,    // result of Field Lines first merge
   showEquipotentialSurface,
   onToggleEquipotentialSurface,
   showOnlyGaussianField,
@@ -26,12 +26,10 @@ export default function SettingsButtons({
   setVectorMinTsl,
   vectorScale,
   setVectorScale,
-  lineMinTsl,
-  setLineMinTsl,
-  lineSpacing,
-  setLineSpacing,
-  showFieldLines,
-  onToggleFieldLines
+  lineMin,
+  setLineMin,
+  lineNumber,
+  setLineNumber
 }) {
   const [open, setOpen] = useState(null)
   const toggle = (k) => setOpen(p => p === k ? null : k)
@@ -215,27 +213,27 @@ export default function SettingsButtons({
                 <div className="efield-section-title">Lines</div>
                 <div className="efield-row compact">
                   <label className="efield-label">
-                    <span className="label-text">Count</span>
-                    <input
-                      type="number"
-                      min={4}
-                      step={1}
-                      value={lineMinTsl}
-                      onChange={e => setLineMinTsl(Number(e.target.value))}
-                      disabled={!showFieldLines}
-                      placeholder="24"
-                    />
-                  </label>
-                  <label className="efield-label">
-                    <span className="label-text">Step</span>
+                    <span className="label-text">Min Threshold</span>
                     <input
                       type="number"
                       min={0.01}
                       step={0.01}
-                      value={lineSpacing}
-                      onChange={e => setLineSpacing(Number(e.target.value))}
-                      disabled={!showFieldLines}
-                      placeholder="0.15"
+                      value={lineMin}
+                      onChange={e => setLineMin(Number(e.target.value))}
+                      disabled={!showLines}
+                      placeholder="0.1"
+                    />
+                  </label>
+                  <label className="efield-label">
+                    <span className="label-text">Nº of Lines</span>
+                    <input
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={lineNumber}
+                      onChange={e => setLineNumber(Number(e.target.value))}
+                      disabled={!showLines}
+                      placeholder="20"
                     />
                   </label>
                 </div>

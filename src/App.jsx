@@ -70,9 +70,8 @@ import FieldLines from './hooks/useFieldLines.jsx'
     const [creativeMode, setCreativeMode] = useState(false)  // stays here (single source)
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
-    //const [lineMin, setLineMin] = useState(24)
-    //const [lineSpacing, setLineSpacing] = useState(0.15)
-    const [showFieldLines, setShowFieldLines] = useState(true)
+    const [lineMin, setLineMin] = useState(0.1)         //LINE SETTINGS NEW
+    const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -210,7 +209,7 @@ import FieldLines from './hooks/useFieldLines.jsx'
 
         {showLines && (
           <FieldLines charges={sceneObjects} 
-          stepsPerLine={30} stepSize={0.5} minStrength={0.1} linesPerCharge={20}
+          stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
           />
         )}
 
@@ -219,7 +218,7 @@ import FieldLines from './hooks/useFieldLines.jsx'
           )}
         </Canvas>
 
-        <SettingsButtons //epa, ya its ugly, i know - yours truly, gabriel
+        <SettingsButtons //epa, ya its ugly, i know - yours truly, gabriel; All gud g
           showField={showField}
           showLines={showLines}
           onToggleField={toggleField}
@@ -239,10 +238,10 @@ import FieldLines from './hooks/useFieldLines.jsx'
           setVectorMinTsl={setVectorMinTsl}
           vectorScale={vectorScale}
           setVectorScale={setVectorScale}
-          //lineMin={lineMin}
-          //setLineMin={setLineMin}
-         // lineScale={lineStep}
-          //setLineScale={setLineScale} 
+          lineMin={lineMin}         //LINE SETTINGS NEW
+          setLineMin={setLineMin}         //LINE SETTINGS NEW
+          lineNumber={lineNumber}         //LINE SETTINGS NEW
+          setLineNumber={setLineNumber}          //LINE SETTINGS NEW
         />
       </div>
     )
