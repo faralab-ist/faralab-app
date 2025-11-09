@@ -181,8 +181,8 @@ export default function SettingsButtons({
                 <button onClick={onToggleLines}>
                   {showLines ? 'Hide Lines' : 'Show Lines'}
                 </button>
+              </div> 
               
-
               {/* E-Field visualization controls */}
               <div className="efield-section">
                 <div className="efield-section-title">Vectors</div>
