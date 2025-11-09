@@ -11,7 +11,7 @@ import fragmentShaderSource from '../shaders/arrowFragment.glsl';
 export default function FieldArrows({ objects, showOnlyPlane = false, showOnlyGaussianField = false, fieldThreshold = 0.1, gridSize = 10, step = 1 }) {
     
     const vectors = useMemo( // TODO definir min threshold
-        () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, 1),
+        () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, 0.1),
         [objects, showOnlyPlane, showOnlyGaussianField]
     );
 
