@@ -23,7 +23,18 @@ export default function ObjectList({ items }) {
       {items.map((obj) => (
         <li key={obj.id} className="object-row-wrapper">
           {/* Linha principal do item */}
-          <div className="object-row">
+          <div
+            className="object-row"
+            role="button"
+            tabIndex={0}
+            onClick={() => toggleExpand(obj.id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                toggleExpand(obj.id)
+              }
+            }}
+          >
             <span className={`pill ${obj.type}`}>
               {obj.type.charAt(0).toUpperCase() + obj.type.slice(1)}
             </span>
@@ -31,18 +42,14 @@ export default function ObjectList({ items }) {
             {/* Nome (ex: "Carga 1", "Fio 1") */}
             <span className="name">{obj.name}</span>
 
-            {/* Botão de expandir (▾ / ▸) */}
-            <button
+            {/* Botão de expandir (▾ / ▸) - stop propagation so it doesn't double-toggle */}
+            <div
               className="expand-btn"
-              onClick={() => toggleExpand(obj.id)}
-              aria-label={
-                expandedItems[obj.id]
-                  ? "Recolher detalhes"
-                  : "Ver detalhes"
-              }
+              
+              
             >
               {expandedItems[obj.id] ? "▾" : "▸"}
-            </button>
+            </div>
           </div>
 
           {/* Detalhes do objeto */}
