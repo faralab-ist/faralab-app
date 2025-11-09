@@ -149,6 +149,88 @@
   opacity: .9;
 }
 
+/* separator line between Gaussian controls and Flux button */
+.gaussian-sep {
+  height: 1px;
+  background: rgba(255,255,255,0.03);
+  margin: 10px -14px 6px -14px; /* span panel padding */
+  border-top: 1px solid rgba(255,255,255,0.03);
+}
+
+/* Compact flux button row */
+.flux-button-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* When no Gaussian surfaces exist, dim the entire row */
+.flux-button-row.disabled {
+  opacity: .35;
+}
+
+/* Compact icon-style Flux button (prevent image shift) */
+.flux-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;   /* keep icon fixed on the left */
+  gap: 8px;
+  width: 155px;
+  height: 40px;
+  padding: 6px 10px;             /* horizontal padding, not affecting icon */
+  border-radius: 10px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background .12s, border-color .12s, transform .05s;
+  position: relative;
+}
+
+/* Make icon a fixed, non-flexing element so text changes can't move it */
+.flux-icon-btn img {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: block;
+  opacity: .95;
+  margin-left: 6px; /* small inset from left edge */
+}
+
+/* Reserve a fixed width for the label so its length changes won't shift layout */
+.flux-icon-btn span {
+  display: inline-block;
+  width: 96px;               /* reserve space; tweak as needed */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+/* Hover / active states */
+.flux-icon-btn:hover:not(:disabled) {
+  background: #2a2a2a;
+  border-color: #444;
+}
+.flux-icon-btn:active:not(:disabled) { transform: translateY(1px); }
+
+/* Disabled visual + pointer guard when disabled attribute is present */
+.flux-icon-btn:disabled {
+  opacity: 1; /* keep row opacity to convey disabled; individual button stays visually consistent */
+  cursor: not-allowed;
+  filter: grayscale(60%) brightness(80%);
+  pointer-events: none;
+}
+
+/* Active state when flux is on */
+.flux-icon-btn.active {
+  background: rgba(46,116,255,0.12);
+  border-color: rgba(46,116,255,0.55);
+  color: #c6e1ff;
+}
+
 .flux-toggle {
   margin-top: 10px;
   font-size: 0.62rem;
@@ -324,3 +406,78 @@
   border: 1px solid #3f3f3f;
   cursor: pointer;
 }
+
+.efield-section {
+  border: 1px solid #222;
+  padding: 10px 10px 12px;
+  border-radius: 10px;
+  background: #121212;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.efield-section-title {
+  font-size: 0.68rem;   /* bigger */
+  font-weight: 700;     /* chonkier */
+  letter-spacing: .35px;
+  color: #c2d7ee;       /* slightly brighter */
+  text-transform: uppercase;
+  opacity: .95;
+}
+
+.efield-row.compact {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;                    /* tighter */
+  align-items: center;         /* align inputs nicely */
+}
+
+.efield-label {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;      /* keep input from stretching */
+}
+
+.efield-label .label-text {
+  font-size: 0.62rem;   /* bigger */
+  font-weight: 700;     /* chonkier */
+  letter-spacing: .3px;
+  color: #8ea2b6;
+}
+
+.efield-label input {
+  /* keep compact box size, but make text heavier/bigger */
+  width: 76px;
+  min-width: 64px;
+  height: 26px;
+  padding: 4px 8px;
+  font-size: 0.72rem;   /* bigger numbers/text */
+  font-weight: 700;     /* chonkier numbers/text */
+  letter-spacing: .2px;
+  line-height: 1.1;
+  background: #1a1c1f;
+  border: 1px solid #3a3f46;
+  color: #eef4ff;
+  border-radius: 6px;
+  outline: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: border-color .15s, background .15s, color .15s;
+}
+
+.efield-label input:focus {
+  border-color: #4a6d94;
+  background: #20252a;
+  color: #ffffff;
+}
+
+.efield-label input:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+
+

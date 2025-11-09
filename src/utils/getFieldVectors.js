@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import calculateFieldAtPoint from './calculateField'
 
-export default function getFieldVector3(objects, gridSize = 10, step = 1, showOnlyPlane = false, showOnlyElectricField = false, min = 0.1) {
+export default function getFieldVector3(objects, gridSize = 10, step = 1, showOnlyPlane = false, showOnlyElectricField = false, min) {
   const fieldVectors = []
 
   if (!showOnlyElectricField) {
