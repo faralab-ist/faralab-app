@@ -23,7 +23,65 @@ import React, { useState, useEffect, useMemo } from 'react'
   import FieldArrows from './hooks/useFieldArrows.jsx'
   import useCameraPreset from './hooks/useCameraPreset.jsx'
   import EquipotentialSurface from './components/models/surfaces/EquipotentialSurface.jsx'
-import FieldLines from './hooks/useFieldLines.jsx'
+  import FieldLines from './hooks/useFieldLines.jsx'
+
+  function LoadingOverlay() {
+  const [opacity, setOpacity] = useState(1)
+  const [hidden, setHidden] = useState(false)
+  const [finalFade, setFinalFade] = useState(false)
+
+  // 1️⃣ Fica transparente gradualmente depois de 1s
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setOpacity(0.3), 2000)
+    return () => clearTimeout(fadeTimer)
+  }, [])
+
+  // 2️⃣ Ao clicar depois do fade → some com fade-out suave
+  useEffect(() => {
+    const handleClick = () => {
+      if (opacity <= 0.3) {
+        setFinalFade(true)
+        setTimeout(() => setHidden(true), 1000) // tempo do fade final
+      }
+    }
+    window.addEventListener('click', handleClick)
+    return () => window.removeEventListener('click', handleClick)
+  }, [opacity])
+
+  if (hidden) return null
+
+  const totalOpacity = finalFade ? 0 : opacity
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'transparent',
+        zIndex: 9999,
+        pointerEvents: 'auto',
+        transition: 'opacity 1s ease-in-out',
+        opacity: totalOpacity,
+      }}
+    >
+      <iframe
+        src="loading.html"
+        title="Loading"
+        style={{
+          width: '100%',
+          height: '100%',
+          border: 'none',
+          pointerEvents: 'none', // deixa cliques passarem
+          transition: 'opacity 3s ease-in-out', // anima mais lento o fade inicial
+          opacity: totalOpacity,
+        }}
+      />
+    </div>
+  )
+}
+
+
+
 
   function CameraFnsMount({ onReady }) {
     const { setCameraPreset, animateCameraPreset } = useCameraPreset()
@@ -106,6 +164,9 @@ import FieldLines from './hooks/useFieldLines.jsx'
     const toggleLines = () => setShowLines(v => !v)
 
     return (
+
+       <>
+      <LoadingOverlay />
       <div id="canvas-container">
         <CreateButtons
           addObject={addObject}
@@ -244,6 +305,7 @@ import FieldLines from './hooks/useFieldLines.jsx'
           setLineNumber={setLineNumber}          //LINE SETTINGS NEW
         />
       </div>
+      </>
     )
   }
 
