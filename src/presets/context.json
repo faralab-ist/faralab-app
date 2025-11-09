@@ -50,7 +50,7 @@
       "target": [0, 0, 0]
     },
     "objects": [
-      { "type": "plane", "props": { "position": [0, 0, 0], "charge_density": "$lambda", "infinite": true, "dimensions": ["$size", "$size", 0.1] } }
+      { "type": "plane", "props": { "position": [0, 0, 0], "charge_density": "$sigma", "infinite": true, "dimensions": ["$size", "$size", 0.1] } }
     ]
   },
   "parallelPlanes": {
