@@ -43,7 +43,7 @@ function LoadingOverlay() {
     const handleClick = () => {
       if (opacity <= 0.3) {
         setFinalFade(true)
-        setTimeout(() => setHidden(true), 1000) // tempo do fade final
+        setTimeout(() => setHidden(true), 2000) // tempo do fade final
       }
     }
     window.addEventListener('click', handleClick)
