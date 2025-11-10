@@ -112,7 +112,7 @@ import React, { useState, useEffect, useMemo } from 'react'
       updatePosition,
       updateDirection,
       addObject,
-      counts 
+      counts,
     } = useSceneObjects()
     
     const [selectedId, setSelectedId] = useState(null)

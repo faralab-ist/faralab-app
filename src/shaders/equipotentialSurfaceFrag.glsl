@@ -26,10 +26,96 @@ uniform float wireChargeDensity[MAX_INF_WIRES];
 uniform vec3 wirePositions[MAX_INF_WIRES];
 uniform vec3 wireDirections[MAX_INF_WIRES];
 
+#define MAX_FIN_PLANES 6
+uniform int finPlaneCount;
+uniform float finPlaneChargeDensity[MAX_FIN_PLANES];
+uniform vec3 finPlanePositions[MAX_FIN_PLANES];
+uniform vec3 finPlaneNormals[MAX_FIN_PLANES];
+uniform vec2 finPlaneDimensions[MAX_FIN_PLANES];
+
+#define PI 3.1415926
+
+// Fast log (clamped to avoid negatives)
+float safeLog(float val) {
+    return log(max(val, 1e-6));
+}
+
+// Fast atan approximation (atan2)
+float fastAtan2(float y, float x) {
+    float abs_y = abs(y) + 1e-10;
+    float angle;
+    if (x >= 0.0)
+        angle = atan(abs_y / x);
+    else
+        angle = 3.1415926 - atan(abs_y / -x);
+    return y < 0.0 ? -angle : angle;
+}
+
+float rectPotential(vec3 p, vec3 planePos, vec3 normal, vec2 dims, float sigma) {
+    // Build local plane coordinates
+    vec3 u = vec3(1.0, 0.0, 0.0);
+    if(abs(dot(normal, u)) > 0.9) u = vec3(0.0, 1.0, 0.0);
+    vec3 v = normalize(cross(normal, u));
+    u = normalize(cross(v, normal));
+
+    // Local coordinates
+    vec3 rVec = p - planePos;
+    float xPrime = dot(rVec, u);
+    float yPrime = abs(dot(rVec, normal));
+    float zPrime = dot(rVec, v);
+
+    // Rectangle corners
+    float x1 = -dims.x / 2.0;
+    float x2 =  dims.x / 2.0;
+    float z1 = -dims.y / 2.0;
+    float z2 =  dims.y / 2.0;
+
+    // Precompute squares
+    float y2 = yPrime * yPrime;
+
+    float V = 0.0;
+
+    float xi, zj, R, atanTerm, signe, log_x, log_z;
+
+    // Corner (x1, z1)
+    xi = x1 - xPrime; zj = z1 - zPrime;
+    R = sqrt(xi*xi + zj*zj + y2);
+    atanTerm = fastAtan2(xi*zj, yPrime*R);
+    log_x = safeLog(xi + R); log_z = safeLog(zj + R);
+    signe = 1.0;
+    V += signe * (xi*log_z + zj*log_x - yPrime*atanTerm);
+
+    // Corner (x1, z2)
+    xi = x1 - xPrime; zj = z2 - zPrime;
+    R = sqrt(xi*xi + zj*zj + y2);
+    atanTerm = fastAtan2(xi*zj, yPrime*R);
+    log_x = safeLog(xi + R); log_z = safeLog(zj + R);
+    signe = -1.0;
+    V += signe * (xi*log_z + zj*log_x - yPrime*atanTerm);
+
+    // Corner (x2, z1)
+    xi = x2 - xPrime; zj = z1 - zPrime;
+    R = sqrt(xi*xi + zj*zj + y2);
+    atanTerm = fastAtan2(xi*zj, yPrime*R);
+    log_x = safeLog(xi + R); log_z = safeLog(zj + R);
+    signe = -1.0;
+    V += signe * (xi*log_z + zj*log_x - yPrime*atanTerm);
+
+    // Corner (x2, z2)
+    xi = x2 - xPrime; zj = z2 - zPrime;
+    R = sqrt(xi*xi + zj*zj + y2);
+    atanTerm = fastAtan2(xi*zj, yPrime*R);
+    log_x = safeLog(xi + R); log_z = safeLog(zj + R);
+    signe = 1.0;
+    V += signe * (xi*log_z + zj*log_x - yPrime*atanTerm);
+
+    return V * sigma / (4.0 * PI * epsilon_0);
+}
+
+
 float potential(vec3 pos) {
     float multiplier = k_e;
     float result = 0.0;
-    float PI = 3.14159265;
     float e0 = epsilon_0;
 
     for (int i = 0; i < chargeCount; i++) {
@@ -52,6 +138,10 @@ float potential(vec3 pos) {
         float distance = length(rPerp);
         if (distance < 0.0001) continue;
         result += (wireChargeDensity[i] / (2.0 * PI * e0)) * log(distance);
+    }
+
+    for (int i = 0; i < finPlaneCount; i++) {
+        result += rectPotential(pos, finPlanePositions[i], normalize(finPlaneNormals[i]), finPlaneDimensions[i], finPlaneChargeDensity[i]);
     }
 
     return result;
@@ -80,7 +170,7 @@ void main() {
     int steps = 100;
     bool hit = false;
 
-    float stepSize = 0.3;
+    float stepSize = 0.2;
     float lastPot = potential(rayPos);
     float lastDiff = lastPot - targ;
     float alpha = 0.0;
@@ -100,7 +190,7 @@ void main() {
             float potAtHit = potential(rayPos);
             float error = abs(potAtHit - targ);
             // smoothstep ta alto pq senao ficava feio
-            alpha = smoothstep(0.7, 0.0, error);
+            alpha = smoothstep(10.0, 0.0, error);
 
             hit = true;
             break;
