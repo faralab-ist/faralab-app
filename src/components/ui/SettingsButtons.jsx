@@ -187,8 +187,8 @@ export default function SettingsButtons({
                 <input
                   className="potential-slider"                
                   type="range"
-                  min={-200}
-                  max={200}
+                  min={-20}
+                  max={20}
                   step={0.1}
                   value={potentialTarget ?? 0}
                   onChange={(e) => setPotentialTarget?.(parseFloat(e.target.value))}
