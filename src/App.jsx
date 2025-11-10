@@ -279,7 +279,8 @@ function LoadingOverlay() {
         )}
 
         {showLines && (
-          <FieldLines charges={sceneObjects} 
+          <FieldLines key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id).join('-')}`}   //LINE BUGFIX
+          charges={sceneObjects}  
           stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
           />
         )}
