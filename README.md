@@ -1,25 +1,38 @@
 # Faralab  
 
-**Faralab** is an academic open-source web application developed at the **Instituto Superior Técnico (IST)**.  
-It provides an **interactive 3D environment for visualizing and exploring electromagnetism**, allowing students and teachers to create virtual experiments, observe field behavior, and intuitively understand theoretical concepts.
+**Faralab** is an academic open-source web application developed at **Instituto Superior Técnico (IST)**.
+It provides an **interactive 3D environment for visualizing and exploring electromagnetism concepts**, allowing students and teachers to create virtual experiments, observe field behaviors and intuitively understand theoretical concepts.
 
----
-
-## Overview  
-
-Faralab is an educational platform that simulates electric and magnetic phenomena in real time.  
-Users can place charges, wires, or planes in a 3D virtual space and instantly observe the resulting field distributions, Gaussian surfaces, and equipotential regions — bridging theory and visualization in electromagnetism.
+Users can place charges, wires or planes in a 3D virtual space and instantly observe the resulting field distributions, Gaussian surfaces, and equipotential regions.
 
 ---
 
 ## Key Features  
 
-- **3D Field Visualization** – Real-time rendering with React and Three.js.  
-- **Physics Engine** – Numerical computation of electric fields from discrete and continuous charge distributions.  
+- **3D Field Visualization** – Real-time rendering of electric and magnetic fields.  
+- **Physics Engine** – Numerical computation of electric fields from charge distributions.  
 - **Interactive GUI** – Add, move, and edit physical objects intuitively.  
-- **Gaussian & Equipotential Surfaces** – Flux and potential visualization for teaching.  
+- **Gaussian & Equipotential Surfaces** – Flux and potential visualization.  
 - **Configurable Controls** – Adjustable field scaling and density.  
 - **Academic Focus** – Designed for classroom and research use.
+
+---
+
+## Authors
+
+**Faralab Development Team**  
+Instituto Superior Técnico (IST) – Lisbon, Portugal  
+
+**Core Team**  
+- **Telmo Viana Vaz** – Project Lead, Physics Engine & UI/UX  
+- **Bernardo Grandela** – Physics Engine & Modeling  
+- **Felipe Sant’Ana** – Field Simulation & Visualization  
+- **Gabriel Bennett Carvalho** – Frontend & Visualization  
+- **Gustavo Carvalhais** – Frontend & UI Design  
+- **João Relvas** – Frontend & UX Development  
+
+### Contact
+For academic or technical inquiries feel free to contact us: faralab@tecnico.ulisboa.pt
 
 ---
 
@@ -54,26 +67,13 @@ If your work leads to a publication, please cite *Faralab* and its authors.
 Issues or suggestions: [GitHub Issues](https://github.com/[your-org]/faralab/issues)  
 Contact: **faralab@tecnico.ulisboa.pt**
 
-## Authors
-
-**Faralab Development Team**  
-Instituto Superior Técnico (IST) – Lisbon, Portugal  
-
-**Core Team**  
-- **Telmo Viana Vaz** – Project Lead, Physics Engine & UI/UX  
-- **Bernardo Grandela** – Physics Engine & Modeling  
-- **Felipe Sant’Ana** – Field Simulation & Visualization  
-- **Gabriel Bennett Carvalho** – Frontend & Visualization  
-- **Gustavo Carvalhais** – Frontend & UI Design  
-- **João Relvas** – Frontend & UX Development  
-
 ---
 
 # Acknowledgments
 
 Developed at the **Department of Physics, Instituto Superior Técnico (IST)** as part of an initiative to enhance the teaching and visualization of electromagnetism through interactive 3D simulation.
 
-Special thanks to Professor Pedro Abreu, and all professors, researchers, and students who contributed to the conception, design, and testing of Faralab.
+Special thanks to Professor Pedro Abreu, and all professors, researchers, and students who contributed to the conception, design and testing of Faralab.
 
 ## **LICENSE**
 
@@ -92,9 +92,3 @@ Permission is hereby granted, free of charge, to any academic, educational, or r
 7. **Forks** – Public forks are permitted for educational and research purposes only.
 
 The Software is provided “as is,” without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and noninfringement.
-
---
-
-### Contact
-For academic or technical inquiries:
-faralab@tecnico.ulisboa.pt
