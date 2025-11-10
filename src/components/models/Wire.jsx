@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect } from 'react'
+import React, { useEffect, useRef, useLayoutEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
@@ -7,20 +7,21 @@ import * as THREE from 'three'
 
 
 
-function Wire({ 
-  id, 
-  position, 
+function Wire({
+  id,
+  position,
   charge_density,
   infinite,
   material,
-  selectedId, 
-  setSelectedId, 
+  selectedId,
+  setSelectedId,
   setIsDragging,
   updatePosition,
   updateDirection,
   gridDimensions,
   height,
   radius,
+  direction,
   creativeMode
 }) {
   const isSelected = id === selectedId
@@ -29,14 +30,14 @@ function Wire({
   const groupRef = useRef()
   const isDraggingRef = useRef(false)
 
-  const trueHeight = infinite ? Math.sqrt(gridDimensions[0]**2 + gridDimensions[1]**2) + 1 : height
+  const trueHeight = infinite ? Math.sqrt(gridDimensions[0] ** 2 + gridDimensions[1] ** 2) + 1 : height
 
- useLayoutEffect(() => {
+  useLayoutEffect(() => {
     if (isDraggingRef.current || !pivotRef.current) return
-    
+
     const pos = new THREE.Vector3(position[0], position[1], position[2])
     const mat = new THREE.Matrix4().setPosition(pos)
-    
+
     // Update PivotControls internal state
     if (pivotRef.current.matrix) {
       pivotRef.current.matrix.copy(mat)
@@ -51,7 +52,9 @@ function Wire({
       anchor={[0, 0, 0]}
       depthTest={false}
       enabled={isSelected && creativeMode}
+      disableScaling={true}
       onDragStart={(activeAxes) => {
+        isDraggingRef.current = true;
         setIsDragging(true)
         handleAxisDragStart(activeAxes, position)
       }}
@@ -70,30 +73,31 @@ function Wire({
         updateDirection(id, [dir.x, dir.y, dir.z])
       }}
       onDragEnd={() => {
+        isDraggingRef.current = false;
         setIsDragging(false)
       }}
       scale={0.86}
       lineWidth={2.5}
     >
-       <group ref={groupRef}>
-      <mesh
-        userData={{ 
-          id, 
-          type: 'wire',
-          charge_density,
-          infinite,
-          material 
-        }}
-        position={[0, 0, 0]}
-        onPointerDown={(e) => {
-          if (e.button !== undefined && e.button !== 0) return
-          e.stopPropagation()
-          setSelectedId(id)
-        }}
-      >
-        <cylinderGeometry args={[radius, radius, trueHeight, 16]} />
-        <meshStandardMaterial color={isSelected ? 'lightblue' : 'red'} />
-      </mesh>
+      <group ref={groupRef}>
+        <mesh
+          userData={{
+            id,
+            type: 'wire',
+            charge_density,
+            infinite,
+            material
+          }}
+          position={[0, 0, 0]}
+          onPointerDown={(e) => {
+            if (e.button !== undefined && e.button !== 0) return
+            e.stopPropagation()
+            setSelectedId(id)
+          }}
+        >
+          <cylinderGeometry args={[radius, radius, trueHeight, 16]} />
+          <meshStandardMaterial color={isSelected ? 'lightblue' : 'red'} />
+        </mesh>
       </group>
     </PivotControls>
   )

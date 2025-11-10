@@ -33,7 +33,19 @@ uniform vec3 finPlanePositions[MAX_FIN_PLANES];
 uniform vec3 finPlaneNormals[MAX_FIN_PLANES];
 uniform vec2 finPlaneDimensions[MAX_FIN_PLANES];
 
+#define MAX_FIN_WIRES 6
+uniform int finWireCount;
+uniform float finWireChargeDensity[MAX_FIN_WIRES];
+uniform vec3 finWirePositions[MAX_FIN_WIRES];
+uniform vec3 finWireDirections[MAX_FIN_WIRES];
+uniform float finWireHeights[MAX_FIN_WIRES];
+
 #define PI 3.1415926
+
+// it was too fast (horrible aproximation)
+float fastLog(float x) {
+    return (x - 1.0) - 0.5 * (x - 1.0)*(x - 1.0); // crude 2nd-order approximation
+}
 
 // Fast log (clamped to avoid negatives)
 float safeLog(float val) {
@@ -51,6 +63,7 @@ float fastAtan2(float y, float x) {
     return y < 0.0 ? -angle : angle;
 }
 
+// from https://arxiv.org/pdf/math-ph/0603051
 float rectPotential(vec3 p, vec3 planePos, vec3 normal, vec2 dims, float sigma) {
     // Build local plane coordinates
     vec3 u = vec3(1.0, 0.0, 0.0);
@@ -112,6 +125,25 @@ float rectPotential(vec3 p, vec3 planePos, vec3 normal, vec2 dims, float sigma) 
     return V * sigma / (4.0 * PI * epsilon_0);
 }
 
+float wirePotential(vec3 p, vec3 wirePos, vec3 wireDir, float wireHeight, float sigma) {
+    vec3 rVec = p - wirePos;
+
+    float z0 = dot(rVec, wireDir);
+    vec3 rPerpVec = rVec - z0 * wireDir;
+
+    float rPerp2 = dot(rPerpVec, rPerpVec);
+    float rPerp = max(sqrt(rPerp2), 1e-6);
+
+    float z1 = -0.5 * wireHeight - z0;
+    float z2 =  0.5 * wireHeight - z0;
+
+    float sqrt1 = sqrt(rPerp2 + z1*z1);
+    float sqrt2 = sqrt(rPerp2 + z2*z2);
+
+    float k = sigma / (4.0 * PI * epsilon_0);
+    return k * log((z2 + sqrt2) / (z1 + sqrt1));
+}
+
 
 float potential(vec3 pos) {
     float multiplier = k_e;
@@ -142,6 +174,10 @@ float potential(vec3 pos) {
 
     for (int i = 0; i < finPlaneCount; i++) {
         result += rectPotential(pos, finPlanePositions[i], normalize(finPlaneNormals[i]), finPlaneDimensions[i], finPlaneChargeDensity[i]);
+    }
+
+    for (int i = 0; i < finWireCount; i++) {
+        result += wirePotential(pos, finWirePositions[i], normalize(finWireDirections[i]), finWireHeights[i], finWireChargeDensity[i]);
     }
 
     return result;
