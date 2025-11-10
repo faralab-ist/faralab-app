@@ -42,29 +42,17 @@ uniform float finWireHeights[MAX_FIN_WIRES];
 
 #define PI 3.1415926
 
-// it was too fast (horrible aproximation)
-float fastLog(float x) {
-    return (x - 1.0) - 0.5 * (x - 1.0)*(x - 1.0); // crude 2nd-order approximation
-}
-
-// Fast log (clamped to avoid negatives)
-float safeLog(float val) {
-    return log(max(val, 1e-6));
-}
-
-// Fast atan approximation (atan2)
-float fastAtan2(float y, float x) {
-    float abs_y = abs(y) + 1e-10;
-    float angle;
-    if (x >= 0.0)
-        angle = atan(abs_y / x);
-    else
-        angle = 3.1415926 - atan(abs_y / -x);
-    return y < 0.0 ? -angle : angle;
-}
-
 // from https://arxiv.org/pdf/math-ph/0603051
 float rectPotential(vec3 p, vec3 planePos, vec3 normal, vec2 dims, float sigma) {
+    
+    vec3 rVec = p - planePos;
+    
+    if(length(rVec) > dims.x * dims.y * 1.0){
+        float area = dims.x * dims.y;
+        float totCharge = sigma * area;
+        return k_e * totCharge / length(rVec);
+    }
+    
     // Build local plane coordinates
     vec3 u = vec3(1.0, 0.0, 0.0);
     if(abs(dot(normal, u)) > 0.9) u = vec3(0.0, 1.0, 0.0);
@@ -72,7 +60,7 @@ float rectPotential(vec3 p, vec3 planePos, vec3 normal, vec2 dims, float sigma) 
     u = normalize(cross(v, normal));
 
     // Local coordinates
-    vec3 rVec = p - planePos;
+
     float xPrime = dot(rVec, u);
     float yPrime = abs(dot(rVec, normal));
     float zPrime = dot(rVec, v);
@@ -88,45 +76,28 @@ float rectPotential(vec3 p, vec3 planePos, vec3 normal, vec2 dims, float sigma) 
 
     float V = 0.0;
 
-    float xi, zj, R, atanTerm, signe, log_x, log_z;
-
-    // Corner (x1, z1)
-    xi = x1 - xPrime; zj = z1 - zPrime;
-    R = sqrt(xi*xi + zj*zj + y2);
-    atanTerm = fastAtan2(xi*zj, yPrime*R);
-    log_x = safeLog(xi + R); log_z = safeLog(zj + R);
-    signe = 1.0;
-    V += signe * (xi*log_z + zj*log_x - yPrime*atanTerm);
-
-    // Corner (x1, z2)
-    xi = x1 - xPrime; zj = z2 - zPrime;
-    R = sqrt(xi*xi + zj*zj + y2);
-    atanTerm = fastAtan2(xi*zj, yPrime*R);
-    log_x = safeLog(xi + R); log_z = safeLog(zj + R);
-    signe = -1.0;
-    V += signe * (xi*log_z + zj*log_x - yPrime*atanTerm);
-
-    // Corner (x2, z1)
-    xi = x2 - xPrime; zj = z1 - zPrime;
-    R = sqrt(xi*xi + zj*zj + y2);
-    atanTerm = fastAtan2(xi*zj, yPrime*R);
-    log_x = safeLog(xi + R); log_z = safeLog(zj + R);
-    signe = -1.0;
-    V += signe * (xi*log_z + zj*log_x - yPrime*atanTerm);
-
-    // Corner (x2, z2)
-    xi = x2 - xPrime; zj = z2 - zPrime;
-    R = sqrt(xi*xi + zj*zj + y2);
-    atanTerm = fastAtan2(xi*zj, yPrime*R);
-    log_x = safeLog(xi + R); log_z = safeLog(zj + R);
-    signe = 1.0;
-    V += signe * (xi*log_z + zj*log_x - yPrime*atanTerm);
+    for(int i = 0; i < 4; i++) {
+        float xi = (i < 2) ? x1 : x2;
+        float zj = ((i == 0) || (i == 2)) ? z1 : z2;
+        float signe = ((i == 0) || (i == 3)) ? 1.0 : -1.0;
+        
+        float dx = xi - xPrime;
+        float dz = zj - zPrime;
+        float R = sqrt(dx*dx + dz*dz + y2);
+        
+        V += signe * (dx * log(dz + R) + dz * log(dx + R) - yPrime * atan(dx * dz, yPrime * R));
+    }
 
     return V * sigma / (4.0 * PI * epsilon_0);
 }
 
 float wirePotential(vec3 p, vec3 wirePos, vec3 wireDir, float wireHeight, float sigma) {
     vec3 rVec = p - wirePos;
+
+    if(length(rVec) > wireHeight * 3.0){
+        float totalCharge = sigma * wireHeight;
+        return k_e * totalCharge / length(rVec);
+    }
 
     float z0 = dot(rVec, wireDir);
     vec3 rPerpVec = rVec - z0 * wireDir;
@@ -212,9 +183,10 @@ void main() {
     float alpha = 0.0;
 
     for (int i = 0; i < steps; i++) {
-        rayPos += rayDir * stepSize;
-        totalDist += stepSize;
-        if (totalDist > 200.0) break;
+        float adaptiveStep = max(0.2, min(3.0, abs(lastDiff) * 0.1));
+        rayPos += rayDir * adaptiveStep;
+        totalDist += adaptiveStep;
+        if (totalDist > 100.0) break;
 
         float pot = potential(rayPos);
         float diff = pot - targ;
