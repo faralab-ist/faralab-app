@@ -4,18 +4,13 @@ import { applyPresetByName } from '../../presets/loader'
 
 export default function CreateButtons({ 
   addObject,
-  showField,
-  onToggleField,
-  showOnlyGaussianField,
-  onToggleOnlyGaussianField,
   counts,
   sceneObjects,
   setSceneObjects,
-  setCameraPreset,
-  animateCameraPreset,
   creativeMode,
   setCreativeMode,
-  sidebarOpen = false
+  sidebarOpen = false,
+  onApplyPreset
 }) {
   const [openGroup, setOpenGroup] = useState(null)
   const hasSurfaces = (counts?.surface ?? 0) > 0
@@ -28,10 +23,7 @@ export default function CreateButtons({
   const toggleGroup = (g) => setOpenGroup(prev => prev === g ? null : g)
 
   const loadPreset = (name, animate = true) => {
-    const onCamera = animate ? animateCameraPreset : setCameraPreset
-    applyPresetByName(name, addObject, setSceneObjects, undefined, onCamera)
-    if (!showField) onToggleField()
-    if (!showOnlyGaussianField) onToggleOnlyGaussianField()
+    onApplyPreset?.(name, { animate })
     setOpenGroup(null)
   }
 

@@ -1,9 +1,15 @@
 {
   "monopole": {
     "context": { "r": 0.1, "q": 1 },
-    "camera": {
-      "position": [5, 4, 5],
-      "target": [0, 0, 0]
+    "camera": { "position": [5, 4, 5], "target": [0, 0, 0] },
+    "settings": {
+      "vectorMinTsl": 0.08,
+      "vectorScale": 1.2,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showLines": false,
+      "showEquipotentialSurface": false
     },
     "objects": [
       { "type": "charge", "props": { "position": [0, 0, 0], "charge": "$q", "radius": "$r"} }
@@ -11,9 +17,16 @@
   },
   "dipole": {
     "context": { "r": 0.1, "d": 3, "q": 1 },
-    "camera": {
-      "position": [0, 1, 5],
-      "target": [0, 0, 0]
+    "camera": { "position": [0, 1, 5], "target": [0, 0, 0] },
+    "settings": {
+      "vectorMinTsl": 0.45,
+      "vectorScale": 1.3,
+      "lineMin": 0.15,
+      "lineNumber": 24,
+      "showField": true,
+      "showOnlyGaussianField": true,
+      "showLines": true,
+      "showEquipotentialSurface": false
     },
     "objects": [
       { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },
@@ -26,6 +39,15 @@
       "position": [0, 2.7, 7],
       "target": [0, 0, 0]
     },
+    "settings": {
+      "vectorMinTsl": 0.08,
+      "vectorScale": 1.2,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showLines": true,
+      "showEquipotentialSurface": true
+    },
     "objects": [
       { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },
       { "type": "charge", "props": { "position": ["$d", 0, 0], "charge": "$(q)", "radius": "$r" } },
@@ -37,6 +59,15 @@
     "camera": {
       "position": [8, 6, 12],
       "target": [0, 0, 0]
+    },
+    "settings": {
+      "vectorMinTsl": 0.08,
+      "vectorScale": 1.2,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showLines": true,
+      "showEquipotentialSurface": true
     },
     "objects": [
       { "type": "wire", "props": { "position": [0, 0, 0], "charge_density": "$lambda", "infinite": true } }
@@ -59,6 +90,15 @@
       "position": [17, 3.6, 0],
       "target": [0, 0, 0]
     },
+    "settings": {
+      "vectorMinTsl": 0.08,
+      "vectorScale": 1.2,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showLines": false,
+      "showEquipotentialSurface": false
+    },
     "objects": [
       { "type": "plane", "props": { "position": [0, "$(distanceY + 0.01)", 0], "charge_density": 5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } },
       { "type": "plane", "props": { "position": [0, 0, 0], "charge_density": -5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } }
@@ -70,6 +110,15 @@
       "position": [7, 5, 7],
       "target": [0, 0, 0]
     },
+    "settings": {
+      "vectorMinTsl": 0.05,
+      "vectorScale": 1.2,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showLines": false,
+      "showEquipotentialSurface": false
+    },
     "objects": [
       { "type": "charge", "props": { "position": [0, 0, 0], "charge": "$lambda", "radius": "$r"} }
     ]
@@ -79,6 +128,15 @@
     "camera": {
       "position": [7, 5, 7],
       "target": [0, 0, 0]
+    },
+    "settings": {
+      "vectorMinTsl": 0.08,
+      "vectorScale": 1.2,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showLines": true,
+      "showEquipotentialSurface": true
     },
     "objects": [
       { "type": "wire", "props": { "position": [0, 0, 0], "charge": "$lambda", "radius": "$r", "height": "$h"} }

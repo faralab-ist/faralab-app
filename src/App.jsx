@@ -23,65 +23,8 @@ import React, { useState, useEffect, useMemo } from 'react'
   import FieldArrows from './hooks/useFieldArrows.jsx'
   import useCameraPreset from './hooks/useCameraPreset.jsx'
   import EquipotentialSurface from './components/models/surfaces/EquipotentialSurface.jsx'
-  import FieldLines from './hooks/useFieldLines.jsx'
-
-  function LoadingOverlay() {
-  const [opacity, setOpacity] = useState(1)
-  const [hidden, setHidden] = useState(false)
-  const [finalFade, setFinalFade] = useState(false)
-
-  // 1️⃣ Fica transparente gradualmente depois de 1s
-  useEffect(() => {
-    const fadeTimer = setTimeout(() => setOpacity(0.3), 2000)
-    return () => clearTimeout(fadeTimer)
-  }, [])
-
-  // 2️⃣ Ao clicar depois do fade → some com fade-out suave
-  useEffect(() => {
-    const handleClick = () => {
-      if (opacity <= 0.3) {
-        setFinalFade(true)
-        setTimeout(() => setHidden(true), 1000) // tempo do fade final
-      }
-    }
-    window.addEventListener('click', handleClick)
-    return () => window.removeEventListener('click', handleClick)
-  }, [opacity])
-
-  if (hidden) return null
-
-  const totalOpacity = finalFade ? 0 : opacity
-
-  return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'transparent',
-        zIndex: 9999,
-        pointerEvents: 'auto',
-        transition: 'opacity 1s ease-in-out',
-        opacity: totalOpacity,
-      }}
-    >
-      <iframe
-        src="loading.html"
-        title="Loading"
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          pointerEvents: 'none', // deixa cliques passarem
-          transition: 'opacity 3s ease-in-out', // anima mais lento o fade inicial
-          opacity: totalOpacity,
-        }}
-      />
-    </div>
-  )
-}
-
-
-
+import FieldLines from './hooks/useFieldLines.jsx'
+import useApplyPreset from './hooks/useApplyPreset'
 
   function CameraFnsMount({ onReady }) {
     const { setCameraPreset, animateCameraPreset } = useCameraPreset()
@@ -154,38 +97,43 @@ import React, { useState, useEffect, useMemo } from 'react'
 
     const toggleField = () => setShowField(v => !v)
     const toggleOnlyGaussianField = () => setShowOnlyGaussianField(v => !v)
-      useEffect(() => {
+    const toggleLines = () => setShowLines(v => !v)
+    const toggleEquip = () => setShowEquipotentialSurface(v => !v)
+    useEffect(() => {
       if (counts.surface === 0 && showOnlyGaussianField) {
         setShowOnlyGaussianField(false)
       }
     }, [counts.surface, showOnlyGaussianField])
     const [camFns, setCamFns] = useState(null)
 
-    const toggleLines = () => setShowLines(v => !v)
+    const applyPreset = useApplyPreset({
+      addObject,
+      setSceneObjects,
+      updatePosition,
+      // camera fns come from camFns
+      animateCameraPreset: camFns?.animateCameraPreset,
+      setCameraPreset: camFns?.setCameraPreset,
+      // map your local toggles to the hook’s expected keys
+      showField, onToggleField: toggleField,
+      showOnlyGaussianField, onToggleOnlyGaussianField: toggleOnlyGaussianField,
+      showLines, onToggleLines: toggleLines,
+      showEquipotentialSurface, onToggleEquipotentialSurface: toggleEquip,
+      // settings setters
+      setVectorMinTsl, setVectorScale, setLineMin, setLineNumber
+    })
 
     return (
-
-       <>
-      <LoadingOverlay />
       <div id="canvas-container">
         <CreateButtons
           addObject={addObject}
           setSceneObjects={setSceneObjects}
-          showField={showField}
-          showLines={showLines}
-          onToggleField={toggleField}
-          onToggleLines={toggleLines}
-          showOnlyGaussianField={showOnlyGaussianField}
-          onToggleOnlyGaussianField={toggleOnlyGaussianField}
-          showEquipotentialSurface={showEquipotentialSurface}
           sceneObjects={sceneObjects}
-          onToggleEquipotentialSurface={() => setShowEquipotentialSurface(v => !v)}
           counts={counts}
-          setCameraPreset={camFns?.setCameraPreset}
-          animateCameraPreset={camFns?.animateCameraPreset}
           creativeMode={creativeMode}
           setCreativeMode={setCreativeMode}
-          sidebarOpen={sidebarOpen} // <- passe o estado da sidebar aqui
+          sidebarOpen={sidebarOpen}
+          onApplyPreset={applyPreset}
+
         />
         
         <ObjectPopup
@@ -196,7 +144,7 @@ import React, { useState, useEffect, useMemo } from 'react'
           isMinimized={isPanelMinimized}
           setIsMinimized={setIsPanelMinimized}
           setSelectedId={setSelectedId}
-          sidebarOpen={sidebarOpen} // <- passe o estado da sidebar para o popup
+          sidebarOpen={sidebarOpen} 
         />
       
         <Sidebar 
@@ -269,10 +217,8 @@ import React, { useState, useEffect, useMemo } from 'react'
         )}
 
         {showLines && (
-          <FieldLines 
-            key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id).join('-')}`}      // BUGFIX
-            charges={sceneObjects} 
-            stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
+          <FieldLines charges={sceneObjects} 
+          stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
           />
         )}
 
@@ -307,7 +253,6 @@ import React, { useState, useEffect, useMemo } from 'react'
           setLineNumber={setLineNumber}          //LINE SETTINGS NEW
         />
       </div>
-      </>
     )
   }
 

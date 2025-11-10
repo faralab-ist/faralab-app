@@ -174,7 +174,7 @@ export default function SettingsButtons({
             <div className="settings-panel up">
               <div className="field-buttons-row">
                 <button onClick={onToggleField}>
-                  {showField ? 'Hide Field' : 'Show Field'}
+                  {showField ? 'Hide Vectors' : 'Show Vectors'}
                 </button>
                 <button onClick={onToggleLines}>
                   {showLines ? 'Hide Lines' : 'Show Lines'}
@@ -193,6 +193,7 @@ export default function SettingsButtons({
                       step={0.05}
                       value={vectorMinTsl}
                       onChange={e => setVectorMinTsl(Number(e.target.value))}
+                      disabled={!showField}
                     />
                   </label>
                   <label className="efield-label">
@@ -204,6 +205,7 @@ export default function SettingsButtons({
                       step={0.1}
                       value={vectorScale}
                       onChange={e => setVectorScale(Number(e.target.value))}
+                      disabled={!showField}
                     />
                   </label>
                 </div>

@@ -21,7 +21,7 @@ export function listPresets() {
 }
 
 // Positions are WORLD units; no scaling.
-export function applyPresetByName(name, addObject, setSceneObjects, updatePosition, onCamera) {
+export function applyPresetByName(name, addObject, setSceneObjects, updatePosition, onCamera, onSettings) {
   const def = presets[name]
   if (!def) throw new Error(`Preset not found: ${name}`)
   const ctx = def.context || {}
@@ -37,7 +37,13 @@ export function applyPresetByName(name, addObject, setSceneObjects, updatePositi
   }
 
   if (def.camera && onCamera) {
-    const cam = resolve(def.camera, ctx) // { position, target, fov, ... }
+    const cam = resolve(def.camera, ctx)
     onCamera(cam)
+  }
+
+  // NEW: apply preset UI/settings if present
+  if (def.settings && onSettings) {
+    const st = resolve(def.settings, ctx)
+    onSettings(st)
   }
 }

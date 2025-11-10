@@ -342,6 +342,10 @@
   appearance: none;
 }
 
+/* Remove focus outline */
+.potential-slider:focus {
+  outline: none;
+}
 
 .potential-slider::-webkit-slider-runnable-track {
   outline: none;
@@ -375,8 +379,9 @@
   box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
   cursor: pointer;
 }
+/* Remove the border-color change on focus if you don't want any visual feedback */
 .potential-slider:focus::-webkit-slider-runnable-track {
-  border-color: #3d5a80;
+  border-color: #2e2e2e; /* keep same as default, or remove this rule entirely */
 }
 
 /* Firefox */
@@ -405,6 +410,10 @@
   background: #e6e6e6;
   border: 1px solid #3f3f3f;
   cursor: pointer;
+}
+/* Remove Firefox focus outline */
+.potential-slider::-moz-focus-outer {
+  border: 0;
 }
 
 .efield-section {
