@@ -55,7 +55,7 @@ import useApplyPreset from './hooks/useApplyPreset'
       updatePosition,
       updateDirection,
       addObject,
-      counts 
+      counts,
     } = useSceneObjects()
     
     const [selectedId, setSelectedId] = useState(null)
