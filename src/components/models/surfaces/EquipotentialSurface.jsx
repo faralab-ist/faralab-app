@@ -12,6 +12,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
         const MAX_INF_PLANES = 6;
         const MAX_INF_WIRES = 6;
         const MAX_FIN_PLANES = 6;
+        const MAX_FIN_WIRES = 6;
 
         return new THREE.ShaderMaterial({
             uniforms: {
@@ -29,6 +30,11 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 finPlaneNormals: { value: new Array(MAX_FIN_PLANES).fill(new THREE.Vector3()) },
                 finPlaneChargeDensity: { value: new Float32Array(MAX_FIN_PLANES).fill(0) },
                 finPlaneDimensions: { value: new Array(MAX_FIN_PLANES).fill(new THREE.Vector2()) },
+                finWireCount: { value: 0 },
+                finWirePositions: { value: new Array(MAX_FIN_WIRES).fill(new THREE.Vector3()) },
+                finWireDirections: { value: new Array(MAX_FIN_WIRES).fill(new THREE.Vector3()) },
+                finWireChargeDensity: { value: new Float32Array(MAX_FIN_WIRES).fill(0) },
+                finWireHeights: { value: new Float32Array(MAX_FIN_WIRES).fill(0) },
                 wireCount: { value: 0 },
                 wirePositions: { value: new Array(MAX_INF_WIRES).fill(new THREE.Vector3()) },
                 wireDirections: { value: new Array(MAX_INF_WIRES).fill(new THREE.Vector3()) },
@@ -61,6 +67,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
         let planeIdx = 0;
         let finPlaneIdx = 0;
         let wireIdx = 0;
+        let finWireIdx = 0;
 
         objects.forEach((obj) => {
             if (obj.type === 'charge') {
@@ -83,6 +90,12 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 material.uniforms.finPlaneChargeDensity.value[finPlaneIdx] = obj.charge_density;
                 material.uniforms.finPlaneDimensions.value[finPlaneIdx] = new THREE.Vector2(...obj.dimensions);
                 finPlaneIdx++;
+            } else if (obj.type === 'wire' && !obj.infinite) {
+                material.uniforms.finWirePositions.value[finWireIdx] = new THREE.Vector3(...obj.position);
+                material.uniforms.finWireDirections.value[finWireIdx] = new THREE.Vector3(...obj.direction).normalize();
+                material.uniforms.finWireChargeDensity.value[finWireIdx] = obj.charge_density;
+                material.uniforms.finWireHeights.value[finWireIdx] = obj.height;
+                finWireIdx++;
             }
         });
 
@@ -90,6 +103,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
         material.uniforms.planeCount.value = planeIdx;
         material.uniforms.finPlaneCount.value = finPlaneIdx;
         material.uniforms.wireCount.value = wireIdx;
+        material.uniforms.finWireCount.value = finWireIdx;
         material.uniforms.targetVal.value = targetValue;
         material.uniforms.transparency.value = transparency;
     });

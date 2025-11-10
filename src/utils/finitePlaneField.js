@@ -1,6 +1,7 @@
 import { EPSILON_0 } from "./constants";
 import * as THREE from 'three';
 
+// from https://arxiv.org/pdf/math-ph/0603051
 export default function finitePlaneField(planePos, planeNormal, planeDimensions, chargeDensity, targPoint) {
     const width = planeDimensions[0];
     const height = planeDimensions[1];
