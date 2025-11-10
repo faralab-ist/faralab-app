@@ -190,7 +190,7 @@ void main() {
             float potAtHit = potential(rayPos);
             float error = abs(potAtHit - targ);
             // smoothstep ta alto pq senao ficava feio
-            alpha = smoothstep(0.9, 0.0, error);
+            alpha = smoothstep(10.0, 0.0, error);
 
             hit = true;
             break;
