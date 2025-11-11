@@ -21,7 +21,7 @@ function Wire({
   gridDimensions,
   height,
   radius,
-  direction,
+  direction = [1, 0, 0], // default horizontal (X axis)
   creativeMode
 }) {
   const isSelected = id === selectedId
@@ -30,21 +30,39 @@ function Wire({
   const groupRef = useRef()
   const isDraggingRef = useRef(false)
 
-  const trueHeight = infinite ? Math.sqrt(gridDimensions[0] ** 2 + gridDimensions[1] ** 2) + 1 : height
+  //const trueHeight = infinite
+  //  ? Math.sqrt(gridDimensions[0] ** 2 + gridDimensions[1] ** 2) + 1
+ //   : height
+  const trueHeight = infinite ? 20 : height
 
+  // Keep gizmo centered using position only (no rotation to avoid snap-back)
   useLayoutEffect(() => {
-    if (isDraggingRef.current || !pivotRef.current) return
-
+    if (!pivotRef.current) return
     const pos = new THREE.Vector3(position[0], position[1], position[2])
-    const mat = new THREE.Matrix4().setPosition(pos)
-
-    // Update PivotControls internal state
     if (pivotRef.current.matrix) {
-      pivotRef.current.matrix.copy(mat)
+      const m = new THREE.Matrix4().identity()
+      m.setPosition(pos)
+      pivotRef.current.matrix.copy(m)
     }
   }, [position])
 
+  // Apply position to the visible mesh/group
+  useEffect(() => {
+    if (!groupRef.current) return
+    groupRef.current.position.set(position[0], position[1], position[2])
+  }, [position])
 
+  // Apply rotation from saved direction (single source of truth)
+  useEffect(() => {
+    if (!groupRef.current || !direction) return
+    const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
+    if (dir.lengthSq() === 0) return
+    dir.normalize()
+    // Cylinder local axis is +Y; rotate +Y to desired direction
+    const from = new THREE.Vector3(0, 1, 0)
+    const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
+    groupRef.current.quaternion.copy(q)
+  }, [direction])
 
   return (
     <PivotControls
@@ -86,7 +104,8 @@ function Wire({
             type: 'wire',
             charge_density,
             infinite,
-            material
+            material,
+            direction
           }}
           position={[0, 0, 0]}
           onPointerDown={(e) => {
