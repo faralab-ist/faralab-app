@@ -17,6 +17,8 @@ export default function ChargeInfo({ object, updateObject }) {
           // Show empty string if value is 0, otherwise show the value
           value={object.charge === 0 ? '' : object.charge}
           step={0.1}
+          min={-20}
+          max={20}
           onChange={handleIntensityChange}
           style={{ width: '50px' }}
         />

@@ -26,6 +26,8 @@ export default function WireInfo({ object, updateObject }) {
           // Show empty string if value is 0, otherwise show the value
           value={object.charge_density === 0 ? '' : object.charge_density}
           step={0.1}
+          min={-10}
+          max={10}
           onChange={handleDensityChange}
         />
       </label>

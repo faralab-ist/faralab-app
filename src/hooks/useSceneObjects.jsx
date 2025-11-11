@@ -25,7 +25,7 @@ const objectFactories = {
     charge_density: 1,
     charge: 1,
     charges: [],
-    direction: [0, 1, 0], 
+    direction: [0, 0, 1], 
     height: 1,
     radius: 0.03,
     infinite: false,

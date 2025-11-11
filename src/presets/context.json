@@ -67,7 +67,7 @@
       "lineNumber": 28,
       "showField": true,
       "showLines": true,
-      "showEquipotentialSurface": true
+      "showEquipotentialSurface": false
     },
     "objects": [
       { "type": "wire", "props": { "position": [0, 0, 0], "charge_density": "$lambda", "infinite": true } }

@@ -218,8 +218,8 @@ export default function SettingsButtons({
                     <span className="label-text">Min Threshold</span>
                     <input
                       type="number"
-                      min={0.01}
-                      step={0.01}
+                      min={0.00}
+                      step={0.05}
                       value={lineMin}
                       onChange={e => setLineMin(Number(e.target.value))}
                       disabled={!showLines}
@@ -231,6 +231,7 @@ export default function SettingsButtons({
                     <input
                       type="number"
                       min={1}
+                      max={50}
                       step={1}
                       value={lineNumber}
                       onChange={e => setLineNumber(Number(e.target.value))}
