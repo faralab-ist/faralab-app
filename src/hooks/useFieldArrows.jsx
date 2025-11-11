@@ -61,7 +61,7 @@ export default function FieldArrows({
         const mag = field.length();
         if (mag <= fieldThreshold) continue;
         const logMag = Math.log1p(mag);
-        const normalized = Math.min(Math.max(logMag, 0), 1);
+        const normalized = logMax > 0 ? Math.min(Math.max(logMag / logMax, 0), 1) : 0;
         const hue = (1 - normalized) * 0.66;
         const color = new THREE.Color().setHSL(hue, 1, 0.5);
         const dir = field.clone().normalize();
