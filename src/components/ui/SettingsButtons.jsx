@@ -30,7 +30,9 @@ export default function SettingsButtons({
   lineMin,
   setLineMin,
   lineNumber,
-  setLineNumber
+  setLineNumber,
+  activePlane,
+  onPlaneSelect
 }) {
   const [open, setOpen] = useState(null)
   const toggle = (k) => setOpen(p => p === k ? null : k)
@@ -181,6 +183,31 @@ export default function SettingsButtons({
                   {showLines ? 'Hide Lines' : 'Show Lines'}
                 </button>
               </div> 
+              
+              {/* Plane Filter Buttons */}
+              <div className="efield-section">
+                <div className="efield-section-title">Plane Filter</div>
+                <div className="plane-filter-buttons">
+                  <button 
+                    className={`plane-btn ${activePlane === 'xy' ? 'active' : ''}`}
+                    onClick={() => onPlaneSelect?.('xy')}
+                  >
+                    XY
+                  </button>
+                  <button 
+                    className={`plane-btn ${activePlane === 'yz' ? 'active' : ''}`}
+                    onClick={() => onPlaneSelect?.('yz')}
+                  >
+                    YZ
+                  </button>
+                  <button 
+                    className={`plane-btn ${activePlane === 'xz' ? 'active' : ''}`}
+                    onClick={() => onPlaneSelect?.('xz')}
+                  >
+                    XZ
+                  </button>
+                </div>
+              </div>
               
               {/* E-Field visualization controls */}
               <div className="efield-section">
