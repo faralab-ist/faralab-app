@@ -221,3 +221,64 @@
   color: #bfffcf;
   border-color: #049d2b;
 }
+
+/* Charge intensity field */
+.object-popup .charge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.object-popup .intensity-label {
+  font-size: 0.7rem;
+}
+
+.object-popup .intensity-input {
+  width: 60px;            /* compact input */
+  padding: 2px 4px;
+  font-size: 0.7rem;
+  border: 1px solid #444;
+  background: #181818;
+  color: #e9f1ff;
+  border-radius: 4px;
+  outline: none;
+  margin-top: 4px;        /* keeps column layout tidy */
+}
+
+.object-popup .intensity-input.has-error {
+  border-color: #c23535;
+}
+
+.object-popup .input-error {
+  color: #ff5c5c;
+  font-size: 0.6rem;
+  line-height: 1.1;
+  font-weight: 600;
+}
+
+/* Reusable small number input for popups (Charge, Plane, Wire, etc.) */
+.object-popup .popup-number-input,
+.object-popup .intensity-input {           /* alias for backward compatibility */
+  width: 60px;
+  padding: 2px 4px;
+  font-size: 0.7rem;
+  border: 1px solid #444;
+  background: #181818;
+  color: #e9f1ff;
+  border-radius: 4px;
+  outline: none;
+  margin-top: 4px;
+}
+
+.object-popup .popup-number-input.has-error,
+.object-popup .intensity-input.has-error {
+  border-color: #c23535;
+}
+
+/* Keep the shared error style */
+.object-popup .input-error {
+  color: #ff5c5c;
+  font-size: 0.6rem;
+  line-height: 1.1;
+  font-weight: 600;
+}

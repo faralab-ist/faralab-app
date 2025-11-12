@@ -3,10 +3,6 @@ import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
 
-
-
-
-
 function Wire({
   id,
   position,
@@ -35,31 +31,19 @@ function Wire({
  //   : height
   const trueHeight = infinite ? 20 : height
 
-  // Keep gizmo centered using position only (no rotation to avoid snap-back)
-  useLayoutEffect(() => {
-    if (!pivotRef.current) return
-    const pos = new THREE.Vector3(position[0], position[1], position[2])
-    if (pivotRef.current.matrix) {
-      const m = new THREE.Matrix4().identity()
-      m.setPosition(pos)
-      pivotRef.current.matrix.copy(m)
-    }
-  }, [position])
-
-  // Apply position to the visible mesh/group
+  // Sync from external state only when NOT dragging
   useEffect(() => {
-    if (!groupRef.current) return
+    if (!groupRef.current || isDraggingRef.current) return
     groupRef.current.position.set(position[0], position[1], position[2])
   }, [position])
 
   // Apply rotation from saved direction (single source of truth)
   useEffect(() => {
-    if (!groupRef.current || !direction) return
+    if (!groupRef.current || isDraggingRef.current || !direction) return
     const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
     if (dir.lengthSq() === 0) return
     dir.normalize()
-    // Cylinder local axis is +Y; rotate +Y to desired direction
-    const from = new THREE.Vector3(0, 1, 0)
+    const from = new THREE.Vector3(0, 1, 0) // cylinder local axis
     const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
     groupRef.current.quaternion.copy(q)
   }, [direction])
@@ -71,13 +55,14 @@ function Wire({
       depthTest={false}
       enabled={isSelected && creativeMode}
       disableScaling={true}
+      // prevent gizmo from also transforming children
       onDragStart={(activeAxes) => {
         isDraggingRef.current = true;
         setIsDragging(true)
         handleAxisDragStart(activeAxes, position)
       }}
       onDrag={(matrix) => {
-        // Decompose the transform coming from PivotControls
+        if (!groupRef.current) return
         const p = new THREE.Vector3()
         const q = new THREE.Quaternion()
         const s = new THREE.Vector3()
@@ -87,7 +72,7 @@ function Wire({
         const pWorld = new THREE.Vector3().setFromMatrixPosition(matrix)
         updatePosition(id, [pWorld.x, pWorld.y, pWorld.z])
         // Cylinder points along +Y in local space, rotate that by the gizmo's rotation
-        const dir = new THREE.Vector3(0, 1, 0).applyQuaternion(q).normalize()
+        const dir = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
         updateDirection(id, [dir.x, dir.y, dir.z])
       }}
       onDragEnd={() => {

@@ -29,7 +29,8 @@ export default function SettingsButtons({
   lineMin,
   setLineMin,
   lineNumber,
-  setLineNumber
+  setLineNumber,
+  // ...existing props...
 }) {
   const [open, setOpen] = useState(null)
   const toggle = (k) => setOpen(p => p === k ? null : k)
@@ -159,6 +160,55 @@ export default function SettingsButtons({
     }
   }, [showOnlyGaussianField, creativeMode])
 
+  // Local buffers for real-time typing without forcing min
+  const [scaleInput, setScaleInput] = useState(String(vectorScale ?? ''))
+  const [lineNumInput, setLineNumInput] = useState(String(lineNumber ?? ''))
+
+  useEffect(() => { setScaleInput(String(vectorScale ?? '')) }, [vectorScale])
+  useEffect(() => { setLineNumInput(String(lineNumber ?? '')) }, [lineNumber])
+
+  const handleScaleChange = (e) => {
+    const s = e.target.value
+    setScaleInput(s)
+    const v = parseFloat(s)
+    if (Number.isFinite(v)) {
+      if (v > 5) { setVectorScale(5); setScaleInput('5') }        // clamp high immediately
+      else if (v >= 0.1) { setVectorScale(v) }                    // update live when above min
+      // if below min, wait until blur/commit to clamp (allows typing "0.3")
+    }
+  }
+  const commitScale = () => {
+    const v = parseFloat(scaleInput)
+    if (Number.isFinite(v)) {
+      const clamped = Math.max(0.1, Math.min(5, v))
+      setVectorScale(clamped)
+      setScaleInput(String(clamped))
+    } else {
+      setScaleInput(String(vectorScale ?? ''))
+    }
+  }
+
+  const handleLineNumChange = (e) => {
+    const s = e.target.value
+    setLineNumInput(s)
+    const v = parseInt(s, 10)
+    if (Number.isFinite(v)) {
+      if (v > 50) { setLineNumber(50); setLineNumInput('50') }    // clamp high immediately
+      else if (v >= 1) { setLineNumber(v) }                       // update live when above min
+      // if below min, wait until blur/commit
+    }
+  }
+  const commitLineNum = () => {
+    const v = parseInt(lineNumInput, 10)
+    if (Number.isFinite(v)) {
+      const clamped = Math.max(1, Math.min(50, v))
+      setLineNumber(clamped)
+      setLineNumInput(String(clamped))
+    } else {
+      setLineNumInput(String(lineNumber ?? ''))
+    }
+  }
+
   return (
     <>
       <div ref={rootRef} className="settings-buttons-root horizontal">
@@ -203,8 +253,10 @@ export default function SettingsButtons({
                       min={0.1}
                       max={5}
                       step={0.1}
-                      value={vectorScale}
-                      onChange={e => setVectorScale(Number(e.target.value))}
+                      value={scaleInput}
+                      onChange={handleScaleChange}
+                      onBlur={commitScale}
+                      onKeyDown={e => { if (e.key === 'Enter') commitScale() }}
                       disabled={!showField}
                     />
                   </label>
@@ -233,8 +285,10 @@ export default function SettingsButtons({
                       min={1}
                       max={50}
                       step={1}
-                      value={lineNumber}
-                      onChange={e => setLineNumber(Number(e.target.value))}
+                      value={lineNumInput}
+                      onChange={handleLineNumChange}
+                      onBlur={commitLineNum}
+                      onKeyDown={e => { if (e.key === 'Enter') commitLineNum() }}
                       disabled={!showLines}
                       placeholder="20"
                     />
@@ -334,7 +388,7 @@ export default function SettingsButtons({
           )}
         </div>
       </div>
-
+  
       {fluxPrompt.open && (
         <div className="flux-popup" style={{ top: fluxPrompt.y, left: fluxPrompt.x }}>
           <div className="flux-popup-header">
@@ -349,4 +403,5 @@ export default function SettingsButtons({
       )}
     </>
   )
-}
+} 
+//man this too big
