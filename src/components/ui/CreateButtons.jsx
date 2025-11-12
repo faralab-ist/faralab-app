@@ -27,12 +27,8 @@ export default function CreateButtons({
     setOpenGroup(null)
   }
 
-  const totalObjects = sceneObjects.length
+
   const handleClearCanvas = () => {
-    if (totalObjects >= 2) {
-      const ok = window.confirm(`Remove all ${totalObjects} objects from the scene?`)
-      if (!ok) return
-    }
     setSceneObjects?.([])
   }
 
