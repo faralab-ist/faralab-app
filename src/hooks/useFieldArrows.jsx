@@ -17,12 +17,13 @@ export default function FieldArrows({
     gridSize = 10, 
     step = 1, 
     minThreshold, 
-    scaleMultiplier
+    scaleMultiplier,
+    planeFilter = null
 }) {
     
     const vectors = useMemo( 
-        () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold),
-        [objects, showOnlyPlane, showOnlyGaussianField]
+        () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
+        [objects, showOnlyPlane, showOnlyGaussianField, planeFilter]
     );
 
     const MAX_L = useMemo(() => {

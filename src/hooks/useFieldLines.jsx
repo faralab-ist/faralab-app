@@ -71,8 +71,8 @@ const generateWireStartPoints = (wire, linesPerWire) => {
     return points;
 };
 
-    // Generic field line tracer from a start point
-const traceFieldLineFromPoint = (startPoint, sourceObj, allObjects, stepsPerLine, stepSize, minStrength) => {
+// Generic field line tracer from a start point
+const traceFieldLineFromPoint = (startPoint, sourceObj, allObjects, stepsPerLine, stepSize, minStrength, planeFilter = null) => {
     const points = [startPoint.clone()];
     let currentPos = startPoint.clone();
 
@@ -89,6 +89,12 @@ const traceFieldLineFromPoint = (startPoint, sourceObj, allObjects, stepsPerLine
         }
             
         currentPos.add(direction.multiplyScalar(stepSize));
+        
+        // Apply plane filter - skip points not on the plane
+        if (planeFilter === 'xy' && Math.abs(currentPos.z) > 0.1) break;
+        if (planeFilter === 'yz' && Math.abs(currentPos.x) > 0.1) break;
+        if (planeFilter === 'xz' && Math.abs(currentPos.y) > 0.1) break;
+        
         points.push(currentPos.clone());
 
         // Stop if too close to another object
@@ -104,7 +110,7 @@ const traceFieldLineFromPoint = (startPoint, sourceObj, allObjects, stepsPerLine
     return points;
 };
 
-export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5, minStrength = 0.1, linesPerCharge = 20}) {
+export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5, minStrength = 0.1, linesPerCharge = 20, planeFilter = null}) {
     
     const fieldLinesData = useMemo(() => {
         const lines = [];
@@ -122,7 +128,7 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
                 const planePoints = generatePlaneStartPoints(obj, linesPerCharge*10);
                 planePoints.forEach(planePoint => {
                     const points = traceFieldLineFromPoint(planePoint, obj, charges, 
-                        stepsPerLine=stepsPerLine, stepSize=stepSize, minStrength=minStrength);
+                        stepsPerLine=stepsPerLine, stepSize=stepSize, minStrength=minStrength, planeFilter);
                     if (points.length > 1) {
                         lines.push({
                             points,
@@ -137,7 +143,7 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
                 const wirePoints = generateWireStartPoints(obj, linesPerCharge*1);
                 wirePoints.forEach(wirePoint => {
                     const points = traceFieldLineFromPoint(wirePoint, obj, charges, 
-                        stepsPerLine=stepsPerLine, stepSize=stepSize, minStrength=minStrength);
+                        stepsPerLine=stepsPerLine, stepSize=stepSize, minStrength=minStrength, planeFilter);
                     if (points.length > 1) {
                         lines.push({
                             points,
@@ -191,6 +197,12 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
                         if (obj.charge < 0) direction.negate();
                         
                         currentPos.add(direction.multiplyScalar(stepSize));
+                        
+                        // Apply plane filter
+                        if (planeFilter === 'xy' && Math.abs(currentPos.z) > 0.1) break;
+                        if (planeFilter === 'yz' && Math.abs(currentPos.x) > 0.1) break;
+                        if (planeFilter === 'xz' && Math.abs(currentPos.y) > 0.1) break;
+                        
                         points.push(currentPos.clone());
 
                         const hitOtherCharge = charges.some(otherCharge => {
@@ -216,7 +228,7 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
 
         return lines;
 
-    }, [charges, linesPerCharge, stepsPerLine, stepSize, minStrength]);
+    }, [charges, linesPerCharge, stepsPerLine, stepSize, minStrength, planeFilter]);
 
     // Create both lines AND arrow helpers like the original
     const linesAndArrows = useMemo(() => {

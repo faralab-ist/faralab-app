@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import calculateFieldAtPoint from './calculateField'
 
-export default function getFieldVector3(objects, gridSize = 10, step = 1, showOnlyPlane = false, showOnlyElectricField = false, min) {
+export default function getFieldVector3(objects, gridSize = 10, step = 1, showOnlyPlane = false, showOnlyElectricField = false, min, planeFilter = null) {
   const fieldVectors = []
 
   if (!showOnlyElectricField) {
@@ -9,6 +9,11 @@ export default function getFieldVector3(objects, gridSize = 10, step = 1, showOn
     for (let x = -gridSize; x <= gridSize; x += step) {
       for (let y = -yLevel; y <= yLevel; y += step) {
         for (let z = -gridSize; z <= gridSize; z += step) {
+          // Filtro de plano
+          if (planeFilter === 'xy' && z !== 0) continue
+          if (planeFilter === 'yz' && x !== 0) continue
+          if (planeFilter === 'xz' && y !== 0) continue
+          
           const targetPos = new THREE.Vector3(x, y, z)
           const fieldAtPoint = calculateFieldAtPoint(objects, targetPos)
           if(fieldAtPoint.length() > min)

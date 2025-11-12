@@ -131,6 +131,7 @@ function LoadingOverlay() {
     const [vectorScale, setVectorScale] = useState(1)
     const [lineMin, setLineMin] = useState(0.1)         //LINE SETTINGS NEW
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
+    const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -163,6 +164,54 @@ function LoadingOverlay() {
       }
     }, [counts.surface, showOnlyGaussianField])
     const [camFns, setCamFns] = useState(null)
+
+    const handlePlaneSelect = (plane) => {
+      // Toggle: se clicar no mesmo plano, desativa
+      if (activePlane === plane) {
+        setActivePlane(null)
+        // Volta para visão padrão
+        if (camFns?.animateCameraPreset) {
+          camFns.animateCameraPreset({
+            position: [15, 15, 15],
+            target: [0, 0, 0],
+            duration: 0.8
+          })
+        }
+      } else {
+        setActivePlane(plane)
+        
+        // Move câmera de acordo com o plano
+        if (camFns?.animateCameraPreset) {
+          let cameraConfig
+          switch (plane) {
+            case 'xy': // Vista de cima (olhando para baixo no eixo Z)
+              cameraConfig = {
+                position: [0, 0, 8],
+                target: [0, 0, 0],
+                duration: 0.8
+              }
+              break
+            case 'yz': // Vista lateral (olhando do eixo X)
+              cameraConfig = {
+                position: [8, 0, 0],
+                target: [0, 0, 0],
+                duration: 0.8
+              }
+              break
+            case 'xz': // Vista frontal (olhando do eixo Y)
+              cameraConfig = {
+                position: [0, 8, 0],
+                target: [0, 0, 0],
+                duration: 0.8
+              }
+              break
+          }
+          if (cameraConfig) {
+            camFns.animateCameraPreset(cameraConfig)
+          }
+        }
+      }
+    }
 
     const applyPreset = useApplyPreset({
       addObject,
@@ -269,19 +318,20 @@ function LoadingOverlay() {
 
         {showField && (
           <FieldArrows
-  key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}`}
+  key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
   objects={sceneObjects}
   showOnlyGaussianField={showOnlyGaussianField}
   minThreshold={vectorMinTsl}
   scaleMultiplier={vectorScale}
-  // ...existing props...
+  planeFilter={activePlane}
 />
         )}
 
         {showLines && (
-          <FieldLines key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id).join('-')}`}   //LINE BUGFIX
+          <FieldLines key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id).join('-')}-${activePlane}`}   //LINE BUGFIX
           charges={sceneObjects}  
           stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
+          planeFilter={activePlane}
           />
         )}
 
@@ -314,6 +364,8 @@ function LoadingOverlay() {
           setLineMin={setLineMin}         //LINE SETTINGS NEW
           lineNumber={lineNumber}         //LINE SETTINGS NEW
           setLineNumber={setLineNumber}          //LINE SETTINGS NEW
+          activePlane={activePlane}
+          onPlaneSelect={handlePlaneSelect}
         />
       </div>
       </>
