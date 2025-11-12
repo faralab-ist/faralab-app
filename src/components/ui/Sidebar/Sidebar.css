@@ -166,6 +166,22 @@
   color: #84b5ff;
 }
 
+/* Subtype pills for surfaces — mantém mesmo estilo que surface */
+.pill.sphere {
+  border-color: #00566e;
+  color: #84b5ff;
+}
+
+.pill.cuboid {
+  border-color: #00566e;
+  color: #84b5ff;
+}
+
+.pill.cylinder {
+  border-color: #00566e;
+  color: #84b5ff;
+}
+
 /* === LISTA DE OBJETOS === */
 .object-list {
   list-style: none;
@@ -276,6 +292,70 @@
 
 .muted {
   opacity: 0.6;
+}
+
+/* acrescentos para modo minimizado */
+
+/* quando minimizado, empurra toggle-tab menos (para encaixar minibar) */
+.sidebar-wrap.minimized .toggle-tab {
+  right: 96px; /* 80px minibar + 16px gap */
+}
+
+/* minibar: barra pequena que mostra só as pills */
+.sidebar.minimized {
+  width: 96px; /* keep some padding */
+  transform: translateX(0);
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+}
+
+/* esconder o conteúdo normal quando minimizado */
+.sidebar.minimized .panel-content {
+  display: none;
+}
+
+/* layout vertical das pills na minibar */
+.minibar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  pointer-events: auto;
+}
+
+/* estilo específico das pills na minibar */
+.minibar-pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  width: 72px;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* ajustar contador nas pills pequenas */
+.minibar-pill .count {
+  margin-left: 0;
+  margin-top: 2px;
+  background: rgba(0,0,0,0.3);
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+/* garante comportamento responsivo: se janela muito pequena, minimizar é estreito */
+@media (max-width: 520px) {
+  .sidebar.minimized { width: 84px; }
+  .sidebar-wrap.minimized .toggle-tab { right: 80px; }
 }
 
 
