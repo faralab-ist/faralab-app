@@ -16,6 +16,7 @@ export default function SettingsButtons({
   showOnlyGaussianField,
   setOnlyGaussianField,
   creativeMode,
+  setCreativeMode,
   addObject,
   sceneObjects,
   setSceneObjects,

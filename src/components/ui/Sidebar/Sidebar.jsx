@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React from "react";
 import ObjectList from "./ObjectList";
 import "./Sidebar.css";
 
@@ -8,7 +8,7 @@ import "./Sidebar.css";
  * - Largura 320px
  * - Conteúdo com lista de objetos (agora com expansão individual)
  */
-export default function Sidebar({ objects, counts, isOpen, setIsOpen }) {
+export default function Sidebar({ objects, counts, isOpen, setIsOpen, updateObject, removeObject }) {
   const togglePanel = () => setIsOpen((p) => !p);
 
   return (
@@ -21,7 +21,7 @@ export default function Sidebar({ objects, counts, isOpen, setIsOpen }) {
       >
         {isOpen ? ">" : "<"}
       </button>
-    
+
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
         <div className="panel-content">
           <header className="panel-header">
@@ -40,10 +40,9 @@ export default function Sidebar({ objects, counts, isOpen, setIsOpen }) {
               </span>
             </div>
           </header>
- 
-          
- 
-          <ObjectList items={objects} />
+
+          {/* Pass update/remove handlers so sidebar tem as mesmas capacidades que o popup */}
+          <ObjectList items={objects} updateObject={updateObject} removeObject={removeObject} />
         </div>
       </div>
     </div>

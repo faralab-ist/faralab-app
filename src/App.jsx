@@ -209,11 +209,13 @@ function LoadingOverlay() {
           sidebarOpen={sidebarOpen} 
         />
       
-        <Sidebar 
+        <Sidebar
           objects={sceneObjects}
           counts={counts}
-          isOpen={sidebarOpen}       // CORRETO: camelCase
-          setIsOpen={setSidebarOpen} // CORRETO: passar o setter do estado criado
+          isOpen={sidebarOpen}
+          setIsOpen={setSidebarOpen}
+          updateObject={updateObject}     // <- ensure these are passed
+          removeObject={removeObject}     // <- <- 
         />
 
         <Canvas onPointerMissed={handleBackgroundClick}>
