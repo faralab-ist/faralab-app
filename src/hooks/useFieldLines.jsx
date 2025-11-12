@@ -2,6 +2,19 @@ import * as THREE from 'three';
 import { useMemo } from 'react';
 import calculateFieldAtPoint from '../utils/calculateField.js';
 
+// returns true if point is 'after' the plane
+function sliceByPlane(point, slicePlane, slicePos, useSlice){
+    if(!useSlice) return true;
+    switch(slicePlane){
+        case 'xy':
+            return point.z > slicePos;
+        case 'yz':
+            return point.x > slicePos;
+        case 'xz':
+            return point.y > slicePos;
+    }
+}
+
 const generatePlaneStartPoints = (plane, linesPerPlane) => {
     const points = [];
     const planePos = new THREE.Vector3(...plane.position);
@@ -110,7 +123,7 @@ const traceFieldLineFromPoint = (startPoint, sourceObj, allObjects, stepsPerLine
     return points;
 };
 
-export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5, minStrength = 0.1, linesPerCharge = 20, planeFilter = null}) {
+export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5, minStrength = 0.1, linesPerCharge = 20, planeFilter = null, slicePlane, slicePos, useSlice}) {
     
     const fieldLinesData = useMemo(() => {
         const lines = [];
@@ -226,8 +239,11 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
             }
         });
 
-        return lines;
-
+        return lines.filter(line => line.points.some(p => sliceByPlane(p, slicePlane, slicePos, useSlice)))
+                .map(line => ({
+                    ...line,
+                    points: line.points.filter(p => sliceByPlane(p, slicePlane, slicePos, useSlice))
+                }))
     }, [charges, linesPerCharge, stepsPerLine, stepSize, minStrength, planeFilter]);
 
     // Create both lines AND arrow helpers like the original

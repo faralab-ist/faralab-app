@@ -40,7 +40,35 @@ uniform vec3 finWirePositions[MAX_FIN_WIRES];
 uniform vec3 finWireDirections[MAX_FIN_WIRES];
 uniform float finWireHeights[MAX_FIN_WIRES];
 
+uniform bool useSlice;
+uniform vec3 slicePlane;
+uniform float slicePos;  
+
+
 #define PI 3.1415926
+
+bool isBehindSlice(vec3 point) {
+    if (!useSlice) return false;
+    
+    if (slicePlane.x > 0.5) return point.x < slicePos;
+    if (slicePlane.y > 0.5) return point.y < slicePos;
+    if (slicePlane.z > 0.5) return point.z < slicePos;
+    return false;
+}
+
+
+float sliceFade(vec3 point) {
+    if (!useSlice) return 1.0;
+    
+    float dist = 0.0;
+    if (slicePlane.x > 0.5) dist = point.x - slicePos;
+    if (slicePlane.y > 0.5) dist = point.y - slicePos;
+    if (slicePlane.z > 0.5) dist = point.z - slicePos;
+    
+    float smoothZone = 0.02; 
+    return smoothstep(-smoothZone, 0.0, dist);
+}
+
 
 // from https://arxiv.org/pdf/math-ph/0603051
 float rectPotential(vec3 p, vec3 planePos, vec3 normal, vec2 dims, float sigma) {
@@ -193,13 +221,21 @@ void main() {
 
         if (sign(diff) != sign(lastDiff)) {
             float t = abs(lastDiff) / (abs(lastDiff) + abs(diff) + 1e-6);
-            rayPos -= rayDir * stepSize * (1.0 - t);
+            vec3 hitPos = rayPos - rayDir * stepSize * (1.0 - t);
 
-            float potAtHit = potential(rayPos);
+            bool behind = isBehindSlice(hitPos);
+            if (useSlice && behind){
+                rayPos += rayDir * adaptiveStep;
+                lastDiff = diff;
+                continue;
+            }
+
+            float potAtHit = potential(hitPos);
             float error = abs(potAtHit - targ);
             // smoothstep ta alto pq senao ficava feio
             alpha = smoothstep(10.0, 0.0, error);
 
+            rayPos = hitPos;
             hit = true;
             break;
         }
@@ -207,7 +243,8 @@ void main() {
         lastDiff = diff;
     }
     if (hit) {
-        gl_FragColor = vec4(0.0, 0.6, 1.0, alpha * transparency);
+        float fade = sliceFade(rayPos);
+        gl_FragColor = vec4(0.0, 0.6, 1.0, alpha * transparency * fade);
     } else {
         discard;
     }
