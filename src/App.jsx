@@ -133,9 +133,9 @@ function LoadingOverlay() {
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
     // slicing planes stuff
-    const [slicePlane, setSlicePlane] = useState('xy') // 'xy', 'yz', 'xz'
+    const [slicePlane, setSlicePlane] = useState('xz') // 'xy', 'yz', 'xz'
     const [slicePos, setSlicePos] = useState(-0.1)
-    const [useSlice, setUseSlice] = useState(true)
+    const [useSlice, setUseSlice] = useState(false)
 
     const handleSelect = (id) => {
       setSelectedId(id)
