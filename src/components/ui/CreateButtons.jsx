@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import './CreateButtons.css'
-import { applyPresetByName } from '../../presets/loader'
 
 export default function CreateButtons({ 
   addObject,
@@ -13,7 +12,6 @@ export default function CreateButtons({
   onApplyPreset
 }) {
   const [openGroup, setOpenGroup] = useState(null)
-  const hasSurfaces = (counts?.surface ?? 0) > 0
 
   // Refs
   const panelRef = useRef(null)
@@ -148,4 +146,3 @@ export default function CreateButtons({
     </>
   )
 }
-
