@@ -16,7 +16,10 @@ export default function Sphere({
   updatePosition,
   fixed = false,
   dragOwnerId = null,
-  creativeMode
+  creativeMode,
+  slicePlane,
+  slicePos,
+  useSlice
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -56,6 +59,18 @@ export default function Sphere({
   useEffect(() => {
     if (rootRef.current) rootRef.current.position.set(...position)
   }, [position])
+
+  const clippingPlanes = useMemo(() => {
+    if (!useSlice) return [];
+
+    switch (slicePlane) {
+      case 'xy': return [new THREE.Plane(new THREE.Vector3(0, 0, 1), slicePos)];
+      case 'yz': return [new THREE.Plane(new THREE.Vector3(1, 0, 0), slicePos)];
+      case 'xz': return [new THREE.Plane(new THREE.Vector3(0, 1, 0), slicePos)];
+      default: return [];
+    }
+  }, [slicePlane, slicePos, useSlice]);
+
 
   return (
     <PivotControls
@@ -111,6 +126,7 @@ export default function Sphere({
             depthWrite={false}
             depthTest={true}
             side={THREE.DoubleSide}
+            clippingPlanes={clippingPlanes}
           />
         </mesh>
 

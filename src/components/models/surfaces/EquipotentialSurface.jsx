@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import equipotentialShaderFragmentSource from '../../../shaders/equipotentialSurfaceFrag.glsl';
 import { EPSILON_0, K_E } from '../../../utils/constants.js';
 
-export default function EquipotentialSurface({ objects, targetValue = 5.0, transparency = 0.6 }) {
+export default function EquipotentialSurface({ objects, targetValue = 5.0, transparency = 0.6, slicePlane, slicePos, useSlice }) {
     const { camera } = useThree();
 
     const material = useMemo(() => {
@@ -16,6 +16,9 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
 
         return new THREE.ShaderMaterial({
             uniforms: {
+                useSlice: { value: false },
+                slicePlane: { value: new THREE.Vector3(1, 0, 0) },
+                slicePos: { value: 0.0 },
                 cameraMatrixWorld : { value: new THREE.Matrix4() },
                 projectionMatrixInverse : {value : new THREE.Matrix4()},
                 chargeCount: { value: 0 },
@@ -106,6 +109,11 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
         material.uniforms.finWireCount.value = finWireIdx;
         material.uniforms.targetVal.value = targetValue;
         material.uniforms.transparency.value = transparency;
+        material.uniforms.useSlice.value = useSlice;
+        if (slicePlane === 'xy') material.uniforms.slicePlane.value.set(0,0,1);
+        else if (slicePlane === 'yz') material.uniforms.slicePlane.value.set(1,0,0);
+        else if (slicePlane === 'xz') material.uniforms.slicePlane.value.set(0,1,0);
+        material.uniforms.slicePos.value = slicePos;
     });
 
     const geometry = useMemo(() => {

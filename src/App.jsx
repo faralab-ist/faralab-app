@@ -132,6 +132,10 @@ function LoadingOverlay() {
     const [lineMin, setLineMin] = useState(0.1)         //LINE SETTINGS NEW
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
+    // slicing planes stuff
+    const [slicePlane, setSlicePlane] = useState('xz') // 'xy', 'yz', 'xz'
+    const [slicePos, setSlicePos] = useState(-0.1)
+    const [useSlice, setUseSlice] = useState(false)
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -267,7 +271,7 @@ function LoadingOverlay() {
           removeObject={removeObject}     // <- <- 
         />
 
-        <Canvas onPointerMissed={handleBackgroundClick}>
+        <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
           <CameraFnsMount onReady={setCamFns} />               {/* inside Canvas */}
           <ambientLight intensity={0.5} />
           <directionalLight position={[2, 2, 5]} />
@@ -312,6 +316,9 @@ function LoadingOverlay() {
                 updateDirection={updateDirection}
                 updateObject={updateObject}
                 removeObject={removeObject}
+                slicePlane={slicePlane}
+                slicePos={slicePos}
+                useSlice={useSlice}
                 dragOwnerId={dragOwnerId}
                 gridDimensions={obj.type === 'wire' || obj.type === 'plane' ? [20, 20] : undefined}
               />
@@ -326,6 +333,9 @@ function LoadingOverlay() {
   minThreshold={vectorMinTsl}
   scaleMultiplier={vectorScale}
   planeFilter={activePlane}
+  slicePlane={slicePlane}
+  slicePos={slicePos}
+  useSlice={useSlice}
 />
         )}
 
@@ -333,12 +343,18 @@ function LoadingOverlay() {
           <FieldLines key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id).join('-')}-${activePlane}`}   //LINE BUGFIX
           charges={sceneObjects}  
           stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
-          planeFilter={activePlane}
+          planeFilter={activePlane}  slicePlane={slicePlane}
+          slicePos={slicePos}
+          useSlice={useSlice}
           />
         )}
 
           {showEquipotentialSurface && (
-            <EquipotentialSurface objects={sceneObjects} targetValue={equipotentialTarget} /> 
+            <EquipotentialSurface objects={sceneObjects} targetValue={equipotentialTarget} 
+                slicePlane={slicePlane}
+                slicePos={slicePos}
+                useSlice={useSlice}
+            /> 
           )}
         </Canvas>
 
