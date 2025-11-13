@@ -13,6 +13,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
         const MAX_INF_WIRES = 6;
         const MAX_FIN_PLANES = 6;
         const MAX_FIN_WIRES = 6;
+        const MAX_CHARGED_SPHERES = 15;
 
         return new THREE.ShaderMaterial({
             uniforms: {
@@ -42,6 +43,11 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 wirePositions: { value: new Array(MAX_INF_WIRES).fill(new THREE.Vector3()) },
                 wireDirections: { value: new Array(MAX_INF_WIRES).fill(new THREE.Vector3()) },
                 wireChargeDensity: { value: new Float32Array(MAX_INF_WIRES).fill(0) },
+                chargedSphereCount: {value: 0},
+                chargedSpherePositions: { value: new Array(MAX_CHARGED_SPHERES).fill(new THREE.Vector3()) },
+                chargedSphereRadius: { value: new Float32Array(MAX_CHARGED_SPHERES).fill(0) },
+                chargedSphereChargeDensity: { value: new Float32Array(MAX_CHARGED_SPHERES).fill(0) },
+                chargedSphereHollow: {value: new Int8Array(MAX_CHARGED_SPHERES).fill(0)},
                 targetVal: { value: 0.0 },
                 transparency: { value: 0.6},
                 epsilon_0 : { value: EPSILON_0 },
@@ -71,6 +77,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
         let finPlaneIdx = 0;
         let wireIdx = 0;
         let finWireIdx = 0;
+        let chargedSphereIdx = 0;
 
         objects.forEach((obj) => {
             if (obj.type === 'charge') {
@@ -99,6 +106,12 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 material.uniforms.finWireChargeDensity.value[finWireIdx] = obj.charge_density;
                 material.uniforms.finWireHeights.value[finWireIdx] = obj.height;
                 finWireIdx++;
+            } else if (obj.type === 'chargedSphere'){
+                material.uniforms.chargedSpherePositions.value[chargedSphereIdx] = new THREE.Vector3(...obj.position);
+                material.uniforms.chargedSphereRadius.value[chargedSphereIdx] = obj.radius;
+                material.uniforms.chargedSphereChargeDensity.value[chargedSphereIdx] = obj.charge_density;
+                material.uniforms.chargedSphereHollow[chargedSphereIdx] = obj.isHollow ? 1 : 0;
+                chargedSphereIdx ++;
             }
         });
 
@@ -107,6 +120,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
         material.uniforms.finPlaneCount.value = finPlaneIdx;
         material.uniforms.wireCount.value = wireIdx;
         material.uniforms.finWireCount.value = finWireIdx;
+        material.uniforms.chargedSphereCount.value = chargedSphereIdx;
         material.uniforms.targetVal.value = targetValue;
         material.uniforms.transparency.value = transparency;
         material.uniforms.useSlice.value = useSlice;

@@ -6,7 +6,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane} from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere} from './components/models'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid } from './components/models/surfaces'
@@ -133,7 +133,7 @@ function LoadingOverlay() {
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
     // slicing planes stuff
-    const [slicePlane, setSlicePlane] = useState('xz') // 'xy', 'yz', 'xz'
+    const [slicePlane, setSlicePlane] = useState('yz') // 'xy', 'yz', 'xz'
     const [slicePos, setSlicePos] = useState(-0.1)
     const [useSlice, setUseSlice] = useState(false)
 
@@ -300,6 +300,7 @@ function LoadingOverlay() {
                 case 'charge': ObjectComponent = Charge; break
                 case 'wire': ObjectComponent = Wire; break
                 case 'plane': ObjectComponent = Plane; break
+                case 'chargedSphere': ObjectComponent = ChargedSphere; break
                 default: return null;
               } 
             }

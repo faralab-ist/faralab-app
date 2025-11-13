@@ -35,7 +35,6 @@ export default function FieldArrows({
     slicePos,
     useSlice
 }) {
-    
     const vectorsUnfiltered = useMemo( 
         () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
         [objects, showOnlyPlane, showOnlyGaussianField, planeFilter]
