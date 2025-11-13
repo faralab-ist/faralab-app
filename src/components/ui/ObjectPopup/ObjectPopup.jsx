@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { CuboidInfo, CylinderInfo, SphereInfo, ChargeInfo, WireInfo, PlaneInfo } from "./ObjectPopups";
+import { CuboidInfo, CylinderInfo, SphereInfo, ChargeInfo, WireInfo, PlaneInfo, ChargedSphereInfo} from "./ObjectPopups";
 import "./ObjectPopup.css";
 
 export default function ObjectPopup({
@@ -95,6 +95,7 @@ export default function ObjectPopup({
     case 'charge':   SpecificPanel = <ChargeInfo object={selectedObject} updateObject={updateObject} />; break
     case 'wire':     SpecificPanel = <WireInfo object={selectedObject} updateObject={updateObject} />; break
     case 'plane':    SpecificPanel = <PlaneInfo object={selectedObject} updateObject={updateObject} />; break
+    case 'chargedSphere':    SpecificPanel = <ChargedSphereInfo object={selectedObject} updateObject={updateObject} />; break
     case 'surface':
       switch (selectedObject.surfaceType) {
         case 'sphere':  SpecificPanel = <SphereInfo object={selectedObject} updateObject={updateObject} />; break

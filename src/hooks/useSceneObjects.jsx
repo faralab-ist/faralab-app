@@ -46,6 +46,19 @@ const objectFactories = {
     material: 'Dielectric',
     createdAt: Date.now(),
   }),
+  chargedSphere: (index) => ({
+    id: `tmp-${index}`,
+    type: 'chargedSphere',
+    name: `Charged Sphere ${index}`,
+    position: [0, 0, 0],
+    charge_density: 5,
+    charge: 1, //sera que e preciso?
+    charges: [],
+    radius: 1,
+    isHollow: false,
+    material: 'Dielectric',
+    createdAt: Date.now(),
+  }),
   sphere: (index) => ({
     id: `tmp-${index}`,
     type: 'surface',
@@ -93,7 +106,7 @@ const objectFactories = {
 export default function useSceneObjects(initial = []) {
   const [sceneObjects, setSceneObjects] = useState(initial)
   const [counters, setCounters] = useState({
-    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0,
+    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0
   })
 
   const addObject = useCallback((type, overrides = {}) => {
@@ -139,6 +152,7 @@ export default function useSceneObjects(initial = []) {
     charge: sceneObjects.filter(o => o.type === 'charge').length,
     wire: sceneObjects.filter(o => o.type === 'wire').length,
     plane: sceneObjects.filter(o => o.type === 'plane').length,
+    chargedSphere: sceneObjects.filter(o => o.type === 'chargedSphere').length,
     surface: sceneObjects.filter(o => o.type === 'surface').length,
     total: sceneObjects.length,
   }), [sceneObjects])
