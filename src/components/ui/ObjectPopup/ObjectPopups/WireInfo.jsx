@@ -1,12 +1,40 @@
-export default function WireInfo({ object, updateObject }) {
-  const handleDensityChange = (e) => {
-    const value = e.target.value
-    // If empty string, pass 0 to object but keep input empty
-    updateObject(object.id, { 
-      charge_density: value === '' ? 0 : parseFloat(value) 
-    })
-  }
+import { useState } from 'react'
 
+
+export default function WireInfo({ object, updateObject }) {
+
+   const MAX_DENSITY = 5
+    const MIN_DENSITY = -5
+  
+    const [inputValue, setInputValue] = useState(
+      object.charge_density === 0 ? '' : String(object.charge_density ?? '')
+    )
+    const [error, setError] = useState('')
+  
+    const handleDensityChange = (e) => {
+      const value = e.target.value
+      setInputValue(value)
+  
+      if (value === '') {
+        updateObject(object.id, { charge_density: 0 })
+        setError('')
+        return
+      }
+  
+      const num = parseFloat(value)
+      if (!Number.isFinite(num)) {
+        setError('Invalid number.')
+        return
+      }
+  
+      if (num > MAX_DENSITY || num < MIN_DENSITY) {
+        setError(`Please keep the density between ${MIN_DENSITY} and ${MAX_DENSITY}.`)
+        return
+      }
+  
+      setError('')
+      updateObject(object.id, { charge_density: num })
+    }
   const handleTypeChange = (e) => {
     const value = e.target.value
     updateObject(object.id, { material: value }) // muda o campo p.ex. "material"
@@ -22,15 +50,16 @@ export default function WireInfo({ object, updateObject }) {
       <label>
         Linear Charge Density λ:
         <input
-          type="number"
-          // Show empty string if value is 0, otherwise show the value
-          value={object.charge_density === 0 ? '' : object.charge_density}
+         type="number"
+          value={inputValue}
           step={0.1}
-          min={-10}
-          max={10}
+          min={MIN_DENSITY}
+          max={MAX_DENSITY}
           onChange={handleDensityChange}
+          className={`popup-number-input ${error ? 'has-error' : ''}`}
         />
       </label>
+      {error && <div className="input-error">{error}</div>}
 
       <div className="checkbox-row">
         <label htmlFor="infinite">
