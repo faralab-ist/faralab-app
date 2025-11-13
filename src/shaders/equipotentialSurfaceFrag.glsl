@@ -168,7 +168,7 @@ float potential(vec3 pos) {
         vec3 rPerp = rVec - dot(rVec, direction) * direction;
         float distance = length(rPerp);
         if (distance < 0.0001) continue;
-        result += (wireChargeDensity[i] / (2.0 * PI * e0)) * log(distance);
+        result += (-wireChargeDensity[i] / (2.0 * PI * e0)) * log(distance);
     }
 
     for (int i = 0; i < finPlaneCount; i++) {
