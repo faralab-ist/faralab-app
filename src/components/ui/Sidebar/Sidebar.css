@@ -31,7 +31,7 @@
 }
 
 .sidebar-wrap.open .toggle-tab {
-  right: 400px; /* igual à largura do painel */
+  right: 325px; /* igual à largura do painel */
 }
 
 /* Painel lateral fixo */
@@ -39,7 +39,7 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 400px;
+  width: 325px;
   height: 100vh;
   background: #101010;
   color: #eaeaea;
@@ -222,6 +222,19 @@
   transform: translateY(-2px);
 }
 
+/* Highlight row when scene object is hovered */
+.object-row.hovered {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border-color: rgba(255,255,255,0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.32);
+}
+
+.object-row.hovered .name {
+  color: #ffffff;
+  font-weight: 600;
+}
+
 /* Subtle active press effect */
 .object-row:active {
   transform: translateY(0);
@@ -239,6 +252,7 @@
 .object-row:focus-visible .pill {
   filter: brightness(1.05);
   border-color: rgba(255,255,255,0.04);
+
 }
 
 /* Keep expand button visuals independent and usable */
@@ -262,36 +276,100 @@
   border: 1px solid #222;
   border-radius: 6px;
   background: #181818;
-  padding: 8px 12px;
-  font-size: 13px;
-  line-height: 1.5;
+  padding: 8px 12px;        /* tighter */
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 270px;        /* narrower */
+  width: 100%;
 }
 
 .details-grid {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .detail-row {
   display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #222;
+  flex-wrap: wrap;           /* allow inputs to wrap */
+  align-items: center;
+  gap: 6px;
   padding: 2px 0;
+  border-bottom: 1px solid #222;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
 }
 
 .detail-key {
+  flex: 0 0 auto;
   color: #999;
   text-transform: capitalize;
 }
 
 .detail-value {
+  flex: 1 1 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: #eee;
   font-family: monospace;
+  font-size: 11px;
+  overflow: hidden;
 }
 
-.muted {
-  opacity: 0.6;
+.object-details input[type="number"],
+.object-details input[type="text"],
+.object-details select {
+  flex: 0 0 auto;
+  width: 70px;               /* fixed compact width */
+  max-width: 100%;
+  padding: 2px 6px;
+  font-size: 11px;
+  background: #141414;
+  color: #e6eef7;
+  border: 1px solid #2b2b2b;
+  border-radius: 4px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.object-details input[type="number"]:focus,
+.object-details input[type="text"]:focus,
+.object-details select:focus {
+  border-color: #3e5a80;
+}
+
+.object-details .wide-input {
+  width: 100%;               /* use this class for any full-width field */
+}
+
+.object-details .input-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+
+.object-details .input-group > label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  color: #aaa;
+}
+
+.object-details .error-text {
+  width: 100%;
+  color: #ff5c5c;
+  font-size: 10px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.object-row.hovered .object-details {
+  max-width: 220px;
 }
 
 /* acrescentos para modo minimizado */
@@ -352,6 +430,31 @@
   font-size: 12px;
 }
 
+/* Minibar pill base */
+.minibar-pill {
+  transition: background .12s, border-color .12s, transform .08s, box-shadow .15s, color .08s;
+}
+
+/* Hover highlight in minimized mode */
+.sidebar.minimized .minibar-pill:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
+  border-color: rgba(255,255,255,0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Scene-hovered object pill (same style) */
+.sidebar.minimized .minibar-pill.hovered {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border-color: rgba(255,255,255,0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  color: #fff;
+  font-weight: 700;
+}
+/* whole bunch of lines holy moly*/
 /* garante comportamento responsivo: se janela muito pequena, minimizar é estreito */
 @media (max-width: 520px) {
   .sidebar.minimized { width: 84px; }

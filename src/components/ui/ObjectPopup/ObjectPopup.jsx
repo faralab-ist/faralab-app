@@ -11,6 +11,7 @@ export default function ObjectPopup({
   setIsMinimized,
   setSelectedId,
   sidebarOpen, // <- nova prop
+  isSidebarMinimized
 }) {
   if (!selectedObject) return null;
 
@@ -103,10 +104,10 @@ export default function ObjectPopup({
       break
     default: SpecificPanel = <div>Unknown Type</div>
   }
-
-  const sidebarWidth = 320; // px
-  const sidebarExtraOffset = 70; // px — ajuste à vontade
-  const totalSidebarOffset = sidebarOpen ? sidebarWidth + sidebarExtraOffset : 0;
+  console.log(isSidebarMinimized)
+  const sidebarWidth = isSidebarMinimized ? 80 : 325
+  const sidebarExtraOffset = 10; // px — 
+  const totalSidebarOffset = sidebarOpen || isSidebarMinimized ? sidebarWidth + sidebarExtraOffset : 0;
 
   const style = screenPosition
     ? {
@@ -117,7 +118,7 @@ export default function ObjectPopup({
       }
     : {
         position: "absolute",
-        right: sidebarOpen ? `calc(20px + ${totalSidebarOffset}px)` : "20px",
+        right: sidebarOpen || isSidebarMinimized ? `calc(20px + ${totalSidebarOffset}px)` : "20px",
         top: "20px"
       };
 

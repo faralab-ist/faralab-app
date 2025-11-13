@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect} from "react";
 import "./Sidebar.css";
 
 /**
@@ -10,9 +10,14 @@ import "./Sidebar.css";
  *
  * Chama updateObject(id, patch) e removeObject(id).
  */
-export default function ObjectList({ items = [], updateObject, removeObject, expandId = null }) {
+export default function ObjectList({ 
+  items = [], 
+  updateObject, 
+  removeObject, 
+  expandId = null,
+  hoveredId
+}) {
   const [expanded, setExpanded] = useState({});
-
   const toggle = (id) => setExpanded((s) => ({ ...s, [id]: !s[id] }));
 
   useEffect(() => {
@@ -106,7 +111,7 @@ export default function ObjectList({ items = [], updateObject, removeObject, exp
       {items.map((obj) => (
         <li key={obj.id} className="object-row-wrapper" data-objid={obj.id}>
           <div
-            className="object-row"
+            className={`object-row ${hoveredId === obj.id ? 'hovered' : ''}`}
             role="button"
             tabIndex={0}
             onClick={() => toggle(obj.id)}

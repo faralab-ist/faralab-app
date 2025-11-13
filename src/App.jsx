@@ -6,10 +6,10 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane} from './components/models'
+  import { Charge, Wire, Plane } from './components/models'
 
   // Surface components
-  import { Sphere, Cylinder, Cuboid } from './components/models/surfaces'
+  import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
 
   // UI components
   import CreateButtons from './components/ui/CreateButtons'
@@ -19,12 +19,13 @@ import React, { useState, useEffect, useMemo } from 'react'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
 
   // Hooks
-  import useSceneObjects from './hooks/useSceneObjects' 
-  import FieldArrows from './hooks/useFieldArrows.jsx'
-  import useCameraPreset from './hooks/useCameraPreset.jsx'
-  import EquipotentialSurface from './components/models/surfaces/EquipotentialSurface.jsx'
-  import FieldLines from './hooks/useFieldLines.jsx'
-  import useApplyPreset from './hooks/useApplyPreset'
+  import {useSceneObjects, 
+    FieldArrows,
+    useCameraPreset,  
+    FieldLines, useApplyPreset, 
+    useSceneHover 
+} from "./hooks"
+
 
 // 🔹 Overlay que carrega o teu loading.html original
 function LoadingOverlay() {
@@ -104,6 +105,15 @@ function LoadingOverlay() {
   return <primitive object={axes} />
 }
 
+  // small bridge used inside <Canvas /> to forward hover -> App state
+  function SceneHoverBridge({ onChange }) {
+    // useSceneHover runs inside the fiber renderer (uses useThree)
+    useSceneHover((id) => {
+      onChange?.(id ?? null)
+    })
+    return null
+  }
+
   function App() {
     const { 
       sceneObjects,
@@ -126,12 +136,17 @@ function LoadingOverlay() {
     const [equipotentialTarget, setEquipotentialTarget] = useState(5.0) 
     const [dragOwnerId, setDragOwnerId] = useState(null)
     const [isPanelMinimized, setIsPanelMinimized] = useState(false)
+    const [isSidebarMinimized, setIsSidebarMinimized] = useState(false)
+
     const [creativeMode, setCreativeMode] = useState(false)  // stays here (single source)
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
     const [lineMin, setLineMin] = useState(0.1)         //LINE SETTINGS NEW
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
+    
+    const [hoveredId, setHoveredId] = useState(null)
+    
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -243,8 +258,8 @@ function LoadingOverlay() {
           creativeMode={creativeMode}
           setCreativeMode={setCreativeMode}
           sidebarOpen={sidebarOpen}
+          sidebarMinimized={isSidebarMinimized}
           onApplyPreset={applyPreset}
-
         />
         
         <ObjectPopup
@@ -256,19 +271,23 @@ function LoadingOverlay() {
           setIsMinimized={setIsPanelMinimized}
           setSelectedId={setSelectedId}
           sidebarOpen={sidebarOpen} 
+          isSidebarMinimized={isSidebarMinimized}
         />
-      
+        
         <Sidebar
           objects={sceneObjects}
           counts={counts}
           isOpen={sidebarOpen}
           setIsOpen={setSidebarOpen}
+          onMinimizedChange={setIsSidebarMinimized}
           updateObject={updateObject}     // <- ensure these are passed
           removeObject={removeObject}     // <- <- 
+          hoveredId={hoveredId}
         />
 
         <Canvas onPointerMissed={handleBackgroundClick}>
           <CameraFnsMount onReady={setCamFns} />               {/* inside Canvas */}
+          <SceneHoverBridge onChange={setHoveredId} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[2, 2, 5]} />
           <OrbitControls enabled={!isDragging} />
@@ -320,13 +339,13 @@ function LoadingOverlay() {
 
         {showField && (
           <FieldArrows
-  key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
-  objects={sceneObjects}
-  showOnlyGaussianField={showOnlyGaussianField}
-  minThreshold={vectorMinTsl}
-  scaleMultiplier={vectorScale}
-  planeFilter={activePlane}
-/>
+        key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
+        objects={sceneObjects}
+        showOnlyGaussianField={showOnlyGaussianField}
+        minThreshold={vectorMinTsl}
+        scaleMultiplier={vectorScale}
+        planeFilter={activePlane}
+        />
         )}
 
         {showLines && (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ObjectList from "./ObjectList";
 import "./Sidebar.css";
 
@@ -10,11 +10,25 @@ import "./Sidebar.css";
  *
  * Clicar numa pill ou na setinha abre o painel completo.
  */
-export default function Sidebar({ objects, counts = {}, isOpen, setIsOpen, updateObject, removeObject }) {
+export default function Sidebar({ 
+  objects, 
+  counts = {},
+  isOpen, 
+  setIsOpen, 
+  updateObject, 
+  removeObject, 
+  onMinimizedChange, 
+  hoveredId,
+   }) {
   const [expandId, setExpandId] = useState(null);
 
   const hasObjects = (counts?.total ?? 0) > 0;
   const minimized = !isOpen && hasObjects;
+
+  // notify parent / other logic whenever minimized changes
+  useEffect(() => {
+    if (typeof onMinimizedChange === "function") onMinimizedChange(minimized);
+  }, [minimized, onMinimizedChange]);
 
   const togglePanel = () => setIsOpen((p) => !p);
   const openPanel = (idToOpen = null) => {
@@ -78,8 +92,7 @@ export default function Sidebar({ objects, counts = {}, isOpen, setIsOpen, updat
               minibarItems.map((item) => (
                 <button
                   key={item.id}
-                  // usa subtype normalizado quando disponível
-                  className={`pill ${item.subtype || item.type} minibar-pill`}
+                  className={`pill ${item.subtype || item.type} minibar-pill ${hoveredId === item.id ? 'hovered' : ''}`}
                   onClick={() => openPanel(item.id)}
                   title={item.name || item.label}
                 >
@@ -108,7 +121,14 @@ export default function Sidebar({ objects, counts = {}, isOpen, setIsOpen, updat
               </div>
             </header>
 
-            <ObjectList items={objects} updateObject={updateObject} removeObject={removeObject} expandId={expandId} />
+            <ObjectList
+              items={objects}
+              updateObject={updateObject}
+              removeObject={removeObject}
+              expandId={expandId}
+              minimized={minimized}           /* pass to child if needed */
+              hoveredId ={hoveredId}
+            />
           </div>
         )}
       </div>
