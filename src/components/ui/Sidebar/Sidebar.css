@@ -272,7 +272,7 @@
 
 /* Detalhes expandidos */
 .object-details {
-  margin-top: 4px;
+  margin-top: -5px;
   border: 1px solid #222;
   border-radius: 6px;
   background: #181818;
@@ -305,7 +305,6 @@
 .detail-key {
   flex: 0 0 auto;
   color: #999;
-  text-transform: capitalize;
 }
 
 .detail-value {
@@ -367,6 +366,10 @@
   font-weight: 600;
   margin-top: 2px;
 }
+
+.object-details .inline-input-wrapper { display: flex; flex-direction: column; gap: 2px; }
+.object-details .inline-input-wrapper input.has-error { border: 1px solid #c23535; }
+.object-details .input-error { color: #ff5c5c; font-size: 10px; line-height: 1.1; font-weight: 600; }
 
 .object-row.hovered .object-details {
   max-width: 220px;
