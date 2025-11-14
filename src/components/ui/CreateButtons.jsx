@@ -82,9 +82,16 @@ export default function CreateButtons({
         ref={presetBtnRef}
         className="presets-btn"
         onClick={() => toggleGroup('presets')}
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          e.currentTarget.style.setProperty('--mouse-x', `${x}px`);
+          e.currentTarget.style.setProperty('--mouse-y', `${y}px`);
+        }}
         aria-expanded={openGroup === 'presets'}
       >
-        Presets
+        PRESETS
       </button>
 
       {/* Presets dropdown (não desloca) */}

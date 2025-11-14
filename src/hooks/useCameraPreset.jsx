@@ -6,12 +6,15 @@ export default function useCameraPreset() {
   const { camera } = useThree()
 
   // Instant snap
-  const setCameraPreset = useCallback(({ position, target, fov }) => {
+  const setCameraPreset = useCallback(({ position, target, fov, up }) => {
     if (position) {
       camera.position.set(position[0], position[1], position[2])
     }
     if (target) {
       camera.lookAt(target[0], target[1], target[2])
+    }
+    if (up) {
+      camera.up.set(up[0], up[1], up[2])
     }
     if (fov) {
       camera.fov = fov
@@ -20,12 +23,18 @@ export default function useCameraPreset() {
   }, [camera])
 
   // Simple linear animation (optional)
-  const animateCameraPreset = useCallback(({ position, target, fov, duration = 0.6 }) => {
+  const animateCameraPreset = useCallback(({ position, target, fov, up, duration = 0.6 }) => {
     const startPos = camera.position.clone()
     const endPos = position ? new THREE.Vector3(...position) : startPos
     const startFov = camera.fov
     const endFov = fov ?? startFov
     const startTime = performance.now()
+
+    // Disable controls during animation
+    if (camera.controls) camera.controls.enabled = false
+
+    // Set up vector immediately if provided
+    if (up) camera.up.set(up[0], up[1], up[2])
 
     function step(now) {
       const t = Math.min(1, (now - startTime) / (duration * 1000))
@@ -35,7 +44,12 @@ export default function useCameraPreset() {
         camera.updateProjectionMatrix()
       }
       if (target) camera.lookAt(target[0], target[1], target[2])
-      if (t < 1) requestAnimationFrame(step)
+      if (t >= 1) {
+        // Re-enable controls after animation
+        if (camera.controls) camera.controls.enabled = true
+      } else {
+        requestAnimationFrame(step)
+      }
     }
     requestAnimationFrame(step)
   }, [camera])

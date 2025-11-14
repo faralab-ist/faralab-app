@@ -27,58 +27,51 @@ import React, { useState, useEffect, useMemo } from 'react'
 } from "./hooks"
 
 
-// 🔹 Overlay que carrega o teu loading.html original
+// 🔹 Mensagem clean ao invés do overlay completo
 function LoadingOverlay() {
-  const [opacity, setOpacity] = useState(1)
   const [hidden, setHidden] = useState(false)
-  const [finalFade, setFinalFade] = useState(false)
 
-  // 1️⃣ Fica transparente gradualmente depois de 1s
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setOpacity(0.3), 1000)
-    return () => clearTimeout(fadeTimer)
+    const timer = setTimeout(() => setHidden(true), 3000)
+    return () => clearTimeout(timer)
   }, [])
 
-  // 2️⃣ Ao clicar depois do fade → some com fade-out suave
-  useEffect(() => {
-    const handleClick = () => {
-      if (opacity <= 0.3) {
-        setFinalFade(true)
-        setTimeout(() => setHidden(true), 2000) // tempo do fade final
-      }
-    }
-    window.addEventListener('click', handleClick)
-    return () => window.removeEventListener('click', handleClick)
-  }, [opacity])
-
   if (hidden) return null
-
-  const totalOpacity = finalFade ? 0 : opacity
 
   return (
     <div
       style={{
         position: 'fixed',
-        inset: 0,
-        background: 'transparent',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
         zIndex: 9999,
-        pointerEvents: 'auto',
-        transition: 'opacity 1s ease-in-out',
-        opacity: totalOpacity,
+        textAlign: 'center',
+        color: '#ffffff',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        animation: 'fadeOut 3s ease-in-out forwards',
+        pointerEvents: 'none',
       }}
     >
-      <iframe
-        src="loading.html"
-        title="Loading"
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          pointerEvents: 'none', // deixa cliques passarem
-          transition: 'opacity 3s ease-in-out', // anima mais lento o fade inicial
-          opacity: totalOpacity,
-        }}
-      />
+      <style>{`
+        @keyframes fadeOut {
+          0% { opacity: 1; }
+          70% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
+      <div style={{ fontSize: '0.9em', fontWeight: 400, marginBottom: '12px', lineHeight: 1.6 }}>
+        This is a pre-alpha version made at IST
+      </div>
+      <div style={{ fontSize: '0.85em', fontWeight: 300 }}>
+        Send us an e-mail at:{' '}
+        <a 
+          href="mailto:faralab@tecnico.ulisboa.pt" 
+          style={{ color: '#0ea5e9', textDecoration: 'none' }}
+        >
+          faralab@tecnico.ulisboa.pt
+        </a>
+      </div>
     </div>
   )
 }
@@ -188,14 +181,7 @@ function LoadingOverlay() {
       // Toggle: se clicar no mesmo plano, desativa
       if (activePlane === plane) {
         setActivePlane(null)
-        // Volta para visão padrão
-        if (camFns?.animateCameraPreset) {
-          camFns.animateCameraPreset({
-            position: [15, 15, 15],
-            target: [0, 0, 0],
-            duration: 0.8
-          })
-        }
+        // Não move a câmera, apenas desativa o filtro
       } else {
         setActivePlane(plane)
         
@@ -207,6 +193,7 @@ function LoadingOverlay() {
               cameraConfig = {
                 position: [0, 0, 8],
                 target: [0, 0, 0],
+                up: [0, 1, 0],
                 duration: 0.8
               }
               break
@@ -214,6 +201,7 @@ function LoadingOverlay() {
               cameraConfig = {
                 position: [8, 0, 0],
                 target: [0, 0, 0],
+                up: [0, 1, 0],
                 duration: 0.8
               }
               break
@@ -221,6 +209,7 @@ function LoadingOverlay() {
               cameraConfig = {
                 position: [0, 8, 0],
                 target: [0, 0, 0],
+                up: [0, 0, 1],
                 duration: 0.8
               }
               break
