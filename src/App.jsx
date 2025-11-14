@@ -178,6 +178,7 @@ function LoadingOverlay() {
           camFns.animateCameraPreset({
             position: [15, 15, 15],
             target: [0, 0, 0],
+            up: [0, 1, 0],
             duration: 0.8
           })
         }
@@ -191,22 +192,25 @@ function LoadingOverlay() {
             case 'xy': // Vista de cima (olhando para baixo no eixo Z)
               cameraConfig = {
                 position: [0, 0, 8],
-                target: [0, 0, 0],
-                duration: 0.8
+                  target: [0, 0, 0],
+                  up: [0, 1, 0],
+                  duration: 0.8
               }
               break
             case 'yz': // Vista lateral (olhando do eixo X)
               cameraConfig = {
                 position: [8, 0, 0],
-                target: [0, 0, 0],
-                duration: 0.8
+                  target: [0, 0, 0],
+                  up: [0, 1, 0],
+                  duration: 0.8
               }
               break
             case 'xz': // Vista frontal (olhando do eixo Y)
               cameraConfig = {
                 position: [0, 8, 0],
-                target: [0, 0, 0],
-                duration: 0.8
+                  target: [0, 0, 0],
+                  up: [0, 0, 1],
+                  duration: 0.8
               }
               break
           }
