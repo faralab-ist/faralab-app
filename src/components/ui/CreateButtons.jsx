@@ -11,6 +11,7 @@ export default function CreateButtons({
   creativeMode,
   setCreativeMode,
   sidebarOpen = false,
+  sidebarMinimized = false,
   onApplyPreset,
   // New props for export/import
   camera,
@@ -90,9 +91,9 @@ export default function CreateButtons({
   }, [openGroup])
 
   // OFFSET — exatamente a largura da sidebar (não exagerar)
-  const sidebarWidth = 320
-  const sidebarExtraOffset = 70 // deixar 0 para deslocar exactamente a sidebar; ajustar se quiser pequeno gap
-  const totalSidebarOffset = sidebarOpen ? sidebarWidth + sidebarExtraOffset : 0
+  const sidebarWidth = sidebarMinimized ? 80 : 325
+  const sidebarExtraOffset = 0 // deixar 0 para deslocar exactamente a sidebar; ajustar se quiser pequeno gap
+  const totalSidebarOffset = sidebarOpen || sidebarMinimized ? sidebarWidth + sidebarExtraOffset : 0
 
   const [appliedOffset, setAppliedOffset] = useState(0)
 

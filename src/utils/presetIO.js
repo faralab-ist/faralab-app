@@ -34,11 +34,6 @@ export function exportPreset({ sceneObjects, camera, settings, name = 'custom-pr
         position: obj.position || [0, 0, 0]
       }
 
-      // Add direction if it exists (for wires, planes, charged spheres)
-      if (obj.direction) {
-        baseProps.direction = obj.direction
-      }
-
       // Map object types to props
       switch (obj.type) {
         case 'charge':
@@ -52,16 +47,36 @@ export function exportPreset({ sceneObjects, camera, settings, name = 'custom-pr
           }
         
         case 'wire':
+          // Extract direction from quaternion if available
+          let wireDirection = obj.direction || [0, 0, 1]
+          if (obj.quaternion && obj.quaternion.length === 4) {
+            // Derive direction from quaternion
+            const q = { x: obj.quaternion[0], y: obj.quaternion[1], z: obj.quaternion[2], w: obj.quaternion[3] }
+            const dir = { x: 0, y: 1, z: 0 } // cylinder local axis
+            // Apply quaternion rotation: v' = q * v * q^-1
+            const ix = q.w * dir.x + q.y * dir.z - q.z * dir.y
+            const iy = q.w * dir.y + q.z * dir.x - q.x * dir.z
+            const iz = q.w * dir.z + q.x * dir.y - q.y * dir.x
+            const iw = -q.x * dir.x - q.y * dir.y - q.z * dir.z
+            wireDirection = [
+              ix * q.w + iw * -q.x + iy * -q.z - iz * -q.y,
+              iy * q.w + iw * -q.y + iz * -q.x - ix * -q.z,
+              iz * q.w + iw * -q.z + ix * -q.y - iy * -q.x
+            ]
+          }
+          
           return {
             type: 'wire',
             props: {
               ...baseProps,
-              charge_density: obj.charge_density ?? 0.1,
-              charge: obj.charge,
-              infinite: obj.infinite ?? true,
-              length: obj.length ?? 5,
+              direction: wireDirection,
+              quaternion: obj.quaternion, // Save full rotation
+              charge_density: obj.charge_density ?? 1,
+              charge: obj.charge ?? 1,
+              infinite: obj.infinite ?? false,
+              height: obj.height ?? 1,
               radius: obj.radius ?? 0.03,
-              material: obj.material
+              material: obj.material || 'Dielectric'
             }
           }
         
@@ -70,11 +85,13 @@ export function exportPreset({ sceneObjects, camera, settings, name = 'custom-pr
             type: 'plane',
             props: {
               ...baseProps,
-              charge_density: obj.charge_density ?? 0.1,
-              charge: obj.charge,
-              infinite: obj.infinite ?? true,
-              dimensions: obj.dimensions || [10, 10, 0.1],
-              material: obj.material
+              direction: obj.direction || [0, 1, 0], // Keep for backwards compatibility
+              quaternion: obj.quaternion, // Save full rotation
+              charge_density: obj.charge_density ?? 5,
+              charge: obj.charge ?? 1,
+              infinite: obj.infinite ?? false,
+              dimensions: obj.dimensions || [4, 4],
+              material: obj.material || 'Dielectric'
             }
           }
         
@@ -83,11 +100,13 @@ export function exportPreset({ sceneObjects, camera, settings, name = 'custom-pr
             type: 'chargedSphere',
             props: {
               ...baseProps,
+              direction: obj.direction || [0, 1, 0], // Keep for backwards compatibility
+              quaternion: obj.quaternion, // Save full rotation
               charge: obj.charge ?? 1,
-              charge_density: obj.charge_density,
+              charge_density: obj.charge_density ?? 5,
               radius: obj.radius ?? 1,
               isHollow: obj.isHollow ?? false,
-              material: obj.material
+              material: obj.material || 'Dielectric'
             }
           }
         
@@ -99,16 +118,18 @@ export function exportPreset({ sceneObjects, camera, settings, name = 'custom-pr
               ...baseProps,
               charge_density: obj.charge_density ?? 0,
               opacity: obj.opacity ?? 0.5,
+              deformable: obj.deformable ?? true,
+              fixed: obj.fixed ?? true,
               // Surface-specific props
-              ...(obj.surfaceType === 'sphere' && { radius: obj.radius ?? 1 }),
+              ...(obj.surfaceType === 'sphere' && { radius: obj.radius ?? 2 }),
               ...(obj.surfaceType === 'cylinder' && { 
-                radius: obj.radius ?? 1, 
-                height: obj.height ?? 2 
+                radius: obj.radius ?? 2, 
+                height: obj.height ?? 6 
               }),
               ...(obj.surfaceType === 'cuboid' && { 
                 width: obj.width ?? 2, 
                 height: obj.height ?? 2, 
-                depth: obj.depth ?? 2 
+                depth: obj.depth ?? 5 
               })
             }
           }

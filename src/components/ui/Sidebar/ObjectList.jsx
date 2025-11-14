@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import "./Sidebar.css";
 
 /**
@@ -10,10 +10,26 @@ import "./Sidebar.css";
  *
  * Chama updateObject(id, patch) e removeObject(id).
  */
-export default function ObjectList({ items = [], updateObject, removeObject }) {
+export default function ObjectList({ 
+  items = [], 
+  updateObject, 
+  removeObject, 
+  expandId = null,
+  hoveredId
+}) {
   const [expanded, setExpanded] = useState({});
-
   const toggle = (id) => setExpanded((s) => ({ ...s, [id]: !s[id] }));
+
+  useEffect(() => {
+    if (!expandId) return;
+    // expande o item solicitado e faz scroll para ele
+    setExpanded((s) => ({ ...s, [expandId]: true }));
+    // esperar um tick para garantir o DOM existe
+    setTimeout(() => {
+      const el = document.querySelector(`[data-objid="${expandId}"]`);
+      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 60);
+  }, [expandId]);
 
   if (!items?.length) {
     return (
@@ -28,76 +44,56 @@ export default function ObjectList({ items = [], updateObject, removeObject }) {
     if (window.confirm(`Remove "${name || id}" from scene?`)) removeObject(id);
   };
 
-  // Inline number input: usa input type="number" (native spinners inside)
-  // mantém comportamento de permitir "-" / vazio e atualiza em tempo real quando válido.
+  // Inline number input: estado local + commit só no blur/Enter
+  // Versão com estado local - mais segura para evitar re-renders
   function InlineNumberInput({ value, onCommit, step = 0.01, style }) {
-    const [str, setStr] = useState(value === undefined || value === null ? "" : String(value));
+    const [localValue, setLocalValue] = useState(value);
+    const [isFocused, setIsFocused] = useState(false);
 
+    // Só sincroniza quando NÃO está focado
     useEffect(() => {
-      setStr(value === undefined || value === null ? "" : String(value));
-    }, [value]);
-
-    const parseCandidate = (s) => {
-      const n = parseFloat(s);
-      return Number.isFinite(n) ? n : null;
-    };
+      if (!isFocused) {
+        setLocalValue(value);
+      }
+    }, [value, isFocused]);
 
     const handleChange = (e) => {
-      const s = e.target.value;
-      setStr(s);
-      const n = parseCandidate(s);
-      if (n !== null) onCommit(n);
+      setLocalValue(e.target.value);
     };
 
-    const commitOnFinish = () => {
-      if (str === "" || str === "-") {
-        onCommit(0);
-        setStr("0");
-        return;
+    const handleBlur = () => {
+      setIsFocused(false);
+      const numVal = localValue === '' ? 0 : parseFloat(localValue);
+      const finalVal = isNaN(numVal) ? 0 : numVal;
+      onCommit(finalVal);
+      setLocalValue(finalVal);
+    };
+
+    const handleFocus = () => {
+      setIsFocused(true);
+    };
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Enter') {
+        const numVal = localValue === '' ? 0 : parseFloat(localValue);
+        const finalVal = isNaN(numVal) ? 0 : numVal;
+        onCommit(finalVal);
+        setLocalValue(finalVal);
+        e.target.blur();
       }
-      const n = parseCandidate(str);
-      if (n !== null) onCommit(n);
-      else {
-        onCommit(0);
-        setStr("0");
-      }
-    };
-
-    const stepNum = Number(step) || 0.01;
-    const current = parseCandidate(str) ?? (Number.isFinite(value) ? value : 0);
-
-    const doInc = () => {
-      const next = Math.round((current + stepNum) * 100000) / 100000;
-      setStr(String(next));
-      onCommit(next);
-    };
-    const doDec = () => {
-      const next = Math.round((current - stepNum) * 100000) / 100000;
-      setStr(String(next));
-      onCommit(next);
     };
 
     return (
       <input
         type="number"
         inputMode="decimal"
-        value={str}
+        value={localValue}
         onChange={handleChange}
-        onBlur={commitOnFinish}
-        step={stepNum}
+        onBlur={handleBlur}
+        onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
+        step={step}
         style={{ width: 84, padding: "4px 8px", ...style }}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            commitOnFinish();
-            e.currentTarget.blur();
-          } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            doInc();
-          } else if (e.key === "ArrowDown") {
-            e.preventDefault();
-            doDec();
-          }
-        }}
       />
     );
   }
@@ -113,9 +109,9 @@ export default function ObjectList({ items = [], updateObject, removeObject }) {
   return (
     <ul className="object-list">
       {items.map((obj) => (
-        <li key={obj.id} className="object-row-wrapper">
+        <li key={obj.id} className="object-row-wrapper" data-objid={obj.id}>
           <div
-            className="object-row"
+            className={`object-row ${hoveredId === obj.id ? 'hovered' : ''}`}
             role="button"
             tabIndex={0}
             onClick={() => toggle(obj.id)}

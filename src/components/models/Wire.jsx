@@ -14,10 +14,12 @@ function Wire({
   setIsDragging,
   updatePosition,
   updateDirection,
+  updateObject,
   gridDimensions,
   height,
   radius,
-  direction = [1, 0, 0], // default horizontal (X axis)
+  direction = [0, 0, 1], // default along Z axis
+  quaternion, // full rotation state
   creativeMode
 }) {
   const isSelected = id === selectedId
@@ -37,16 +39,32 @@ function Wire({
     groupRef.current.position.set(position[0], position[1], position[2])
   }, [position])
 
-  // Apply rotation from saved direction (single source of truth)
+  // Initialize direction if not set
   useEffect(() => {
-    if (!groupRef.current || isDraggingRef.current || !direction) return
-    const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
-    if (dir.lengthSq() === 0) return
-    dir.normalize()
-    const from = new THREE.Vector3(0, 1, 0) // cylinder local axis
-    const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
-    groupRef.current.quaternion.copy(q)
-  }, [direction])
+    if (!direction || direction.every(d => d === 0)) {
+      // Set default direction along Z axis
+      updateDirection?.(id, [0, 0, 1])
+    }
+  }, []) // Run only once on mount
+
+  // Apply rotation from saved quaternion or direction
+  useLayoutEffect(() => {
+    if (!groupRef.current || isDraggingRef.current) return
+    
+    // Prefer quaternion if available (more accurate)
+    if (quaternion && quaternion.length === 4) {
+      const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+      groupRef.current.quaternion.copy(q)
+    } else if (direction) {
+      // Fallback to direction vector
+      const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
+      if (dir.lengthSq() === 0) return
+      dir.normalize()
+      const from = new THREE.Vector3(0, 1, 0) // cylinder local axis
+      const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
+      groupRef.current.quaternion.copy(q)
+    }
+  }, [direction, quaternion])
 
   return (
     <PivotControls
@@ -74,6 +92,8 @@ function Wire({
         // Cylinder points along +Y in local space, rotate that by the gizmo's rotation
         const dir = new THREE.Vector3(0, 1, 0).applyQuaternion(q).normalize()
         updateDirection(id, [dir.x, dir.y, dir.z])
+        // Also save the full quaternion for complete rotation
+        updateObject?.(id, { quaternion: [q.x, q.y, q.z, q.w] })
       }}
       onDragEnd={() => {
         isDraggingRef.current = false;
