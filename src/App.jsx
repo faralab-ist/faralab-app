@@ -6,7 +6,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane } from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere} from './components/models'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -147,6 +147,10 @@ function LoadingOverlay() {
     
     const [hoveredId, setHoveredId] = useState(null)
     
+    // slicing planes stuff
+    const [slicePlane, setSlicePlane] = useState('yz') // 'xy', 'yz', 'xz'
+    const [slicePos, setSlicePos] = useState(-0.1)
+    const [useSlice, setUseSlice] = useState(false)
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -285,7 +289,7 @@ function LoadingOverlay() {
           hoveredId={hoveredId}
         />
 
-        <Canvas onPointerMissed={handleBackgroundClick}>
+        <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
           <CameraFnsMount onReady={setCamFns} />               {/* inside Canvas */}
           <SceneHoverBridge onChange={setHoveredId} />
           <ambientLight intensity={0.5} />
@@ -315,6 +319,7 @@ function LoadingOverlay() {
                 case 'charge': ObjectComponent = Charge; break
                 case 'wire': ObjectComponent = Wire; break
                 case 'plane': ObjectComponent = Plane; break
+                case 'chargedSphere': ObjectComponent = ChargedSphere; break
                 default: return null;
               } 
             }
@@ -331,6 +336,9 @@ function LoadingOverlay() {
                 updateDirection={updateDirection}
                 updateObject={updateObject}
                 removeObject={removeObject}
+                slicePlane={slicePlane}
+                slicePos={slicePos}
+                useSlice={useSlice}
                 dragOwnerId={dragOwnerId}
                 gridDimensions={obj.type === 'wire' || obj.type === 'plane' ? [20, 20] : undefined}
               />
@@ -339,25 +347,35 @@ function LoadingOverlay() {
 
         {showField && (
           <FieldArrows
-        key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
-        objects={sceneObjects}
-        showOnlyGaussianField={showOnlyGaussianField}
-        minThreshold={vectorMinTsl}
-        scaleMultiplier={vectorScale}
-        planeFilter={activePlane}
-        />
+  key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
+  objects={sceneObjects}
+  showOnlyGaussianField={showOnlyGaussianField}
+  minThreshold={vectorMinTsl}
+  scaleMultiplier={vectorScale}
+  planeFilter={activePlane}
+  slicePlane={slicePlane}
+  slicePos={slicePos}
+  useSlice={useSlice}
+/>
         )}
 
         {showLines && (
-          <FieldLines key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id).join('-')}-${activePlane}`}   //LINE BUGFIX
+          <FieldLines key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id)
+                           .join('-')}-${activePlane}-${lineMin}-${lineNumber}`}   //LINE BUGFIX
           charges={sceneObjects}  
           stepsPerLine={30} stepSize={0.5} minStrength={lineMin} linesPerCharge={lineNumber}         //LINE SETTINGS NEW
-          planeFilter={activePlane}
+          planeFilter={activePlane}  slicePlane={slicePlane}
+          slicePos={slicePos}
+          useSlice={useSlice}
           />
         )}
 
           {showEquipotentialSurface && (
-            <EquipotentialSurface objects={sceneObjects} targetValue={equipotentialTarget} /> 
+            <EquipotentialSurface objects={sceneObjects} targetValue={equipotentialTarget} 
+                slicePlane={slicePlane}
+                slicePos={slicePos}
+                useSlice={useSlice}
+            /> 
           )}
         </Canvas>
 

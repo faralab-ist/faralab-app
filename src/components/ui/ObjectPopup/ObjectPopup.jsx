@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { CuboidInfo, CylinderInfo, SphereInfo, ChargeInfo, WireInfo, PlaneInfo } from "./ObjectPopups";
+import { CuboidInfo, CylinderInfo, SphereInfo, ChargeInfo, WireInfo, PlaneInfo, ChargedSphereInfo} from "./ObjectPopups";
 import "./ObjectPopup.css";
 
 export default function ObjectPopup({
@@ -38,7 +38,8 @@ export default function ObjectPopup({
   const commitAxis = (axis, raw) => {
     const idx = { x:0, y:1, z:2 }[axis]
     const newPos = [...(selectedObject.position || [0,0,0])]
-    newPos[idx] = toNum(raw)
+    // clamp to [min, max] for position inputs
+    newPos[idx] = Math.max(-10, Math.min(10, toNum(raw)))
     updateObject(selectedObject.id, { position: newPos })
   }
 
@@ -95,6 +96,7 @@ export default function ObjectPopup({
     case 'charge':   SpecificPanel = <ChargeInfo object={selectedObject} updateObject={updateObject} />; break
     case 'wire':     SpecificPanel = <WireInfo object={selectedObject} updateObject={updateObject} />; break
     case 'plane':    SpecificPanel = <PlaneInfo object={selectedObject} updateObject={updateObject} />; break
+    case 'chargedSphere':    SpecificPanel = <ChargedSphereInfo object={selectedObject} updateObject={updateObject} />; break
     case 'surface':
       switch (selectedObject.surfaceType) {
         case 'sphere':  SpecificPanel = <SphereInfo object={selectedObject} updateObject={updateObject} />; break
@@ -169,6 +171,8 @@ export default function ObjectPopup({
                 ref={xRef}
                 type="number"
                 step={0.01}
+                min={-10}
+                max={10}
                 value={posInputs.x}
                 onChange={e => handlePosChange('x', e.target.value)}
                 onBlur={() => handlePosBlur('x')}
@@ -184,6 +188,8 @@ export default function ObjectPopup({
                 ref={yRef}
                 type="number"
                 step={0.01}
+                min={-10}
+                max={10}
                 value={posInputs.y}
                 onChange={e => handlePosChange('y', e.target.value)}
                 onBlur={() => handlePosBlur('y')}
@@ -199,6 +205,8 @@ export default function ObjectPopup({
                 ref={zRef}
                 type="number"
                 step={0.01}
+                min={-10}
+                max={10}
                 value={posInputs.z}
                 onChange={e => handlePosChange('z', e.target.value)}
                 onBlur={() => handlePosBlur('z')}
@@ -219,4 +227,3 @@ export default function ObjectPopup({
     </div>
   )
 }
-

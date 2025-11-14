@@ -2,6 +2,19 @@ import * as THREE from 'three';
 import { useMemo } from 'react';
 import calculateFieldAtPoint from '../utils/calculateField.js';
 
+// returns true if point is 'after' the plane
+function sliceByPlane(point, slicePlane, slicePos, useSlice){
+    if(!useSlice) return true;
+    switch(slicePlane){
+        case 'xy':
+            return point.z > slicePos;
+        case 'yz':
+            return point.x > slicePos;
+        case 'xz':
+            return point.y > slicePos;
+    }
+}
+
 const generatePlaneStartPoints = (plane, linesPerPlane) => {
     const points = [];
     const planePos = new THREE.Vector3(...plane.position);
@@ -33,41 +46,74 @@ const generatePlaneStartPoints = (plane, linesPerPlane) => {
     return points;
 };
 
-    // Generate start points for wires (points along and around the wire)
+// Generate start points for wires (points along and around the wire)
 const generateWireStartPoints = (wire, linesPerWire) => {
     const points = [];
     const wirePos = new THREE.Vector3(...wire.position);
     const wireDir = new THREE.Vector3(...(wire.direction || [0, 1, 0])).normalize();
-        
-        // Points along the wire length
-    //const steps = Math.max(2, Math.floor(linesPerWire / 8)); // Adjust based on wire length
-    const steps = 10
-    const linesPerZ = Math.max(4,Math.floor(linesPerWire/4))
-    const length = 16;
-        
-    for (let i = 0; i < steps; i++) {
-        const t = (i / (steps - 1)) * length - length / 2;
+    
+    // Determine if wire is finite or infinite
+    const isFinite = !wire.infinite;
+    const wireLength = isFinite ? (wire.length || 10) : 20;
+    
+    // Fixed number of points along the wire (independent of linesPerWire)
+    const stepsAlongWire = 10;
+
+    // linesPerWire controls how many radii we add
+    const numAdditionalRadii = Math.max(0, Math.floor(linesPerWire / 8));
+    const radii = [0, ...Array.from({length: numAdditionalRadii}, (_, i) => 0.5 + (i * 0.5))];
+    
+    for (let i = 0; i < stepsAlongWire; i++) {
+        const t = (i / (stepsAlongWire - 1)) * wireLength - wireLength / 2;
         const pointAlongWire = wirePos.clone().add(wireDir.clone().multiplyScalar(t));
-            
-            // Add points around the wire circumference
-        for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / linesPerZ) {
-            const radius = 0.5;
-            const tangent = new THREE.Vector3();
-            if (Math.abs(wireDir.y) > 0.9) {
-                tangent.set(1, 0, 0);
-            } else {
-                tangent.set(0, 1, 0).cross(wireDir);
-            }
-            const bitangent = new THREE.Vector3().crossVectors(wireDir, tangent).normalize();
-                
-            const point = pointAlongWire.clone()
-                .add(tangent.clone().multiplyScalar(Math.cos(angle) * radius))
-                .add(bitangent.clone().multiplyScalar(Math.sin(angle) * radius));
-                    
-            points.push(point);
-        }
-    }
         
+        // Generate points at different radii with different angular densities
+        radii.forEach((radius,radiusIndex) => {
+
+            let angularDensity;
+            if (isFinite) {
+                const distanceFromCenter = Math.abs(t); // Current position along wire
+                const centerRegion = wireLength * 0.15; // 15% from center (30% total center region)
+                const middleRegion = wireLength * 0.35; // 35% from center (70% total middle region)
+                
+                // If radius extends beyond wire end, reduce density
+                if (distanceFromCenter <= centerRegion) {
+                    angularDensity = 16; // Center region: 16 lines
+                } else if (distanceFromCenter <= middleRegion) {
+                    angularDensity = 8;  // Middle region: 8 lines
+                } else {
+                    angularDensity = 4;  // End regions: 4 lines
+                }
+
+            } else { 
+                angularDensity = 16;
+            } 
+                
+                // Add points around the circumference at this radius
+            if (radius === 0) {
+                // For center radius, only create ONE point (no angular variation)
+                const point = pointAlongWire.clone();
+                points.push(point);
+            } else {
+                // For other radii, create multiple angular points
+                const tangent = new THREE.Vector3();
+                if (Math.abs(wireDir.y) > 0.9) {
+                    tangent.set(1, 0, 0);
+                } else {
+                    tangent.set(0, 1, 0).cross(wireDir);
+                }
+                const bitangent = new THREE.Vector3().crossVectors(wireDir, tangent).normalize();
+
+                for (let angle = 0; angle < Math.PI * 2; angle += Math.PI * 2 / angularDensity) {
+                    const point = pointAlongWire.clone()
+                        .add(tangent.clone().multiplyScalar(Math.cos(angle) * radius))
+                        .add(bitangent.clone().multiplyScalar(Math.sin(angle) * radius));
+                    points.push(point);
+                }
+            }
+        });
+    }
+    
     return points;
 };
 
@@ -110,7 +156,7 @@ const traceFieldLineFromPoint = (startPoint, sourceObj, allObjects, stepsPerLine
     return points;
 };
 
-export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5, minStrength = 0.1, linesPerCharge = 20, planeFilter = null}) {
+export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5, minStrength = 0.1, linesPerCharge = 20, planeFilter = null, slicePlane, slicePos, useSlice}) {
     
     const fieldLinesData = useMemo(() => {
         const lines = [];
@@ -226,8 +272,11 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
             }
         });
 
-        return lines;
-
+        return lines.filter(line => line.points.some(p => sliceByPlane(p, slicePlane, slicePos, useSlice)))
+                .map(line => ({
+                    ...line,
+                    points: line.points.filter(p => sliceByPlane(p, slicePlane, slicePos, useSlice))
+                }))
     }, [charges, linesPerCharge, stepsPerLine, stepSize, minStrength, planeFilter]);
 
     // Create both lines AND arrow helpers like the original

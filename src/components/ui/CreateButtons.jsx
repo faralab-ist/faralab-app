@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import './CreateButtons.css'
-import { applyPresetByName } from '../../presets/loader'
 
 export default function CreateButtons({ 
   addObject,
@@ -14,7 +13,6 @@ export default function CreateButtons({
   onApplyPreset
 }) {
   const [openGroup, setOpenGroup] = useState(null)
-  const hasSurfaces = (counts?.surface ?? 0) > 0
 
   // Refs
   const panelRef = useRef(null)
@@ -138,6 +136,7 @@ export default function CreateButtons({
               <button onClick={() => addObject('charge', { position: [0,0,0], charge: 1 })}>Add Charge</button>
               <button onClick={() => addObject('wire', { position: [0,0,0], direction: [0,1,0] })}>Add Wire</button>
               <button onClick={() => addObject('plane', { position: [0,0,0], direction: [0,1,0] })}>Add Plane</button>
+              <button onClick={() => addObject('chargedSphere', { position: [0,0,0] })}>Add Charged Sphere</button>
             </div>
           </div>
         )}
@@ -145,4 +144,3 @@ export default function CreateButtons({
     </>
   )
 }
-

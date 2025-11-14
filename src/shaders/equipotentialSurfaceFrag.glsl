@@ -40,7 +40,42 @@ uniform vec3 finWirePositions[MAX_FIN_WIRES];
 uniform vec3 finWireDirections[MAX_FIN_WIRES];
 uniform float finWireHeights[MAX_FIN_WIRES];
 
+#define MAX_CHARGED_SPHERES 15
+uniform int chargedSphereCount;
+uniform float chargedSphereChargeDensity[MAX_CHARGED_SPHERES];
+uniform float chargedSphereRadius[MAX_CHARGED_SPHERES];
+uniform vec3 chargedSpherePositions[MAX_CHARGED_SPHERES];
+uniform int chargedSphereHollow[MAX_CHARGED_SPHERES];
+
+uniform bool useSlice;
+uniform vec3 slicePlane;
+uniform float slicePos;  
+
+
 #define PI 3.1415926
+
+bool isBehindSlice(vec3 point) {
+    if (!useSlice) return false;
+    
+    if (slicePlane.x > 0.5) return point.x < slicePos;
+    if (slicePlane.y > 0.5) return point.y < slicePos;
+    if (slicePlane.z > 0.5) return point.z < slicePos;
+    return false;
+}
+
+
+float sliceFade(vec3 point) {
+    if (!useSlice) return 1.0;
+    
+    float dist = 0.0;
+    if (slicePlane.x > 0.5) dist = point.x - slicePos;
+    if (slicePlane.y > 0.5) dist = point.y - slicePos;
+    if (slicePlane.z > 0.5) dist = point.z - slicePos;
+    
+    float smoothZone = 0.02; 
+    return smoothstep(-smoothZone, 0.0, dist);
+}
+
 
 // from https://arxiv.org/pdf/math-ph/0603051
 float rectPotential(vec3 p, vec3 planePos, vec3 normal, vec2 dims, float sigma) {
@@ -115,6 +150,35 @@ float wirePotential(vec3 p, vec3 wirePos, vec3 wireDir, float wireHeight, float 
     return k * log((z2 + sqrt2) / (z1 + sqrt1));
 }
 
+// isHollow => 1 is hollow 0 is not
+float chargedSpherePotential(vec3 p, vec3 spherePos, float sphereRad, float sigma, int isHollow){
+    vec3 rVec = p - spherePos;
+    float r = length(rVec);
+    if (r < 1e-6) return 0.0;
+    float Q;
+    float V;
+
+    if(isHollow == 1){
+        float surfArea = 4.0 * PI * sphereRad * sphereRad;
+        Q = sigma * surfArea;
+
+        if (r < sphereRad){
+            V = k_e * Q / sphereRad;
+        } else{
+            V = k_e * Q / r;
+        }
+    } else{
+        float volume = (4.0/3.0) * PI * pow(sphereRad, 3.0);
+        Q = sigma * volume;
+
+        if (r < sphereRad){
+            V = k_e * Q / (2.0 * pow(sphereRad, 3.0)) * (3.0 * pow(sphereRad, 2.0) - pow(r, 2.0));
+        } else {
+            V = k_e * Q / r;
+        }
+    }
+    return V;
+}
 
 float potential(vec3 pos) {
     float multiplier = k_e;
@@ -140,7 +204,7 @@ float potential(vec3 pos) {
         vec3 rPerp = rVec - dot(rVec, direction) * direction;
         float distance = length(rPerp);
         if (distance < 0.0001) continue;
-        result += (wireChargeDensity[i] / (2.0 * PI * e0)) * log(distance);
+        result += (-wireChargeDensity[i] / (2.0 * PI * e0)) * log(distance);
     }
 
     for (int i = 0; i < finPlaneCount; i++) {
@@ -149,6 +213,10 @@ float potential(vec3 pos) {
 
     for (int i = 0; i < finWireCount; i++) {
         result += wirePotential(pos, finWirePositions[i], normalize(finWireDirections[i]), finWireHeights[i], finWireChargeDensity[i]);
+    }
+
+    for (int i = 0; i < chargedSphereCount; i++){
+        result += chargedSpherePotential(pos, chargedSpherePositions[i], chargedSphereRadius[i], chargedSphereChargeDensity[i], chargedSphereHollow[i]);
     }
 
     return result;
@@ -193,13 +261,21 @@ void main() {
 
         if (sign(diff) != sign(lastDiff)) {
             float t = abs(lastDiff) / (abs(lastDiff) + abs(diff) + 1e-6);
-            rayPos -= rayDir * stepSize * (1.0 - t);
+            vec3 hitPos = rayPos - rayDir * stepSize * (1.0 - t);
 
-            float potAtHit = potential(rayPos);
+            bool behind = isBehindSlice(hitPos);
+            if (useSlice && behind){
+                rayPos += rayDir * adaptiveStep;
+                lastDiff = diff;
+                continue;
+            }
+
+            float potAtHit = potential(hitPos);
             float error = abs(potAtHit - targ);
             // smoothstep ta alto pq senao ficava feio
             alpha = smoothstep(10.0, 0.0, error);
 
+            rayPos = hitPos;
             hit = true;
             break;
         }
@@ -207,7 +283,8 @@ void main() {
         lastDiff = diff;
     }
     if (hit) {
-        gl_FragColor = vec4(0.0, 0.6, 1.0, alpha * transparency);
+        float fade = sliceFade(rayPos);
+        gl_FragColor = vec4(0.0, 0.6, 1.0, alpha * transparency * fade);
     } else {
         discard;
     }

@@ -8,6 +8,18 @@ import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUti
 import vertexShaderSource from '../shaders/arrowVertex.glsl';
 import fragmentShaderSource from '../shaders/arrowFragment.glsl';
 
+// returns true if point is 'after' the plane
+function sliceByPlane(point, slicePlane, slicePos, useSlice){
+    if(!useSlice) return true;
+    switch(slicePlane){
+        case 'xy':
+            return point.z > slicePos;
+        case 'yz':
+            return point.x > slicePos;
+        case 'xz':
+            return point.y > slicePos;
+    }
+}
 
 export default function FieldArrows({ 
     objects, 
@@ -18,12 +30,17 @@ export default function FieldArrows({
     step = 1, 
     minThreshold, 
     scaleMultiplier,
-    planeFilter = null
+    planeFilter = null,
+    slicePlane,
+    slicePos,
+    useSlice
 }) {
-    
-    const vectors = useMemo( 
+    const vectorsUnfiltered = useMemo( 
         () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
         [objects, showOnlyPlane, showOnlyGaussianField, planeFilter]
+    );
+    const vectors = vectorsUnfiltered.filter(({position, field}) => 
+        sliceByPlane(position, slicePlane, slicePos, useSlice)
     );
 
     const MAX_L = useMemo(() => {

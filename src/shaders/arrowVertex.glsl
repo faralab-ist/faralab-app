@@ -9,6 +9,15 @@ vec3 rotateToDirection(vec3 v, vec3 dir){
     vec3 up = vec3(0.0, 1.0, 0.0);
     // since dir is normalized
     float cosTheta = dot(up, dir);
+
+    //avoid cross product being zero
+    if (abs(cosTheta - 1.0) < 1e-5) {
+        return v; 
+    }
+    if (abs(cosTheta + 1.0) < 1e-5) {
+        return vec3(v.x, -v.y, -v.z);
+    }
+
     vec3 rotationAxis = normalize(cross(up, dir));
     float angle = acos(clamp(cosTheta, -1.0, 1.0));
     // Rodrigues' rotation formula

@@ -162,6 +162,35 @@ export default function SettingsButtons({
     }
   }, [showOnlyGaussianField, creativeMode])
 
+  // Local edit buffers to allow clearing/backspacing
+  const [scaleInput, setScaleInput] = useState(String(vectorScale ?? ''))
+  const [lineNumInput, setLineNumInput] = useState(String(lineNumber ?? ''))
+
+  useEffect(() => { setScaleInput(String(vectorScale ?? '')) }, [vectorScale])
+  useEffect(() => { setLineNumInput(String(lineNumber ?? '')) }, [lineNumber])
+
+  const commitScale = useCallback(() => {
+    const v = parseFloat(scaleInput)
+    if (Number.isFinite(v)) {
+      const clamped = Math.max(0.1, Math.min(5, v))
+      setVectorScale(clamped)
+      setScaleInput(String(clamped))
+    } else {
+      setScaleInput(String(vectorScale ?? ''))
+    }
+  }, [scaleInput, setVectorScale, vectorScale])
+
+  const commitLineNum = useCallback(() => {
+    const v = parseInt(lineNumInput, 10)
+    if (Number.isFinite(v)) {
+      const clamped = Math.max(1, Math.min(50, v))
+      setLineNumber(clamped)
+      setLineNumInput(String(clamped))
+    } else {
+      setLineNumInput(String(lineNumber ?? ''))
+    }
+  }, [lineNumInput, setLineNumber, lineNumber])
+
   return (
     <>
       <div ref={rootRef} className="settings-buttons-root horizontal">
@@ -231,8 +260,10 @@ export default function SettingsButtons({
                       min={0.1}
                       max={5}
                       step={0.1}
-                      value={vectorScale}
-                      onChange={e => setVectorScale(Number(e.target.value))}
+                      value={scaleInput}
+                      onChange={e => setScaleInput(e.target.value)}
+                      onBlur={commitScale}
+                      onKeyDown={e => { if (e.key === 'Enter') commitScale() }}
                       disabled={!showField}
                     />
                   </label>
@@ -261,8 +292,10 @@ export default function SettingsButtons({
                       min={1}
                       max={50}
                       step={1}
-                      value={lineNumber}
-                      onChange={e => setLineNumber(Number(e.target.value))}
+                      value={lineNumInput}
+                      onChange={e => setLineNumInput(e.target.value)}
+                      onBlur={commitLineNum}
+                      onKeyDown={e => { if (e.key === 'Enter') commitLineNum() }}
                       disabled={!showLines}
                       placeholder="20"
                     />
