@@ -35,18 +35,39 @@ function Plane({
   const baseQuat = new THREE.Quaternion().setFromEuler(baseEuler)
   const localNormal = new THREE.Vector3(0, 0, 1).applyQuaternion(baseQuat) // becomes (0,1,0)
 
+  // Calculate initial rotation from direction prop (if provided)
+  const initialRotation = React.useMemo(() => {
+    if (!direction || (direction[0] === 0 && direction[1] === 1 && direction[2] === 0)) {
+      // Default orientation (normal pointing up)
+      return new THREE.Quaternion()
+    }
+    
+    // Calculate rotation needed to align localNormal with direction
+    const targetNormal = new THREE.Vector3(...direction).normalize()
+    const defaultNormal = new THREE.Vector3(0, 1, 0) // after baseEuler is applied
+    const rotationQuat = new THREE.Quaternion().setFromUnitVectors(defaultNormal, targetNormal)
+    
+    return rotationQuat
+  }, [direction])
+
   // Ensure direction is correct when the plane is created (before any dragging)
   useEffect(() => {
-    const n = localNormal.clone().normalize() // (0,1,0)
-    updateDirection(id, [n.x, n.y, n.z])
-  }, [id, updateDirection])
+    if (!direction) {
+      const n = localNormal.clone().normalize() // (0,1,0)
+      updateDirection(id, [n.x, n.y, n.z])
+    }
+  }, [id, updateDirection, direction])
 
   useLayoutEffect(() => {
     if (isDraggingRef.current || !pivotRef.current) return
     const pos = new THREE.Vector3(...position)
     const mat = new THREE.Matrix4().setPosition(pos)
+    
+    // Apply rotation from direction
+    mat.multiply(new THREE.Matrix4().makeRotationFromQuaternion(initialRotation))
+    
     if (pivotRef.current.matrix) pivotRef.current.matrix.copy(mat)
-  }, [position])
+  }, [position, initialRotation])
 
   return (
     <PivotControls

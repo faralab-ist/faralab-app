@@ -24,7 +24,7 @@ export default function useApplyPreset({
   setLineMin,
   setLineNumber
 }) {
-  return useCallback((name, { animate = true } = {}) => {
+  return useCallback((nameOrPreset, { animate = true, isCustom = false } = {}) => {
     const onCamera = animate ? animateCameraPreset : setCameraPreset
     const visProvided = { field: false, onlyGauss: false, lines: false, equip: false }
 
@@ -52,7 +52,38 @@ export default function useApplyPreset({
       }
     }
 
-    applyPresetByName(name, addObject, setSceneObjects, updatePosition, onCamera, onSettings)
+    // Handle custom preset (imported JSON) or preset name
+    if (isCustom && typeof nameOrPreset === 'object') {
+      // Custom preset object
+      const preset = nameOrPreset
+      
+      // Clear scene
+      setSceneObjects?.([])
+      
+      // Apply camera
+      if (preset.camera) {
+        onCamera?.(preset.camera)
+      }
+      
+      // Apply settings
+      if (preset.settings) {
+        onSettings(preset.settings)
+      }
+      
+      // Add objects
+      if (preset.objects) {
+        preset.objects.forEach(({ type, props, surfaceType }) => {
+          if (type === 'surface') {
+            addObject?.(surfaceType, props)
+          } else {
+            addObject?.(type, props)
+          }
+        })
+      }
+    } else {
+      // Named preset
+      applyPresetByName(nameOrPreset, addObject, setSceneObjects, updatePosition, onCamera, onSettings)
+    }
 
     // Legacy auto-on behavior if preset didn't specify
     if (!visProvided.field && showField === false && onToggleField) onToggleField()

@@ -54,6 +54,7 @@ const objectFactories = {
     charge_density: 5,
     charge: 1, //sera que e preciso?
     charges: [],
+    direction: [0, 1, 0], // normal da esfera
     radius: 1,
     isHollow: false,
     material: 'Dielectric',
