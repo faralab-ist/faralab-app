@@ -72,7 +72,7 @@ function Wire({
         const pWorld = new THREE.Vector3().setFromMatrixPosition(matrix)
         updatePosition(id, [pWorld.x, pWorld.y, pWorld.z])
         // Cylinder points along +Y in local space, rotate that by the gizmo's rotation
-        const dir = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
+        const dir = new THREE.Vector3(0, 1, 0).applyQuaternion(q).normalize()
         updateDirection(id, [dir.x, dir.y, dir.z])
       }}
       onDragEnd={() => {

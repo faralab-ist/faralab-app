@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import './CreateButtons.css'
+import { exportPreset, importPreset } from '../../utils/presetIO'
+import ExportDialog from './ExportDialog/ExportDialog'
 
 export default function CreateButtons({ 
   addObject,
@@ -9,9 +11,13 @@ export default function CreateButtons({
   creativeMode,
   setCreativeMode,
   sidebarOpen = false,
-  onApplyPreset
+  onApplyPreset,
+  // New props for export/import
+  camera,
+  settings
 }) {
   const [openGroup, setOpenGroup] = useState(null)
+  const [showExportDialog, setShowExportDialog] = useState(false)
 
   // Refs
   const panelRef = useRef(null)
@@ -28,6 +34,41 @@ export default function CreateButtons({
 
   const handleClearCanvas = () => {
     setSceneObjects?.([])
+  }
+
+  const handleExport = () => {
+    setShowExportDialog(true)
+  }
+
+  const handleExportConfirm = (presetName) => {
+    exportPreset({
+      sceneObjects,
+      camera,
+      settings,
+      name: presetName
+    })
+    setShowExportDialog(false)
+  }
+
+  const handleImport = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = (e) => {
+      const file = e.target.files?.[0]
+      if (!file) return
+      
+      importPreset(file, (error, preset) => {
+        if (error) {
+          alert(`Failed to import preset: ${error.message}`)
+          return
+        }
+        
+        // Apply imported preset
+        onApplyPreset?.(preset, { animate: false, isCustom: true })
+      })
+    }
+    input.click()
   }
 
   useEffect(() => {
@@ -108,13 +149,31 @@ export default function CreateButtons({
         {/* Toolbar com Clear + Creative (SÓ ESTES são deslocados) */}
         <div ref={toolbarRef} className="toolbar" style={toolbarStyle}>
           {creativeMode && (
-            <button
-              className="clear-canvas-btn"
-              onClick={handleClearCanvas}
-              title="Clear all objects"
-            >
-              Clear canvas
-            </button>
+            <>
+              <button
+                className="clear-canvas-btn"
+                onClick={handleClearCanvas}
+                title="Clear all objects"
+              >
+                Clear canvas
+              </button>
+              
+              <button
+                className="export-btn"
+                onClick={handleExport}
+                title="Export current scene as JSON"
+              >
+                Export
+              </button>
+              
+              <button
+                className="import-btn"
+                onClick={handleImport}
+                title="Import preset from JSON file"
+              >
+                Import
+              </button>
+            </>
           )}
 
           <button
@@ -140,6 +199,12 @@ export default function CreateButtons({
           </div>
         )}
       </div>
+
+      <ExportDialog
+        isOpen={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        onConfirm={handleExportConfirm}
+      />
     </>
   )
 }

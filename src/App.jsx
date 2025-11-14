@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-  import { Canvas } from '@react-three/fiber'
+  import { Canvas, useThree } from '@react-three/fiber'
   import { OrbitControls } from '@react-three/drei'
   import './App.css'
   import * as THREE from 'three'
@@ -92,6 +92,23 @@ function LoadingOverlay() {
     return null
   }
 
+  function CameraStateCapture({ onCameraUpdate }) {
+    const { camera } = useThree()
+    
+    useEffect(() => {
+      const interval = setInterval(() => {
+        onCameraUpdate?.({
+          position: [camera.position.x, camera.position.y, camera.position.z],
+          target: [0, 0, 0] // OrbitControls target is usually origin
+        })
+      }, 500) // Update every 500ms
+      
+      return () => clearInterval(interval)
+    }, [camera, onCameraUpdate])
+    
+    return null
+  }
+
   function WhiteAxes({ size = 1 }) {
   const axes = useMemo(() => new THREE.AxesHelper(size), [size])
 
@@ -136,6 +153,7 @@ function LoadingOverlay() {
     const [slicePlane, setSlicePlane] = useState('yz') // 'xy', 'yz', 'xz'
     const [slicePos, setSlicePos] = useState(-0.1)
     const [useSlice, setUseSlice] = useState(false)
+    const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -252,7 +270,17 @@ function LoadingOverlay() {
           setCreativeMode={setCreativeMode}
           sidebarOpen={sidebarOpen}
           onApplyPreset={applyPreset}
-
+          camera={cameraState}
+          settings={{
+            vectorMinTsl,
+            vectorScale,
+            lineMin,
+            lineNumber,
+            showField,
+            showLines,
+            showEquipotentialSurface,
+            showOnlyGaussianField
+          }}
         />
         
         <ObjectPopup
@@ -276,7 +304,8 @@ function LoadingOverlay() {
         />
 
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
-          <CameraFnsMount onReady={setCamFns} />               {/* inside Canvas */}
+          <CameraFnsMount onReady={setCamFns} />
+          <CameraStateCapture onCameraUpdate={setCameraState} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[2, 2, 5]} />
           <OrbitControls enabled={!isDragging} />
