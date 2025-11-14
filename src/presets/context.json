@@ -17,7 +17,7 @@
   },
   "dipole": {
     "context": { "r": 0.1, "d": 3, "q": 1 },
-    "camera": { "position": [0, 1, 5], "target": [0, 0, 0] },
+    "camera": { "position": [0, 1.3, 6], "target": [0, 0, 0] },
     "settings": {
       "vectorMinTsl": 0.45,
       "vectorScale": 1.3,
@@ -45,8 +45,8 @@
       "lineMin": 0.12,
       "lineNumber": 28,
       "showField": true,
-      "showLines": true,
-      "showEquipotentialSurface": true
+      "showLines": false,
+      "showEquipotentialSurface": false
     },
     "objects": [
       { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },

@@ -106,7 +106,6 @@ export default function ObjectPopup({
       break
     default: SpecificPanel = <div>Unknown Type</div>
   }
-  console.log(isSidebarMinimized)
   const sidebarWidth = isSidebarMinimized ? 80 : 325
   const sidebarExtraOffset = 10; // px — 
   const totalSidebarOffset = sidebarOpen || isSidebarMinimized ? sidebarWidth + sidebarExtraOffset : 0;

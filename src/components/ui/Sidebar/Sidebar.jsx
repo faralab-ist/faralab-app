@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ObjectList from "./ObjectList";
 import "./Sidebar.css";
 
@@ -19,8 +19,11 @@ export default function Sidebar({
   removeObject, 
   onMinimizedChange, 
   hoveredId,
-   }) {
+  selectedId,
+  setSelectedId,
+}) {
   const [expandId, setExpandId] = useState(null);
+  const sidebarRootRef = useRef(null)
 
   const hasObjects = (counts?.total ?? 0) > 0;
   const minimized = !isOpen && hasObjects;
@@ -34,6 +37,11 @@ export default function Sidebar({
   const openPanel = (idToOpen = null) => {
     if (idToOpen) setExpandId(idToOpen);
     setIsOpen?.(true);
+  };
+  const handleRowClick = (item) => {
+    if (typeof setSelectedId === 'function') {
+      setSelectedId(selectedId === item.id ? null : item.id);
+    }
   };
 
   // helper para detectar subtype em nomes de campo comuns
@@ -71,18 +79,38 @@ export default function Sidebar({
     }
   });
 
-  return (
-    <div className={`sidebar-wrap ${isOpen ? "open" : minimized ? "minimized" : "closed"}`}>
-      <button
-        className="toggle-tab"
-        aria-label={isOpen ? "Close panel" : "Open panel"}
-        onClick={togglePanel}
-        title={isOpen ? "Close" : "Open"}
-      >
-        {isOpen ? ">" : "<"}
-      </button>
+  useEffect(() => {
+    const onDocMouseDown = (e) => {
+      // if sidebar is not open, do nothing
+      if (!isOpen) return
+      const sidebarEl = sidebarRootRef.current
+      if (!sidebarEl) return
+      // allow clicks inside sidebar
+      if (sidebarEl.contains(e.target)) return
+      // allow clicks inside settings window (class used by SettingsButtons)
+      const settingsEl = document.querySelector('.settings-buttons-root')
+      if (settingsEl && settingsEl.contains(e.target)) return
+      // outside click -> close sidebar
+      setIsOpen?.(false)
+    }
+    document.addEventListener('mousedown', onDocMouseDown)
+    return () => document.removeEventListener('mousedown', onDocMouseDown)
+  }, [isOpen, setIsOpen])
+  
+  const effectiveClass = isOpen ? "open" : minimized ? "minimized" : "closed";
 
-      <div className={`sidebar ${isOpen ? "open" : minimized ? "minimized" : "closed"}`}>
+  return (
+    <div ref={sidebarRootRef} className={`sidebar-wrap ${effectiveClass}`}>
+       <button
+         className="toggle-tab"
+         aria-label={isOpen ? "Close panel" : "Open panel"}
+         onClick={togglePanel}
+         title={isOpen ? "Close" : "Open"}
+       >
+         {isOpen ? ">" : "<"}
+       </button>
+
+      <div className={`sidebar ${effectiveClass}`}>
         {/* Minimized view: show individual pills (one per object) */}
         {minimized ? (
           <div className="minibar" role="group" aria-label="Objects quick bar">
@@ -92,8 +120,12 @@ export default function Sidebar({
               minibarItems.map((item) => (
                 <button
                   key={item.id}
-                  className={`pill ${item.subtype || item.type} minibar-pill ${hoveredId === item.id ? 'hovered' : ''}`}
-                  onClick={() => openPanel(item.id)}
+                  className={`pill ${item.subtype || item.type} minibar-pill ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
+                  onClick={() => {openPanel(item.id); handleRowClick(item) }}
+                  
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(obj); }
+              }}
                   title={item.name || item.label}
                 >
                   <strong>{item.label}</strong>
@@ -107,7 +139,7 @@ export default function Sidebar({
             <header className="panel-header">
               <div className="header-left">
                 <h3 className="panel-title">Panel</h3>
-                <p className="panel-sub">Manage scene objects</p>
+                
               </div>
               <div className="header-pills">
                 <span className="pill objects">
@@ -128,6 +160,8 @@ export default function Sidebar({
               expandId={expandId}
               minimized={minimized}           /* pass to child if needed */
               hoveredId ={hoveredId}
+              selectedId={selectedId}
+              setSelectedId={setSelectedId}
             />
           </div>
         )}

@@ -41,7 +41,7 @@ export default function SettingsButtons({
   const rootRef = useRef(null)
 
   // Close panels when clicking outside
-  /*useEffect(() => {
+  useEffect(() => {
     const onDown = (e) => {
       if (!rootRef.current) return
       if (rootRef.current.contains(e.target)) return
@@ -49,7 +49,7 @@ export default function SettingsButtons({
     }
     window.addEventListener('mousedown', onDown)
     return () => window.removeEventListener('mousedown', onDown)
-  }, [])*/
+  }, [])
 
   // Optional: close with Escape
   useEffect(() => {
@@ -348,7 +348,7 @@ export default function SettingsButtons({
           {open === 'gaussian' && (
             <div className="settings-panel up">
               <div className="settings-info">
-                {creativeMode ? 'Create multiple Gaussian surfaces.' : 'One Gaussian surface at a time.'}
+                {creativeMode ? 'Create multiple Gaussian surfaces.' : 'Create one surface at a time.'}
               </div>
               <div className="surface-buttons-row">
                 <button

@@ -320,6 +320,8 @@ function LoadingOverlay() {
           updateObject={updateObject}     // <- ensure these are passed
           removeObject={removeObject}     // <- <- 
           hoveredId={hoveredId}
+          selectedId={selectedId}
+          setSelectedId={setSelectedId}
         />
 
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
@@ -381,16 +383,16 @@ function LoadingOverlay() {
 
         {showField && (
           <FieldArrows
-  key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
-  objects={sceneObjects}
-  showOnlyGaussianField={showOnlyGaussianField}
-  minThreshold={vectorMinTsl}
-  scaleMultiplier={vectorScale}
-  planeFilter={activePlane}
-  slicePlane={slicePlane}
-  slicePos={slicePos}
-  useSlice={useSlice}
-/>
+        key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
+        objects={sceneObjects}
+        showOnlyGaussianField={showOnlyGaussianField}
+        minThreshold={vectorMinTsl}
+        scaleMultiplier={vectorScale}
+        planeFilter={activePlane}
+        slicePlane={slicePlane}
+        slicePos={slicePos}
+        useSlice={useSlice}
+        />
         )}
 
         {showLines && (
