@@ -137,7 +137,7 @@ export default function Cylinder({
 
         {isSelected && (
           <group name="cylinder-normals">
-            {faceNormals.map((n, i) => {
+            {normals.map((n, i) => {
               if (!sliceByPlane(n.origin, slicePlane, slicePos, useSlice, slicePlaneFlip)) return null;
               return <NormalArrow
                 key={i}
