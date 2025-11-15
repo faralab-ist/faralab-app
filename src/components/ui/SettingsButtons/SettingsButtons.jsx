@@ -1,9 +1,12 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import './SettingsButtons.css'
-import sphereIcon from '../../assets/sphere.svg'
-import cylinderIcon from '../../assets/cylinder.svg'
-import cuboidIcon from '../../assets/cuboid.svg'
-import flux from '../../assets/flux.svg'
+import sphereIcon from '../../../assets/sphere.svg'
+import cylinderIcon from '../../../assets/cuboid.svg'
+import cuboidIcon from '../../../assets/cylinder.svg'
+import flux from '../../../assets/flux.svg'
+import PlaneButtons from './SubButtons/PlaneButtons'
+import EfieldButtons from './SubButtons/EfieldButtons'
+import PotButtons from './SubButtons/PotButtons'
 
 
 export default function SettingsButtons({
@@ -33,7 +36,6 @@ export default function SettingsButtons({
   setLineNumber,
   activePlane,
   onPlaneSelect,
-  // added now
   useSlice,
   setUseSlice,
   slicePlane,
@@ -47,6 +49,9 @@ export default function SettingsButtons({
 }) {
   const [open, setOpen] = useState(null)
   const toggle = (k) => setOpen(p => p === k ? null : k)
+
+  // which tab inside FieldView: 'efield' | 'potential'
+  const [fieldTab, setFieldTab] = useState('efield')
 
   // NEW: ref for outside-click detection
   const rootRef = useRef(null)
@@ -81,6 +86,16 @@ export default function SettingsButtons({
     [sceneObjects]
   )
 
+  // Has electric field: any non-gaussian object with a numeric non-zero `charge`
+  const hasField = useMemo(() => {
+    if (!sceneObjects) return false;
+    return sceneObjects.some(o => {
+      if (isGaussian(o)) return false;
+      const q = Number(o?.charge);
+      return Number.isFinite(q) && q !== 0;
+    });
+  }, [sceneObjects]);
+  
   const exclusiveActiveType = !creativeMode && gaussianSurfaces.length === 1
     ? surfaceTypeOf(gaussianSurfaces[0])
     : null
@@ -206,149 +221,78 @@ export default function SettingsButtons({
     <>
       <div ref={rootRef} className="settings-buttons-root horizontal">
 
+        {/* FieldView button (replaces separate E-Field / Potential buttons) */}
         <div className="settings-group">
           <button
-            className={`settings-main big ${open === 'field' ? 'open' : ''}`}
-            onClick={() => toggle('field')}
+            className={`settings-main big ${open === 'fieldview' ? 'open' : ''}`}
+            onClick={() => { toggle('fieldview'); /* keep last selected tab */ }}
           >
-            E-Field
+            Field View
           </button>
-          {open === 'field' && (
-            <div className="settings-panel up">
-              <div className="field-buttons-row">
-                <button onClick={onToggleField}>
-                  {showField ? 'Hide Vectors' : 'Show Vectors'}
+
+          {open === 'fieldview' && (
+            <div className="settings-panel up fieldview-panel">   {/* single container */}
+              {/* Tabs header */}
+              <div className="fieldview-tabs" style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                <button
+                  className={`fieldview-tab ${fieldTab === 'efield' ? 'active' : ''}`}
+                  onClick={() => setFieldTab('efield')}
+                >
+                  E-Field
                 </button>
-                <button onClick={onToggleLines}>
-                  {showLines ? 'Hide Lines' : 'Show Lines'}
+                <button
+                  className={`fieldview-tab ${fieldTab === 'potential' ? 'active' : ''}`}
+                  onClick={() => setFieldTab('potential')}
+                >
+                  Potential
                 </button>
-              </div> 
-              
-              {/* Plane Filter Buttons */}
-              <div className="efield-section">
-                <div className="efield-section-title">Plane Filter</div>
-                <div className="plane-filter-buttons">
-                  <button 
-                    className={`plane-btn ${activePlane === 'xy' ? 'active' : ''}`}
-                    onClick={() => onPlaneSelect?.('xy')}
-                  >
-                    XY
-                  </button>
-                  <button 
-                    className={`plane-btn ${activePlane === 'yz' ? 'active' : ''}`}
-                    onClick={() => onPlaneSelect?.('yz')}
-                  >
-                    YZ
-                  </button>
-                  <button 
-                    className={`plane-btn ${activePlane === 'xz' ? 'active' : ''}`}
-                    onClick={() => onPlaneSelect?.('xz')}
-                  >
-                    XZ
-                  </button>
-                </div>
-              </div>
-              
-              {/* E-Field visualization controls */}
-              <div className="efield-section">
-                <div className="efield-section-title">Vectors</div>
-                <div className="efield-row compact">
-                  <label className="efield-label">
-                    <span className="label-text">Min Threshold</span>
-                    <input
-                      type="number"
-                      min={0.00}
-                      step={0.05}
-                      value={vectorMinTsl}
-                      onChange={e => setVectorMinTsl(Number(e.target.value))}
-                      disabled={!showField}
-                    />
-                  </label>
-                  <label className="efield-label">
-                    <span className="label-text">Scale</span>
-                    <input
-                      type="number"
-                      min={0.1}
-                      max={5}
-                      step={0.1}
-                      value={scaleInput}
-                      onChange={e => setScaleInput(e.target.value)}
-                      onBlur={commitScale}
-                      onKeyDown={e => { if (e.key === 'Enter') commitScale() }}
-                      disabled={!showField}
-                    />
-                  </label>
-                </div>
               </div>
 
-              <div className="efield-section">
-                <div className="efield-section-title">Lines</div>
-                <div className="efield-row compact">
-                  <label className="efield-label">
-                    <span className="label-text">Min Threshold</span>
-                    <input
-                      type="number"
-                      min={0.00}
-                      step={0.05}
-                      value={lineMin}
-                      onChange={e => setLineMin(Number(e.target.value))}
-                      disabled={!showLines}
-                      placeholder="0.1"
-                    />
-                  </label>
-                  <label className="efield-label">
-                    <span className="label-text">Nº of Lines</span>
-                    <input
-                      type="number"
-                      min={1}
-                      max={50}
-                      step={1}
-                      value={lineNumInput}
-                      onChange={e => setLineNumInput(e.target.value)}
-                      onBlur={commitLineNum}
-                      onKeyDown={e => { if (e.key === 'Enter') commitLineNum() }}
-                      disabled={!showLines}
-                      placeholder="20"
-                    />
-                  </label>
-                </div>
+              {/* Tab content — inline (no separate popover) */}
+              <div className="fieldview-content" style={{ paddingBottom: 8 }}>
+                {fieldTab === 'efield' && (
+                  <EfieldButtons
+                    inline={true}                      // <--- render inline
+                    hasField={hasField}
+                    onToggleField={onToggleField}
+                    onToggleLines={onToggleLines}
+                    vectorMinTsl={vectorMinTsl}
+                    setVectorMinTsl={setVectorMinTsl}
+                    activePlane={activePlane}
+                    onPlaneSelect={onPlaneSelect}
+                    showField={showField}
+                    scaleInput={scaleInput}
+                    setScaleInput={setScaleInput}
+                    commitScale={commitScale}
+                    lineMin={lineMin}
+                    setLineMin={setLineMin}
+                    showLines={showLines}
+                    lineNumInput={lineNumInput}
+                    setLineNumInput={setLineNumInput}
+                    commitLineNum={commitLineNum}
+                  />
+                )}
+
+                {fieldTab === 'potential' && (
+                  <PotButtons
+                    inline={true}                      // <--- render inline
+                    onToggleEquipotentialSurface={onToggleEquipotentialSurface}
+                    showEquipotentialSurface={showEquipotentialSurface}
+                    potentialTarget={potentialTarget}
+                    setPotentialTarget={setPotentialTarget}
+                  />
+                )}
+              </div>
+
+              {/* Plane buttons are constant at the bottom of the FieldView panel */}
+              <div className="fieldview-plane-bottom" style={{ marginTop: 0 }}>
+                <PlaneButtons activePlane={activePlane} onPlaneSelect={onPlaneSelect} />
               </div>
             </div>
           )}
         </div>
 
-        <div className="settings-group">
-          <button
-            className={`settings-main big ${open === 'potential' ? 'open' : ''}`}
-            onClick={() => toggle('potential')}
-          >
-            Potential
-          </button>
-          {open === 'potential' && (
-            <div className="settings-panel up">
-              <button onClick={onToggleEquipotentialSurface}>
-                {showEquipotentialSurface ? 'Hide Equipotential' : 'Show Equipotential'}
-              </button>
-
-             
-              <div className="slider-row">
-                <label className="slider-label">
-                  Target V: <span className="slider-value">{Number(potentialTarget).toFixed(2)}</span>
-                </label>
-                <input
-                  className="potential-slider"                
-                  type="range"
-                  min={-20}
-                  max={20}
-                  step={0.1}
-                  value={potentialTarget ?? 0}
-                  onChange={(e) => setPotentialTarget?.(parseFloat(e.target.value))}
-                />
-              </div>
-            </div>
-          )}
-        </div>
-          
+        {/* Slicing / rest of controls remain unchanged */}
         <div className="settings-group">
           <button
             className={`settings-main big ${open === 'slicing' ? 'open' : ''}`}
@@ -362,7 +306,7 @@ export default function SettingsButtons({
                 <button
                   onClick={() => setUseSlice?.(!useSlice)}
                 >
-                  {useSlice ? 'Disable Slicing' : 'Enable Slicing'}
+                  {useSlice ? 'Slicing On' : 'Slicing Off'}
                 </button>
                 <button
                  className={`helper-btn ${showSliceHelper ? 'active' : ''}`}
@@ -384,28 +328,37 @@ export default function SettingsButtons({
 
               <div className="efield-section">
                 <div className="efield-section-title">Slicing Plane</div>
-                <div className="plane-filter-buttons">
+                <div className="plane-buttons-container">
+                <div className="plane-buttons-group">
+
                   <button
-                    className={`plane-btn ${slicePlane === 'xy' ? 'active' : ''}`}
-                    onClick={() => setSlicePlane?.('xy')}
+                    className={`plane-button ${slicePlane === 'xy' && useSlice ? 'active' : 'inactive'}`}
+                    onClick={(e) => { if (!useSlice) return; setSlicePlane?.('xy') }}
                     disabled={!useSlice}
+                    aria-disabled={!useSlice}
+                    title={!useSlice ? "Enable slicing to change plane" : "Select XY plane"}
                   >
                     XY
                   </button>
                   <button
-                    className={`plane-btn ${slicePlane === 'yz' ? 'active' : ''}`}
-                    onClick={() => setSlicePlane?.('yz')}
+                    className={`plane-button ${slicePlane === 'yz' && useSlice ? 'active' : 'inactive'}`}
+                    onClick={(e) => { if (!useSlice) return; setSlicePlane?.('yz') }}
                     disabled={!useSlice}
+                    aria-disabled={!useSlice}
+                    title={!useSlice ? "Enable slicing to change plane" : "Select YZ plane"}
                   >
                     YZ
                   </button>
                   <button
-                    className={`plane-btn ${slicePlane === 'xz' ? 'active' : ''}`}
-                    onClick={() => setSlicePlane?.('xz')}
+                    className={`plane-button ${slicePlane === 'xz' && useSlice ? 'active' : 'inactive'}`}
+                    onClick={(e) => { if (!useSlice) return; setSlicePlane?.('xz') }}
                     disabled={!useSlice}
+                    aria-disabled={!useSlice}
+                    title={!useSlice ? "Enable slicing to change plane" : "Select XZ plane"}
                   >
                     XZ
                   </button>
+                </div>
                 </div>
               </div>
 

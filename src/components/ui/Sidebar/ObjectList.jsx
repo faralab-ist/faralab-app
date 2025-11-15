@@ -20,6 +20,8 @@ export default function ObjectList({
   setSelectedId
 }) {
   const [expanded, setExpanded] = useState({});
+  const [errors, setErrors] = useState({}); // { [id]: { charge?: string, density?: string } }
+
   const toggle = (id) => setExpanded((s) => ({ ...s, [id]: !s[id] }));
 
   useEffect(() => {
@@ -43,62 +45,52 @@ export default function ObjectList({
 
   const onRemove = (id, name) => {
     if (!removeObject) return;
-    if (window.confirm(`Remove "${name || id}" from scene?`)) removeObject(id);
+    //if (window.confirm(`Remove "${name || id}" from scene?`)) 
+    removeObject(id);
   };
 
-  // Inline number input: estado local + commit só no blur/Enter
-  // Versão com estado local - mais segura para evitar re-renders
-  function InlineNumberInput({ value, onCommit, step = 0.01, style }) {
-    const [localValue, setLocalValue] = useState(value);
-    const [isFocused, setIsFocused] = useState(false);
+  // helpers for plain inputs
+  const parseNum = (s) => {
+    if (s === '' || s == null) return 0;
+    const n = parseFloat(String(s).replace(',', '.'));
+    return Number.isFinite(n) ? n : 0;
+  };
+  const isPartial = (s) => s === '' || s === '-' || s === '.' || s === '-.';
 
-    // Só sincroniza quando NÃO está focado
-    useEffect(() => {
-      if (!isFocused) {
-        setLocalValue(value);
-      }
-    }, [value, isFocused]);
+  const formatFixed = (raw, decimals = 2) => {
+     const n = parseNum(raw);
+     return n.toFixed(decimals);
+   };
+  
+  // bounds
+  const POS_MIN = -10, POS_MAX = 10;
+  const VAL_MIN = -5, VAL_MAX = 5;
+  const ERROR_MSG = `Please keep the value between ${VAL_MIN} and ${VAL_MAX}`;
+  const clampPos = (n) => Math.max(POS_MIN, Math.min(POS_MAX, n));
 
-    const handleChange = (e) => {
-      setLocalValue(e.target.value);
-    };
+  const setError = (id, key, msg) => {
+    setErrors(prev => ({ ...prev, [id]: { ...(prev[id] || {}), [key]: msg } }));
+  };
+  const clearError = (id, key) => {
+    setErrors(prev => {
+      const cur = { ...(prev[id] || {}) };
+      delete cur[key];
+      const next = { ...prev, [id]: cur };
+      if (!Object.keys(cur).length) { delete next[id]; }
+      return next;
+    });
+  };
 
-    const handleBlur = () => {
-      setIsFocused(false);
-      const numVal = localValue === '' ? 0 : parseFloat(localValue);
-      const finalVal = isNaN(numVal) ? 0 : numVal;
-      onCommit(finalVal);
-      setLocalValue(finalVal);
-    };
-
-    const handleFocus = () => {
-      setIsFocused(true);
-    };
-
-    const handleKeyDown = (e) => {
-      if (e.key === 'Enter') {
-        const numVal = localValue === '' ? 0 : parseFloat(localValue);
-        const finalVal = isNaN(numVal) ? 0 : numVal;
-        onCommit(finalVal);
-        setLocalValue(finalVal);
-        e.target.blur();
-      }
-    };
-
-    return (
-      <input
-        type="number"
-        inputMode="decimal"
-        value={localValue}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        onKeyDown={handleKeyDown}
-        step={step}
-        style={{ width: 84, padding: "4px 8px", ...style }}
-      />
-    );
-  }
+  const commitPosition = (obj, idx, raw) => {
+    const next = parseNum(raw);
+    const clamped = Math.max(POS_MIN, Math.min(POS_MAX, next));
+    const arr = Array.isArray(obj.position) ? [...obj.position] : [0, 0, 0];
+    arr[idx] = clamped;
+    updateObject?.(obj.id, { position: arr });
+  };
+  const commitField = (obj, field, raw) => {
+    updateObject?.(obj.id, { [field]: parseNum(raw) });
+  };
 
   const setPositionElem = (id, key, idx, newVal) => {
     if (!updateObject) return;
@@ -161,23 +153,77 @@ export default function ObjectList({
                   <div className="detail-row">
                     <div className="detail-key">Position</div>
                     <div className="detail-value" style={{ display: "flex", gap: 6 }}>
-                      <InlineNumberInput
-                        value={obj.position[0]}
-                        onCommit={(v) => setPositionElem(obj.id, "position", 0, v)}
+                      <input
+                        type="number"
+                        inputMode="decimal"
                         step={0.01}
-                        style={{ width: 72 }}
+                        defaultValue={obj.position[0]}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (isPartial(v)) return;
+                          const n = parseNum(v);
+                          const c = clampPos(n);
+                          commitPosition(obj, 0, c);
+                          if (n !== c) e.target.value = formatFixed(c, 2); // reflect clamp immediately
+                        }}
+                        onBlur={(e) => {
+                          const v = e.target.value;
+                          const n = clampPos(parseNum(isPartial(v) ? 0 : v));
+                          commitPosition(obj, 0, n);
+                          e.target.value = formatFixed(n, 2);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ width: 72, padding: "4px 8px" }}
                       />
-                      <InlineNumberInput
-                        value={obj.position[1]}
-                        onCommit={(v) => setPositionElem(obj.id, "position", 1, v)}
+                      <input
+                        type="number"
+                        inputMode="decimal"
                         step={0.01}
-                        style={{ width: 72 }}
+                        defaultValue={obj.position[1]}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (isPartial(v)) return;
+                          const n = parseNum(v);
+                          const c = clampPos(n);
+                          commitPosition(obj, 1, c);
+                          if (n !== c) e.target.value = formatFixed(c, 2);
+                        }}
+                        onBlur={(e) => {
+                          const v = e.target.value;
+                          const n = clampPos(parseNum(isPartial(v) ? 0 : v));
+                          commitPosition(obj, 1, n);
+                          e.target.value = formatFixed(n, 2);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ width: 72, padding: "4px 8px" }}
                       />
-                      <InlineNumberInput
-                        value={obj.position[2]}
-                        onCommit={(v) => setPositionElem(obj.id, "position", 2, v)}
+                      <input
+                        type="number"
+                        inputMode="decimal"
                         step={0.01}
-                        style={{ width: 72 }}
+                        defaultValue={obj.position[2]}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (isPartial(v)) return;
+                          const n = parseNum(v);
+                          const c = clampPos(n);
+                          commitPosition(obj, 2, c);
+                          if (n !== c) e.target.value = formatFixed(c, 2);
+                        }}
+                        onBlur={(e) => {
+                          const v = e.target.value;
+                          const n = clampPos(parseNum(isPartial(v) ? 0 : v));
+                          commitPosition(obj, 2, n);
+                          e.target.value = formatFixed(n, 2);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ width: 72, padding: "4px 8px" }}
                       />
                     </div>
                   </div>
@@ -188,13 +234,43 @@ export default function ObjectList({
                   <div className="detail-row">
                     <div className="detail-key">Intensity C</div>
                     <div className="detail-value">
-                      <InlineNumberInput
-                        value={obj.charge}
-                        onCommit={(v) => updateObject?.(obj.id, { charge: v })}
-                        step={0.1}
-                        style={{ width: 140 }}
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        step={0.25}
+                        defaultValue={obj.charge ?? 0}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          if (isPartial(v)) return;
+                          const n = parseNum(v);
+                          if (n < VAL_MIN || n > VAL_MAX) {
+                            setError(obj.id, 'charge', ERROR_MSG);
+                            return;
+                          }
+                          clearError(obj.id, 'charge');
+                          commitField(obj, 'charge', n);
+                        }}
+                        min={VAL_MIN}
+                        max={VAL_MAX}
+                        onBlur={(e) => {
+                          const v = e.target.value;
+                          const n = parseNum(isPartial(v) ? 0 : v);
+                          // on blur, commit 0 if partial, otherwise keep typed value
+                          if (isPartial(v)) commitField(obj, 'charge', v);
+                          // update error state according to bounds
+                          if (n < VAL_MIN || n > VAL_MAX) setError(obj.id, 'charge', ERROR_MSG);
+                          else clearError(obj.id, 'charge');
+                          e.target.value = formatFixed(v, 2);
+                        }}
+                        onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ width: 140, padding: "4px 8px" }}
                       />
                     </div>
+                   {errors[obj.id]?.charge && (
+                     <div className="error-text">{errors[obj.id].charge}</div>
+                   )}
                   </div>
                 )}
 
@@ -204,13 +280,41 @@ export default function ObjectList({
                     <div className="detail-row">
                       <div className="detail-key">Superficial Charge Density σ</div>
                       <div className="detail-value">
-                        <InlineNumberInput
-                          value={obj.charge_density}
-                          onCommit={(v) => updateObject?.(obj.id, { charge_density: v })}
+                        <input
+                          type="number"
+                          inputMode="decimal"
                           step={0.1}
-                          style={{ width: 140 }}
+                          defaultValue={obj.charge_density ?? 0}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (isPartial(v)) return;
+                            const n = parseNum(v);
+                            if (n < VAL_MIN || n > VAL_MAX) {
+                              setError(obj.id, 'density', ERROR_MSG);
+                              return;
+                            }
+                            clearError(obj.id, 'density');
+                            commitField(obj, 'charge_density', n);
+                          }}
+                          min={VAL_MIN}
+                          max={VAL_MAX}
+                          onBlur={(e) => {
+                            const v = e.target.value;
+                            const n = parseNum(isPartial(v) ? 0 : v);
+                            if (isPartial(v)) commitField(obj, 'charge_density', v);
+                            if (n < VAL_MIN || n > VAL_MAX) setError(obj.id, 'density', ERROR_MSG);
+                            else clearError(obj.id, 'density');
+                            e.target.value = formatFixed(v, 2);
+                          }}
+                          onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ width: 140, padding: "4px 8px" }}
                         />
                       </div>
+                     {errors[obj.id]?.density && (
+                       <div className="error-text">{errors[obj.id].density}</div>
+                     )}
                     </div>
 
                     <div className="detail-row">
@@ -221,6 +325,8 @@ export default function ObjectList({
                             type="checkbox"
                             checked={obj.infinite || false}
                             onChange={(e) => updateObject?.(obj.id, { infinite: e.target.checked })}
+                           onMouseDown={(e) => e.stopPropagation()}
+                           onClick={(e) => e.stopPropagation()}
                           />
                         </label>
                       </div>
@@ -234,13 +340,41 @@ export default function ObjectList({
                     <div className="detail-row">
                       <div className="detail-key">Linear Charge Density λ</div>
                       <div className="detail-value">
-                        <InlineNumberInput
-                          value={obj.charge_density}
-                          onCommit={(v) => updateObject?.(obj.id, { charge_density: v })}
+                        <input
+                          type="number"
+                          inputMode="decimal"
                           step={0.1}
-                          style={{ width: 140 }}
+                          defaultValue={obj.charge_density ?? 0}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (isPartial(v)) return;
+                            const n = parseNum(v);
+                            if (n < VAL_MIN || n > VAL_MAX) {
+                              setError(obj.id, 'density', ERROR_MSG);
+                              return;
+                            }
+                            clearError(obj.id, 'density');
+                            commitField(obj, 'charge_density', n);
+                          }}
+                          min={VAL_MIN}
+                          max={VAL_MAX}
+                          onBlur={(e) => {
+                            const v = e.target.value;
+                            const n = parseNum(isPartial(v) ? 0 : v);
+                            if (isPartial(v)) commitField(obj, 'charge_density', v);
+                            if (n < VAL_MIN || n > VAL_MAX) setError(obj.id, 'density', ERROR_MSG);
+                            else clearError(obj.id, 'density');
+                            e.target.value = formatFixed(v, 2);
+                          }}
+                          onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ width: 140, padding: "4px 8px" }}
                         />
                       </div>
+                    {errors[obj.id]?.density && (
+                       <div className="error-text">{errors[obj.id].density}</div>
+                     )}
                     </div>
 
                     <div className="detail-row">
@@ -251,6 +385,8 @@ export default function ObjectList({
                             type="checkbox"
                             checked={obj.infinite || false}
                             onChange={(e) => updateObject?.(obj.id, { infinite: e.target.checked })}
+                           onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
                           />
                         </label>
                       </div>
@@ -262,7 +398,7 @@ export default function ObjectList({
                 <div className="detail-row">
                   <div className="detail-key">Actions</div>
                   <div className="detail-value" style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => onRemove(obj.id, obj.name)} style={{ padding: "6px 8px" }}>
+                    <button onClick={(e) => { e.stopPropagation(); onRemove(obj.id, obj.name); }} style={{ padding: "6px 8px" }}>
                       Remove
                     </button>
                   </div>
