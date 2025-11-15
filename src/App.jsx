@@ -299,7 +299,7 @@ function LoadingOverlay() {
           }}
         />
         
-        <ObjectPopup
+       {/* <ObjectPopup
           selectedObject={sceneObjects.find(o => o.id === selectedId)}
           updateObject={updateObject}
           removeObject={removeObject}
@@ -309,7 +309,7 @@ function LoadingOverlay() {
           setSelectedId={setSelectedId}
           sidebarOpen={sidebarOpen} 
           isSidebarMinimized={isSidebarMinimized}
-        />
+        /> */}
         
         <Sidebar
           objects={sceneObjects}

@@ -33,7 +33,7 @@ export default function Sidebar({
     if (typeof onMinimizedChange === "function") onMinimizedChange(minimized);
   }, [minimized, onMinimizedChange]);
 
-  const togglePanel = () => setIsOpen((p) => !p);
+  const togglePanel = () => {setIsOpen((p) => !p); setExpandId(null) };
   const openPanel = (idToOpen = null) => {
     if (idToOpen) setExpandId(idToOpen);
     setIsOpen?.(true);
@@ -92,6 +92,7 @@ export default function Sidebar({
       if (settingsEl && settingsEl.contains(e.target)) return
       // outside click -> close sidebar
       setIsOpen?.(false)
+      setExpandId(null)
     }
     document.addEventListener('mousedown', onDocMouseDown)
     return () => document.removeEventListener('mousedown', onDocMouseDown)
@@ -124,7 +125,7 @@ export default function Sidebar({
                   onClick={() => {openPanel(item.id); handleRowClick(item) }}
                   
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(obj); }
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(item); }
               }}
                   title={item.name || item.label}
                 >
