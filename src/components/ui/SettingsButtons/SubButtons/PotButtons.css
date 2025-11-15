@@ -1,0 +1,101 @@
+.settings-panel .slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.settings-panel .slider-label {
+  font-size: 0.7rem;
+  color: #aebccc;
+}
+.settings-panel .slider-value {
+  color: #d7e6f7;
+  font-weight: 600;
+  margin-left: 4px;
+}
+.settings-panel input[type="range"] {
+  width: 100%;
+}
+
+/* Zero-centered range slider for Potential */
+.potential-slider {
+  width: 100%;
+  background: transparent;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Remove focus outline */
+.potential-slider:focus {
+  outline: none;
+}
+
+.potential-slider::-webkit-slider-runnable-track {
+  outline: none;
+  height: 8px;
+  border-radius: 9999px;
+  border: 1px solid #2e2e2e;
+  /* Left half (neg) + right half (pos) + center marker */
+  background:
+    linear-gradient(90deg,
+      rgba(116, 116, 116, 0.18) 0%,
+      rgba(128, 128, 128, 0.18) 50%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(120, 170, 255, 0.18) 100%
+    ),
+    linear-gradient(90deg,
+      transparent calc(50% - 1px),
+      rgba(214, 230, 255, 0.7) 50%,
+      transparent calc(50% + 1px)
+    ),
+    #1e1e1e;
+}
+.potential-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -5px; /* center the 14px thumb on 8px track */
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e6e6e6;
+  border: 1px solid #3f3f3f;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
+  cursor: pointer;
+}
+/* Remove the border-color change on focus if you don't want any visual feedback */
+.potential-slider:focus::-webkit-slider-runnable-track {
+  border-color: #2e2e2e; /* keep same as default, or remove this rule entirely */
+}
+
+/* Firefox */
+.potential-slider::-moz-range-track {
+  height: 8px;
+  border-radius: 9999px;
+  border: 1px solid #2e2e2e;
+  background:
+    linear-gradient(90deg,
+      rgba(232, 94, 94, 0.18) 0%,
+      rgba(232, 94, 94, 0.18) 50%,
+      rgba(120, 170, 255, 0.18) 50%,
+      rgba(120, 170, 255, 0.18) 100%
+    ),
+    linear-gradient(90deg,
+      transparent calc(50% - 1px),
+      rgba(214, 230, 255, 0.7) 50%,
+      transparent calc(50% + 1px)
+    ),
+    #1a1a1a;
+}
+.potential-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e6e6e6;
+  border: 1px solid #3f3f3f;
+  cursor: pointer;
+}
+/* Remove Firefox focus outline */
+.potential-slider::-moz-focus-outer {
+  border: 0;
+}

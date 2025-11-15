@@ -314,189 +314,59 @@
   border-color: #3f6f9d;
 }
 
-.settings-panel .slider-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 8px;
-}
-.settings-panel .slider-label {
-  font-size: 0.7rem;
-  color: #aebccc;
-}
-.settings-panel .slider-value {
-  color: #d7e6f7;
-  font-weight: 600;
-  margin-left: 4px;
-}
-.settings-panel input[type="range"] {
-  width: 100%;
-}
 
-/* Zero-centered range slider for Potential */
-.potential-slider {
-  width: 100%;
-  background: transparent;
-  outline: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
 
-/* Remove focus outline */
-.potential-slider:focus {
+/* tabs */
+.fieldview-tabs .fieldview-tab { padding: 6px 10px; background: transparent; border: 0; cursor: pointer }
+.fieldview-tabs .fieldview-tab.active { font-weight: 700; text-decoration: underline; }
+
+/* ensure plane buttons at bottom are visually attached */
+.fieldview-plane-bottom { border-top: 1px solid rgba(255,255,255,0.04); }
+
+/* Don't show a focus/outline or "highlight" around the panel when tabs are clicked */
+.settings-panel,
+.fieldview-panel {
   outline: none;
 }
 
-.potential-slider::-webkit-slider-runnable-track {
-  outline: none;
-  height: 8px;
-  border-radius: 9999px;
-  border: 1px solid #2e2e2e;
-  /* Left half (neg) + right half (pos) + center marker */
-  background:
-    linear-gradient(90deg,
-      rgba(116, 116, 116, 0.18) 0%,
-      rgba(128, 128, 128, 0.18) 50%,
-      rgba(255, 255, 255, 0.18) 50%,
-      rgba(120, 170, 255, 0.18) 100%
-    ),
-    linear-gradient(90deg,
-      transparent calc(50% - 1px),
-      rgba(214, 230, 255, 0.7) 50%,
-      transparent calc(50% + 1px)
-    ),
-    #1e1e1e;
-}
-.potential-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  margin-top: -5px; /* center the 14px thumb on 8px track */
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #e6e6e6;
-  border: 1px solid #3f3f3f;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
-  cursor: pointer;
-}
-/* Remove the border-color change on focus if you don't want any visual feedback */
-.potential-slider:focus::-webkit-slider-runnable-track {
-  border-color: #2e2e2e; /* keep same as default, or remove this rule entirely */
+/* Prevent the focus-within state from drawing extra box-shadow/border */
+.settings-panel:focus-within,
+.fieldview-panel:focus-within {
+  box-shadow: none !important;
+  border-color: rgba(255,255,255,0.03) !important; /* keep subtle border if desired */
 }
 
-/* Firefox */
-.potential-slider::-moz-range-track {
-  height: 8px;
-  border-radius: 9999px;
-  border: 1px solid #2e2e2e;
-  background:
-    linear-gradient(90deg,
-      rgba(232, 94, 94, 0.18) 0%,
-      rgba(232, 94, 94, 0.18) 50%,
-      rgba(120, 170, 255, 0.18) 50%,
-      rgba(120, 170, 255, 0.18) 100%
-    ),
-    linear-gradient(90deg,
-      transparent calc(50% - 1px),
-      rgba(214, 230, 255, 0.7) 50%,
-      transparent calc(50% + 1px)
-    ),
-    #1a1a1a;
-}
-.potential-slider::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #e6e6e6;
-  border: 1px solid #3f3f3f;
-  cursor: pointer;
-}
-/* Remove Firefox focus outline */
-.potential-slider::-moz-focus-outer {
-  border: 0;
+/* Remove button focus ring on the tabs themselves */
+.fieldview-tab,
+.fieldview-tab:focus,
+.fieldview-tab:active {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.efield-section {
-  border: 1px solid #222;
-  padding: 10px 10px 12px;
-  border-radius: 10px;
-  background: #121212;
+/* If you also want to hide the little triangular pointer under the panel, uncomment: */
+* .settings-panel::before, .fieldview-panel::before { display: none; } 
+
+
+/* make the buttons flow inline inside the parent panel instead of fixed on screen */
+.plane-buttons-container {
+  position: static;      /* allow it to live inside the parent container */
+  top: auto;
+  left: auto;
+  z-index: auto;
+  pointer-events: auto;  /* enable interactions when inside the panel */
+  margin: 0;
+  display: block;
+}
+
+.plane-buttons-group {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  pointer-events: auto;
+  align-items: center;
 }
 
-.efield-section-title {
-  font-size: 0.68rem;   /* bigger */
-  font-weight: 700;     /* chonkier */
-  letter-spacing: .35px;
-  color: #c2d7ee;       /* slightly brighter */
-  text-transform: uppercase;
-  opacity: .95;
-}
-
-.efield-row.compact {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;                    /* tighter */
-  align-items: center;         /* align inputs nicely */
-}
-
-.efield-label {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;      /* keep input from stretching */
-}
-
-.efield-label .label-text {
-  font-size: 0.62rem;   /* bigger */
-  font-weight: 700;     /* chonkier */
-  letter-spacing: .3px;
-  color: #8ea2b6;
-}
-
-.efield-label input {
-  /* keep compact box size, but make text heavier/bigger */
-  width: 76px;
-  min-width: 64px;
-  height: 26px;
-  padding: 4px 8px;
-  font-size: 0.72rem;   /* bigger numbers/text */
-  font-weight: 700;     /* chonkier numbers/text */
-  letter-spacing: .2px;
-  line-height: 1.1;
-  background: #1a1c1f;
-  border: 1px solid #3a3f46;
-  color: #eef4ff;
-  border-radius: 6px;
-  outline: none;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  transition: border-color .15s, background .15s, color .15s;
-}
-
-.efield-label input:focus {
-  border-color: #4a6d94;
-  background: #20252a;
-  color: #ffffff;
-}
-
-.efield-label input:disabled {
-  opacity: .35;
-  cursor: not-allowed;
-}
-
-/* Plane Filter Buttons */
-.plane-filter-buttons {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  padding: 4px 0;
-}
-
-.plane-btn {
+.plane-button {
   flex: 1;
   padding: 8px 12px;
   background: rgba(60, 60, 60, 0.6);
@@ -509,19 +379,63 @@
   cursor: pointer;
   transition: all 0.2s ease;
   backdrop-filter: blur(8px);
+  
 }
 
-.plane-btn:hover {
+.plane-button.inactive:hover {
   background: rgba(100, 100, 100, 0.7);
-  border-color: rgba(255, 255, 255, 0.8);
-  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  transform: scale(1.05);
 }
 
-.plane-btn.active {
+.plane-button.active {
   background: rgba(70, 130, 255, 0.7);
   border-color: rgba(100, 180, 255, 1);
-  box-shadow: 0 0 15px rgba(70, 130, 255, 0.6);
+  box-shadow: 0 0 25px rgba(70, 130, 255, 0.8);
 }
+.plane-button.active:hover {
+  background: rgba(70, 130, 255, 0.7);
+  border-color: rgba(100, 180, 255, 1);
+  box-shadow: 0 0 25px rgba(70, 130, 255, 0.8);
+  transform: scale(1.05);
+}
+
+/* make disabled plane buttons visibly inert */
+.plane-button:disabled,
+.plane-button[aria-disabled="true"] {
+  opacity: 0.48;
+  cursor: not-allowed;
+  filter: grayscale(8%);
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+  border-color: rgba(255,255,255,0.12);
+  background: rgba(30,30,30,0.6);
+}
+
+.plane-label {
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 1);
+  user-select: none;
+  letter-spacing: 1px;
+}
+
+.plane-buttons-title {
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 8px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+
+
+
+
+
 
 
 
