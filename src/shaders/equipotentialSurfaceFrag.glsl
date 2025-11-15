@@ -56,23 +56,49 @@ uniform float slicePos;
 
 bool isBehindSlice(vec3 point) {
     if (!useSlice) return false;
-    
-    if (slicePlane.x > 0.5) return point.x < slicePos;
-    if (slicePlane.y > 0.5) return point.y < slicePos;
-    if (slicePlane.z > 0.5) return point.z < slicePos;
+
+    // X axis slice
+    if (abs(slicePlane.x) > 0.5) {
+        float s = sign(slicePlane.x);
+        float dist = s * (point.x - slicePos);
+        return dist < 0.0;
+    }
+
+    // Y axis slice
+    if (abs(slicePlane.y) > 0.5) {
+        float s = sign(slicePlane.y);
+        float dist = s * (point.y - slicePos);
+        return dist < 0.0;
+    }
+
+    // Z axis slice
+    if (abs(slicePlane.z) > 0.5) {
+        float s = sign(slicePlane.z);
+        float dist = s * (point.z - slicePos);
+        return dist < 0.0;
+    }
+
     return false;
 }
 
 
 float sliceFade(vec3 point) {
     if (!useSlice) return 1.0;
-    
+
     float dist = 0.0;
-    if (slicePlane.x > 0.5) dist = point.x - slicePos;
-    if (slicePlane.y > 0.5) dist = point.y - slicePos;
-    if (slicePlane.z > 0.5) dist = point.z - slicePos;
-    
     float smoothZone = 0.02; 
+
+    if (abs(slicePlane.x) > 0.5) {
+        float s = sign(slicePlane.x);
+        dist = s * (point.x - slicePos);
+    } else if (abs(slicePlane.y) > 0.5) {
+        float s = sign(slicePlane.y);
+        dist = s * (point.y - slicePos);
+    } else if (abs(slicePlane.z) > 0.5) {
+        float s = sign(slicePlane.z);
+        dist = s * (point.z - slicePos);
+    }
+
     return smoothstep(-smoothZone, 0.0, dist);
 }
 

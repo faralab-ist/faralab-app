@@ -6,7 +6,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane, ChargedSphere} from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper} from './components/models'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -165,9 +165,11 @@ function LoadingOverlay() {
     const [hoveredId, setHoveredId] = useState(null)
     
     // slicing planes stuff
-    const [slicePlane, setSlicePlane] = useState('yz') // 'xy', 'yz', 'xz'
+    const [slicePlane, setSlicePlane] = useState('xz') // 'xy', 'yz', 'xz'
     const [slicePos, setSlicePos] = useState(-0.1)
     const [useSlice, setUseSlice] = useState(false)
+    const [showSlicePlaneHelper, setShowSlicePlaneHelper] = useState(true)
+    const [slicePlaneFlip, setSlicePlaneFlip] = useState(false)
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
 
     const handleSelect = (id) => {
@@ -375,6 +377,7 @@ function LoadingOverlay() {
                 slicePlane={slicePlane}
                 slicePos={slicePos}
                 useSlice={useSlice}
+                slicePlaneFlip={slicePlaneFlip}
                 dragOwnerId={dragOwnerId}
                 gridDimensions={obj.type === 'wire' || obj.type === 'plane' ? [20, 20] : undefined}
               />
@@ -392,6 +395,7 @@ function LoadingOverlay() {
         slicePlane={slicePlane}
         slicePos={slicePos}
         useSlice={useSlice}
+        slicePlaneFlip={slicePlaneFlip}
         />
         )}
 
@@ -403,6 +407,7 @@ function LoadingOverlay() {
           planeFilter={activePlane}  slicePlane={slicePlane}
           slicePos={slicePos}
           useSlice={useSlice}
+          slicePlaneFlip={slicePlaneFlip}
           />
         )}
 
@@ -411,8 +416,13 @@ function LoadingOverlay() {
                 slicePlane={slicePlane}
                 slicePos={slicePos}
                 useSlice={useSlice}
+                slicePlaneFlip={slicePlaneFlip}
             /> 
           )}
+
+          {useSlice && showSlicePlaneHelper && (<SlicePlaneHelper 
+                slicePlane={slicePlane}
+                slicePos={slicePos}/>)}
         </Canvas>
 
         <SettingsButtons //epa, ya its ugly, i know - yours truly, gabriel; All gud g
@@ -441,6 +451,16 @@ function LoadingOverlay() {
           setLineNumber={setLineNumber}          //LINE SETTINGS NEW
           activePlane={activePlane}
           onPlaneSelect={handlePlaneSelect}
+          useSlice={useSlice}
+          setUseSlice={setUseSlice}
+          slicePlane={slicePlane}
+          setSlicePlane={setSlicePlane}
+          slicePos={slicePos}
+          setSlicePos={setSlicePos}
+          showSliceHelper={showSlicePlaneHelper}
+          setShowSliceHelper={setShowSlicePlaneHelper}
+          slicePlaneFlip={slicePlaneFlip}
+          setSlicePlaneFlip={setSlicePlaneFlip}
         />
       </div>
       </>

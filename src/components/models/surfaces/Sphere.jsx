@@ -3,7 +3,17 @@ import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
 
-
+function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
+    if(!useSlice) return true;
+    switch(slicePlane){
+        case 'xy':
+            return slicePlaneFlip ^ point.z > slicePos;
+        case 'yz':
+            return slicePlaneFlip ^ point.x > slicePos;
+        case 'xz':
+            return slicePlaneFlip ^ point.y > slicePos;
+    }
+}
 
 export default function Sphere({
   id,
@@ -19,7 +29,8 @@ export default function Sphere({
   creativeMode,
   slicePlane,
   slicePos,
-  useSlice
+  useSlice,
+  slicePlaneFlip
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -62,14 +73,15 @@ export default function Sphere({
 
   const clippingPlanes = useMemo(() => {
     if (!useSlice) return [];
-
-    switch (slicePlane) {
-      case 'xy': return [new THREE.Plane(new THREE.Vector3(0, 0, 1), slicePos)];
-      case 'yz': return [new THREE.Plane(new THREE.Vector3(1, 0, 0), slicePos)];
-      case 'xz': return [new THREE.Plane(new THREE.Vector3(0, 1, 0), slicePos)];
+      let sliceFlip = -1;
+      if(slicePlaneFlip) sliceFlip = 1;
+      switch (slicePlane) {
+      case 'xy': return [new THREE.Plane(new THREE.Vector3(0, 0, -sliceFlip), sliceFlip * slicePos)];
+      case 'yz': return [new THREE.Plane(new THREE.Vector3(-sliceFlip, 0, 0), sliceFlip * slicePos)];
+      case 'xz': return [new THREE.Plane(new THREE.Vector3(0, -sliceFlip, 0), sliceFlip * slicePos)];
       default: return [];
     }
-  }, [slicePlane, slicePos, useSlice]);
+  }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
 
 
   return (
@@ -132,13 +144,14 @@ export default function Sphere({
 
         {isSelected && (
           <group name="sphere-normal">
+            {sliceByPlane(mainNormal.origin, slicePlane, slicePos, useSlice, slicePlaneFlip) && 
             <NormalArrow
               origin={mainNormal.origin}
               dir={mainNormal.dir}
               length={arrowLen}
               color="red"
               opacity={opacity}
-            />
+            />}
           </group>
         )}
       </group>

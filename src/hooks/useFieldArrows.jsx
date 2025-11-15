@@ -9,15 +9,15 @@ import vertexShaderSource from '../shaders/arrowVertex.glsl';
 import fragmentShaderSource from '../shaders/arrowFragment.glsl';
 
 // returns true if point is 'after' the plane
-function sliceByPlane(point, slicePlane, slicePos, useSlice){
+function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
     if(!useSlice) return true;
     switch(slicePlane){
         case 'xy':
-            return point.z > slicePos;
+            return slicePlaneFlip ^ point.z > slicePos; // i hope this works // check later
         case 'yz':
-            return point.x > slicePos;
+            return slicePlaneFlip ^ point.x > slicePos;
         case 'xz':
-            return point.y > slicePos;
+            return slicePlaneFlip ^ point.y > slicePos;
     }
 }
 
@@ -33,14 +33,15 @@ export default function FieldArrows({
     planeFilter = null,
     slicePlane,
     slicePos,
-    useSlice
+    useSlice,
+    slicePlaneFlip
 }) {
     const vectorsUnfiltered = useMemo( 
         () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
         [objects, showOnlyPlane, showOnlyGaussianField, planeFilter]
     );
     const vectors = vectorsUnfiltered.filter(({position, field}) => 
-        sliceByPlane(position, slicePlane, slicePos, useSlice)
+        sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)
     );
 
     const MAX_L = useMemo(() => {

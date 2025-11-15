@@ -3,15 +3,15 @@ import { useMemo } from 'react';
 import calculateFieldAtPoint from '../utils/calculateField.js';
 
 // returns true if point is 'after' the plane
-function sliceByPlane(point, slicePlane, slicePos, useSlice){
+function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
     if(!useSlice) return true;
     switch(slicePlane){
         case 'xy':
-            return point.z > slicePos;
+            return slicePlaneFlip ^ point.z > slicePos;
         case 'yz':
-            return point.x > slicePos;
+            return slicePlaneFlip ^ point.x > slicePos;
         case 'xz':
-            return point.y > slicePos;
+            return slicePlaneFlip ^ point.y > slicePos;
     }
 }
 
@@ -156,7 +156,7 @@ const traceFieldLineFromPoint = (startPoint, sourceObj, allObjects, stepsPerLine
     return points;
 };
 
-export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5, minStrength = 0.1, linesPerCharge = 20, planeFilter = null, slicePlane, slicePos, useSlice}) {
+export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5, minStrength = 0.1, linesPerCharge = 20, planeFilter = null, slicePlane, slicePos, useSlice, slicePlaneFlip}) {
     
     const fieldLinesData = useMemo(() => {
         const lines = [];
@@ -272,12 +272,12 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
             }
         });
 
-        return lines.filter(line => line.points.some(p => sliceByPlane(p, slicePlane, slicePos, useSlice)))
+        return lines.filter(line => line.points.some(p => sliceByPlane(p, slicePlane, slicePos, useSlice, slicePlaneFlip)))
                 .map(line => ({
                     ...line,
-                    points: line.points.filter(p => sliceByPlane(p, slicePlane, slicePos, useSlice))
+                    points: line.points.filter(p => sliceByPlane(p, slicePlane, slicePos, useSlice, slicePlaneFlip))
                 }))
-    }, [charges, linesPerCharge, stepsPerLine, stepSize, minStrength, planeFilter]);
+    }, [charges, linesPerCharge, stepsPerLine, stepSize, minStrength, planeFilter, slicePlane, slicePos, useSlice, slicePlaneFlip]);
 
     // Create both lines AND arrow helpers like the original
     const linesAndArrows = useMemo(() => {

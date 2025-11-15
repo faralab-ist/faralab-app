@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import equipotentialShaderFragmentSource from '../../../shaders/equipotentialSurfaceFrag.glsl';
 import { EPSILON_0, K_E } from '../../../utils/constants.js';
 
-export default function EquipotentialSurface({ objects, targetValue = 5.0, transparency = 0.6, slicePlane, slicePos, useSlice }) {
+export default function EquipotentialSurface({ objects, targetValue = 5.0, transparency = 0.6, slicePlane, slicePos, useSlice, slicePlaneFlip}) {
     const { camera } = useThree();
 
     const material = useMemo(() => {
@@ -124,9 +124,11 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
         material.uniforms.targetVal.value = targetValue;
         material.uniforms.transparency.value = transparency;
         material.uniforms.useSlice.value = useSlice;
-        if (slicePlane === 'xy') material.uniforms.slicePlane.value.set(0,0,1);
-        else if (slicePlane === 'yz') material.uniforms.slicePlane.value.set(1,0,0);
-        else if (slicePlane === 'xz') material.uniforms.slicePlane.value.set(0,1,0);
+        let sliceFlip = 1;
+        if (slicePlaneFlip) sliceFlip = -1;
+        if (slicePlane === 'xy') material.uniforms.slicePlane.value.set(0,0,sliceFlip);
+        else if (slicePlane === 'yz') material.uniforms.slicePlane.value.set(sliceFlip,0,0);
+        else if (slicePlane === 'xz') material.uniforms.slicePlane.value.set(0,sliceFlip,0);
         material.uniforms.slicePos.value = slicePos;
     });
 
