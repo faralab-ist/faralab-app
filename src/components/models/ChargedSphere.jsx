@@ -17,6 +17,7 @@ export default function Sphere({
   radius,
   isHollow = false,
   slicePlane,
+  slicePlaneFlip,
   slicePos,
   useSlice,
   creativeMode            // NEW
@@ -47,14 +48,15 @@ export default function Sphere({
 
     const clippingPlanes = useMemo(() => {
         if (!useSlice) return [];
-
+        let sliceFlip = -1;
+        if(slicePlaneFlip) sliceFlip = 1;
         switch (slicePlane) {
-        case 'xy': return [new THREE.Plane(new THREE.Vector3(0, 0, 1), slicePos)];
-        case 'yz': return [new THREE.Plane(new THREE.Vector3(1, 0, 0), slicePos)];
-        case 'xz': return [new THREE.Plane(new THREE.Vector3(0, 1, 0), slicePos)];
+        case 'xy': return [new THREE.Plane(new THREE.Vector3(0, 0, -sliceFlip), sliceFlip * slicePos)];
+        case 'yz': return [new THREE.Plane(new THREE.Vector3(-sliceFlip, 0, 0), sliceFlip * slicePos)];
+        case 'xz': return [new THREE.Plane(new THREE.Vector3(0, -sliceFlip, 0), sliceFlip * slicePos)];
         default: return [];
         }
-    }, [slicePlane, slicePos, useSlice]);
+    }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
 
   return (
     <PivotControls

@@ -32,7 +32,18 @@ export default function SettingsButtons({
   lineNumber,
   setLineNumber,
   activePlane,
-  onPlaneSelect
+  onPlaneSelect,
+  // added now
+  useSlice,
+  setUseSlice,
+  slicePlane,
+  setSlicePlane,
+  slicePos,
+  setSlicePos,
+  showSliceHelper,
+  setShowSliceHelper,
+  slicePlaneFlip,
+  setSlicePlaneFlip
 }) {
   const [open, setOpen] = useState(null)
   const toggle = (k) => setOpen(p => p === k ? null : k)
@@ -333,6 +344,88 @@ export default function SettingsButtons({
                   value={potentialTarget ?? 0}
                   onChange={(e) => setPotentialTarget?.(parseFloat(e.target.value))}
                 />
+              </div>
+            </div>
+          )}
+        </div>
+          
+        <div className="settings-group">
+          <button
+            className={`settings-main big ${open === 'slicing' ? 'open' : ''}`}
+            onClick={() => toggle('slicing')}
+          >
+            Slicing
+          </button>
+          {open === 'slicing' && (
+            <div className="settings-panel up">
+              <div className="slice-row">
+                <button
+                  onClick={() => setUseSlice?.(!useSlice)}
+                >
+                  {useSlice ? 'Disable Slicing' : 'Enable Slicing'}
+                </button>
+                <button
+                 className={`helper-btn ${showSliceHelper ? 'active' : ''}`}
+                 onClick={() => setShowSliceHelper?.(!showSliceHelper)}
+                 disabled={!useSlice}
+                 title="Toggle slice helper"
+               >
+                 {showSliceHelper ? 'Hide Helper' : 'Show Helper'}
+               </button>
+               <button
+                className={`flip-btn ${slicePlaneFlip ? 'active' : ''}`}
+                onClick={() => setSlicePlaneFlip?.(!slicePlaneFlip)}
+                disabled={!useSlice}
+                title="Flip slice plane orientation"
+              >
+                Flip slice orientation
+              </button>
+              </div>
+
+              <div className="efield-section">
+                <div className="efield-section-title">Slicing Plane</div>
+                <div className="plane-filter-buttons">
+                  <button
+                    className={`plane-btn ${slicePlane === 'xy' ? 'active' : ''}`}
+                    onClick={() => setSlicePlane?.('xy')}
+                    disabled={!useSlice}
+                  >
+                    XY
+                  </button>
+                  <button
+                    className={`plane-btn ${slicePlane === 'yz' ? 'active' : ''}`}
+                    onClick={() => setSlicePlane?.('yz')}
+                    disabled={!useSlice}
+                  >
+                    YZ
+                  </button>
+                  <button
+                    className={`plane-btn ${slicePlane === 'xz' ? 'active' : ''}`}
+                    onClick={() => setSlicePlane?.('xz')}
+                    disabled={!useSlice}
+                  >
+                    XZ
+                  </button>
+                </div>
+              </div>
+
+              <div className="efield-section">
+                <div className="efield-section-title">Slicing coordinate</div>
+                <div className="efield-row compact">
+                  <label className="efield-label slider-label">
+                    <input
+                      type="range"
+                      //this shouldnt be hardcoded ill fix later
+                      min={-10}
+                      max={10}
+                      step={0.1}
+                      value={slicePos ?? 0}
+                      onChange={e => setSlicePos?.(parseFloat(e.target.value))}
+                      disabled={!useSlice}
+                    />
+                    <span className="slider-value">{Number(slicePos ?? 0).toFixed(2)}</span>
+                  </label>
+                </div>
               </div>
             </div>
           )}
