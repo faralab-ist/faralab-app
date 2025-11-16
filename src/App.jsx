@@ -175,6 +175,7 @@ function LoadingOverlay() {
     const handleSelect = (id) => {
       setSelectedId(id)
       setIsPanelMinimized(false)
+      setSidebarOpen(true)
     }
 
     const handleDragging = (dragging) => {
@@ -190,6 +191,8 @@ function LoadingOverlay() {
     const handleBackgroundClick = (e) => {
       if (e.target.id === 'canvas-container' || e.target.tagName === 'CANVAS') {
         setIsPanelMinimized(true)
+        setSelectedId(null)
+        setSidebarOpen(false)
       }
     }
 
@@ -211,7 +214,7 @@ function LoadingOverlay() {
         // Volta para visão padrão
         if (camFns?.animateCameraPreset) {
           camFns.animateCameraPreset({
-            position: [15, 15, 15],
+            position: [10, 10, 10],
             target: [0, 0, 0],
             up: [0, 1, 0],
             duration: 0.8

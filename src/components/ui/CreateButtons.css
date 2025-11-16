@@ -214,7 +214,8 @@ button:hover {
   backdrop-filter: blur(6px);
 }
 
-.preset-dropdown.tl .expanded-panel button {
+.preset-dropdown.tl .expanded-panel button,
+.preset-dropdown.tl .expanded-panel .preset-actions button {
   width: 110px;
   padding: 6px 10px;
   font-size: 0.85rem;
@@ -228,6 +229,25 @@ button:hover {
   background: #2a2a2a;
   border-color: #444;
 }
+
+.preset-dropdown.tl .expanded-panel .preset-separator {
+  grid-column: 1 / -1;
+  height: 1px;
+  margin: 4px 0;
+  background: rgba(255,255,255,0.06);
+}
+
+/* place export/import as a full-width row directly under the presets */
+.preset-dropdown.tl .expanded-panel .preset-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start; /* change to center if you want them centered */
+  align-items: center;
+  padding-top: 0px;
+}
+
+
 
 /* Remove obsolete panel (no longer used) */
 .preset-panel { display: none; }

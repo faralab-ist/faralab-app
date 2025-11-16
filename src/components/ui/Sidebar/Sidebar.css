@@ -316,6 +316,7 @@
   font-family: monospace;
   font-size: 11px;
   overflow: hidden;
+  padding: 1px;
 }
 
 .object-details input[type="number"],

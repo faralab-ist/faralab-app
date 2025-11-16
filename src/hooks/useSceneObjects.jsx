@@ -26,6 +26,7 @@ const objectFactories = {
     charge: 1,
     charges: [],
     direction: [0, 0, 1], 
+    rotation: [0,0,0],
     height: 5,
     radius: 0.03,
     infinite: false,
@@ -40,6 +41,7 @@ const objectFactories = {
     charge_density: 0.1,
     charge: 1,
     charges: [],
+    rotation: [0,0,0],
     direction: [0, 1, 0], //normal
     dimensions: [4 , 4],
     planeWidth: 5,
@@ -84,6 +86,7 @@ const objectFactories = {
     radius: 2,
     height: 6,
     opacity: 0.5,
+    rotation: [0,0,0],
     charges: [],
     deformable: true,
     fixed: true,
@@ -102,6 +105,7 @@ const objectFactories = {
     charges: [],
     deformable: true,
     fixed: true,
+    rotation: [0,0,0],
     createdAt: Date.now(),
   }),
 }
