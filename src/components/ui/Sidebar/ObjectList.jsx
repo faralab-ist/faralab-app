@@ -66,9 +66,12 @@ export default function ObjectList({
   // bounds
   const POS_MIN = -10, POS_MAX = 10;
   const VAL_MIN = -5, VAL_MAX = 5;
-  const ANGLE_MIN = -360, ANGLE_MAX =360;
+  const ANGLE_MIN = -360, ANGLE_MAX = 360;
+  const DIM_MIN = 0.1;
+  const DIM_MAX = 10;
   const ERROR_MSG = `Please keep the value between ${VAL_MIN} and ${VAL_MAX}`;
   const clampPos = (n) => Math.max(POS_MIN, Math.min(POS_MAX, n));
+  const clampDim = (n) => Math.max(DIM_MIN, Math.min(DIM_MAX, n));
   const clampAngle= (n) =>  Math.min(360, n%360);
 
   const setError = (id, key, msg) => {
@@ -93,6 +96,14 @@ export default function ObjectList({
   };
   const commitField = (obj, field, raw) => {
     updateObject?.(obj.id, { [field]: parseNum(raw) });
+  };
+
+  const commitDimension = (obj, field, raw) => {
+    const v = raw;
+    if (isPartial(v)) return;
+    const n = parseNum(v);
+    const clamped = Math.max(DIM_MIN, Math.abs(n));
+    updateObject?.(obj.id, { [field]: clamped });
   };
 
   // Rotation helper: input in degrees, store as radians in obj.rotation [rx,ry,rz]
@@ -132,16 +143,7 @@ export default function ObjectList({
     } 
   };
 
-  // === DIMENSIONS HELPERS ===
-  const DIM_MIN = 0.001;
 
-  const commitDimension = (obj, field, raw) => {
-    const v = raw;
-    if (isPartial(v)) return;
-    const n = parseNum(v);
-    const clamped = Math.max(DIM_MIN, Math.abs(n));
-    updateObject?.(obj.id, { [field]: clamped });
-  };
 
   const renderDimensionControls = (obj) => {
     // Não mostrar dimensões para charges
@@ -163,14 +165,20 @@ export default function ObjectList({
                 type="number"
                 inputMode="decimal"
                 step={0.1}
-                min="0"
                 defaultValue={obj.radius}
-                onChange={(e) => commitDimension(obj, 'radius', e.target.value)}
+                  onChange={(e) => {const v = e.target.value;
+                    if (isPartial(v)) return;
+                    let n = parseNum(v);
+                    const c = clampDim(n);
+                    if(isPartial(v)) return;
+                    commitDimension(obj, 'radius', n);
+                    if (n !== c) e.target.value = formatFixed(c, 2);}}
                 onBlur={(e) => {
-                  const v = e.target.value;
-                  const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
-                  updateObject?.(obj.id, { radius: n });
-                  e.target.value = formatFixed(n, 2);
+                    const v = e.target.value;
+                    let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                    if(isPartial(v)) return;
+                    commitRotation(obj, 'radius', n);
+                    e.target.value = formatFixed(n, 2);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
                 onMouseDown={(e) => e.stopPropagation()}
@@ -195,14 +203,20 @@ export default function ObjectList({
                 type="number"
                 inputMode="decimal"
                 step={0.1}
-                min="0"
                 defaultValue={obj.radius}
-                onChange={(e) => commitDimension(obj, 'radius', e.target.value)}
+                onChange={(e) => {const v = e.target.value;
+                              if (isPartial(v)) return;
+                              let n = parseNum(v);
+                              const c = clampDim(n);
+                              if(isPartial(v)) return;
+                              commitDimension(obj, 'radius', n);
+                              if (n !== c) e.target.value = formatFixed(c, 2);}}
                 onBlur={(e) => {
-                  const v = e.target.value;
-                  const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
-                  updateObject?.(obj.id, { radius: n });
-                  e.target.value = formatFixed(n, 2);
+                              const v = e.target.value;
+                              let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                              if(isPartial(v)) return;
+                              commitDimension(obj, 'radius', n);
+                              e.target.value = formatFixed(n, 2);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
                 onMouseDown={(e) => e.stopPropagation()}
@@ -217,13 +231,21 @@ export default function ObjectList({
                 type="number"
                 inputMode="decimal"
                 step={0.1}
-                min="0"
+                min={DIM_MIN}
+                max={DIM_MAX}
                 defaultValue={obj.height}
-                onChange={(e) => commitDimension(obj, 'height', e.target.value)}
+                 onChange={(e) => {const v = e.target.value;
+                  if (isPartial(v)) return;
+                  let n = parseNum(v);
+                  const c = clampDim(n);
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'height', n);
+                  if (n !== c) e.target.value = formatFixed(c, 2);}}
                 onBlur={(e) => {
                   const v = e.target.value;
-                  const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
-                  updateObject?.(obj.id, { height: n });
+                  let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'height', n);
                   e.target.value = formatFixed(n, 2);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
@@ -251,11 +273,18 @@ export default function ObjectList({
                 step={0.1}
                 min="0"
                 defaultValue={obj.width}
-                onChange={(e) => commitDimension(obj, 'width', e.target.value)}
+                onChange={(e) => {const v = e.target.value;
+                  if (isPartial(v)) return;
+                  let n = parseNum(v);
+                  const c = clampDim(n);
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'width', n);
+                  if (n !== c) e.target.value = formatFixed(c, 2);}}
                 onBlur={(e) => {
                   const v = e.target.value;
-                  const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
-                  updateObject?.(obj.id, { width: n });
+                  let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'width', n);
                   e.target.value = formatFixed(n, 2);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
@@ -273,11 +302,18 @@ export default function ObjectList({
                 step={0.1}
                 min="0"
                 defaultValue={obj.height}
-                onChange={(e) => commitDimension(obj, 'height', e.target.value)}
+                 onChange={(e) => {const v = e.target.value;
+                  if (isPartial(v)) return;
+                  let n = parseNum(v);
+                  const c = clampDim(n);
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'height', n);
+                  if (n !== c) e.target.value = formatFixed(c, 2);}}
                 onBlur={(e) => {
                   const v = e.target.value;
-                  const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
-                  updateObject?.(obj.id, { height: n });
+                  let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'height', n);
                   e.target.value = formatFixed(n, 2);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
@@ -295,11 +331,18 @@ export default function ObjectList({
                 step={0.1}
                 min="0"
                 defaultValue={obj.depth}
-                onChange={(e) => commitDimension(obj, 'depth', e.target.value)}
+                 onChange={(e) => {const v = e.target.value;
+                  if (isPartial(v)) return;
+                  let n = parseNum(v);
+                  const c = clampDim(n);
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'depth', n);
+                  if (n !== c) e.target.value = formatFixed(c, 2);}}
                 onBlur={(e) => {
                   const v = e.target.value;
-                  const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
-                  updateObject?.(obj.id, { depth: n });
+                  let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'depth', n);
                   e.target.value = formatFixed(n, 2);
                 }}
                 onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
