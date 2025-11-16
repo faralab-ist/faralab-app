@@ -26,7 +26,7 @@ export default function ObjectList({
 
   useEffect(() => {
     if (!expandId) return;
-    // expande o item solicitado e faz scroll para ele
+    // expande o item solicitado imediatamente
     setExpanded((s) => ({ ...s, [expandId]: true }));
     // esperar um tick para garantir o DOM existe
     setTimeout(() => {
