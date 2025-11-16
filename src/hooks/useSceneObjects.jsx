@@ -137,8 +137,20 @@ export default function useSceneObjects(initial = []) {
     setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, position } : o)))
   }, [])
 
+  const updateChargeDensity = useCallback((id, charge_density) => {
+    setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charge_density } : o)))
+  }, [])  
+
   const updateDirection = useCallback((id, direction) => {
     setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, direction } : o)))
+  }, [])
+
+  const addCharge = useCallback((id, position, charge) => {
+    setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charges:[...o.charges, {position:position, charge:charge}] } : o)))
+  }, [])
+
+  const clearCharges = useCallback((id) => {
+    setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charges:[] } : o)))
   }, [])
 
   const updateObject = useCallback((id, newProps) => {
@@ -163,9 +175,12 @@ export default function useSceneObjects(initial = []) {
     setSceneObjects,
     addObject,
     updatePosition,
+    updateChargeDensity,
     updateObject,
     removeObject,
     updateDirection,
+    addCharge,
+    clearCharges,
     counts,
   }
 }

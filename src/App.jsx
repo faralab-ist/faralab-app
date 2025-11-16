@@ -153,6 +153,7 @@ function LoadingOverlay() {
       updateObject, 
       removeObject,
       updatePosition,
+      updateChargeDensity,
       updateDirection,
       addObject,
       counts,
@@ -418,6 +419,7 @@ function LoadingOverlay() {
                 setSelectedId={handleSelect}
                 setIsDragging={handleDragging}
                 updatePosition={updatePosition}
+                updateChargeDensity={updateChargeDensity}
                 updateDirection={updateDirection}
                 updateObject={updateObject}
                 removeObject={removeObject}

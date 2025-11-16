@@ -394,6 +394,106 @@ export default function ObjectList({
                   </>
                 )}
 
+                {/* Charged Sphere */}
+                {obj.type === "chargedSphere" && (
+                  <>
+                    { !obj.isGrounded && <div className="detail-row">
+                      <div className="detail-key">{obj.isHollow ? 'Surface Charge Density' : 'Volume Charge Density'}</div>
+                      <div className="detail-value">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          step={0.1}
+                          defaultValue={obj.charge_density ?? 0}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (isPartial(v)) return;
+                            const n = parseNum(v);
+                            if (n < VAL_MIN || n > VAL_MAX) {
+                              setError(obj.id, 'density', ERROR_MSG);
+                              return;
+                            }
+                            clearError(obj.id, 'density');
+                            commitField(obj, 'charge_density', n);
+                          }}
+                          min={VAL_MIN}
+                          max={VAL_MAX}
+                          onBlur={(e) => {
+                            const v = e.target.value;
+                            const n = parseNum(isPartial(v) ? 0 : v);
+                            if (isPartial(v)) commitField(obj, 'charge_density', v);
+                            if (n < VAL_MIN || n > VAL_MAX) setError(obj.id, 'density', ERROR_MSG);
+                            else clearError(obj.id, 'density');
+                            e.target.value = formatFixed(v, 2);
+                          }}
+                          onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ width: 140, padding: "4px 8px" }}
+                        />
+                      </div>
+                    {errors[obj.id]?.density && (
+                       <div className="error-text">{errors[obj.id].density}</div>
+                     )}
+                    </div>}
+
+                    <div className="detail-row">
+                      <div className="detail-key">Radius</div>
+                      <div className="detail-value">
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          step={0.1}
+                          defaultValue={obj.radius ?? 0}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (isPartial(v)) return;
+                            const n = parseNum(v);
+                            if (n < VAL_MIN || n > VAL_MAX) {
+                              setError(obj.id, 'radius', ERROR_MSG);
+                              return;
+                            }
+                            clearError(obj.id, 'radius');
+                            commitField(obj, 'radius', n);
+                          }}
+                          min={0}
+                          max={VAL_MAX}
+                          onBlur={(e) => {
+                            const v = e.target.value;
+                            const n = parseNum(isPartial(v) ? 0 : v);
+                            if (isPartial(v)) commitField(obj, 'radius', v);
+                            if (n < VAL_MIN || n > VAL_MAX) setError(obj.id, 'radius', ERROR_MSG);
+                            else clearError(obj.id, 'radius');
+                            e.target.value = formatFixed(v, 2);
+                          }}
+                          onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ width: 140, padding: "4px 8px" }}
+                        />
+                      </div>
+                    {errors[obj.id]?.radius && (
+                       <div className="error-text">{errors[obj.id].radius}</div>
+                     )}
+                    </div>
+
+                    {!obj.isGrounded && <div className="detail-row">
+                      <div className="detail-key">Hollow</div>
+                      <div className="detail-value">
+                        <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+                          <input
+                            type="checkbox"
+                            checked={obj.isHollow || false}
+                            onChange={(e) => updateObject?.(obj.id, { isHollow: e.target.checked })}
+                           onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                          />
+                        </label>
+                      </div>
+                    </div>}
+                  </>
+                )}
+
                 {/* Actions */}
                 <div className="detail-row">
                   <div className="detail-key">Actions</div>

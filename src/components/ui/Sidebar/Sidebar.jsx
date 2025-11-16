@@ -59,7 +59,7 @@ export default function Sidebar({
     return null;
   };
 
-  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'surface'].includes(o.type));
+  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'chargedSphere', 'surface'].includes(o.type));
 
   const typeCounters = {};
   const subtypeCounters = {};

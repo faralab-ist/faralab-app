@@ -2,7 +2,7 @@ import React, { useRef, useLayoutEffect, useEffect, useMemo} from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
-
+import calculateDesiredChargeDens from '../../utils/calculateDesiredChargeDens.jsx'
 
 export default function Sphere({ 
   id, 
@@ -14,6 +14,7 @@ export default function Sphere({
   setIsDragging,
   updatePosition,
   updateDirection,
+  updateChargeDensity,
   radius,
   isHollow = false,
   slicePlane,
@@ -46,7 +47,7 @@ export default function Sphere({
     if (pivotRef.current.matrix) pivotRef.current.matrix.copy(mat)
   }, [position])
 
-    const clippingPlanes = useMemo(() => {
+  const clippingPlanes = useMemo(() => {
         if (!useSlice) return [];
         let sliceFlip = -1;
         if(slicePlaneFlip) sliceFlip = 1;
@@ -56,8 +57,8 @@ export default function Sphere({
         case 'xz': return [new THREE.Plane(new THREE.Vector3(0, -sliceFlip, 0), sliceFlip * slicePos)];
         default: return [];
         }
-    }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
-
+  }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
+  
   return (
     <PivotControls
       ref={pivotRef}
