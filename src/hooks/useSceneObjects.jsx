@@ -42,6 +42,8 @@ const objectFactories = {
     charges: [],
     direction: [0, 1, 0], //normal
     dimensions: [4 , 4],
+    planeWidth: 5,
+    planeHeight: 5,
     infinite: false,
     material: 'Dielectric',
     createdAt: Date.now(),

@@ -18,7 +18,9 @@ function Plane({
   gridDimensions,
   dimensions,
   direction,
-  creativeMode            // NEW
+  creativeMode,            // NEW
+  planeWidth,
+  planeHeight
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -27,8 +29,11 @@ function Plane({
   const isDraggingRef = useRef(false)
 
   // Use dimensions (width/height) or fallback
-  const width  = infinite ? 20 : dimensions[0]
-  const height = infinite ? 20 : dimensions[1]
+  const finiteWidth  = planeWidth  ?? dimensions?.[0] ?? 4
+  const finiteHeight = planeHeight ?? dimensions?.[1] ?? 4
+  
+  const width  = infinite ? 20 : finiteWidth
+  const height = infinite ? 20 : finiteHeight
 
   // Base (static) rotation to lay the plane flat on XZ (normal initially +Y)
   const baseEuler = new THREE.Euler(-Math.PI / 2, 0, 0)
@@ -93,6 +98,9 @@ function Plane({
         updateDirection(id, [worldNormal.x, worldNormal.y, worldNormal.z])
 
         updatePosition(id, [pWorld.x, pWorld.y, pWorld.z])
+
+        updateObject(id, { planeWidth, planeHeight })
+
       }}
       onDragEnd={() => {
         isDraggingRef.current = false

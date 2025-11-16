@@ -116,6 +116,269 @@ export default function ObjectList({
     } 
   };
 
+  // === DIMENSIONS HELPERS ===
+  const DIM_MIN = 0.001;
+
+  const commitDimension = (obj, field, raw) => {
+    const v = raw;
+    if (isPartial(v)) return;
+    const n = parseNum(v);
+    const clamped = Math.max(DIM_MIN, Math.abs(n));
+    updateObject?.(obj.id, { [field]: clamped });
+  };
+
+  const renderDimensionControls = (obj) => {
+    // Não mostrar dimensões para charges
+    if (obj.type === 'charge') {
+      return null;
+    }
+
+    const has = (k) => typeof obj?.[k] === 'number';
+
+    // Sphere: radius only (1 input)
+    if (has('radius') && !has('height') && !has('width') && !has('depth')) {
+      return (
+        <div className="detail-row">
+          <div className="detail-key">Dimensions</div>
+          <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              min="0"
+              defaultValue={obj.radius}
+              onChange={(e) => commitDimension(obj, 'radius', e.target.value)}
+              onBlur={(e) => {
+                const v = e.target.value;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
+                updateObject?.(obj.id, { radius: n });
+                e.target.value = formatFixed(n, 2);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 72, padding: "4px 8px" }}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Cylinder: radius + height (nunca para wire)
+    if (obj.type !== 'wire' && has('radius') && has('height') && !has('width') && !has('depth')) {
+      return (
+        <div className="detail-row">
+          <div className="detail-key">Dimensions</div>
+          <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              min="0"
+              defaultValue={obj.radius}
+              onChange={(e) => commitDimension(obj, 'radius', e.target.value)}
+              onBlur={(e) => {
+                const v = e.target.value;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
+                updateObject?.(obj.id, { radius: n });
+                e.target.value = formatFixed(n, 2);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 72, padding: "4px 8px" }}
+            />
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              min="0"
+              defaultValue={obj.height}
+              onChange={(e) => commitDimension(obj, 'height', e.target.value)}
+              onBlur={(e) => {
+                const v = e.target.value;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
+                updateObject?.(obj.id, { height: n });
+                e.target.value = formatFixed(n, 2);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 72, padding: "4px 8px" }}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Cuboid: width + height + depth (3 inputs in same row)
+    if (has('width') && has('height') && has('depth')) {
+      return (
+        <div className="detail-row">
+          <div className="detail-key">Dimensions</div>
+          <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              min="0"
+              defaultValue={obj.width}
+              onChange={(e) => commitDimension(obj, 'width', e.target.value)}
+              onBlur={(e) => {
+                const v = e.target.value;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
+                updateObject?.(obj.id, { width: n });
+                e.target.value = formatFixed(n, 2);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 72, padding: "4px 8px" }}
+            />
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              min="0"
+              defaultValue={obj.height}
+              onChange={(e) => commitDimension(obj, 'height', e.target.value)}
+              onBlur={(e) => {
+                const v = e.target.value;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
+                updateObject?.(obj.id, { height: n });
+                e.target.value = formatFixed(n, 2);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 72, padding: "4px 8px" }}
+            />
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              min="0"
+              defaultValue={obj.depth}
+              onChange={(e) => commitDimension(obj, 'depth', e.target.value)}
+              onBlur={(e) => {
+                const v = e.target.value;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? DIM_MIN : v)));
+                updateObject?.(obj.id, { depth: n });
+                e.target.value = formatFixed(n, 2);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 72, padding: "4px 8px" }}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Plane: width + height (only if NOT infinite)
+    if (obj.type === 'plane' && !obj.infinite) {
+      const planeWidth = obj.planeWidth ?? obj.width ?? 5;
+      const planeHeight = obj.planeHeight ?? obj.height ?? 5;
+      
+      return (
+        <div className="detail-row">
+          <div className="detail-key">Dimensions</div>
+          <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              min="0"
+              defaultValue={planeWidth}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (isPartial(v)) return;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(v)));
+                updateObject?.(obj.id, { planeWidth: n });
+                updateObject?.(obj.id, { planeWidth: n, dimensions: [n, obj.planeHeight ?? obj.height ?? 5] });
+
+              }}
+              onBlur={(e) => {
+                const v = e.target.value;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? planeWidth : v)));
+                updateObject?.(obj.id, { planeWidth: n });
+                e.target.value = formatFixed(n, 2);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 72, padding: "4px 8px" }}
+            />
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              min="0"
+              defaultValue={planeHeight}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (isPartial(v)) return;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(v)));
+                updateObject?.(obj.id, { planeHeight: n });
+                updateObject?.(obj.id, { planeHeight: n, dimensions: [obj.planeWidth ?? obj.width ?? 5, n] });
+
+              }}
+              onBlur={(e) => {
+                const v = e.target.value;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? planeHeight : v)));
+                updateObject?.(obj.id, { planeHeight: n });
+                e.target.value = formatFixed(n, 2);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 72, padding: "4px 8px" }}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    // Wire: only show when not infinite, only allow changing length (height)
+    if (obj.type === 'wire' && !obj.infinite) {
+      const height = obj.height ?? 5;
+
+      return (
+        <div className="detail-row">
+          <div className="detail-key">Length</div>
+          <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+            <input
+              type="number"
+              inputMode="decimal"
+              step={0.1}
+              min="0"
+              defaultValue={height}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (isPartial(v)) return;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(v)));
+                updateObject?.(obj.id, { height: n });
+              }}
+              onBlur={(e) => {
+                const v = e.target.value;
+                const n = Math.max(DIM_MIN, Math.abs(parseNum(isPartial(v) ? height : v)));
+                updateObject?.(obj.id, { height: n });
+                e.target.value = formatFixed(n, 2);
+              }}
+              onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{ width: 72, padding: "4px 8px" }}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <ul className="object-list">
       {items.map((obj) => (
@@ -145,7 +408,7 @@ export default function ObjectList({
             </div>
           </div>
 
-          {expanded[obj.id] && (
+          {expanded[obj.id] && ( 
             <div className="object-details">
               <div className="details-grid">
                 {/* Position (common) */}
@@ -228,6 +491,9 @@ export default function ObjectList({
                     </div>
                   </div>
                 )}
+
+                {/* === DIMENSIONS (only for surfaces) === */}
+                {renderDimensionControls(obj)}
 
                 {/* Charge: Intensity C (same as popup) */}
                 {obj.type === "charge" && (
