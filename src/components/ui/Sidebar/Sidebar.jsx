@@ -28,6 +28,17 @@ export default function Sidebar({
   const hasObjects = (counts?.total ?? 0) > 0;
   const minimized = !isOpen && hasObjects;
 
+  // Sync expandId with selectedId whenever selectedId changes and sidebar is open
+  useEffect(() => {
+    if (selectedId) {
+      setExpandId(selectedId);
+      // If sidebar is closed, open it
+      if (!isOpen) {
+        setIsOpen(true);
+      }
+    }
+  }, [selectedId, isOpen, setIsOpen]);
+
   // notify parent / other logic whenever minimized changes
   useEffect(() => {
     if (typeof onMinimizedChange === "function") onMinimizedChange(minimized);
