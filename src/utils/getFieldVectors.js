@@ -38,7 +38,7 @@ export default function getFieldVector3(objects, gridSize = 10, step = 1, showOn
       case 'sphere': {
         //const radius = (obj.dimensions?.[0] || 1)
         gridVector3 = fibonacciSpherePoints(sampleCount, obj.radius)
-        gridVector3 = gridVector3.map(p => p.add(objPos.clone().multiplyScalar(2)))
+        gridVector3 = gridVector3.map(p => p.add(objPos.clone()))
         break
       }
 
@@ -69,7 +69,7 @@ export default function getFieldVector3(objects, gridSize = 10, step = 1, showOn
               const y = -length / 2 + (ri + 0.5) * (length / rows)
               const x = Math.cos(theta) * radius
               const z = Math.sin(theta) * radius
-              gridVector3.push(new THREE.Vector3(x, y, z).add(objPos.clone().multiplyScalar(2)))
+              gridVector3.push(new THREE.Vector3(x, y, z).add(objPos.clone()))
             }
           }
         }
@@ -85,7 +85,7 @@ export default function getFieldVector3(objects, gridSize = 10, step = 1, showOn
               const x = -radius + (c + 0.5) * (2 * radius / cols)
               const z = -radius + (r + 0.5) * (2 * radius / rows)
               if (x * x + z * z <= radius * radius) {
-                gridVector3.push(new THREE.Vector3(x, capY, z).add(objPos.clone().multiplyScalar(2)))
+                gridVector3.push(new THREE.Vector3(x, capY, z).add(objPos.clone()))
               }
             }
           }
@@ -152,7 +152,7 @@ export default function getFieldVector3(objects, gridSize = 10, step = 1, showOn
               p[f.u] = uu
               p[f.v] = vv
               p[f.wAxis] = f.wPos
-              gridVector3.push(p.add(objPos.clone().multiplyScalar(2)))
+              gridVector3.push(p.add(objPos.clone()))
             }
           }
         }
