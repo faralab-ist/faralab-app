@@ -24,8 +24,8 @@ function Charge({
   // compute glow color and base scale from charge
   const { glowColor, baseGlowScale, glowIntensity } = useMemo(() => {
     const sign = charge >= 0 ? 1 : -1
-    // positive -> red, negative -> blue (inverted per user request)
-    const glowColor = sign >= 0 ? new THREE.Color(0xff6e6e) : new THREE.Color(0x6ea8ff)
+    // positive -> blue, negative -> red
+    const glowColor = sign >= 0 ? new THREE.Color(0x6ea8ff) : new THREE.Color(0xff6e6e)
     const magnitude = Math.min(4, Math.max(0.2, Math.abs(charge)))
     const baseGlowScale = 1 + magnitude * 0.6
     const glowIntensity = 0.6 + Math.min(2.0, Math.abs(charge) * 0.15)
@@ -95,8 +95,8 @@ function Charge({
               const cx = size / 2
               const cy = size / 2
               const r = size / 2
-              // make positive charges red and negative charges blue
-              const color = charge >= 0 ? 'rgba(255,110,110,' : 'rgba(110,168,255,'
+              // positive charges blue, negative charges red
+              const color = charge >= 0 ? 'rgba(110,168,255,' : 'rgba(255,110,110,'
               const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r)
               // very bright white center, then colored ring, then fade to transparent
               grad.addColorStop(0.0, 'rgba(255,255,255,1)')
@@ -120,7 +120,13 @@ function Charge({
           />
         </sprite>
 
-        {/* invisible interaction mesh: keeps click/selection but no visible sphere */}
+        {/* small visible white dot at center for visual targeting */}
+        <mesh position={[0, 0, 0]} renderOrder={999}>
+          <sphereGeometry args={[0.06]} />
+          <meshBasicMaterial color={0xffffff} toneMapped={false} depthWrite={false} />
+        </mesh>
+
+        {/* larger transparent hitbox for pointer interactions (click/drag) */}
         <mesh
           position={[0, 0, 0]}
           userData={{ id, type: 'charge' }}
@@ -130,7 +136,7 @@ function Charge({
             setSelectedId(id)
           }}
         >
-          <sphereGeometry args={[Math.max(0.001, radius || 0.2)]} />
+          <sphereGeometry args={[Math.max(0.3, (radius || 0.2) * 1.5)]} />
           <meshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
         </mesh>
       </group>

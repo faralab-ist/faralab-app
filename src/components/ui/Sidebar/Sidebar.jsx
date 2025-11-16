@@ -28,8 +28,6 @@ export default function Sidebar({
   const hasObjects = (counts?.total ?? 0) > 0;
   const minimized = !isOpen && hasObjects;
 
-
-
   // notify parent / other logic whenever minimized changes
   useEffect(() => {
     if (typeof onMinimizedChange === "function") onMinimizedChange(minimized);
