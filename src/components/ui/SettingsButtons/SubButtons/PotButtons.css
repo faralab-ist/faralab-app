@@ -1,8 +1,74 @@
+.potential-controls {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+  z-index: 30;
+ 
+}
+
+
+
+.pot-toggle-btn {
+  width: auto;
+  background: #1a1c1f;
+  border: 1px solid #3a3f46;
+  color: #eef4ff;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  min-width: 120px;
+  text-align: center;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, transform .06s, box-shadow .12s;
+  
+}
+
+.pot-toggle-btn:hover {
+  background: #202427;
+  border-color: #4a6d94;
+  transform: translateY(-1px);
+}
+
+.pot-toggle-btn:active {
+  transform: translateY(0);
+}
+
+.pot-toggle-btn.active {
+  background: linear-gradient(180deg, rgba(74,109,148,0.10), rgba(74,109,148,0.04));
+  border-color: #4a6d94;
+  box-shadow: inset 0 -2px 6px rgba(74,109,148,0.04);
+}
+
+/*They're never disabled but keep this here cz it might help */
+.pot-toggle-btn.disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  filter: grayscale(12%);
+  pointer-events: auto; /* keep pointer so title appears, but clicks are ignored in code */
+}
+
+.pot-toggle-btn.disabled:hover {
+  transform: none;
+  border-color: #333;
+  background: #131313;
+}
+
+
+
+
 .settings-panel .slider-row {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin-top: 8px;
+  transform: translateY(-4px);
+  animation: fadeInUp .16s ease forwards;
 }
 .settings-panel .slider-label {
   font-size: 0.7rem;
@@ -25,6 +91,7 @@
   -webkit-appearance: none;
   appearance: none;
 }
+
 
 /* Remove focus outline */
 .potential-slider:focus {
@@ -61,11 +128,52 @@
   background: #e6e6e6;
   border: 1px solid #3f3f3f;
   box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
-  cursor: pointer;
 }
 /* Remove the border-color change on focus if you don't want any visual feedback */
 .potential-slider:focus::-webkit-slider-runnable-track {
   border-color: #2e2e2e; /* keep same as default, or remove this rule entirely */
+}
+.potential-slider:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+/* only show pointer cursor on the thumb when the slider is NOT disabled */
+.potential-slider:not(:disabled)::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -5px; /* center the 14px thumb on 8px track */
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e6e6e6;
+  border: 1px solid #3f3f3f;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
+  cursor: pointer;
+}
+
+/* same for Firefox */
+.potential-slider:not(:disabled)::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e6e6e6;
+  border: 1px solid #3f3f3f;
+  cursor: pointer;
+}
+
+/* ensure disabled state forces not-allowed (use !important to beat any UA behavior) */
+.potential-slider:disabled,
+.potential-slider[disabled] {
+  opacity: .35;
+  cursor: not-allowed !important;
+}
+
+.potential-slider:disabled::-webkit-slider-thumb,
+.potential-slider[disabled]::-webkit-slider-thumb,
+.potential-slider:disabled::-moz-range-thumb,
+.potential-slider[disabled]::-moz-range-thumb {
+  cursor: not-allowed !important;
 }
 
 /* Firefox */

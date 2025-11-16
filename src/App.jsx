@@ -366,6 +366,7 @@ function LoadingOverlay() {
           updateObject={updateObject}     // <- ensure these are passed
           removeObject={removeObject}     // <- <- 
           hoveredId={hoveredId}
+          setHoveredId={setHoveredId}
           selectedId={selectedId}
           setSelectedId={setSelectedId}
         />
@@ -424,6 +425,7 @@ function LoadingOverlay() {
                 useSlice={useSlice}
                 slicePlaneFlip={slicePlaneFlip}
                 dragOwnerId={dragOwnerId}
+                isHovered={obj.id === hoveredId}
                 gridDimensions={obj.type === 'wire' || obj.type === 'plane' ? [20, 20] : undefined}
               />
             )

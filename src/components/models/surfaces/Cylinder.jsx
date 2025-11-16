@@ -37,6 +37,7 @@ export default function Cylinder({
   quaternion,
   updateObject,
   updateDirection,
+  isHovered
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -173,7 +174,7 @@ export default function Cylinder({
         >
           <cylinderGeometry args={[radius, radius, height, 32]} />
           <meshStandardMaterial
-            color={isSelected ? 'lightblue' : 'white'}
+            color={isSelected || isHovered ? 'lightblue' : 'white'}
             transparent
             opacity={opacity}
             depthWrite={false}

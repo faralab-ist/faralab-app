@@ -19,11 +19,23 @@ export default function Sidebar({
   removeObject, 
   onMinimizedChange, 
   hoveredId,
+  setHoveredId,
   selectedId,
   setSelectedId,
 }) {
   const [expandId, setExpandId] = useState(null);
   const sidebarRootRef = useRef(null)
+
+  // preserve previous selectedId while hovering
+  const prevSelectedRef = useRef(null);
+  const hoverStart = (id) => {
+    
+    if (typeof setSelectedId === 'function') setHoveredId(id);
+  };
+  const hoverEnd = () => {
+    if (typeof setHoveredId === 'function') setHoveredId(prevSelectedRef.current);
+
+  };
 
   const hasObjects = (counts?.total ?? 0) > 0;
   const minimized = !isOpen && hasObjects;
@@ -54,7 +66,15 @@ export default function Sidebar({
     }
   }, [selectedId, isOpen, setIsOpen])
 
-  const togglePanel = () => {setIsOpen((p) => !p); setExpandId(null) };
+  const togglePanel = () => {
+    setExpandId(null)
+    setIsOpen((prev) => {
+      const next = !prev
+      // if closing, clear selection so useEffect won't immediately re-open (maybe fix it other way?)
+      if (!next && typeof setSelectedId === 'function') setSelectedId(null)
+      return next
+    })
+  };
   const openPanel = (idToOpen = null) => {
     if (idToOpen) setExpandId(idToOpen);
     setIsOpen?.(true);
@@ -124,7 +144,6 @@ export default function Sidebar({
   }, [isOpen, setIsOpen])
   
   const effectiveClass = isOpen ? "open" : minimized ? "minimized" : "closed";
-
   return (
     <div ref={sidebarRootRef} className={`sidebar-wrap ${effectiveClass}`}>
        <button
@@ -148,6 +167,8 @@ export default function Sidebar({
                   key={item.id}
                   className={`pill ${item.subtype || item.type} minibar-pill ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
                   onClick={() => {openPanel(item.id); handleRowClick(item) }}
+                  onMouseEnter={() => hoverStart(item.id)}
+                  onMouseLeave={() => hoverEnd()}
                   
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(item); }
@@ -188,6 +209,8 @@ export default function Sidebar({
               hoveredId ={hoveredId}
               selectedId={selectedId}
               setSelectedId={setSelectedId}
+              onHoverStart={hoverStart}
+              onHoverEnd={hoverEnd}
             />
           </div>
         )}

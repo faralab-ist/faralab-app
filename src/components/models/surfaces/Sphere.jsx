@@ -30,7 +30,8 @@ export default function Sphere({
   slicePlane,
   slicePos,
   useSlice,
-  slicePlaneFlip
+  slicePlaneFlip,
+  isHovered
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -132,7 +133,7 @@ export default function Sphere({
         >
           <sphereGeometry args={[radius, 32, 32]} />
           <meshStandardMaterial
-            color={isSelected ? 'lightblue' : 'white'}
+            color={isSelected || isHovered ? 'lightblue'  : 'white'}
             transparent
             opacity={opacity}
             depthWrite={false}

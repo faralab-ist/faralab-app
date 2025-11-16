@@ -20,7 +20,8 @@ export default function Sphere({
   slicePlaneFlip,
   slicePos,
   useSlice,
-  creativeMode            // NEW
+  creativeMode,        
+  isHovered
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -110,7 +111,7 @@ export default function Sphere({
       >
         <sphereGeometry args={[radius, 32, 32]} />
         <meshStandardMaterial
-          color={isSelected ? 'lightblue' : 'lightgreen'}
+          color={isSelected || isHovered ? 'lightblue' : 'lightgreen'}
           side={THREE.DoubleSide}
           opacity={0.7}
           transparent={true}

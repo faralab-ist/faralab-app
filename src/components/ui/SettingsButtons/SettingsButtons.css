@@ -42,10 +42,31 @@
   color: #d6d6d6;
 }
 
+/* visually and functionally disable the main Field View button */
+.settings-main.disabled,
+.settings-main:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(40%);
+  box-shadow: none;
+  border-color: rgba(255,255,255,0.08);
+  background: rgba(30,30,30,0.6);
+}
+
+/* keep hover effects disabled */
+.settings-main.disabled:hover,
+.settings-main:disabled:hover {
+  transform: none;
+  background: rgba(30,30,30,0.6);
+  box-shadow: none;
+}
+
 
 
 /* Panel expands upward */
-.settings-panel {
+.settings-panel,
+.gaussian-panel,
+.slicing-panel {
   position: absolute;
   bottom: calc(100% + 10px);
   left: 0;
@@ -56,24 +77,11 @@
   border: 1px solid #2e2e2e;
   padding: 14px;
   border-radius: 12px;
-  min-width: 250px;           
   width: 250px;                
   backdrop-filter: blur(6px);
   animation: panelFade .18s ease-out;
 }
-.settings-panel::before {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 18px;
-  width: 14px;
-  height: 14px;
-  background: rgba(15,15,15,0.94);
-  border-left: 1px solid #2e2e2e;
-  border-bottom: 1px solid #2e2e2e;
-  transform: rotate(45deg);
-  border-radius: 2px;
-}
+
 
 @keyframes panelFade {
   from { opacity: 0; transform: translateY(8px) scale(.97); }
@@ -81,7 +89,9 @@
 }
 
 /* Panel buttons: match CreateButtons */
-.settings-panel button {
+.settings-panel button,
+.gaussian-panel button,
+.slicing-panel button {
   border-radius: 9999px;
   font-size: 0.8rem;
   background: #1a1a1a;
@@ -105,6 +115,8 @@
   font-weight: 500;             /* match */
   margin: 0 0 8px 0;
 }
+
+
 
 .surface-buttons-row {
   display: flex;
@@ -148,6 +160,9 @@
   display: block;
   opacity: .9;
 }
+
+
+
 
 /* separator line between Gaussian controls and Flux button */
 .gaussian-sep {
@@ -310,7 +325,35 @@
   transition: background .15s, border-color .15s;
 }
 .flux-popup-actions button:hover {
-  background: #2d567a;
+  background: #2d567a;.settings-panel {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(15,15,15,0.94);
+  border: 1px solid #2e2e2e;
+  padding: 14px;
+  border-radius: 12px;
+  min-width: 250px;           
+  width: 250px;                
+  backdrop-filter: blur(6px);
+  animation: panelFade .18s ease-out;
+}
+.settings-panel::before {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 18px;
+  width: 14px;
+  height: 14px;
+  background: rgba(15,15,15,0.94);
+  border-left: 1px solid #2e2e2e;
+  border-bottom: 1px solid #2e2e2e;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
   border-color: #3f6f9d;
 }
 
@@ -320,8 +363,14 @@
 .fieldview-tabs .fieldview-tab { padding: 6px 10px; background: transparent; border: 0; cursor: pointer }
 .fieldview-tabs .fieldview-tab.active { font-weight: 700; text-decoration: underline; }
 
-/* ensure plane buttons at bottom are visually attached */
-.fieldview-plane-bottom { border-top: 1px solid rgba(255,255,255,0.04); }
+
+.separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.024);
+  margin: -10px -2px 2px -2px; /* span panel padding */
+  border-top: 1px solid rgba(255,255,255,0.03);
+}
+
 
 /* Don't show a focus/outline or "highlight" around the panel when tabs are clicked */
 .settings-panel,
@@ -357,6 +406,7 @@
   pointer-events: auto;  /* enable interactions when inside the panel */
   margin: 0;
   display: block;
+  
 }
 
 .plane-buttons-group {
@@ -429,6 +479,37 @@
   margin-bottom: 8px;
   font-weight: 600;
   margin-top: 4px;
+}
+
+/* keep tab/panel container a fixed size so tabs never change panel dimensions */
+.settings-panel,
+.fieldview-panel {
+  width: 280px;         /* fixed width */
+  min-width: 100px;
+  max-width: 320px;
+
+  height: 430px;        /* fixed height  */
+  min-height: 420px;
+  max-height: 420px;
+
+  box-sizing: border-box;
+  overflow: hidden;     /* prevent panel itself from changing size */
+}
+
+/* Make the panel body scrollable so internal tab content can be taller than the fixed container. */
+.settings-panel .panel-body,
+.fieldview-panel .panel-body,
+.settings-panel .panel-scroll,
+.fieldview-panel .panel-scroll {
+  height: calc(100% - 48px); /* leave room for header/title (adjust 48px to match your header) */
+  overflow: auto;
+  padding-right: 6px;   /* avoid scrollbar overlaying content */
+}
+
+/* Keep animation behavior but avoid layout jumps */
+.settings-panel,
+.fieldview-panel {
+  will-change: transform, opacity;
 }
 
 
