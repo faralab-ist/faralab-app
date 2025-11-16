@@ -31,7 +31,12 @@ export default function Cylinder({
   slicePlane,
   slicePos,
   useSlice,
-  slicePlaneFlip
+  slicePlaneFlip,
+  // rotation support (optional)
+  rotation,
+  quaternion,
+  updateObject,
+  updateDirection,
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -68,6 +73,37 @@ export default function Cylinder({
     if (rootRef.current) rootRef.current.position.set(...position)
   }, [position])
 
+  // apply quaternion / rotation to the root group and keep direction in sync
+  useEffect(() => {
+    if (!rootRef.current) return
+    // don't override while dragging
+    if (dragOwnerId !== null && dragOwnerId !== id) return
+    // prefer quaternion
+    if (Array.isArray(quaternion) && quaternion.length === 4) {
+      const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+      rootRef.current.quaternion.copy(q)
+      // sync direction (use local Y as cylinder neutral axis)
+      if (typeof updateDirection === 'function') {
+        const dirWorld = new THREE.Vector3(0, 1, 0).applyQuaternion(q).normalize()
+        updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
+      }
+      return
+    }
+    // fallback to Euler rotation (radians)
+    if (Array.isArray(rotation) && rotation.length >= 3) {
+      const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
+      rootRef.current.rotation.copy(e)
+      if (typeof updateDirection === 'function') {
+        const dirWorld = new THREE.Vector3(0, 1, 0).applyEuler(e).normalize()
+        updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
+      }
+      return
+    }
+    // otherwise reset
+    rootRef.current.rotation.set(0, 0, 0)
+    rootRef.current.quaternion.identity()
+  }, [rotation, quaternion, updateDirection, id, dragOwnerId])
+
   const clippingPlanes = useMemo(() => {
     if (!useSlice) return [];
       let sliceFlip = -1;
@@ -93,6 +129,18 @@ export default function Cylinder({
         const newPos = new THREE.Vector3().setFromMatrixPosition(matrix)
         updatePosition(id, [newPos.x, newPos.y, newPos.z])
         if (rootRef.current) rootRef.current.position.copy(newPos)
+        // persist quaternion + Euler rotation (radians) so UI stays in sync
+        const p = new THREE.Vector3()
+        const q = new THREE.Quaternion()
+        const s = new THREE.Vector3()
+        matrix.decompose(p, q, s)
+        const e = new THREE.Euler().setFromQuaternion(q, 'XYZ')
+        updateObject?.(id, { quaternion: [q.x, q.y, q.z, q.w], rotation: [e.x, e.y, e.z] })
+        // also update direction to match resulting quaternion (local Y)
+        if (typeof updateDirection === 'function') {
+          const dirWorld = new THREE.Vector3(0, 1, 0).applyQuaternion(q).normalize()
+          updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
+        }
       }}
       onDragEnd={() => setIsDragging(false)}
     >

@@ -34,6 +34,10 @@ export default function Cuboid({
   slicePos,
   useSlice,
   slicePlaneFlip,
+  // rotation support (optional)
+  rotation= [0,0,0],
+  quaternion,
+  updateObject,
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -55,8 +59,28 @@ export default function Cuboid({
 
   // ⚙️ Mantém o objeto sincronizado com a posição global
   useEffect(() => {
-    if (rootRef.current) rootRef.current.position.set(...position)   // 👈 move o grupo
+    if (rootRef.current) rootRef.current.position.set(...position)   // 👈 move the group
   }, [position])
+
+  // apply quaternion / rotation (skip while dragging)
+  useEffect(() => {
+    if (isDragging || !rootRef.current) return
+    // prefer quaternion
+    if (Array.isArray(quaternion) && quaternion.length === 4) {
+      const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+      rootRef.current.quaternion.copy(q)
+      return
+    }
+    // fallback to Euler rotation (radians)
+    if (Array.isArray(rotation) && rotation.length >= 3) {
+      const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
+      rootRef.current.rotation.copy(e)
+      return
+    }
+    // otherwise keep identity
+    rootRef.current.rotation.set(0, 0, 0)
+    rootRef.current.quaternion.identity()
+  }, [rotation, quaternion, isDragging])
 
   const faceNormals = useMemo(() => {
     const n = []
@@ -98,7 +122,14 @@ export default function Cuboid({
       onDrag={(matrix) => {
         const newPos = new THREE.Vector3().setFromMatrixPosition(matrix)
         updatePosition(id, [newPos.x, newPos.y, newPos.z])
-        if (rootRef.current) rootRef.current.position.copy(newPos)   // 👈 move o grupo durante o drag
+        if (rootRef.current) rootRef.current.position.copy(newPos)   // 👈 move the group during the drag
+        // persist rotation/quaternion from the pivot's world transform so the sidebar stays in sync
+        const p = new THREE.Vector3()
+        const q = new THREE.Quaternion()
+        const s = new THREE.Vector3()
+        matrix.decompose(p, q, s)
+        const e = new THREE.Euler().setFromQuaternion(q, 'XYZ')
+        updateObject?.(id, { quaternion: [q.x, q.y, q.z, q.w], rotation: [e.x, e.y, e.z] })
       }}
       onDragEnd={() => setIsDragging(false)}
     >

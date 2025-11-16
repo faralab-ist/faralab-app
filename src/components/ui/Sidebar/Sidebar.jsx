@@ -28,10 +28,31 @@ export default function Sidebar({
   const hasObjects = (counts?.total ?? 0) > 0;
   const minimized = !isOpen && hasObjects;
 
+  // Sync expandId with selectedId whenever selectedId changes and sidebar is open
+  useEffect(() => {
+    if (selectedId) {
+      setExpandId(selectedId);
+      // If sidebar is closed, open it
+      if (!isOpen) {
+        setIsOpen(true);
+      }
+    }
+  }, [selectedId, isOpen, setIsOpen]);
+
   // notify parent / other logic whenever minimized changes
   useEffect(() => {
     if (typeof onMinimizedChange === "function") onMinimizedChange(minimized);
   }, [minimized, onMinimizedChange]);
+
+  
+  useEffect(() => {
+    if (selectedId) {
+      setExpandId(selectedId);
+      if (!isOpen) {
+        setIsOpen(true);
+      }
+    }
+  }, [selectedId, isOpen, setIsOpen])
 
   const togglePanel = () => {setIsOpen((p) => !p); setExpandId(null) };
   const openPanel = (idToOpen = null) => {
@@ -59,7 +80,7 @@ export default function Sidebar({
     return null;
   };
 
-  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'chargedSphere', 'surface'].includes(o.type));
+  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'surface','chargedSphere'].includes(o.type));
 
   const typeCounters = {};
   const subtypeCounters = {};
@@ -73,7 +94,11 @@ export default function Sidebar({
       return { id: o.id, type: 'surface', subtype, label, name: o.name };
     } else {
       const t = o.type;
-      typeCounters[t] = (typeCounters[t] || 0) + 1;
+      typeCounters[t] = (typeCounters[t] || 0) + 1; 
+      if (t === 'chargedSphere') { //Shouldn't be hardcoded, but for now it works :)
+        const label = `Charged Sphere ${typeCounters[t]}`
+        return { id: o.id, type: t, subtype: null, label, name: o.name };
+      }
       const label = `${t.charAt(0).toUpperCase() + t.slice(1)} ${typeCounters[t]}`;
       return { id: o.id, type: t, subtype: null, label, name: o.name };
     }
