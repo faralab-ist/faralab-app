@@ -27,73 +27,56 @@ import React, { useState, useEffect, useMemo } from 'react'
 } from "./hooks"
 
 
-// 🔹 Overlay que carrega o teu loading.html original
+// Fullscreen loading overlay that fades away
 function LoadingOverlay() {
-  const [opacity, setOpacity] = useState(1)
   const [hidden, setHidden] = useState(false)
-  const [finalFade, setFinalFade] = useState(false)
 
-  // 1️⃣ Fica transparente gradualmente depois de 1s
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setOpacity(0.3), 1000)
-    return () => clearTimeout(fadeTimer)
-  }, [])
-
-  // 2️⃣ Ao clicar depois do fade → some com fade-out suave
-  useEffect(() => {
-    const handleClick = () => {
-      if (opacity <= 0.3) {
-        setFinalFade(true)
-        setTimeout(() => setHidden(true), 2000) // tempo do fade final
-      }
+    // Prevent the page from scrolling while the fullscreen overlay is visible
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    // Fade away after a bit longer
+    const fadeTimer = setTimeout(() => setHidden(true), 4000)
+    return () => {
+      clearTimeout(fadeTimer)
+      document.body.style.overflow = previous
     }
-    window.addEventListener('click', handleClick)
-    return () => window.removeEventListener('click', handleClick)
-  }, [opacity])
+  }, [])
 
   if (hidden) return null
 
-  const totalOpacity = finalFade ? 0 : opacity
-
-  // Small, unobtrusive loading/info box that reuses the original `loading.html`.
-  // Keeps the original file but doesn't cover the entire screen.
   return (
     <div
       style={{
         position: 'fixed',
-        top: 20,
-        right: 20,
-        width: 280,
-        height: 140,
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
         zIndex: 9999,
-        pointerEvents: 'auto',
-        transition: 'opacity 0.6s ease-in-out, transform 0.6s',
-        opacity: totalOpacity,
-        transform: `scale(${totalOpacity > 0 ? 1 : 0.96})`,
-      }}
-      aria-hidden={totalOpacity === 0}
-    >
-      <div style={{
-        width: '100%',
-        height: '100%',
-        borderRadius: 12,
+        pointerEvents: 'none',
+        animation: 'fadeOut 2.2s ease-out forwards',
         overflow: 'hidden',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.45)',
-        border: '1px solid rgba(255,255,255,0.04)',
-        background: 'rgba(10,10,12,0.75)'
-      }}>
-        <iframe
-          src="loading.html"
-          title="Loading"
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            pointerEvents: 'none',
-            opacity: totalOpacity,
-          }}
-        />
-      </div>
+      }}
+    >
+      <iframe
+        src="loading.html"
+        title="Loading"
+        style={{
+          width: '100%',
+          height: '100%',
+          border: 'none',
+          transform: 'scale(1)',
+          transformOrigin: 'center center',
+        }}
+      />
+      <style>{`
+        @keyframes fadeOut {
+          0% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
     </div>
   )
 }
@@ -211,9 +194,8 @@ function LoadingOverlay() {
       }
     }
 
-    // Global outside-click handler: when clicking outside UI panels, deselect and close UI menus
-    // COMMENTED FOR NOW BECAUSE FOR SOME REASON THIS DOESN'T LET ME CLICK ON ANY OBJECT OF THE SCENE
-    /*useEffect(() => {
+    // Global outside-click handler: when clicking outside UI panels AND canvas objects, deselect and close UI menus
+    useEffect(() => {
       const uiSelectors = [
         '.sidebar-wrap',
         '.create-buttons-container',
@@ -228,6 +210,7 @@ function LoadingOverlay() {
 
       const onDocMouseDown = (ev) => {
         const path = ev.composedPath ? ev.composedPath() : (ev.path || [])
+        
         // if path contains any UI element, do nothing
         for (const sel of uiSelectors) {
           const el = document.querySelector(sel)
@@ -235,7 +218,16 @@ function LoadingOverlay() {
           if (el && ev.target && el.contains(ev.target)) return
         }
 
-        // clicked outside UI -> deselect and broadcast close event
+        // Check if clicking on canvas - if so, only close menus but don't deselect
+        // (let the canvas handle object selection/deselection internally)
+        const canvas = ev.target?.tagName === 'CANVAS'
+        if (canvas) {
+          // Just close UI menus, let canvas objects handle their own selection
+          window.dispatchEvent(new CustomEvent('app:close-all-ui'))
+          return
+        }
+
+        // clicked outside UI and outside canvas -> deselect and broadcast close event
         setSelectedId(null)
         window.dispatchEvent(new CustomEvent('app:close-all-ui'))
       }
@@ -325,10 +317,10 @@ function LoadingOverlay() {
 
     return (
 
-      <>
-      <LoadingOverlay /> {/* 🔹 Aqui o overlay real */}
+    <>
+    {/* <LoadingOverlay /> */}
 
-      <div id="canvas-container">
+    <div id="canvas-container">
         <CreateButtons
           addObject={addObject}
           setSceneObjects={setSceneObjects}
