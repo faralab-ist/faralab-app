@@ -181,7 +181,7 @@ button:hover {
   cursor: pointer;
   /*backdrop-filter: blur(4px);*/
   transition: background .15s, border-color .15s, color .15s, transform .12s;
-  box-shadow: 0 6px 20px rgba(60, 120, 220, 0.18), 0 0 28px rgba(70, 130, 255, 0.28);
+  /*box-shadow: 0 6px 20px rgba(60, 120, 220, 0.18), 0 0 28px rgba(70, 130, 255, 0.28);*/
   position: relative;
 }
 .presets-btn:hover {
@@ -190,9 +190,10 @@ button:hover {
   color: #ffffff;
   transform: translateY(-1px);
   box-shadow: 0 10px 30px rgba(60, 130, 230, 0.22), 0 0 40px rgba(80, 150, 255, 0.32);
+
 }
 
-.presets-btn::before {
+/*.presets-btn::before {
   content: '';
   position: absolute;
   left: -10px;
@@ -204,7 +205,7 @@ button:hover {
   filter: blur(10px);
   pointer-events: none;
   z-index: -1;
-}
+} */
 
 /* Dropdown under Presets button */
 .preset-dropdown.tl {
@@ -232,6 +233,7 @@ button:hover {
   border: 1px solid #333;
   border-radius: 10px;
   backdrop-filter: blur(6px);
+
 }
 
 .preset-dropdown.tl .expanded-panel button,
@@ -244,6 +246,7 @@ button:hover {
   border: 1px solid transparent;
   cursor: pointer;
   transition: background .15s, border-color .15s;
+ 
 }
 .preset-dropdown.tl .expanded-panel button:hover {
   background: #2a2a2a;
@@ -269,6 +272,5 @@ button:hover {
 
 
 
-/* Remove obsolete panel (no longer used) */
-.preset-panel { display: none; }
+
 
