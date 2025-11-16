@@ -234,7 +234,7 @@ function LoadingOverlay() {
 
       document.addEventListener('mousedown', onDocMouseDown)
       return () => document.removeEventListener('mousedown', onDocMouseDown)
-    }, [setSelectedId])
+    }, [setSelectedId]) 
 
     const toggleField = () => setShowField(v => !v)
     const toggleOnlyGaussianField = () => setShowOnlyGaussianField(v => !v)
