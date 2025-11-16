@@ -142,6 +142,13 @@ export default function CreateButtons({
             <button onClick={() => loadPreset('parallelPlanes')}>2 Planes</button>
             <div className="spacer" />
             <button onClick={() => loadPreset('sphere')}>Sphere</button>
+
+            <div className="preset-separator" aria-hidden="true" />
+
+            <div className="preset-actions">
+              <button onClick={handleImport} >Import Preset</button>
+              <button onClick={handleExport}>Export Preset</button>
+            </div>
           </div>
         </div>
       )}
@@ -159,21 +166,7 @@ export default function CreateButtons({
                 Clear canvas
               </button>
               
-              <button
-                className="export-btn"
-                onClick={handleExport}
-                title="Export current scene as JSON"
-              >
-                Export
-              </button>
-              
-              <button
-                className="import-btn"
-                onClick={handleImport}
-                title="Import preset from JSON file"
-              >
-                Import
-              </button>
+              {/* export/import moved into presets dropdown */}
             </>
           )}
 

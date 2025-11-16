@@ -1,4 +1,5 @@
 import React, { useState, useEffect} from "react";
+import * as THREE from 'three'
 import "./Sidebar.css";
 
 /**
@@ -65,8 +66,13 @@ export default function ObjectList({
   // bounds
   const POS_MIN = -10, POS_MAX = 10;
   const VAL_MIN = -5, VAL_MAX = 5;
+  const ANGLE_MIN = -360, ANGLE_MAX = 360;
+  const DIM_MIN = 0.1;
+  const DIM_MAX = 10;
   const ERROR_MSG = `Please keep the value between ${VAL_MIN} and ${VAL_MAX}`;
   const clampPos = (n) => Math.max(POS_MIN, Math.min(POS_MAX, n));
+  const clampDim = (n) => Math.max(DIM_MIN, Math.min(DIM_MAX, n));
+  const clampAngle= (n) =>  Math.min(360, n%360);
 
   const setError = (id, key, msg) => {
     setErrors(prev => ({ ...prev, [id]: { ...(prev[id] || {}), [key]: msg } }));
@@ -92,6 +98,27 @@ export default function ObjectList({
     updateObject?.(obj.id, { [field]: parseNum(raw) });
   };
 
+  const commitDimension = (obj, field, raw) => {
+    const v = raw;
+    if (isPartial(v)) return;
+    const n = parseNum(v);
+    const clamped = Math.max(DIM_MIN, Math.abs(n));
+    updateObject?.(obj.id, { [field]: clamped });
+  };
+
+  // Rotation helper: input in degrees, store as radians in obj.rotation [rx,ry,rz]
+  const commitRotation = (obj, idx, rawDeg) => {
+    const deg = parseNum(rawDeg);
+    const rad = (deg * Math.PI) / -180;
+    const arr = Array.isArray(obj.rotation) ? [...obj.rotation] : [0, 0, 0];
+    arr[idx] = rad;
+    // build quaternion from Euler (XYZ)
+    const e = new THREE.Euler(arr[0], arr[1], arr[2], 'XYZ');
+    const q = new THREE.Quaternion().setFromEuler(e);
+    // save both so UI and models stay in sync
+    updateObject?.(obj.id, { rotation: arr, quaternion: [q.x, q.y, q.z, q.w] });
+  };
+
   const setPositionElem = (id, key, idx, newVal) => {
     if (!updateObject) return;
     const obj = items.find((it) => it.id === id);
@@ -114,6 +141,224 @@ export default function ObjectList({
     if (typeof setSelectedId === "function") {
       setSelectedId(newId);
     } 
+  };
+
+
+
+  const renderDimensionControls = (obj) => {
+    // Não mostrar dimensões para charges
+    if (obj.type === 'charge') {
+      return null;
+    }
+
+    const has = (k) => typeof obj?.[k] === 'number';
+
+    // Sphere: radius only (1 input) — add label above input
+    if (has('radius') && !has('height') && !has('width') && !has('depth')) {
+      return (
+        <div className="detail-row">
+          <div className="detail-key">Dimensions</div>
+          <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Radius</div>
+              <input
+                type="number"
+                inputMode="decimal"
+                step={0.1}
+                defaultValue={obj.radius}
+                  onChange={(e) => {const v = e.target.value;
+                    if (isPartial(v)) return;
+                    let n = parseNum(v);
+                    const c = clampDim(n);
+                    if(isPartial(v)) return;
+                    commitDimension(obj, 'radius', n);
+                    if (n !== c) e.target.value = formatFixed(c, 2);}}
+                onBlur={(e) => {
+                    const v = e.target.value;
+                    let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                    if(isPartial(v)) return;
+                    commitRotation(obj, 'radius', n);
+                    e.target.value = formatFixed(n, 2);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: 72, padding: "4px 8px" }}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Cylinder: radius + height — labels above each input
+    if (obj.type !== 'wire' && has('radius') && has('height') && !has('width') && !has('depth')) {
+      return (
+        <div className="detail-row">
+          <div className="detail-key">Dimensions</div>
+          <div className="detail-value" style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Radius</div>
+              <input
+                type="number"
+                inputMode="decimal"
+                step={0.1}
+                defaultValue={obj.radius}
+                onChange={(e) => {const v = e.target.value;
+                              if (isPartial(v)) return;
+                              let n = parseNum(v);
+                              const c = clampDim(n);
+                              if(isPartial(v)) return;
+                              commitDimension(obj, 'radius', n);
+                              if (n !== c) e.target.value = formatFixed(c, 2);}}
+                onBlur={(e) => {
+                              const v = e.target.value;
+                              let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                              if(isPartial(v)) return;
+                              commitDimension(obj, 'radius', n);
+                              e.target.value = formatFixed(n, 2);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: 72, padding: "4px 8px" }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Height</div>
+              <input
+                type="number"
+                inputMode="decimal"
+                step={0.1}
+                min={DIM_MIN}
+                max={DIM_MAX}
+                defaultValue={obj.height}
+                 onChange={(e) => {const v = e.target.value;
+                  if (isPartial(v)) return;
+                  let n = parseNum(v);
+                  const c = clampDim(n);
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'height', n);
+                  if (n !== c) e.target.value = formatFixed(c, 2);}}
+                onBlur={(e) => {
+                  const v = e.target.value;
+                  let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'height', n);
+                  e.target.value = formatFixed(n, 2);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: 72, padding: "4px 8px" }}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Cuboid: width + height + depth — labels above each input
+    if (has('width') && has('height') && has('depth')) {
+      return (
+        <div className="detail-row">
+          <div className="detail-key">Dimensions</div>
+          <div className="detail-value" style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Width</div>
+              <input
+                type="number"
+                inputMode="decimal"
+                step={0.1}
+                min="0"
+                defaultValue={obj.width}
+                onChange={(e) => {const v = e.target.value;
+                  if (isPartial(v)) return;
+                  let n = parseNum(v);
+                  const c = clampDim(n);
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'width', n);
+                  if (n !== c) e.target.value = formatFixed(c, 2);}}
+                onBlur={(e) => {
+                  const v = e.target.value;
+                  let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'width', n);
+                  e.target.value = formatFixed(n, 2);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: 72, padding: "4px 8px" }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Height</div>
+              <input
+                type="number"
+                inputMode="decimal"
+                step={0.1}
+                min="0"
+                defaultValue={obj.height}
+                 onChange={(e) => {const v = e.target.value;
+                  if (isPartial(v)) return;
+                  let n = parseNum(v);
+                  const c = clampDim(n);
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'height', n);
+                  if (n !== c) e.target.value = formatFixed(c, 2);}}
+                onBlur={(e) => {
+                  const v = e.target.value;
+                  let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'height', n);
+                  e.target.value = formatFixed(n, 2);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: 72, padding: "4px 8px" }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Depth</div>
+              <input
+                type="number"
+                inputMode="decimal"
+                step={0.1}
+                min="0"
+                defaultValue={obj.depth}
+                 onChange={(e) => {const v = e.target.value;
+                  if (isPartial(v)) return;
+                  let n = parseNum(v);
+                  const c = clampDim(n);
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'depth', n);
+                  if (n !== c) e.target.value = formatFixed(c, 2);}}
+                onBlur={(e) => {
+                  const v = e.target.value;
+                  let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+                  if(isPartial(v)) return;
+                  commitDimension(obj, 'depth', n);
+                  e.target.value = formatFixed(n, 2);
+                }}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                style={{ width: 72, padding: "4px 8px" }}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Plane: width + height (only if NOT infinite) — existing code remains
+    // Wire: length — existing code remains
+    return null;
   };
 
   return (
@@ -145,13 +390,13 @@ export default function ObjectList({
             </div>
           </div>
 
-          {expanded[obj.id] && (
+          {expanded[obj.id] && ( 
             <div className="object-details">
               <div className="details-grid">
                 {/* Position (common) */}
                 {Array.isArray(obj.position) && obj.position.length === 3 && (
                   <div className="detail-row">
-                    <div className="detail-key">Position</div>
+                    <div className="detail-key">Position X, Y, Z</div>
                     <div className="detail-value" style={{ display: "flex", gap: 6 }}>
                       <input
                         type="number"
@@ -228,6 +473,9 @@ export default function ObjectList({
                     </div>
                   </div>
                 )}
+
+                {/* === DIMENSIONS (only for surfaces) === */}
+                {renderDimensionControls(obj)}
 
                 {/* Charge: Intensity C (same as popup) */}
                 {obj.type === "charge" && (
@@ -393,6 +641,50 @@ export default function ObjectList({
                     </div>
                   </>
                 )}
+
+                {/* Rotation (degrees) */}
+                {Array.isArray(obj.rotation) && obj.rotation.length === 3 && (
+                  <div className="detail-row">
+                    <div className="detail-key">Rotation (deg)</div>
+                    <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+                      {['θx','θy','θz'].map((label, i) => (
+                        <div key={label} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>{label}</div>
+                          <input
+                            min={ANGLE_MIN}
+                            max={ANGLE_MAX}
+                            type="number"
+                            inputMode="decimal"
+                            step={1}
+                            defaultValue={formatFixed((obj.rotation[i] ?? 0) * 180 / Math.PI, 2)}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              if (isPartial(v)) return;
+                              let n = parseNum(v);
+                              const c = clampAngle(n);
+                              if(isPartial(v)) return;
+                              commitRotation(obj, i, n);
+                              if (n !== c) e.target.value = formatFixed(c, 2);
+                            }}
+                            onBlur={(e) => {
+                              const v = e.target.value;
+                              let n = clampAngle(parseNum(isPartial(v) ? 0 : v));
+    
+                              if(isPartial(v)) return;
+                              commitRotation(obj, i, n);
+                              e.target.value = formatFixed(n, 2);
+                            }}
+                            onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ width: 72, padding: "4px 8px" }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {/* end Rotation */}
 
                 {/* Actions */}
                 <div className="detail-row">

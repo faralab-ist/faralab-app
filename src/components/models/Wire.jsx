@@ -20,7 +20,8 @@ function Wire({
   radius,
   direction = [0, 0, 1], // default along Z axis
   quaternion, // full rotation state
-  creativeMode
+  creativeMode,
+  rotation 
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -50,21 +51,50 @@ function Wire({
   // Apply rotation from saved quaternion or direction
   useLayoutEffect(() => {
     if (!groupRef.current || isDraggingRef.current) return
-    
-    // Prefer quaternion if available (more accurate)
+
+    // Prefer quaternion if available (most accurate)
     if (quaternion && quaternion.length === 4) {
       const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
       groupRef.current.quaternion.copy(q)
-    } else if (direction) {
-      // Fallback to direction vector
+
+      // keep direction in sync with quaternion: local Z is our "forward"
+      if (typeof updateDirection === 'function') {
+        const dirWorld = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
+        const [dx = 0, dy = 0, dz = 0] = direction || []
+        const eps = 1e-6
+        if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
+          updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
+        }
+      }
+      return
+    }
+
+    // If rotation Euler (radians) is provided, apply it (XYZ) and keep direction in sync
+    if (Array.isArray(rotation) && rotation.length >= 3) {
+      const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
+      groupRef.current.rotation.copy(e)
+      // compute resulting forward direction (local Z) and update object if changed
+      if (typeof updateDirection === 'function') {
+        const dirWorld = new THREE.Vector3(0, 0, 1).applyEuler(e).normalize()
+        const [dx = 0, dy = 0, dz = 0] = direction || []
+        const eps = 1e-6
+        if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
+          updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
+        }
+      }
+      return
+    }
+
+    // Fallback to direction vector -> quaternion using local Z as base
+    if (direction) {
       const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
       if (dir.lengthSq() === 0) return
       dir.normalize()
-      const from = new THREE.Vector3(0, 1, 0) // cylinder local axis
+      const from = new THREE.Vector3(0, 0, 1) // use Z as cylinder "neutral" axis
       const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
       groupRef.current.quaternion.copy(q)
     }
-  }, [direction, quaternion])
+  }, [direction, quaternion, rotation, updateDirection, id])
 
   return (
     <PivotControls
@@ -89,11 +119,15 @@ function Wire({
 
         const pWorld = new THREE.Vector3().setFromMatrixPosition(matrix)
         updatePosition(id, [pWorld.x, pWorld.y, pWorld.z])
-        // Cylinder points along +Y in local space, rotate that by the gizmo's rotation
-        const dir = new THREE.Vector3(0, 1, 0).applyQuaternion(q).normalize()
+        // Cylinder "neutral" axis is Z for our UX: rotate local Z by the gizmo quaternion
+        const dir = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
         updateDirection(id, [dir.x, dir.y, dir.z])
-        // Also save the full quaternion for complete rotation
-        updateObject?.(id, { quaternion: [q.x, q.y, q.z, q.w] })
+        // Save full quaternion and Euler rotation (radians) so UI rotation fields stay in sync
+        const e = new THREE.Euler().setFromQuaternion(q, 'XYZ')
+        updateObject?.(id, {
+          quaternion: [q.x, q.y, q.z, q.w],
+          rotation: [e.x, e.y, e.z]
+        })
       }}
       onDragEnd={() => {
         isDraggingRef.current = false;
@@ -110,9 +144,11 @@ function Wire({
             charge_density,
             infinite,
             material,
-            direction
+            direction,
           }}
           position={[0, 0, 0]}
+          // rotate mesh so its native Y-axis (three.js cylinder) aligns with local Z used by group
+          rotation={[Math.PI / 2, 0, 0]}
           onPointerDown={(e) => {
             if (e.button !== undefined && e.button !== 0) return
             e.stopPropagation()
