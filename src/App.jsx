@@ -55,30 +55,45 @@ function LoadingOverlay() {
 
   const totalOpacity = finalFade ? 0 : opacity
 
+  // Small, unobtrusive loading/info box that reuses the original `loading.html`.
+  // Keeps the original file but doesn't cover the entire screen.
   return (
     <div
       style={{
         position: 'fixed',
-        inset: 0,
-        background: 'transparent',
+        top: 20,
+        right: 20,
+        width: 280,
+        height: 140,
         zIndex: 9999,
         pointerEvents: 'auto',
-        transition: 'opacity 1s ease-in-out',
+        transition: 'opacity 0.6s ease-in-out, transform 0.6s',
         opacity: totalOpacity,
+        transform: `scale(${totalOpacity > 0 ? 1 : 0.96})`,
       }}
+      aria-hidden={totalOpacity === 0}
     >
-      <iframe
-        src="loading.html"
-        title="Loading"
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          pointerEvents: 'none', // deixa cliques passarem
-          transition: 'opacity 3s ease-in-out', // anima mais lento o fade inicial
-          opacity: totalOpacity,
-        }}
-      />
+      <div style={{
+        width: '100%',
+        height: '100%',
+        borderRadius: 12,
+        overflow: 'hidden',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.45)',
+        border: '1px solid rgba(255,255,255,0.04)',
+        background: 'rgba(10,10,12,0.75)'
+      }}>
+        <iframe
+          src="loading.html"
+          title="Loading"
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            pointerEvents: 'none',
+            opacity: totalOpacity,
+          }}
+        />
+      </div>
     </div>
   )
 }
