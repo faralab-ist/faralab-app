@@ -2,7 +2,6 @@ import React, { useRef, useLayoutEffect, useEffect, useMemo} from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
-import calculateDesiredChargeDens from '../../utils/calculateDesiredChargeDens.jsx'
 
 export default function Sphere({ 
   id, 
