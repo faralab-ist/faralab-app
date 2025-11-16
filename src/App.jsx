@@ -208,6 +208,38 @@ function LoadingOverlay() {
       }
     }
 
+    // Global outside-click handler: when clicking outside UI panels, deselect and close UI menus
+    useEffect(() => {
+      const uiSelectors = [
+        '.sidebar-wrap',
+        '.create-buttons-container',
+        '.presets-btn',
+        '.preset-dropdown',
+        '.plane-buttons-container',
+        '.settings-buttons-root',
+        '.export-dialog',
+        '.object-popup',
+        '.preset-expand-list'
+      ]
+
+      const onDocMouseDown = (ev) => {
+        const path = ev.composedPath ? ev.composedPath() : (ev.path || [])
+        // if path contains any UI element, do nothing
+        for (const sel of uiSelectors) {
+          const el = document.querySelector(sel)
+          if (el && path.includes && path.includes(el)) return
+          if (el && ev.target && el.contains(ev.target)) return
+        }
+
+        // clicked outside UI -> deselect and broadcast close event
+        setSelectedId(null)
+        window.dispatchEvent(new CustomEvent('app:close-all-ui'))
+      }
+
+      document.addEventListener('mousedown', onDocMouseDown)
+      return () => document.removeEventListener('mousedown', onDocMouseDown)
+    }, [setSelectedId])
+
     const toggleField = () => setShowField(v => !v)
     const toggleOnlyGaussianField = () => setShowOnlyGaussianField(v => !v)
     const toggleLines = () => setShowLines(v => !v)
