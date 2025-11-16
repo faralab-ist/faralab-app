@@ -317,10 +317,10 @@ function LoadingOverlay() {
 
     return (
 
-      <>
-      <LoadingOverlay /> {/* 🔹 Aqui o overlay real */}
+    <>
+    {/* <LoadingOverlay /> */}
 
-      <div id="canvas-container">
+    <div id="canvas-container">
         <CreateButtons
           addObject={addObject}
           setSceneObjects={setSceneObjects}
