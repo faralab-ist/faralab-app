@@ -125,7 +125,7 @@ export default function CreateButtons({
         onClick={() => toggleGroup('presets')}
         aria-expanded={openGroup === 'presets'}
       >
-        Presets
+        PRESETS
       </button>
 
       {/* Presets dropdown (não desloca) */}
