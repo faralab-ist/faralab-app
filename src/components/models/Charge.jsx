@@ -1,5 +1,4 @@
 import React, { useRef, useLayoutEffect, useMemo } from 'react'
-import { useFrame } from '@react-three/fiber'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
@@ -32,18 +31,17 @@ function Charge({
     return { glowColor, baseGlowScale, glowIntensity }
   }, [charge])
 
-  // pulse the glow with a small animation based on time and magnitude
-  useFrame(({ clock }) => {
+  // apply static glow (no pulsing) — user requested no inner sphere and no pulsing
+  useLayoutEffect(() => {
     if (!glowRef.current) return
-    const t = clock.getElapsedTime()
-    const pulse = 1 + 0.08 * Math.sin(t * 3 + (id?.charCodeAt?.(0) || 0)) * Math.min(2, Math.abs(charge))
-    glowRef.current.scale.setScalar(baseGlowScale * pulse)
+    // scale tightly around the intended visual radius
+    glowRef.current.scale.setScalar(baseGlowScale * Math.max(0.8, radius || 1))
     if (glowRef.current.material) {
-      glowRef.current.material.emissive = glowColor
-      glowRef.current.material.emissiveIntensity = glowIntensity * pulse
-      glowRef.current.material.opacity = Math.min(0.55, 0.18 + Math.abs(charge) * 0.08)
+      // make the sprite visually very intense in the center (white) and strong overall
+      glowRef.current.material.opacity = Math.min(1, 0.65 + Math.abs(charge) * 0.22)
+      glowRef.current.material.color.set(glowColor)
     }
-  })
+  }, [baseGlowScale, glowColor, charge, radius])
 
   // Sync PivotControls matrix when position changes externally (preset load)
   useLayoutEffect(() => {
@@ -84,7 +82,7 @@ function Charge({
     >
       <group ref={groupRef}>
         {/* soft billboard glow using a canvas gradient texture (sprite) */}
-        <sprite ref={glowRef} position={[0, 0, 0]}>
+        <sprite ref={glowRef} position={[0, 0, 0]}> 
           <spriteMaterial
             attach="material"
             map={useMemo(() => {
@@ -96,27 +94,31 @@ function Charge({
               const cx = size / 2
               const cy = size / 2
               const r = size / 2
-              const c = charge >= 0 ? 'rgba(110,168,255,' : 'rgba(255,110,110,'
+              const color = charge >= 0 ? 'rgba(110,168,255,' : 'rgba(255,110,110,'
               const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r)
-              grad.addColorStop(0, `${c}0.95)`)
-              grad.addColorStop(0.25, `${c}0.55)`)
-              grad.addColorStop(0.5, `${c}0.28)`)
-              grad.addColorStop(0.85, `${c}0.06)`)
-              grad.addColorStop(1, 'rgba(0,0,0,0)')
+              // very bright white center, then colored ring, then fade to transparent
+              grad.addColorStop(0.0, 'rgba(255,255,255,1)')
+              grad.addColorStop(0.06, `${color}0.95)`)
+              grad.addColorStop(0.18, `${color}0.75)`)
+              grad.addColorStop(0.45, `${color}0.22)`)
+              grad.addColorStop(1.0, 'rgba(0,0,0,0)')
               ctx.fillStyle = grad
               ctx.fillRect(0, 0, size, size)
               const tex = new THREE.CanvasTexture(canvas)
               tex.needsUpdate = true
+              tex.minFilter = THREE.LinearFilter
+              tex.magFilter = THREE.LinearFilter
               return tex
             }, [charge])}
             transparent={true}
             depthWrite={false}
             blending={THREE.AdditiveBlending}
-            opacity={0.45}
+            opacity={1.0}
             toneMapped={false}
           />
         </sprite>
 
+        {/* invisible interaction mesh: keeps click/selection but no visible sphere */}
         <mesh
           position={[0, 0, 0]}
           userData={{ id, type: 'charge' }}
@@ -126,8 +128,8 @@ function Charge({
             setSelectedId(id)
           }}
         >
-          <sphereGeometry args={[radius]} />
-          <meshStandardMaterial color={isSelected ? 'lightblue' : (charge >= 0 ? '#8ec6ff' : '#ffb2b2')} />
+          <sphereGeometry args={[Math.max(0.001, radius || 0.2)]} />
+          <meshBasicMaterial transparent={true} opacity={0} depthWrite={false} />
         </mesh>
       </group>
     </PivotControls>
