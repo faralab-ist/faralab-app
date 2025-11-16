@@ -47,7 +47,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 chargedSpherePositions: { value: new Array(MAX_CHARGED_SPHERES).fill(new THREE.Vector3()) },
                 chargedSphereRadius: { value: new Float32Array(MAX_CHARGED_SPHERES).fill(0) },
                 chargedSphereChargeDensity: { value: new Float32Array(MAX_CHARGED_SPHERES).fill(0) },
-                chargedSphereHollow: {value: new Int8Array(MAX_CHARGED_SPHERES).fill(0)},
+                chargedSphereHollow: {value: new Int32Array(MAX_CHARGED_SPHERES).fill(0)},
                 targetVal: { value: 0.0 },
                 transparency: { value: 0.6},
                 epsilon_0 : { value: EPSILON_0 },
@@ -110,7 +110,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 material.uniforms.chargedSpherePositions.value[chargedSphereIdx] = new THREE.Vector3(...obj.position);
                 material.uniforms.chargedSphereRadius.value[chargedSphereIdx] = obj.radius;
                 material.uniforms.chargedSphereChargeDensity.value[chargedSphereIdx] = obj.charge_density;
-                material.uniforms.chargedSphereHollow[chargedSphereIdx] = obj.isHollow ? 1 : 0;
+                material.uniforms.chargedSphereHollow.value[chargedSphereIdx] = obj.isHollow ? 1 : 0;
                 chargedSphereIdx ++;
             }
         });
