@@ -21,9 +21,11 @@ function Wire({
   direction = [0, 0, 1], // default along Z axis
   quaternion, // full rotation state
   creativeMode,
-  rotation 
+  rotation,
+  isHovered,
 }) {
   const isSelected = id === selectedId
+  
   const { handleAxisDragStart } = useCameraSnap()
   const pivotRef = useRef()
   const groupRef = useRef()
@@ -156,7 +158,7 @@ function Wire({
           }}
         >
           <cylinderGeometry args={[radius, radius, trueHeight, 16]} />
-          <meshStandardMaterial color={isSelected ? 'lightblue' : 'red'} />
+          <meshStandardMaterial color={isSelected || isHovered ? 'lightblue' : 'red'} />
         </mesh>
       </group>
     </PivotControls>

@@ -9,7 +9,10 @@ export default function PotButons({
 }) {
     const content = (
     <div className="potential-controls">
-              <button onClick={onToggleEquipotentialSurface}>
+              <button 
+              className='pot-toggle-btn'
+              onClick={onToggleEquipotentialSurface}
+              >
                 {showEquipotentialSurface ? 'Hide Equipotential' : 'Show Equipotential'}
               </button>
 
@@ -26,6 +29,7 @@ export default function PotButons({
                   step={0.1}
                   value={potentialTarget ?? 0}
                   onChange={(e) => setPotentialTarget?.(parseFloat(e.target.value))}
+                  disabled={!showEquipotentialSurface}
                 />
               </div>
             </div>

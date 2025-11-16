@@ -1,12 +1,18 @@
 /* make the buttons flow inline inside the parent panel instead of fixed on screen */
 .plane-buttons-container {
-  position: static;      /* allow it to live inside the parent container */
-  top: auto;
-  left: auto;
-  z-index: auto;
-  pointer-events: auto;  /* enable interactions when inside the panel */
+  /* pin inside the panel at the bottom */
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
   margin: 0;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+  z-index: 30;
+  
+
 }
 
 .plane-buttons-group {

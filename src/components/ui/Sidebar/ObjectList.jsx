@@ -18,7 +18,9 @@ export default function ObjectList({
   expandId = null,
   hoveredId,
   selectedId,
-  setSelectedId
+  setSelectedId,
+  onHoverStart,
+  onHoverEnd
 }) {
   const [expanded, setExpanded] = useState({});
   const [errors, setErrors] = useState({}); // { [id]: { charge?: string, density?: string } }
@@ -370,6 +372,8 @@ export default function ObjectList({
             role="button"
             tabIndex={0}
             onClick={() => handleRowClick(obj)}
+            onMouseEnter={() => { if (typeof onHoverStart === 'function') onHoverStart(obj.id); }}
+            onMouseLeave={() => { if (typeof onHoverEnd === 'function') onHoverEnd(); }}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();

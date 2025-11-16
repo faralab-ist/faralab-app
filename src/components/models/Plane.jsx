@@ -24,8 +24,10 @@ function Plane({
   planeHeight,
   rotation,
   quaternion,
+  hoveredId,
 }) {
   const isSelected = id === selectedId
+  const isHovered = id === hoveredId
   const { handleAxisDragStart } = useCameraSnap()
   const pivotRef = useRef()
   const meshRef = useRef()
@@ -154,7 +156,7 @@ function Plane({
       >
         <planeGeometry args={[width, height, 10, 6]} />
         <meshStandardMaterial
-          color={isSelected ? 'lightblue' : 'lightgreen'}
+          color={isSelected || isHovered ? 'lightblue' : 'lightgreen'}
           side={THREE.DoubleSide}
         />
       </mesh>

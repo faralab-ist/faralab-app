@@ -38,6 +38,7 @@ export default function Cuboid({
   rotation= [0,0,0],
   quaternion,
   updateObject,
+  isHovered
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -166,7 +167,7 @@ export default function Cuboid({
         >
           <boxGeometry args={[width, height, depth]} />
           <meshStandardMaterial
-            color={isSelected ? 'lightblue' : 'white'}
+            color={isSelected || isHovered ? 'lightblue' : 'white'}
             transparent
             opacity={opacity}
             depthWrite={false}

@@ -102,10 +102,12 @@ export default function SettingsButtons({
 
   const anyGaussian = gaussianSurfaces.length > 0
 
+  // disable Field View when there's nothing to show (no field sources and no gaussian surfaces)
+  const fieldButtonDisabled = !hasField
   const ensureFieldVisible = () => {
     if (!showField) onToggleField()
   }
-
+  
   const addSurface = (type) => {
     addObject?.(type, { position: [0,0,0] })
     ensureFieldVisible()
@@ -128,8 +130,8 @@ export default function SettingsButtons({
   }
 
   // Popup on selection
-  const [fluxPrompt, setFluxPrompt] = useState({ open: false, x: 0, y: 0, surfaceType: null })
-  const prevSelectedRef = useRef(null)
+  //const [fluxPrompt, setFluxPrompt] = useState({ open: false, x: 0, y: 0, surfaceType: null })
+  //const prevSelectedRef = useRef(null)
   const lastPointer = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 })
 
   useEffect(() => {
@@ -146,7 +148,7 @@ export default function SettingsButtons({
     }
   }, [])
 
-  useEffect(() => {
+ /* useEffect(() => {
     if (selectedObjectId === prevSelectedRef.current) return
     prevSelectedRef.current = selectedObjectId
 
@@ -186,7 +188,7 @@ export default function SettingsButtons({
     if (showOnlyGaussianField) {
       setFluxPrompt(p => ({ ...p, open: false }))
     }
-  }, [showOnlyGaussianField, creativeMode])
+  }, [showOnlyGaussianField, creativeMode])*/
 
   // Local edit buffers to allow clearing/backspacing
   const [scaleInput, setScaleInput] = useState(String(vectorScale ?? ''))
@@ -224,8 +226,11 @@ export default function SettingsButtons({
         {/* FieldView button (replaces separate E-Field / Potential buttons) */}
         <div className="settings-group">
           <button
-            className={`settings-main big ${open === 'fieldview' ? 'open' : ''}`}
-            onClick={() => { toggle('fieldview'); /* keep last selected tab */ }}
+            className={`settings-main big ${open === 'fieldview' ? 'open' : ''} ${fieldButtonDisabled ? 'disabled' : ''}`}
+            onClick={() => { if (fieldButtonDisabled) return; toggle('fieldview'); /* keep last selected tab */ }}
+            disabled={fieldButtonDisabled}
+            aria-disabled={fieldButtonDisabled}
+            title={fieldButtonDisabled ? "There's no electric field in the scene" : 'Field View'}
           >
             Field View
           </button>
@@ -283,6 +288,7 @@ export default function SettingsButtons({
                   />
                 )}
               </div>
+              <div className="separator" />
 
               {/* Plane buttons are constant at the bottom of the FieldView panel */}
               <div className="fieldview-plane-bottom" style={{ marginTop: 0 }}>
@@ -301,7 +307,7 @@ export default function SettingsButtons({
             Slicing
           </button>
           {open === 'slicing' && (
-            <div className="settings-panel up">
+            <div className="slicing-panel">
               <div className="slice-row">
                 <button
                   onClick={() => setUseSlice?.(!useSlice)}
@@ -328,7 +334,6 @@ export default function SettingsButtons({
 
               <div className="efield-section">
                 <div className="efield-section-title">Slicing Plane</div>
-                <div className="plane-buttons-container">
                 <div className="plane-buttons-group">
 
                   <button
@@ -359,13 +364,12 @@ export default function SettingsButtons({
                     XZ
                   </button>
                 </div>
-                </div>
               </div>
 
               <div className="efield-section">
                 <div className="efield-section-title">Slicing coordinate</div>
                 <div className="efield-row compact">
-                  <label className="efield-label slider-label">
+               
                     <input
                       type="range"
                       //this shouldnt be hardcoded ill fix later
@@ -377,7 +381,7 @@ export default function SettingsButtons({
                       disabled={!useSlice}
                     />
                     <span className="slider-value">{Number(slicePos ?? 0).toFixed(2)}</span>
-                  </label>
+              
                 </div>
               </div>
             </div>
@@ -392,8 +396,8 @@ export default function SettingsButtons({
             Gaussian
           </button>
           {open === 'gaussian' && (
-            <div className="settings-panel up">
-              <div className="settings-info">
+                <div className='gaussian-panel'>
+                  <div className="settings-info">
                 {creativeMode ? 'Create multiple Gaussian surfaces.' : 'Create one surface at a time.'}
               </div>
               <div className="surface-buttons-row">
@@ -438,11 +442,12 @@ export default function SettingsButtons({
                 </button>
               </div>
             </div>
+            
           )}
         </div>
       </div>
 
-      {fluxPrompt.open && (
+     {/* {fluxPrompt.open && (
         <div className="flux-popup" style={{ top: fluxPrompt.y, left: fluxPrompt.x }}>
           <div className="flux-popup-header">
             <span>Gaussian surface</span>
@@ -453,7 +458,7 @@ export default function SettingsButtons({
             <button className="yes" onClick={acceptFlux}>Show Flux</button>
           </div>
         </div>
-      )}
+      )} */}
     </>
   )
 }
