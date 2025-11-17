@@ -51,23 +51,31 @@
 /* remove outline for mouse clicks but keep keyboard focus (accessibility) */
 .tb-btn:focus {
   outline: none;
+  
 }
 .tb-btn:focus:not(:focus-visible) {
-  box-shadow: none;
+  
   outline: none;
 }
 
+.tb-btn:hover{
+  transform: translateY(-1px);
+
+}
+
+
+
 /* keep your :active transform */
 .tb-btn:active {
-  transform: translateY(0); 
+  transform: translateY(-1px); 
   background: rgba(255,255,255,0.02); /* neutral active background */
 }
 
 /* active state visuals */
 .tb-btn.active {
-
+  transform: translateY(-1px);
   background: rgba(83,176,255,0.06);
-  color: #53b0ff; /* used if SVG supports currentColor */
+  color: #53b0ff; 
   box-shadow: 0 0 12px rgba(83,176,255,0.32);
 }
 
