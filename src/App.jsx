@@ -17,6 +17,7 @@ import React, { useState, useEffect, useMemo } from 'react'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
+  import Toolbar from './components/ui/Toolbar/Toolbar'
 
   // Hooks
   import {useSceneObjects, 
@@ -317,11 +318,13 @@ function LoadingOverlay() {
     })
 
     return (
-
+      
     <>
     {/* <LoadingOverlay /> */}
 
-    <div id="canvas-container">
+    <div id="app-root">
+      <Toolbar creativeMode={creativeMode} setCreativeMode={setCreativeMode}/>
+      <div id="canvas-container">
         <CreateButtons
           addObject={addObject}
           setSceneObjects={setSceneObjects}
@@ -344,7 +347,8 @@ function LoadingOverlay() {
             showOnlyGaussianField
           }}
         />
-        
+
+
        {/* <ObjectPopup
           selectedObject={sceneObjects.find(o => o.id === selectedId)}
           updateObject={updateObject}
@@ -510,7 +514,8 @@ function LoadingOverlay() {
           setSlicePlaneFlip={setSlicePlaneFlip}
         />
       </div>
-      </>
+    </div>
+    </>
     )
   }
 

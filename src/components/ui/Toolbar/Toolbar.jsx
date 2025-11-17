@@ -1,22 +1,45 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './Toolbar.css'
+import Slice from '../../../assets/slice.svg'
+import Edit from '../../../assets/edit.svg'
 
-export default function Toolbar() {
+export default function Toolbar({
+  creativeMode,
+  setCreativeMode,
+}) {
+  const [active, setActive] = useState(null)
+
   const handleClick = (name, e) => {
     e.preventDefault()
-    // dummy handler — replace with real actions later
+    // toggle active
+    setActive((a) => (a === name ? null : name))
     // eslint-disable-next-line no-console
     console.log(`Toolbar: ${name} clicked`)
-    alert(`${name} (dummy)`) // quick visual feedback
   }
 
   return (
     <div className="top-toolbar">
-      <button className="tb-btn" onClick={(e) => handleClick('Tool A', e)}>Tool A</button>
-      <button className="tb-btn" onClick={(e) => handleClick('Tool B', e)}>Tool B</button>
-      <button className="tb-btn" onClick={(e) => handleClick('Tool C', e)}>Tool C</button>
-      <div className="tb-sep" />
-      <button className="tb-btn small" onClick={(e) => handleClick('Settings', e)}>⚙</button>
+      <div className="tb-group" >
+        <button
+          className={`tb-btn ${active === 'Slice' ? 'active' : ''}`}
+          onClick={(e) => handleClick('Slice', e)}
+          title="Slice"
+          aria-pressed={active === 'Slice'}
+        >
+          <img className="tb-icon" src={Slice} alt="" />
+        </button>
+
+        <button
+          
+            className={`tb-btn ${creativeMode ? 'active' : ''}`}
+            onClick={() => setCreativeMode(v => !v)}
+            title="Enable manual object creation"
+            aria-pressed={creativeMode}
+  
+        >
+          <img className="tb-icon" src={Edit} alt="" />
+        </button>
+      </div>
     </div>
   )
 }
