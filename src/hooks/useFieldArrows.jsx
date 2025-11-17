@@ -36,6 +36,9 @@ export default function FieldArrows({
     slicePos,
     useSlice,
     slicePlaneFlip
+    ,
+    wavePropagationEnabled = true,
+    waveDuration: propWaveDuration = 0.1
 }) {
     const [previousVectors, setPreviousVectors] = React.useState([]);
     const [isTransitioning, setIsTransitioning] = React.useState(false);
@@ -91,11 +94,33 @@ export default function FieldArrows({
 
     // Função helper para criar os atributos instanciados
     const createInstancedAttributes = React.useCallback((vectorList, isOld = false) => {
-        const positions = new Float32Array(vectorList.length * 3);
-        const directions = new Float32Array(vectorList.length * 3);
-        const scales = new Float32Array(vectorList.length);
-        const colors = new Float32Array(vectorList.length * 3);
-        const delays = new Float32Array(vectorList.length);
+        // Deduplicate nearby positions (to avoid multiple arrows at the exact same point)
+        // We'll quantize positions to a small grid and accumulate fields for duplicates.
+        const quant = 1e-3; // 1mm-ish quantization for dedupe (adjust if needed)
+        const map = new Map();
+        for (const { position, field } of vectorList) {
+            const key = `${Math.round(position.x / quant)}|${Math.round(position.y / quant)}|${Math.round(position.z / quant)}`;
+            const entry = map.get(key);
+            if (!entry) {
+                map.set(key, { position: position.clone(), field: field.clone(), count: 1 });
+            } else {
+                entry.field.add(field);
+                entry.count++;
+            }
+        }
+
+        const unique = [];
+        for (const v of map.values()) {
+            // average the accumulated field to avoid bias
+            v.field.divideScalar(v.count);
+            unique.push({ position: v.position, field: v.field });
+        }
+
+        const positions = new Float32Array(unique.length * 3);
+        const directions = new Float32Array(unique.length * 3);
+        const scales = new Float32Array(unique.length);
+        const colors = new Float32Array(unique.length * 3);
+        const delays = new Float32Array(unique.length);
 
         // compute object centers and max distance for delay normalization
         const objectCenters = (objects && objects.length)
@@ -103,7 +128,7 @@ export default function FieldArrows({
             : [new THREE.Vector3(0, 0, 0)];
 
         let maxDist = 0;
-        for (const { position } of vectorList) {
+        for (const { position } of unique) {
             let minD = Infinity;
             for (const c of objectCenters) {
                 const d = position.distanceTo(c);
@@ -114,7 +139,7 @@ export default function FieldArrows({
         }
 
         let i = 0;
-        for (const { position, field } of vectorList) {
+        for (const { position, field } of unique) {
             const mag = field.length();
             if (mag <= fieldThreshold) continue;
             const logMag = Math.log1p(mag);
@@ -191,7 +216,8 @@ export default function FieldArrows({
     const meshRef = useRef();
     const previousMeshRef = useRef();
 
-    const waveDuration = 0.1; // seconds per instance reveal (reduced from 0.3 for faster appearance)
+    // Determine effective wave duration: if propagation disabled, make it near-instant
+    const waveDuration = wavePropagationEnabled ? (Number.isFinite(propWaveDuration) ? propWaveDuration : 0.1) : 0.0001
 
     const material = useMemo(() => {
         const m = new THREE.ShaderMaterial({
@@ -238,10 +264,22 @@ export default function FieldArrows({
         }
     });
 
+    // ensure shader uniform reflects current waveDuration when slider/toggle changes
+    useEffect(() => {
+        const effective = wavePropagationEnabled ? (Number.isFinite(propWaveDuration) ? propWaveDuration : 0.1) : 0.0001;
+        if (materialRef.current && materialRef.current.uniforms && typeof materialRef.current.uniforms.uWaveDuration !== 'undefined') {
+            materialRef.current.uniforms.uWaveDuration.value = effective;
+        }
+        if (previousMaterialRef.current && previousMaterialRef.current.uniforms && typeof previousMaterialRef.current.uniforms.uWaveDuration !== 'undefined') {
+            previousMaterialRef.current.uniforms.uWaveDuration.value = effective;
+        }
+    }, [propWaveDuration, wavePropagationEnabled]);
+
     // restart wave when vectors or objects change
     useEffect(() => {
         if (materialRef.current && materialRef.current.uniforms) {
-            materialRef.current.uniforms.uStartTime.value = performance.now() / 1000.0 - 0.15;
+            // nudge start time to center the reveal; subtract half the waveDuration for nicer timing
+            materialRef.current.uniforms.uStartTime.value = performance.now() / 1000.0 - (waveDuration / 2);
         }
     }, [vectorsUnfiltered.length, objects, showOnlyPlane, showOnlyGaussianField, planeFilter]);
 

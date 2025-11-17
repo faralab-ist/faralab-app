@@ -46,6 +46,12 @@ export default function SettingsButtons({
   setShowSliceHelper,
   slicePlaneFlip,
   setSlicePlaneFlip
+  ,
+  // optional wave propagation props (passed from App)
+  wavePropagationEnabled,
+  setWavePropagationEnabled,
+  waveDuration,
+  setWaveDuration
 }) {
   const [open, setOpen] = useState(null)
   const toggle = (k) => setOpen(p => p === k ? null : k)
@@ -219,6 +225,8 @@ export default function SettingsButtons({
     }
   }, [lineNumInput, setLineNumber, lineNumber])
 
+  // wavePropagation props are accepted from parent; defaults handled in child
+
   return (
     <>
       <div ref={rootRef} className="settings-buttons-root horizontal">
@@ -259,6 +267,10 @@ export default function SettingsButtons({
                   <EfieldButtons
                     inline={true}                      // <--- render inline
                     hasField={hasField}
+                    wavePropagationEnabled={wavePropagationEnabled}
+                    setWavePropagationEnabled={setWavePropagationEnabled}
+                    waveDuration={waveDuration}
+                    setWaveDuration={setWaveDuration}
                     onToggleField={onToggleField}
                     onToggleLines={onToggleLines}
                     vectorMinTsl={vectorMinTsl}
