@@ -169,6 +169,9 @@ function LoadingOverlay() {
     const [useSlice, setUseSlice] = useState(false)
     const [showSlicePlaneHelper, setShowSlicePlaneHelper] = useState(true)
     const [slicePlaneFlip, setSlicePlaneFlip] = useState(false)
+      // Wave propagation settings for field arrows
+      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(true)
+      const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
 
     const handleSelect = (id) => {
@@ -443,6 +446,8 @@ function LoadingOverlay() {
         slicePos={slicePos}
         useSlice={useSlice}
         slicePlaneFlip={slicePlaneFlip}
+        wavePropagationEnabled={wavePropagationEnabled}
+        waveDuration={waveDuration}
         />
         )}
 
@@ -508,6 +513,11 @@ function LoadingOverlay() {
           setShowSliceHelper={setShowSlicePlaneHelper}
           slicePlaneFlip={slicePlaneFlip}
           setSlicePlaneFlip={setSlicePlaneFlip}
+          // Wave propagation controls for field arrows
+          wavePropagationEnabled={wavePropagationEnabled}
+          setWavePropagationEnabled={setWavePropagationEnabled}
+          waveDuration={waveDuration}
+          setWaveDuration={setWaveDuration}
         />
       </div>
       </>

@@ -20,13 +20,44 @@ export default function EfieldButtons({
     setLineNumInput,
     commitLineNum,
     inline,
-    hasField = true
+    hasField = true,
+    // wave propagation props
+    wavePropagationEnabled,
+    setWavePropagationEnabled,
+    waveDuration,
+    setWaveDuration
 }) {
     const disabledTitle_vectors = "Enable the field vectors to use this";
     const disabledTitle_lines = "Enable the field lines to use this";
 
     const content = (
         <div className="efield-controls">
+            <div className="efield-row compact" style={{alignItems: 'center', gap: 8}}>
+                <label className="efield-label" style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                    <input
+                        type="checkbox"
+                        checked={!!wavePropagationEnabled}
+                        onChange={e => setWavePropagationEnabled?.(e.target.checked)}
+                        disabled={!hasField}
+                    />
+                    <span className="label-text">Wave Propagation</span>
+                </label>
+                {wavePropagationEnabled && (
+                    <label className="efield-label" style={{display:'flex', alignItems:'center', gap:8}}>
+                        <span className="label-text">Wave Duration (s)</span>
+                        <input
+                            type="range"
+                            min={0.02}
+                            max={1.0}
+                            step={0.01}
+                            value={waveDuration ?? 0.1}
+                            onChange={e => setWaveDuration?.(parseFloat(e.target.value))}
+                            disabled={!hasField}
+                        />
+                        <span style={{minWidth:48, textAlign:'right'}}>{(waveDuration ?? 0.1).toFixed(2)}</span>
+                    </label>
+                )}
+            </div>
             <div className="field-buttons-row">
                 <button
                     type="button"
