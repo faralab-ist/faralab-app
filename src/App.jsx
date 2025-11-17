@@ -319,6 +319,24 @@ function LoadingOverlay() {
       setVectorMinTsl, setVectorScale, setLineMin, setLineNumber
     })
 
+    useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key !== 'Backspace' && e.key !== 'Delete') return
+      const active = document.activeElement
+      if (!active) return
+      const tag = active.tagName
+      const isFormField = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active.isContentEditable
+      if (isFormField) return
+      if (selectedId == null) return
+      e.preventDefault() // avoid back-navigation on Backspace
+      removeObject?.(selectedId)
+      setSelectedId(null)
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [selectedId, removeObject, setSelectedId])
+
     return (
 
     <>
