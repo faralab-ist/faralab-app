@@ -164,6 +164,8 @@ export default function getFieldVector3(objects, gridSize = 10, step = 1, showOn
       }
     }
 
+    let final_vectors = []
+
     for (const pointVector3 of gridVector3) {
       const fieldAtPoint = calculateFieldAtPoint(objects, pointVector3)      
       fieldVectors.push({ position: pointVector3, field: fieldAtPoint })

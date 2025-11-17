@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import calculateField from '../utils/calculateField.js';
 import Arrow from '../components/models/Arrow.jsx';
 import getFieldVector3 from '../utils/getFieldVectors.js';
-import { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { Instance, Instances } from '@react-three/drei';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import vertexShaderSource from '../shaders/arrowVertex.glsl';
@@ -57,23 +58,29 @@ export default function FieldArrows({
     const logMax = MAX_L > 0 ? Math.log1p(MAX_L) : 1;
     
     const arrowGeometry = useMemo(() => { 
-        const shaft = new THREE.CylinderGeometry(0.01, 0.01, 0.8* scaleMultiplier, 6)
-        const head = new THREE.ConeGeometry(0.05, 0.2, 8)
-        head.translate(0, 0.4* scaleMultiplier, 0)
+        const s = scaleMultiplier || 1;
+        const shaft = new THREE.CylinderGeometry(0.01, 0.01, 0.8 * s, 6);
+        const head = new THREE.ConeGeometry(0.05, 0.2, 8);
+        head.translate(0, 0.4 * s, 0);
         const merged = BufferGeometryUtils.mergeGeometries([shaft, head]);
-        // ensure lighting/shaders that use normals work
-        // howver they do not work
         merged.computeVertexNormals();
-        // move the geometry so base is at y=0 (optional but often needed)
-        merged.translate(0, 0.4* scaleMultiplier  , 0);
+        merged.translate(0, 0.4 * s, 0);
         merged.computeBoundingSphere();
         return merged;
-    }, [])
+    }, [scaleMultiplier]);
 
     const positions = new Float32Array(vectors.length * 3);
     const directions = new Float32Array(vectors.length * 3);
     const scales = new Float32Array(vectors.length);
     const colors = new Float32Array(vectors.length * 3);
+    const delays = new Float32Array(vectors.length);
+
+    // compute max distance for delay normalization (so wave can be based on distance)
+    let maxDist = 0;
+    for (const { position } of vectors) {
+        const d = position.length();
+        if (d > maxDist) maxDist = d;
+    }
 
     let i = 0;
     for (const { position, field } of vectors) {
@@ -100,6 +107,10 @@ export default function FieldArrows({
         colors[i * 3 + 1] = color.g;
         colors[i * 3 + 2] = color.b;
 
+        // per-instance delay (normalized 0..1) based on distance from origin
+        const dist = position.length();
+        delays[i] = maxDist > 0 ? dist / maxDist : 0;
+
         i++;
     }
 
@@ -107,14 +118,49 @@ export default function FieldArrows({
     arrowGeometry.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(directions, 3));
     arrowGeometry.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(scales, 1));
     arrowGeometry.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(colors, 3));
+    arrowGeometry.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(delays, 1));
 
     arrowGeometry.instanceCount = i;
 
-    const material = new THREE.ShaderMaterial({
-         vertexShader: vertexShaderSource,
-         fragmentShader: fragmentShaderSource,
-         vertexColors: true,
+    // shader material with time uniforms for reveal wave
+    const materialRef = useRef();
+    const meshRef = useRef();
+
+    const waveDuration = 0.6; // seconds per instance reveal
+
+    const material = useMemo(() => {
+        const m = new THREE.ShaderMaterial({
+            vertexShader: vertexShaderSource,
+            fragmentShader: fragmentShaderSource,
+            vertexColors: true,
+            transparent: true,
+            uniforms: {
+                uTime: { value: 0.0 },
+                uStartTime: { value: performance.now() / 1000.0 },
+                uWaveDuration: { value: waveDuration }
+            }
+        });
+        return m;
+    }, [vertexShaderSource, fragmentShaderSource]);
+
+    // keep ref to update uniforms each frame
+    materialRef.current = material;
+
+    useFrame((state) => {
+        if (materialRef.current && materialRef.current.uniforms) {
+            materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
+        }
     });
+
+    // restart wave when vectors or objects change
+    useEffect(() => {
+        if (materialRef.current && materialRef.current.uniforms) {
+            materialRef.current.uniforms.uStartTime.value = performance.now() / 1000.0;
+        }
+    }, [vectorsUnfiltered.length, objects, showOnlyPlane, showOnlyGaussianField, planeFilter]);
+
     const instanced = new THREE.InstancedMesh(arrowGeometry, material, i);
-    return <primitive object={instanced} />;
+    instanced.frustumCulled = false;
+
+    return <primitive ref={meshRef} object={instanced} />;
 }
