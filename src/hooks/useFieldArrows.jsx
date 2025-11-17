@@ -37,13 +37,33 @@ export default function FieldArrows({
     useSlice,
     slicePlaneFlip
 }) {
+    const [previousVectors, setPreviousVectors] = React.useState([]);
+    const [isTransitioning, setIsTransitioning] = React.useState(false);
+    
     const vectorsUnfiltered = useMemo( 
         () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
-        [objects, showOnlyPlane, showOnlyGaussianField, planeFilter]
+        [objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter]
     );
     const vectors = vectorsUnfiltered.filter(({position, field}) => 
         sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)
     );
+    
+    // Detectar mudanças nos vetores
+    useEffect(() => {
+        if (previousVectors.length > 0 && vectors.length > 0) {
+            // Há vetores antigos e novos - iniciar transição
+            setIsTransitioning(true);
+            // Após a duração da animação da onda, remover os vetores antigos
+            const timeout = setTimeout(() => {
+                setPreviousVectors(vectors);
+                setIsTransitioning(false);
+            }, 200); // Reduced from 600ms to 200ms
+            return () => clearTimeout(timeout);
+        } else if (previousVectors.length === 0 && vectors.length > 0) {
+            // Primeira renderização - apenas salvar os vetores
+            setPreviousVectors(vectors);
+        }
+    }, [vectors.length, slicePlane, slicePos, useSlice, slicePlaneFlip]);
 
     const MAX_L = useMemo(() => {
         let maxL = 0;
@@ -69,64 +89,109 @@ export default function FieldArrows({
         return merged;
     }, [scaleMultiplier]);
 
-    const positions = new Float32Array(vectors.length * 3);
-    const directions = new Float32Array(vectors.length * 3);
-    const scales = new Float32Array(vectors.length);
-    const colors = new Float32Array(vectors.length * 3);
-    const delays = new Float32Array(vectors.length);
+    // Função helper para criar os atributos instanciados
+    const createInstancedAttributes = React.useCallback((vectorList, isOld = false) => {
+        const positions = new Float32Array(vectorList.length * 3);
+        const directions = new Float32Array(vectorList.length * 3);
+        const scales = new Float32Array(vectorList.length);
+        const colors = new Float32Array(vectorList.length * 3);
+        const delays = new Float32Array(vectorList.length);
 
-    // compute max distance for delay normalization (so wave can be based on distance)
-    let maxDist = 0;
-    for (const { position } of vectors) {
-        const d = position.length();
-        if (d > maxDist) maxDist = d;
-    }
+        // compute object centers and max distance for delay normalization
+        const objectCenters = (objects && objects.length)
+            ? objects.map(o => new THREE.Vector3(...(o.position || [0, 0, 0])))
+            : [new THREE.Vector3(0, 0, 0)];
 
-    let i = 0;
-    for (const { position, field } of vectors) {
-        const mag = field.length();
-        if (mag <= fieldThreshold) continue;
-        const logMag = Math.log1p(mag);
-        const normalized = logMax > 0 ? Math.min(Math.max(logMag / logMax, 0), 1) : 0;
-        const hue = (1 - normalized) * 0.66;
-        const color = new THREE.Color().setHSL(hue, 1, 0.5);
-        const dir = field.clone().normalize();
+        let maxDist = 0;
+        for (const { position } of vectorList) {
+            let minD = Infinity;
+            for (const c of objectCenters) {
+                const d = position.distanceTo(c);
+                if (d < minD) minD = d;
+            }
+            if (!isFinite(minD)) minD = position.length();
+            if (minD > maxDist) maxDist = minD;
+        }
 
-        positions[i * 3] = position.x;
-        positions[i * 3 + 1] = position.y;
-        positions[i * 3 + 2] = position.z;
+        let i = 0;
+        for (const { position, field } of vectorList) {
+            const mag = field.length();
+            if (mag <= fieldThreshold) continue;
+            const logMag = Math.log1p(mag);
+            const normalized = logMax > 0 ? Math.min(Math.max(logMag / logMax, 0), 1) : 0;
+            const hue = (1 - normalized) * 0.66;
+            const color = new THREE.Color().setHSL(hue, 1, 0.5);
+            const dir = field.clone().normalize();
 
-        directions[i * 3] = dir.x;
-        directions[i * 3 + 1] = dir.y;
-        directions[i * 3 + 2] = dir.z;
+            positions[i * 3] = position.x;
+            positions[i * 3 + 1] = position.y;
+            positions[i * 3 + 2] = position.z;
 
-        const parameter = 1 - Math.exp(-logMag);
-        scales[i] = (Math.min(Math.max(parameter, 0), 1.0));
+            directions[i * 3] = dir.x;
+            directions[i * 3 + 1] = dir.y;
+            directions[i * 3 + 2] = dir.z;
 
-        colors[i * 3] = color.r;
-        colors[i * 3 + 1] = color.g;
-        colors[i * 3 + 2] = color.b;
+            const parameter = 1 - Math.exp(-logMag);
+            scales[i] = (Math.min(Math.max(parameter, 0), 1.0));
 
-        // per-instance delay (normalized 0..1) based on distance from origin
-        const dist = position.length();
-        delays[i] = maxDist > 0 ? dist / maxDist : 0;
+            colors[i * 3] = color.r;
+            colors[i * 3 + 1] = color.g;
+            colors[i * 3 + 2] = color.b;
 
-        i++;
-    }
+            let minDistToObject = Infinity;
+            for (const c of objectCenters) {
+                const d = position.distanceTo(c);
+                if (d < minDistToObject) minDistToObject = d;
+            }
+            if (!isFinite(minDistToObject)) minDistToObject = position.length();
+            const dist = minDistToObject;
+            delays[i] = maxDist > 0 ? dist / maxDist : 0;
 
-    arrowGeometry.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(positions, 3));
-    arrowGeometry.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(directions, 3));
-    arrowGeometry.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(scales, 1));
-    arrowGeometry.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(colors, 3));
-    arrowGeometry.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(delays, 1));
+            i++;
+        }
 
-    arrowGeometry.instanceCount = i;
+        return { positions, directions, scales, colors, delays, count: i };
+    }, [objects, fieldThreshold, logMax]);
+
+    // Criar geometria e material para os vetores atuais
+    const currentGeometry = useMemo(() => {
+        const geom = arrowGeometry.clone();
+        const attrs = createInstancedAttributes(vectors);
+        
+        geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(attrs.positions, 3));
+        geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(attrs.directions, 3));
+        geom.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(attrs.scales, 1));
+        geom.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(attrs.colors, 3));
+        geom.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(attrs.delays, 1));
+        geom.instanceCount = attrs.count;
+        
+        return geom;
+    }, [vectors, arrowGeometry, createInstancedAttributes]);
+
+    // Criar geometria para vetores antigos (se existirem)
+    const previousGeometry = useMemo(() => {
+        if (!isTransitioning || previousVectors.length === 0) return null;
+        
+        const geom = arrowGeometry.clone();
+        const attrs = createInstancedAttributes(previousVectors, true);
+        
+        geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(attrs.positions, 3));
+        geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(attrs.directions, 3));
+        geom.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(attrs.scales, 1));
+        geom.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(attrs.colors, 3));
+        geom.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(attrs.delays, 1));
+        geom.instanceCount = attrs.count;
+        
+        return geom;
+    }, [previousVectors, isTransitioning, arrowGeometry, createInstancedAttributes]);
 
     // shader material with time uniforms for reveal wave
     const materialRef = useRef();
+    const previousMaterialRef = useRef();
     const meshRef = useRef();
+    const previousMeshRef = useRef();
 
-    const waveDuration = 0.6; // seconds per instance reveal
+    const waveDuration = 0.1; // seconds per instance reveal (reduced from 0.3 for faster appearance)
 
     const material = useMemo(() => {
         const m = new THREE.ShaderMaterial({
@@ -136,31 +201,71 @@ export default function FieldArrows({
             transparent: true,
             uniforms: {
                 uTime: { value: 0.0 },
-                uStartTime: { value: performance.now() / 1000.0 },
+                uStartTime: { value: performance.now()},
                 uWaveDuration: { value: waveDuration }
             }
         });
         return m;
     }, [vertexShaderSource, fragmentShaderSource]);
 
+    const previousMaterial = useMemo(() => {
+        if (!isTransitioning) return null;
+        
+        const m = new THREE.ShaderMaterial({
+            vertexShader: vertexShaderSource,
+            fragmentShader: fragmentShaderSource,
+            vertexColors: true,
+            transparent: true,
+            uniforms: {
+                uTime: { value: 0.0 },
+                uStartTime: { value: -999. }, // Tempo muito antigo para que apareçam totalmente visíveis
+                uWaveDuration: { value: waveDuration }
+            }
+        });
+        return m;
+    }, [isTransitioning, vertexShaderSource, fragmentShaderSource]);
+
     // keep ref to update uniforms each frame
     materialRef.current = material;
+    previousMaterialRef.current = previousMaterial;
 
     useFrame((state) => {
         if (materialRef.current && materialRef.current.uniforms) {
             materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
+        }
+        if (previousMaterialRef.current && previousMaterialRef.current.uniforms) {
+            previousMaterialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
         }
     });
 
     // restart wave when vectors or objects change
     useEffect(() => {
         if (materialRef.current && materialRef.current.uniforms) {
-            materialRef.current.uniforms.uStartTime.value = performance.now() / 1000.0;
+            materialRef.current.uniforms.uStartTime.value = performance.now() / 1000.0 - 0.15;
         }
     }, [vectorsUnfiltered.length, objects, showOnlyPlane, showOnlyGaussianField, planeFilter]);
 
-    const instanced = new THREE.InstancedMesh(arrowGeometry, material, i);
-    instanced.frustumCulled = false;
+    const currentInstanced = useMemo(() => {
+        const attrs = createInstancedAttributes(vectors);
+        const mesh = new THREE.InstancedMesh(currentGeometry, material, attrs.count);
+        mesh.frustumCulled = false;
+        return mesh;
+    }, [currentGeometry, material, createInstancedAttributes, vectors]);
 
-    return <primitive ref={meshRef} object={instanced} />;
+    const previousInstanced = useMemo(() => {
+        if (!previousGeometry || !previousMaterial) return null;
+        const attrs = createInstancedAttributes(previousVectors, true);
+        const mesh = new THREE.InstancedMesh(previousGeometry, previousMaterial, attrs.count);
+        mesh.frustumCulled = false;
+        return mesh;
+    }, [previousGeometry, previousMaterial, previousVectors, createInstancedAttributes]);
+
+    return (
+        <>
+            <primitive ref={meshRef} object={currentInstanced} />
+            {isTransitioning && previousInstanced && (
+                <primitive ref={previousMeshRef} object={previousInstanced} />
+            )}
+        </>
+    );
 }
