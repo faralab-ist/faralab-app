@@ -14,8 +14,9 @@ export default function getFieldVector3(
         for (let z = -gridSize; z <= gridSize; z += step) {
           // Filtro de plano
           if (planeFilter === 'xy' && z !== 0)
-            continue if (planeFilter === 'yz' && x !== 0) continue if (
-                planeFilter === 'xz' && y !== 0) continue
+            continue 
+          if (planeFilter === 'yz' && x !== 0) continue 
+          if (planeFilter === 'xz' && y !== 0) continue
 
                 const targetPos = new THREE.Vector3(x, y, z)
             const fieldAtPoint = calculateFieldAtPoint(objects, targetPos)
@@ -75,7 +76,8 @@ export default function getFieldVector3(
             for (let ri = 0; ri < rows; ri++) {
               for (let ci = 0; ci < cols; ci++) {
                 if (gridVector3.length >= lateralCount)
-                  break const theta = ((ci + 0.5) / cols) * Math.PI * 2
+                  break 
+                  const theta = ((ci + 0.5) / cols) * Math.PI * 2
                   const y = -length / 2 + (ri + 0.5) * (length / rows)
                   const x = Math.cos(theta) * radius
                   const z = Math.sin(theta) * radius
@@ -89,12 +91,14 @@ export default function getFieldVector3(
           // circle
           function sampleCap(count, capY) {
             if (count <= 0)
-              return const cols = Math.max(1, Math.ceil(Math.sqrt(count)))
+              return 
+            const cols = Math.max(1, Math.ceil(Math.sqrt(count)))
               const rows = Math.max(1, Math.ceil(count / cols))
               for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
                   if (gridVector3.length >= sampleCount)
-                    return const x = -radius + (c + 0.5) * (2 * radius / cols)
+                    return 
+                  const x = -radius + (c + 0.5) * (2 * radius / cols)
                     const z = -radius + (r + 0.5) * (2 * radius / rows)
                     if (x * x + z * z <= radius * radius) {
                       gridVector3.push(
@@ -120,7 +124,8 @@ export default function getFieldVector3(
           for (let i = 0; i < rows; i++) {
             for (let j = 0; j < cols; j++) {
               if (gridVector3.length >= sampleCount)
-                break const x = (-width / 2) + (j + 0.5) * (width / cols)
+                break 
+              const x = (-width / 2) + (j + 0.5) * (width / cols)
                 const y = (-height / 2) + (i + 0.5) * (height / rows)
                 gridVector3.push(new THREE.Vector3(x, y, 0).add(objPos))
             }
@@ -132,7 +137,8 @@ export default function getFieldVector3(
           // sample on prism surface (axis-aligned box) — distribute points on
           // faces proportional to face area
           const [w = 1, h = 1, d = 1] =
-              [obj.width, obj.height, obj.depth] const faces = [
+              [obj.width, obj.height, obj.depth] 
+              const faces = [
                 {
                   u: 'x',
                   v: 'y',
@@ -181,7 +187,8 @@ export default function getFieldVector3(
                   vSize: d,
                   wPos: -w / 2
                 },  // -x
-              ] const areas = faces.map(f => f.uSize * f.vSize)
+              ] 
+              const areas = faces.map(f => f.uSize * f.vSize)
           const totalArea = areas.reduce((s, a) => s + a, 0) || 1
           const exact = areas.map(a => (a / totalArea) * sampleCount)
           const counts = exact.map(v => Math.floor(v))
@@ -195,14 +202,18 @@ export default function getFieldVector3(
             ri++
           }
           for (let fi = 0; fi < faces.length; fi++) {
-            const f = faces[fi] const cnt =
-                counts[fi] if (cnt <= 0) continue const cols =
+            const f = faces[fi] 
+            const cnt =
+                counts[fi] 
+                if (cnt <= 0) continue 
+                const cols =
                     Math.ceil(Math.sqrt((cnt * f.uSize) / f.vSize))
             const rows = Math.ceil(cnt / cols)
             for (let r = 0; r < rows; r++) {
               for (let c = 0; c < cols; c++) {
                 if (gridVector3.length >= sampleCount)
-                  break const uu = (-f.uSize / 2) + (c + 0.5) * (f.uSize / cols)
+                  break 
+                const uu = (-f.uSize / 2) + (c + 0.5) * (f.uSize / cols)
                   const vv = (-f.vSize / 2) + (r + 0.5) * (f.vSize / rows)
                   const p = new THREE.Vector3()
                   p[f.u] = uu
@@ -231,8 +242,10 @@ export default function getFieldVector3(
 
 function fibonacciSpherePoints(count, radius = 1) {
   if (count <= 0)
-    return [] if (count === 1) return [new THREE.Vector3(
-               0, 0, 0)] const points = [] const offset = 2 / count
+    return [] 
+  if (count === 1) return [new THREE.Vector3(0, 0, 0)] 
+               const points = [] 
+               const offset = 2 / count
     const increment = Math.PI * (3 - Math.sqrt(5))
     for (let i = 0; i < count; i++) {
       const y = ((i * offset) - 1) + (offset / 2)
