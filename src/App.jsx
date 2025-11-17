@@ -323,7 +323,7 @@ function LoadingOverlay() {
     {/* <LoadingOverlay /> */}
 
     <div id="app-root">
-      <Toolbar creativeMode={creativeMode} setCreativeMode={setCreativeMode}/>
+      <Toolbar creativeMode={creativeMode} setCreativeMode={setCreativeMode} setSceneObjects={setSceneObjects} />
       <div id="canvas-container">
         <CreateButtons
           addObject={addObject}

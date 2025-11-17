@@ -15,6 +15,32 @@
 
 
 
+/* position canvas controls to the left while keeping the center group centered */
+.top-toolbar { position: relative; } /* already present, keep for positioning context */
+
+.canvas-controls {
+  position: absolute;
+  right: 80px;                /* move controls to the left edge (adjust as needed) */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  pointer-events: auto;
+  z-index: 12;
+}
+
+/* small divider between sections */
+.tb-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.06);
+  margin: 0 10px;
+  border-radius: 1px;
+  align-self: center;
+  pointer-events: none;
+}
+
 /* center the group across the full toolbar */
 .tb-group {
   flex: 1;                  /* take available space */
@@ -23,6 +49,7 @@
   justify-content: center;  /* center children horizontally */
   align-items: center;      /* center vertically */
   gap: 8px;                 /* space between buttons */
+  margin: 0 auto;
 }
 
 /* tighter, perfectly centered buttons */
