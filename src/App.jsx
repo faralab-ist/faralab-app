@@ -17,7 +17,8 @@ import React, { useState, useEffect, useMemo } from 'react'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
-  import Toolbar from './components/ui/Toolbar/Toolbar'
+  import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
+  import Toolbar from './components/ui/Toolbar/Toolbar' // already imported below in your file; keep as-is
 
   // Hooks
   import {useSceneObjects, 
@@ -172,6 +173,8 @@ function LoadingOverlay() {
     const [slicePlaneFlip, setSlicePlaneFlip] = useState(false)
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
 
+    const [toolbarActive, setToolbarActive] = useState(false);
+
     const handleSelect = (id) => {
       setSelectedId(id)
       setIsPanelMinimized(false)
@@ -323,8 +326,35 @@ function LoadingOverlay() {
     {/* <LoadingOverlay /> */}
 
     <div id="app-root">
-      <Toolbar creativeMode={creativeMode} setCreativeMode={setCreativeMode} setSceneObjects={setSceneObjects} />
-      <div id="canvas-container">
+      <div className="toolbar-root">     {/* new same-container wrapper */}
+     <Toolbar 
+      creativeMode={creativeMode}
+       setCreativeMode={setCreativeMode} 
+       setSceneObjects={setSceneObjects} 
+       active={toolbarActive}
+       setActive={setToolbarActive}
+        useSlice={useSlice} setUseSlice={setUseSlice}
+        showSliceHelper={showSlicePlaneHelper} 
+        setShowSliceHelper={setShowSlicePlaneHelper}
+        setSlicePlane={setSlicePlane} 
+        slicePlane={slicePlane}
+        slicePos={slicePos} setSlicePos={setSlicePos}
+        slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
+       />
+       <ToolbarPopup
+          active={toolbarActive}
+          setActive={setToolbarActive}
+          popupProps={{
+            useSlice, setUseSlice,
+            showSliceHelper: showSlicePlaneHelper, setShowSliceHelper: setShowSlicePlaneHelper,
+            setSlicePlane, slicePlane,
+            slicePos, setSlicePos,
+            slicePlaneFlip, setSlicePlaneFlip
+          }}
+        />
+       </div>
+       <div id="canvas-container">
+        {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
         <CreateButtons
           addObject={addObject}
           setSceneObjects={setSceneObjects}

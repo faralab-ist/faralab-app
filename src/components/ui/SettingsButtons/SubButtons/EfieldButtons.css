@@ -72,6 +72,7 @@
   border-color: #4a6d94;
   background: #20252a;
   color: #ffffff;
+  outline: none
 }
 
 .efield-label input:disabled {
@@ -84,6 +85,8 @@
   gap: 8px;
   align-items: center;
 }
+
+
 
 /* toggle buttons (unchanged) */
 .efield-toggle-btn {
@@ -100,10 +103,16 @@
   transition: background .12s, border-color .12s, transform .06s, box-shadow .12s;
 }
 
+
+
 .efield-toggle-btn:hover {
   background: #202427;
   border-color: #4a6d94;
   transform: translateY(-1px);
+}
+
+.efield-toggle-btn:focus {
+ outline: none;
 }
 
 .efield-toggle-btn:active {

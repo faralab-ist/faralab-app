@@ -18,6 +18,7 @@
 /* position canvas controls to the left while keeping the center group centered */
 .top-toolbar { position: relative; } /* already present, keep for positioning context */
 
+/*this is not used for now*/
 .canvas-controls {
   position: absolute;
   right: 80px;                /* move controls to the left edge (adjust as needed) */
