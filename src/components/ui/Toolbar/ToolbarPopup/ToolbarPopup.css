@@ -139,7 +139,7 @@
   transition: background .15s, border-color .15s;
 }
 
-.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):hover,
+.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):hover:not(.slicing-btn):hover,
 .toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):hover,
 .toolbar-popup .flip-btn:not(.plane-button):not(.tp-icon-btn):hover {
   transform: translateY(-2px);

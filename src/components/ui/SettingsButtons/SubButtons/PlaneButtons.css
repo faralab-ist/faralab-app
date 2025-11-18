@@ -73,6 +73,9 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
   transform: scale(1.05);
 }
+.plane-button:focus{
+  outline: none;
+}
 
 
 .plane-button.active:hover {
