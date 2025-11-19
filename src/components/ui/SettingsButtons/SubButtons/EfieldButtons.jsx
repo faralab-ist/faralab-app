@@ -48,10 +48,10 @@ export default function EfieldButtons({
 
                 {/* Always render the Wave Duration row — greyed/disabled when wavePropagationEnabled is false */}
                 <label
-                    className={`efield-label ${(!wavePropagationEnabled || !hasField) ? 'dimmed' : ''}`}
+                    className={`efield-label ${(!wavePropagationEnabled || !showField) ? 'dimmed' : ''}`}
                     style={{display:'flex', alignItems:'center', gap:8}}
-                    title={(!wavePropagationEnabled || !hasField) ? 'Enable field vectors to control this' : undefined}
-                    aria-hidden={!hasField && !wavePropagationEnabled ? 'true' : undefined}
+                    title={(!wavePropagationEnabled || !showField) ? 'Enable field vectors to control this' : undefined}
+                    aria-hidden={!showField && !wavePropagationEnabled ? 'true' : undefined}
                 >
                     <span className="label-text">Wave Duration (s)</span>
                     <input
@@ -61,7 +61,7 @@ export default function EfieldButtons({
                         step={0.01}
                         value={waveDuration ?? 0.1}
                         onChange={e => setWaveDuration?.(parseFloat(e.target.value))}
-                        disabled={!wavePropagationEnabled || !hasField}
+                        disabled={!wavePropagationEnabled || !showField}
                         className="efield-range"
                     />
                     <span className="slider-value" style={{minWidth:48, textAlign:'right'}}>{(waveDuration ?? 0.1).toFixed(2)}</span>

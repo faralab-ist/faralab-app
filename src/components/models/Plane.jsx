@@ -24,10 +24,9 @@ function Plane({
   planeHeight,
   rotation,
   quaternion,
-  hoveredId,
+  isHovered,
 }) {
   const isSelected = id === selectedId
-  const isHovered = id === hoveredId
   const { handleAxisDragStart } = useCameraSnap()
   const pivotRef = useRef()
   const meshRef = useRef()
