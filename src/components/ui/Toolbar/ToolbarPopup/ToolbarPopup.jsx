@@ -9,9 +9,17 @@ export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
   const ref = useRef(null)
   const dragRef = useRef({ dragging: false, startX: 0, startY: 0, origX: 0, origY: 0 })
   const prevActive = useRef(null)
-  const [pos, setPos] = useState({ left: 80, top: 80, width: 320 })
+  // keep a ref mirror for the latest pos so callbacks always read current value
+  const posRef = useRef({ left: 80, top: 80, width: 320 })
+  const [pos, setPosState] = useState(posRef.current)
   const [minimized, setMinimized] = useState(false)
   const [pinned, setPinned] = useState(false)
+
+  const setPos = (next) => {
+    const newPos = typeof next === 'function' ? next(posRef.current) : next
+    posRef.current = newPos
+    setPosState(newPos)
+  }
 
   // load saved pos when popup opens
   useEffect(() => {
@@ -23,14 +31,14 @@ export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
       if (raw) {
         const p = JSON.parse(raw)
         if (typeof p.left === 'number' && typeof p.top === 'number') {
-          setPos({ left: p.left, top: p.top, width: p.width || 320 })
+          setPos({ left: p.left, top: p.top, width: p.width || posRef.current.width })
           return
         }
       }
     } catch (e) { /* ignore */ }
 
-    // default position (center-ish)
-    const w = Math.min(420, Math.max(240, ref.current?.offsetWidth || 320))
+    // default position (center-ish relative to viewport)
+    const w = Math.min(420, Math.max(240, ref.current?.offsetWidth || posRef.current.width))
     const left = Math.max(8, Math.round((window.innerWidth - w) / 2))
     const top = 80
     setPos({ left, top, width: w })
@@ -45,16 +53,16 @@ export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
       setPos({
         left: Math.max(8, Math.round(dragRef.current.origX + dx)),
         top: Math.max(8, Math.round(dragRef.current.origY + dy)),
-        width: pos.width
+        width: posRef.current.width
       })
     }
     const onUp = () => {
       if (!dragRef.current.dragging) return
       dragRef.current.dragging = false
-      // persist
+      // persist only when user dragged (use posRef to get latest)
       const key = prevActive.current ? `toolbar-popup-pos-${prevActive.current}` : null
       if (key) {
-        try { localStorage.setItem(key, JSON.stringify(pos)) } catch (e) {}
+        try { localStorage.setItem(key, JSON.stringify(posRef.current)) } catch (e) {}
       }
     }
     window.addEventListener('pointermove', onMove)
@@ -62,14 +70,10 @@ export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
     return () => {
       window.removeEventListener('pointermove', onMove)
       window.removeEventListener('pointerup', onUp)
-      // persist on unmount if still relevant
-      const key = prevActive.current ? `toolbar-popup-pos-${prevActive.current}` : null
-      if (key) {
-        try { localStorage.setItem(key, JSON.stringify(pos)) } catch (e) {}
-      }
+      // DON'T persist here — avoid saving default/initial positions on close
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pos])
+  }, [])
 
   const startDrag = (ev) => {
     // do not allow dragging while pinned
@@ -79,8 +83,8 @@ export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
     dragRef.current.dragging = true
     dragRef.current.startX = ev.clientX
     dragRef.current.startY = ev.clientY
-    dragRef.current.origX = pos.left
-    dragRef.current.origY = pos.top
+    dragRef.current.origX = posRef.current.left
+    dragRef.current.origY = posRef.current.top
     try { ev.target?.setPointerCapture?.(ev.pointerId) } catch (e) {}
   }
 
@@ -102,11 +106,10 @@ export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
       role="dialog"
       aria-modal="false"
       style={{
-        position: 'absolute',   // positioned relative to .toolbar-root
+        position: 'absolute',
         left: `${pos.left}px`,
         top: `${pos.top}px`,
         zIndex: 1200,
-        /* allow CSS max-width to control maximum size; size will now follow inner content */
         maxWidth: '90vw'
       }}
     >
@@ -149,7 +152,6 @@ export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
       </div>
 
       <h3 className={`${active}`}>{active}</h3>
-      {/* when minimized, hide the inner content but keep title visible */}
       {!minimized && renderFor(active)}
     </div>
   )
