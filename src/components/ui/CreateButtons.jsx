@@ -189,6 +189,9 @@ export default function CreateButtons({
               <button onClick={() => addObject('wire', { position: [0,0,0]})}>Add Wire</button>
               <button onClick={() => addObject('plane', { position: [0,0,0] })}>Add Plane</button>
               <button onClick={() => addObject('chargedSphere', { position: [0,0,0] })}>Add Charged Sphere</button>
+              <button onClick={() => addObject('concentricSpheres', { position: [0,0,0] })}>Add Concentric Sphere System</button>
+              <button onClick={() => addObject('concentricInfWires', { position: [0,0,0] })}>Add Concentric Infinite Wire System</button>
+              <button onClick={() => addObject('stackedPlanes', { position: [0,0,0] })}>Add Stacked Planes</button>
             </div>
           </div>
         )}

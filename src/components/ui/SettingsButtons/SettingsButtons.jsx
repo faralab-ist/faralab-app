@@ -92,7 +92,9 @@ export default function SettingsButtons({
     return sceneObjects.some(o => {
       if (isGaussian(o)) return false;
       const q = Number(o?.charge);
-      return Number.isFinite(q) && q !== 0;
+      return (Number.isFinite(q) && q !== 0) ||
+      ((o.type === 'concentricSpheres' || o.type === 'concentricInfWires') && o.radiuses.length != 0) ||
+      (o.type === 'stackedPlanes' && o.charge_densities.length != 0);
     });
   }, [sceneObjects]);
   

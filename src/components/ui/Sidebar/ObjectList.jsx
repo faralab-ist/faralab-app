@@ -20,7 +20,17 @@ export default function ObjectList({
   selectedId,
   setSelectedId,
   onHoverStart,
-  onHoverEnd
+  onHoverEnd,
+  addRadiusToChargedSphere,
+  setRadiusToChargedSphere,
+  removeLastRadiusFromChargedSphere,
+  setMaterialForLayerInChargedSphere,
+  setDielectricForLayerInChargedSphere,
+  setChargeForLayerInChargedSphere,
+  addPlaneToStackedPlanes,
+  removeLastPlaneFromStackedPlanes,
+  setSpacingForStackedPlanes,
+  setChargeDensityForPlaneInStackedPlanes,
 }) {
   const [expanded, setExpanded] = useState({});
   const [errors, setErrors] = useState({}); // { [id]: { charge?: string, density?: string } }
@@ -745,8 +755,419 @@ export default function ObjectList({
                     </div>}
                   </>
                 )}
+
+                {/* Concentric Spheres */}
+                {obj.type === "concentricSpheres" && (
+                  <>
+                    <div className="detail-row">
+                      <div className="detail-key">Radii</div>
+                      <div className="detail-value" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {(Array.isArray(obj.radiuses) ? obj.radiuses : []).map((r, i, arr) => {
+                          const radiuses = Array.isArray(obj.radiuses) ? obj.radiuses : [];
+                          const epsilon = 0.01;
+                          const prev = i === 0 ? 0.0 : radiuses[i - 1];
+                          const next = i === (radiuses.length - 1) ? DIM_MAX : radiuses[i + 1];
+                          const minAllowed = Math.max(DIM_MIN, prev + epsilon);
+                          const maxAllowed = Math.min(DIM_MAX, next - epsilon);
+
+                          const applyRadius = (val) => {
+                            let n = Number.isFinite(val) ? val : parseNum(val);
+                            if (!Number.isFinite(n)) n = minAllowed;
+                            // clamp to allowed interval
+                            if (minAllowed > maxAllowed) {
+                              // fallback if adjacent radii invalid
+                              n = Math.max(DIM_MIN, prev + epsilon);
+                            } else {
+                              n = Math.max(minAllowed, Math.min(maxAllowed, n));
+                            }
+                            if (typeof setRadiusToChargedSphere === 'function') {
+                              setRadiusToChargedSphere(obj.id, i, n);
+                            } else {
+                              setPositionElem(obj.id, 'radiuses', i, n);
+                            }
+                            return n;
+                          };
+
+                          return (
+                            <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", width: 56 }}>{`r${i+1}=`}</div>
+                              <input
+                                type="number"
+                                inputMode="decimal"
+                                step={0.1}
+                                min={0}
+                                defaultValue={r}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  if (isPartial(v)) return;
+                                  const n = parseNum(v);
+                                  applyRadius(n);
+                                }}
+                                onBlur={(e) => {
+                                  const v = e.target.value;
+                                  if (isPartial(v)) return;
+                                  const n = parseNum(v);
+                                  const applied = applyRadius(n);
+                                  e.target.value = formatFixed(applied, 2);
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ width: 120, padding: "4px 8px" }}
+                              />
+                            </div>
+                          );
+                        })}
+
+                        <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); addRadiusToChargedSphere?.(obj.id); }}
+                            style={{ padding: "6px 8px" }}
+                          >
+                            Add Radius
+                          </button>
+                          {!(!Array.isArray(obj.radiuses) || obj.radiuses.length === 0) && <button
+                            onClick={(e) => { e.stopPropagation(); removeLastRadiusFromChargedSphere?.(obj.id); }}
+                            style={{ padding: "6px 8px" }}
+                            disabled={!Array.isArray(obj.radiuses) || obj.radiuses.length === 0}
+                          >
+                            Remove Last
+                          </button>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Per-layer material / dielectric / charge controls */}
+                    <div className="detail-row">
+                      <div className="detail-key">Layers</div>
+                      <div className="detail-value" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        {((Array.isArray(obj.radiuses) ? obj.radiuses : [])).map((_, i) => {
+                          const label = i === 0 ? `0 < r < r1` : `r${i} < r < r${i+1}`;
+                          return (
+                            <div key={i} style={{ display: "flex", gap: 0, alignItems: "center" }}>
+                              <div style={{ width: 90, fontSize: 12, gap:0, alignItems: "center", color: "rgba(255,255,255,0.8)" }}>{label}</div>
+
+                              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                {/* material: dropdown conductor / dielectric */}
+                                <select
+                                  defaultValue={(obj.materials && obj.materials[i]) || 'dielectric'}
+                                  onChange={(e) => { e.stopPropagation(); setMaterialForLayerInChargedSphere?.(obj.id, i, e.target.value); }}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                >
+                                  <option value="dielectric">Dielectric</option>
+                                  <option value="conductor">Conductor</option>
+                                </select>
+
+                                {/* dielectric constant input (only meaningful if dielectric) */}
+                                {obj.materials[i] === 'dielectric' && <input
+                                  type="number"
+                                  inputMode="decimal"
+                                  step={0.1}
+                                  min={0.0}
+                                  defaultValue={ (obj.dielectrics && obj.dielectrics[i]) ?? 1.0 }
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    if (isPartial(v)) return;
+                                    const n = parseNum(v);
+                                    setDielectricForLayerInChargedSphere?.(obj.id, i, Math.max(0.0, n));
+                                  }}
+                                  onBlur={(e) => {
+                                    const v = e.target.value;
+                                    const n = Math.max(0.0, parseNum(isPartial(v) ? 1.0 : v));
+                                    setDielectricForLayerInChargedSphere?.(obj.id, i, n);
+                                    e.target.value = formatFixed(n, 2);
+                                  }}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  style={{ width: 70, padding: "4px 8px" }}
+                                />}
+
+                                {/* charge for this layer */}
+                                {obj.materials[i] === 'conductor' && <input
+                                  type="number"
+                                  inputMode="decimal"
+                                  step={0.1}
+                                  defaultValue={ (obj.charges && obj.charges[i]) ?? 0.0 }
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    if (isPartial(v)) return;
+                                    const n = parseNum(v);
+                                    setChargeForLayerInChargedSphere?.(obj.id, i, n);
+                                  }}
+                                  onBlur={(e) => {
+                                    const v = e.target.value;
+                                    const n = parseNum(isPartial(v) ? 0 : v);
+                                    setChargeForLayerInChargedSphere?.(obj.id, i, n);
+                                    e.target.value = formatFixed(n, 2);
+                                  }}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  style={{ width: 92, padding: "4px 8px", backgroundColor: (obj.charges && obj.charges[i] < 0) ? 'rgba(255,0,0,1)' : 'rgba(0,0,255,1)' }}
+                                />}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {!Array.isArray(obj.radiuses) || obj.radiuses.length === 0 ? (
+                          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>No radii defined</div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Concentric Infinite Wires */}
+                {obj.type === "concentricInfWires" && (
+                  <>
+                    <div className="detail-row">
+                      <div className="detail-key">Radii</div>
+                      <div className="detail-value" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {(Array.isArray(obj.radiuses) ? obj.radiuses : []).map((r, i, arr) => {
+                          const radiuses = Array.isArray(obj.radiuses) ? obj.radiuses : [];
+                          const epsilon = 0.01;
+                          const prev = i === 0 ? 0.0 : radiuses[i - 1];
+                          const next = i === (radiuses.length - 1) ? DIM_MAX : radiuses[i + 1];
+                          const minAllowed = Math.max(DIM_MIN, prev + epsilon);
+                          const maxAllowed = Math.min(DIM_MAX, next - epsilon);
+
+                          const applyRadius = (val) => {
+                            let n = Number.isFinite(val) ? val : parseNum(val);
+                            if (!Number.isFinite(n)) n = minAllowed;
+                            // clamp to allowed interval
+                            if (minAllowed > maxAllowed) {
+                              // fallback if adjacent radii invalid
+                              n = Math.max(DIM_MIN, prev + epsilon);
+                            } else {
+                              n = Math.max(minAllowed, Math.min(maxAllowed, n));
+                            }
+                            if (typeof setRadiusToChargedSphere === 'function') {
+                              setRadiusToChargedSphere(obj.id, i, n);
+                            } else {
+                              setPositionElem(obj.id, 'radiuses', i, n);
+                            }
+                            return n;
+                          };
+
+                          return (
+                            <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", width: 56 }}>{`r${i+1}=`}</div>
+                              <input
+                                type="number"
+                                inputMode="decimal"
+                                step={0.1}
+                                min={0}
+                                defaultValue={r}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  if (isPartial(v)) return;
+                                  const n = parseNum(v);
+                                  applyRadius(n);
+                                }}
+                                onBlur={(e) => {
+                                  const v = e.target.value;
+                                  if (isPartial(v)) return;
+                                  const n = parseNum(v);
+                                  const applied = applyRadius(n);
+                                  e.target.value = formatFixed(applied, 2);
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onClick={(e) => e.stopPropagation()}
+                                style={{ width: 120, padding: "4px 8px" }}
+                              />
+                            </div>
+                          );
+                        })}
+
+                        <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); addRadiusToChargedSphere?.(obj.id); }}
+                            style={{ padding: "6px 8px" }}
+                          >
+                            Add Radius
+                          </button>
+                          {!(!Array.isArray(obj.radiuses) || obj.radiuses.length === 0) && <button
+                            onClick={(e) => { e.stopPropagation(); removeLastRadiusFromChargedSphere?.(obj.id); }}
+                            style={{ padding: "6px 8px" }}
+                            disabled={!Array.isArray(obj.radiuses) || obj.radiuses.length === 0}
+                          >
+                            Remove Last
+                          </button>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Per-layer material / dielectric / charge controls */}
+                    <div className="detail-row">
+                      <div className="detail-key">Layers</div>
+                      <div className="detail-value" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        {((Array.isArray(obj.radiuses) ? obj.radiuses : [])).map((_, i) => {
+                          const label = i === 0 ? `0 < r < r1` : `r${i} < r < r${i+1}`;
+                          return (
+                            <div key={i} style={{ display: "flex", gap: 0, alignItems: "center" }}>
+                              <div style={{ width: 90, fontSize: 12, gap:0, alignItems: "center", color: "rgba(255,255,255,0.8)" }}>{label}</div>
+
+                              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                {/* material: dropdown conductor / dielectric */}
+                                <select
+                                  defaultValue={(obj.materials && obj.materials[i]) || 'dielectric'}
+                                  onChange={(e) => { e.stopPropagation(); setMaterialForLayerInChargedSphere?.(obj.id, i, e.target.value); }}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                >
+                                  <option value="dielectric">Dielectric</option>
+                                  <option value="conductor">Conductor</option>
+                                </select>
+
+                                {/* dielectric constant input (only meaningful if dielectric) */}
+                                {obj.materials[i] === 'dielectric' && <input
+                                  type="number"
+                                  inputMode="decimal"
+                                  step={0.1}
+                                  min={0.0}
+                                  defaultValue={ (obj.dielectrics && obj.dielectrics[i]) ?? 1.0 }
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    if (isPartial(v)) return;
+                                    const n = parseNum(v);
+                                    setDielectricForLayerInChargedSphere?.(obj.id, i, Math.max(0.0, n));
+                                  }}
+                                  onBlur={(e) => {
+                                    const v = e.target.value;
+                                    const n = Math.max(0.0, parseNum(isPartial(v) ? 1.0 : v));
+                                    setDielectricForLayerInChargedSphere?.(obj.id, i, n);
+                                    e.target.value = formatFixed(n, 2);
+                                  }}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  style={{ width: 70, padding: "4px 8px" }}
+                                />}
+
+                                {/* charge for this layer */}
+                                {obj.materials[i] === 'conductor' && <input
+                                  type="number"
+                                  inputMode="decimal"
+                                  step={0.1}
+                                  defaultValue={ (obj.charges && obj.charges[i]) ?? 0.0 }
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    if (isPartial(v)) return;
+                                    const n = parseNum(v);
+                                    setChargeForLayerInChargedSphere?.(obj.id, i, n);
+                                  }}
+                                  onBlur={(e) => {
+                                    const v = e.target.value;
+                                    const n = parseNum(isPartial(v) ? 0 : v);
+                                    setChargeForLayerInChargedSphere?.(obj.id, i, n);
+                                    e.target.value = formatFixed(n, 2);
+                                  }}
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  style={{ width: 92, padding: "4px 8px", backgroundColor: (obj.charges && obj.charges[i] < 0) ? 'rgba(255,0,0,1)' : 'rgba(0,0,255,1)' }}
+                                />}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        {!Array.isArray(obj.radiuses) || obj.radiuses.length === 0 ? (
+                          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>No radii defined</div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Stacked Planes */}
+                {obj.type === "stackedPlanes" && (
+                  <>
+                    <div className="detail-row">
+                      <div className="detail-key">Spacing</div>
+                      <div className="detail-value" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          step={0.1}
+                          defaultValue={obj.spacing ?? 1.0}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            if (isPartial(v)) return;
+                            const n = parseNum(v);
+                            setSpacingForStackedPlanes?.(obj.id, Math.max(0.01, n));
+                          }}
+                          onBlur={(e) => {
+                            const v = e.target.value;
+                            const n = Math.max(0.01, parseNum(isPartial(v) ? 1.0 : v));
+                            setSpacingForStackedPlanes?.(obj.id, n);
+                            e.target.value = formatFixed(n, 2);
+                          }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          style={{ width: 120, padding: "4px 8px" }}
+                        />
+
+                        <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+                          <input
+                            type="checkbox"
+                            checked={!!obj.infinite}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              updateObject?.(obj.id, { infinite: e.target.checked });
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                          />
+                          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>Infinite</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="detail-row">
+                      <div className="detail-key">Planes</div>
+                      <div className="detail-value" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {(Array.isArray(obj.charge_densities) ? obj.charge_densities : []).map((chargeDensity, i) => {
+                          const chargeVal = (obj.charge_densities && obj.charge_densities[i]) ?? 0;
+                          return (
+                            <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                              <div style={{ width: 80, fontSize: 12, color: "rgba(255,255,255,0.8)" }}>{`plane ${i+1}`}</div>
+
+                              <input
+                                type="number"
+                                inputMode="decimal"
+                                step={0.1}
+                                defaultValue={chargeVal}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  if (isPartial(v)) return;
+                                  const n = parseNum(v);
+                                  setChargeDensityForPlaneInStackedPlanes?.(obj.id, i, n);
+                                }}
+                                onBlur={(e) => {
+                                  const v = e.target.value;
+                                  const n = parseNum(isPartial(v) ? 0 : v);
+                                  setChargeDensityForPlaneInStackedPlanes?.(obj.id, i, n);
+                                  e.target.value = formatFixed(n, 2);
+                                }}
+                                onMouseDown={(e) => e.stopPropagation()}
+                                style={{ width: 120, padding: "4px 8px" }}
+                              />
+                            </div>
+                          );
+                        })}
+
+                        <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); addPlaneToStackedPlanes?.(obj.id); }}
+                            style={{ padding: "6px 8px" }}
+                          >
+                            Add Plane
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); removeLastPlaneFromStackedPlanes?.(obj.id); }}
+                            style={{ padding: "6px 8px" }}
+                            disabled={!Array.isArray(obj.charge_densities) || obj.charge_densities.length === 0}
+                          >
+                            Remove Last
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+
                 {/* Rotation (degrees) */}
-                {Array.isArray(obj.rotation) && obj.rotation.length === 3 && (
+                {Array.isArray(obj.rotation) && obj.rotation.length === 3 && obj.type !== 'concentricInfWires' && (
                   <div className="detail-row">
                     <div className="detail-key">Rotation (deg)</div>
                     <div className="detail-value" style={{ display: "flex", gap: 6 }}>

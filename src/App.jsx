@@ -6,7 +6,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper} from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes} from './components/models'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -139,6 +139,16 @@ function LoadingOverlay() {
       updateChargeDensity,
       updateDirection,
       addObject,
+      addRadiusToChargedSphere,
+      removeLastRadiusFromChargedSphere,
+      setMaterialForLayerInChargedSphere,
+      setDielectricForLayerInChargedSphere,
+      setChargeForLayerInChargedSphere,
+      setRadiusToChargedSphere,
+      addPlaneToStackedPlanes,
+      removeLastPlaneFromStackedPlanes,
+      setSpacingForStackedPlanes,
+      setChargeDensityForPlaneInStackedPlanes,
       counts,
     } = useSceneObjects()
     
@@ -369,6 +379,16 @@ function LoadingOverlay() {
           setHoveredId={setHoveredId}
           selectedId={selectedId}
           setSelectedId={setSelectedId}
+          addRadiusToChargedSphere={addRadiusToChargedSphere}
+          removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+          setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
+          setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
+          setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
+          setRadiusToChargedSphere={setRadiusToChargedSphere}
+          addPlaneToStackedPlanes={addPlaneToStackedPlanes}
+          removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
+          setSpacingForStackedPlanes={setSpacingForStackedPlanes}
+          setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
         />
 
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
@@ -403,6 +423,9 @@ function LoadingOverlay() {
                 case 'wire': ObjectComponent = Wire; break
                 case 'plane': ObjectComponent = Plane; break
                 case 'chargedSphere': ObjectComponent = ChargedSphere; break
+                case 'concentricSpheres': ObjectComponent = ConcentricSpheres; break
+                case 'concentricInfWires': ObjectComponent = ConcentricInfiniteWires; break
+                case 'stackedPlanes': ObjectComponent = StackedPlanes; break
                 default: return null;
               } 
             }
@@ -420,6 +443,15 @@ function LoadingOverlay() {
                 updateDirection={updateDirection}
                 updateObject={updateObject}
                 removeObject={removeObject}
+                addRadiusToChargedSphere={addRadiusToChargedSphere}
+                removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+                setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
+                setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
+                setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
+                addPlaneToStackedPlanes={addPlaneToStackedPlanes}
+                removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
+                setSpacingForStackedPlanes={setSpacingForStackedPlanes}
+                setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
                 slicePlane={slicePlane}
                 slicePos={slicePos}
                 useSlice={useSlice}
@@ -481,6 +513,11 @@ function LoadingOverlay() {
           onToggleEquipotentialSurface={() => setShowEquipotentialSurface(v => !v)}
           showOnlyGaussianField={showOnlyGaussianField}
           setOnlyGaussianField={setShowOnlyGaussianField}
+          addRadiusToChargedSphere={addRadiusToChargedSphere}
+          removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+          setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
+          setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
+          setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
           creativeMode={creativeMode}
           addObject={addObject}
           sceneObjects={sceneObjects}
