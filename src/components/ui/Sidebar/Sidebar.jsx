@@ -22,6 +22,16 @@ export default function Sidebar({
   setHoveredId,
   selectedId,
   setSelectedId,
+  addRadiusToChargedSphere,
+  setRadiusToChargedSphere,
+  removeLastRadiusFromChargedSphere,
+  setMaterialForLayerInChargedSphere,
+  setDielectricForLayerInChargedSphere,
+  setChargeForLayerInChargedSphere,
+  addPlaneToStackedPlanes,
+  removeLastPlaneFromStackedPlanes,
+  setSpacingForStackedPlanes,
+  setChargeDensityForPlaneInStackedPlanes,
 }) {
   const [expandId, setExpandId] = useState(null);
   const sidebarRootRef = useRef(null)
@@ -100,7 +110,7 @@ export default function Sidebar({
     return null;
   };
 
-  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'surface','chargedSphere'].includes(o.type));
+  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
 
   const typeCounters = {};
   const subtypeCounters = {};
@@ -117,6 +127,14 @@ export default function Sidebar({
       typeCounters[t] = (typeCounters[t] || 0) + 1; 
       if (t === 'chargedSphere') { //Shouldn't be hardcoded, but for now it works :)
         const label = `Charged Sphere ${typeCounters[t]}`
+        return { id: o.id, type: t, subtype: null, label, name: o.name };
+      }
+      if (t === 'concentricSpheres') { //Shouldn't be hardcoded, but for now it works :) x 2
+        const label = `Concentric Sphere System ${typeCounters[t]}`
+        return { id: o.id, type: t, subtype: null, label, name: o.name };
+      }
+      if (t === 'concentricInfWires') { //Shouldn't be hardcoded, but for now it works :) x 3
+        const label = `Concentric Infinite Wire System ${typeCounters[t]}`
         return { id: o.id, type: t, subtype: null, label, name: o.name };
       }
       const label = `${t.charAt(0).toUpperCase() + t.slice(1)} ${typeCounters[t]}`;
@@ -211,6 +229,15 @@ export default function Sidebar({
               setSelectedId={setSelectedId}
               onHoverStart={hoverStart}
               onHoverEnd={hoverEnd}
+              addRadiusToChargedSphere={addRadiusToChargedSphere}
+              removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+              setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
+              setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
+              setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
+              addPlaneToStackedPlanes={addPlaneToStackedPlanes}
+              removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
+              setSpacingForStackedPlanes={setSpacingForStackedPlanes}
+              setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
             />
           </div>
         )}

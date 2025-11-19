@@ -25,6 +25,7 @@ uniform int wireCount;
 uniform float wireChargeDensity[MAX_INF_WIRES];
 uniform vec3 wirePositions[MAX_INF_WIRES];
 uniform vec3 wireDirections[MAX_INF_WIRES];
+uniform float wireRadius[MAX_INF_WIRES];
 
 #define MAX_FIN_PLANES 6
 uniform int finPlaneCount;
@@ -226,10 +227,11 @@ float potential(vec3 pos) {
 
     for (int i = 0; i < wireCount; i++) {
         vec3 direction = normalize(wireDirections[i]);
+        float rad = wireRadius[i];
         vec3 rVec = pos - wirePositions[i];
         vec3 rPerp = rVec - dot(rVec, direction) * direction;
         float distance = length(rPerp);
-        if (distance < 0.0001) continue;
+        if (distance < rad) distance = rad;
         result += (-wireChargeDensity[i] / (2.0 * PI * e0)) * log(distance);
     }
 
