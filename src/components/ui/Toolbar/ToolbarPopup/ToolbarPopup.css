@@ -3,10 +3,11 @@
   /* anchor absolutely inside the .top-toolbar so it appears directly under the toolbar */
   position: absolute;
   top: calc(50% + 6px);   /* place right below the toolbar */
-  left: 8px;               /* align to toolbar left (adjust if you want it under a specific button) */
+  left: 8px;               /* align to toolbar left */
   z-index: 120;
+  width: 300px;            /* fixed width decided in CSS */
   min-width: 240px;
-  max-width: 420px;
+  max-width: 90vw;
   background: rgba(18,18,18,0.98);
   border: 1px solid rgba(255,255,255,0.04);
   padding: 10px;
@@ -19,10 +20,7 @@
 /* keep layout inside the popup compact */
 .toolbar-popup .slicing-panel { margin: 0; }
 
-/* small responsive nudges */
-@media (max-width: 420px) {
-  .toolbar-popup { left: 6px; right: 6px; min-width: auto; max-width: calc(100% - 12px); }
-}
+
 
 /* handle for dragging */
 .toolbar-popup-handle {
@@ -188,5 +186,132 @@
   margin: 2px;
   background: transparent;
   padding: 2px;
+}
+
+/* ensure fixed popup width lives in CSS and all children fit nicely */
+.toolbar-popup,
+.toolbar-popup * {
+  box-sizing: border-box;
+}
+
+/* fixed width (already present) — keep it explicit */
+.toolbar-popup {
+  width: 300px;        /* fixed width for the popup */
+  min-width: 240px;
+  max-width: 90vw;
+}
+
+/* layout containers scale to the popup width */
+.toolbar-popup .slicing-panel {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+/* top row: allow wrap so primary button can take full width and small buttons sit centered underneath */
+.slice-row {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* primary slicing button spans full width but stays compact in height */
+.slice-row .slicing-btn {
+  flex: 0 0 100%;
+  max-width: 100%;
+  width: 100%;
+  height: 44px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* make sure icon + label inside primary button center and don't overflow */
+.slice-row .slicing-btn img {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+.slice-row .slicing-btn .btn-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+
+/* plane buttons row adapts to width — 3 columns when space allows, wrap when narrow */
+.plane-buttons-group {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.plane-button {
+  flex: 1 1 calc(33% - 8px);
+  min-width: 64px;
+  max-width: 100%;
+  text-align: center;
+}
+
+/* sections fill the popup width */
+.efield-section {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* compact rows inside sections adapt to width */
+.efield-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* labels / controls share space; inputs shrink if needed */
+.efield-label {
+  flex: 1 1 160px;
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* range slider takes remaining space and remains readable */
+.efield-range {
+  flex: 1 1 auto;
+  min-width: 120px;
+  max-width: 100%;
+}
+
+/* ensure slider value stays visible to the right */
+.slider-value {
+  min-width: 44px;
+  text-align: right;
+}
+
+/* prevent images or long labels from forcing overflow */
+.toolbar-popup img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* small responsive tweak for very narrow viewports */
+@media (max-width: 340px) {
+  .slice-row .helper-btn,
+  .slice-row .flip-btn { flex: 0 0 48px; width: 48px; height: 48px; }
+  .slice-row .slicing-btn { height: 42px; padding: 8px; }
+  .efield-label { min-width: 100px; }
 }
 
