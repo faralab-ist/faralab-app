@@ -3,7 +3,7 @@ import SlicerMenu from './SlicerMenu'
 import './ToolbarPopup.css'
 import Pin from '../../../../assets/pin.svg'
 import Close from '../../../../assets/close_X.svg'
-import Minimize from '../../../../assets/Minimize.svg'
+import Minimize from '../../../../assets/minimize.svg'
 
 export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
   const ref = useRef(null)

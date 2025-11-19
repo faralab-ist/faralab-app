@@ -1,3 +1,4 @@
+import { Center } from '@react-three/drei';
 import './EfieldButtons.css'
 import PlaneButtons from './PlaneButtons'
 
@@ -33,30 +34,38 @@ export default function EfieldButtons({
     const content = (
         <div className="efield-controls">
             <div className="efield-row compact" style={{alignItems: 'center', gap: 8}}>
-                <label className="efield-label" style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                <label className="efield-label horizontal">
+                    <span className="label-text" style= {{justifyContent:'normal'}}>Wave Propagation</span>
                     <input
                         type="checkbox"
                         checked={!!wavePropagationEnabled}
                         onChange={e => setWavePropagationEnabled?.(e.target.checked)}
-                        disabled={!hasField}
+                        title={(!wavePropagationEnabled || !hasField) ? 'Enable field vectors to control this' : undefined}
+                        disabled={!hasField || !showField}
+                        className="efield-checkbox"
                     />
-                    <span className="label-text">Wave Propagation</span>
                 </label>
-                {wavePropagationEnabled && (
-                    <label className="efield-label" style={{display:'flex', alignItems:'center', gap:8}}>
-                        <span className="label-text">Wave Duration (s)</span>
-                        <input
-                            type="range"
-                            min={0.02}
-                            max={1.0}
-                            step={0.01}
-                            value={waveDuration ?? 0.1}
-                            onChange={e => setWaveDuration?.(parseFloat(e.target.value))}
-                            disabled={!hasField}
-                        />
-                        <span style={{minWidth:48, textAlign:'right'}}>{(waveDuration ?? 0.1).toFixed(2)}</span>
-                    </label>
-                )}
+
+                {/* Always render the Wave Duration row — greyed/disabled when wavePropagationEnabled is false */}
+                <label
+                    className={`efield-label ${(!wavePropagationEnabled || !hasField) ? 'dimmed' : ''}`}
+                    style={{display:'flex', alignItems:'center', gap:8}}
+                    title={(!wavePropagationEnabled || !hasField) ? 'Enable field vectors to control this' : undefined}
+                    aria-hidden={!hasField && !wavePropagationEnabled ? 'true' : undefined}
+                >
+                    <span className="label-text">Wave Duration (s)</span>
+                    <input
+                        type="range"
+                        min={0.02}
+                        max={1.0}
+                        step={0.01}
+                        value={waveDuration ?? 0.1}
+                        onChange={e => setWaveDuration?.(parseFloat(e.target.value))}
+                        disabled={!wavePropagationEnabled || !hasField}
+                        className="efield-range"
+                    />
+                    <span className="slider-value" style={{minWidth:48, textAlign:'right'}}>{(waveDuration ?? 0.1).toFixed(2)}</span>
+                </label>
             </div>
             <div className="field-buttons-row">
                 <button
