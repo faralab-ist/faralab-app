@@ -1,40 +1,133 @@
 .top-toolbar {
-  position: fixed;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9998;
+  position: relative; /* was fixed */
+  width: 100%;
+  height: 34px;
+  z-index: 10;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
-  padding: 6px 10px;
-  background: rgba(12, 12, 14, 0.65);
-  border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+  padding: calc(env(safe-area-inset-top, 0) + 4px) 10px 6px 10px;
+  background: rgba(12, 12, 14, 0.6);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.35);
   backdrop-filter: blur(6px);
 }
 
-.tb-btn {
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  color: #e6eef6;
-  border: 1px solid rgba(255,255,255,0.04);
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.9rem;
+
+
+/* position canvas controls to the left while keeping the center group centered */
+.top-toolbar { position: relative; } /* already present, keep for positioning context */
+
+/*this is not used for now*/
+.canvas-controls {
+  position: absolute;
+  right: 80px;                /* move controls to the left edge (adjust as needed) */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  pointer-events: auto;
+  z-index: 12;
 }
 
-.tb-btn.small { padding: 6px; width: 36px; }
-
-.tb-btn:hover {
-  transform: translateY(-1px);
-  transition: transform 120ms ease;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-}
-
-.tb-sep {
+/* small divider between sections */
+.tb-divider {
   width: 1px;
-  height: 28px;
-  background: rgba(255,255,255,0.04);
-  margin-left: 6px;
+  height: 18px;
+  background: rgba(255,255,255,0.06);
+  margin: 0 10px;
+  border-radius: 1px;
+  align-self: center;
+  pointer-events: none;
+}
+
+/* center the group across the full toolbar */
+.tb-group {
+  flex: 1;                  /* take available space */
+  display: flex;
+  padding-top:  2px;
+  justify-content: center;  /* center children horizontally */
+  align-items: center;      /* center vertically */
+  gap: 8px;                 /* space between buttons */
+  margin: 0 auto;
+}
+
+/* tighter, perfectly centered buttons */
+.tb-btn {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #e6eef6;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 6px;
+
+  /* prevent native tap/click highlight and accidental selection/drag */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: manipulation;
+}
+
+/* remove outline for mouse clicks but keep keyboard focus (accessibility) */
+.tb-btn:focus {
+  outline: none;
+  
+}
+.tb-btn:focus:not(:focus-visible) {
+  
+  outline: none;
+}
+
+.tb-btn:hover{
+  transform: translateY(-1px);
+
+}
+
+
+
+/* keep your :active transform */
+.tb-btn:active {
+  transform: translateY(-1px); 
+  background: rgba(255,255,255,0.02); /* neutral active background */
+}
+
+/* active state visuals */
+.tb-btn.active {
+  transform: translateY(-1px);
+  background: rgba(83,176,255,0.06);
+  color: #53b0ff; 
+  box-shadow: 0 0 12px rgba(83,176,255,0.32);
+}
+
+/* colorize raster/SVG images via CSS filter (approx blue) */
+.tb-btn.active .tb-icon {
+  /* tuned to produce a blue tint — adjust hue/sepia for other colors */
+  filter: invert(63%) sepia(61%) saturate(3550%) hue-rotate(180deg) brightness(96%) contrast(100%);
+}
+
+/* focus accessibility */
+.tb-btn:focus-visible {
+  outline: 2px solid rgba(83,176,255,0.18);
+  outline-offset: 2px;
+}
+
+.tb-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  pointer-events: none;
+  filter: invert(1) brightness(1.2);
+}
+
+/* Optional spacer to push items to the left/right if needed */
+.tb-spacer {
+  flex: 0;
 }

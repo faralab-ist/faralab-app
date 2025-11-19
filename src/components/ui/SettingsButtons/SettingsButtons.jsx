@@ -310,7 +310,7 @@ export default function SettingsButtons({
           )}
         </div>
 
-        {/* Slicing / rest of controls remain unchanged */}
+        {/* Slicing / rest of controls remain unchanged 
         <div className="settings-group">
           <button
             className={`settings-main big ${open === 'slicing' ? 'open' : ''}`}
@@ -399,7 +399,7 @@ export default function SettingsButtons({
             </div>
           )}
         </div>
-
+*/}
         <div className="settings-group">
           <button
             className={`settings-main big ${open === 'gaussian' ? 'open' : ''}`}

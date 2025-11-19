@@ -1,0 +1,192 @@
+/* Simple, clean popup styling anchored to the toolbar (top-toolbar must be position: relative) */
+.toolbar-popup {
+  /* anchor absolutely inside the .top-toolbar so it appears directly under the toolbar */
+  position: absolute;
+  top: calc(50% + 6px);   /* place right below the toolbar */
+  left: 8px;               /* align to toolbar left (adjust if you want it under a specific button) */
+  z-index: 120;
+  min-width: 240px;
+  max-width: 420px;
+  background: rgba(18,18,18,0.98);
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.55);
+  color: #e6eef6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* keep layout inside the popup compact */
+.toolbar-popup .slicing-panel { margin: 0; }
+
+/* small responsive nudges */
+@media (max-width: 420px) {
+  .toolbar-popup { left: 6px; right: 6px; min-width: auto; max-width: calc(100% - 12px); }
+}
+
+/* handle for dragging */
+.toolbar-popup-handle {
+  height: 18px;
+  cursor: grab;
+  border-radius:6px;
+  margin: -10px -10px 8px -10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(12, 12, 12, 0.531));
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+/* container for icon buttons aligned to right */
+.toolbar-popup-controls {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* small icon button - no border, transparent by default */
+.tp-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: transparent;   /* transparent by default */
+  cursor: pointer;
+  transition: background .12s, transform .08s, box-shadow .12s;
+  border: none;              /* remove border */
+  padding: 0;
+  box-shadow: none;
+}
+.tp-icon-btn img { width: 10px; height: 10px; display: block; filter: invert() }
+
+/* hover / active (subtle) */
+.tp-icon-btn:hover { background: rgba(255,255,255,0.02); transform: translateY(-1px); }
+
+/* visual "on" state: subtle accent background + soft glow */
+.tp-icon-btn.on {
+  background: rgba(117, 117, 117, 0.12);
+  box-shadow: 0 8px 20px rgba(135, 135, 135, 0.12);
+  border-radius: 0px;
+  
+}
+
+/* keep close hover indication but no border */
+.tp-icon-btn.close-btn:hover { background: rgba(255,80,80,0.06); box-shadow: 0 6px 16px rgba(255,80,80,0.06); }
+
+/* keyboard focus for accessibility */
+.tp-icon-btn:focus {
+  outline: none
+}
+
+/* when minimized, reduce vertical spacing so card is compact */
+.toolbar-popup.minimized {
+  padding-bottom: 6px;
+}
+.toolbar-popup.minimized .slicing-panel { display: none; }
+
+/* controls (pin / minimize / close) placed at top-right inside the handle */
+.toolbar-popup-handle {
+  position: relative;
+  height: 18px;
+  cursor: grab;
+  border-radius:6px;
+  margin: -10px -10px 8px -10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(12, 12, 12, 0.531));
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+/* ensure popup layout doesn't add bottom gaps */
+.toolbar-popup { margin: 0; box-sizing: border-box; }
+
+/* ensure the wrapper is the positioning context */
+.toolbar-root {
+  position: relative;
+}
+
+/* popup uses absolute positioning now (no change if already present) */
+.toolbar-popup {
+  position: absolute;
+  margin: 0;
+}
+
+/* unify popup buttons to match SlicerMenu appearance,
+   but exclude .plane-button and .tp-icon-btn so tp icons keep their own style */
+.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):not(.slicing-btn),
+.toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):not(.slicing-btn),
+.toolbar-popup .flip-btn:not(.plane-button):not(.tp-icon-btn):not(.slicing-btn) {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  background: #1a1a1a;
+  color: white;
+  border: 1px solid #333;
+  padding: 8px 12px;
+  font-size: 0.9rem;            
+  font-weight: 700;
+  border-radius: 4px;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+
+.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):hover:not(.slicing-btn):hover,
+.toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):hover,
+.toolbar-popup .flip-btn:not(.plane-button):not(.tp-icon-btn):hover {
+  transform: translateY(-2px);
+  background: #2a2a2a;         
+  border-color: #444; 
+}
+
+.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):active,
+.toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):active,
+.toolbar-popup .flip-btn:not(.plane-button):not(.tp-icon-btn):active {
+  transform: translateY(-1);
+}
+
+.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):disabled,
+.toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):disabled,
+.toolbar-popup .flip-btn:not(.plane-button):not(.tp-icon-btn):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):focus,
+.toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):focus,
+.toolbar-popup .flip-btn:not(.plane-button):not(.tp-icon-btn):focus {
+  outline: none;
+}
+
+
+
+/* subtle, compact title styling */
+.toolbar-popup h3 {
+  margin: 0 0 10px 8px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.88);
+  background: transparent;
+}
+
+
+
+/* ensure inner content uses the card's background */
+.toolbar-popup .slicing-panel {
+  margin: 2px;
+  background: transparent;
+  padding: 2px;
+}
+

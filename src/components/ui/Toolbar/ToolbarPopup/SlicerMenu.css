@@ -1,0 +1,245 @@
+:root{
+  --slice-btn-size: 68px; 
+}
+
+/* Light, compact layout for the slicer panel */
+.slicing-panel {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  position:relative;
+  gap: 10px;
+  color: #dfeaf5;
+  font-size: 13px;
+  background: transparent;
+  border: none;
+}
+
+/* top buttons row: force single line of three square buttons */
+.slice-row{
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;      /* allow main button to occupy full row, others wrap to next line */
+}
+
+/* make each top button a square with centered icon + small label */
+.slice-row button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: var(--slice-btn-size);
+  height: var(--slice-btn-size);
+  min-width: var(--slice-btn-size);
+  padding: 8px 6px;       
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  border: 1px solid rgba(255,255,255,0.04);
+  color: #dfeaf5;
+  cursor: pointer;
+  transition: all .16s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35) inset;
+  gap: 6px;
+  text-align: center;
+  justify-self: start;
+}
+
+/* primary slicing button: full-width but not too tall (prominent without being huge) */
+.slice-row .slicing-btn {
+  flex: 0 0 100%;            /* occupy the full row */
+  max-width: 100%;
+  height: 44px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: row;     /* icon left, label right */
+  align-items: center;
+  gap: 10px;
+  justify-content: center; /* CENTER icon + label horizontally */
+  text-align: center;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.55), inset 0 2px 6px rgba(0,0,0,0.35);
+  z-index: 2;
+}
+
+.slice-row .slicing-btn:active {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-color: rgba(79,154,255,0.9);
+  color:#fff;
+  box-shadow: 0 8px 28px rgba(79,154,255,0.16), 0 2px 6px rgba(0,0,0,0.5) inset;
+  transform:translateY(-1px);
+}
+
+.slice-row .slicing-btn.active:hover {
+  background: rgba(32, 99, 245, 0.95);
+  border-color: rgba(100, 180, 255, 1);
+  box-shadow: 0 0 25px rgba(70, 129, 255, 0.959);
+  transform: scale(1.05);
+}
+
+
+/* keep icon and label centered and vertically aligned */
+.slice-row .slicing-btn img {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  display: block;
+}
+.slice-row .slicing-btn .btn-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-block;
+}
+
+/* tighten label spacing so it sits directly to the right of the icon */
+.slice-row .slicing-btn .btn-label {
+  margin: 0;
+  margin-left: 0;          /* left spacing handled by gap on parent */
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* make sure icon stays at expected size and sits left */
+.slice-row .slicing-btn img {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+/* scale down label to fit inside the square */
+.slice-row .btn-label {
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  color: inherit;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* icon sizing inside the square */
+.slice-row button img {
+  width: 22px;
+  height: 22px;
+  display: block;
+
+  filter: none;
+  flex: 0 0 auto;
+  filter: invert() brightness(1.1);
+}
+
+/* keep hover/active/disabled/active styling but adapted to squares */
+.slice-row button:hover{ transform: translateY(-4px); color:#fff; border-color: rgba(255,255,255,0.07); }
+.slice-row button:active { transform: translateY(0); }
+.slice-row button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.slice-row button.active {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-color: rgba(79,154,255,0.9);
+  color:#fff;
+  box-shadow: 0 8px 28px rgba(79,154,255,0.16), 0 2px 6px rgba(0,0,0,0.5) inset;
+  transform:translateY(-1px);
+}
+
+/* sections (unified panel look) */
+.efield-section{
+  background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.00));
+  border-radius:var(--radius);
+  padding:12px;
+  border:1px solid var(--edge);
+  box-shadow: var(--soft-shadow);
+  overflow:hidden;
+}
+
+/* section title */
+.efield-section-title{
+  font-size:11px;
+  color:rgba(255,255,255,0.75);
+  margin-bottom:8px;
+  font-weight:700;
+  letter-spacing:.6px;
+}
+
+
+
+/* compact rows */
+.efield-row.compact{ display:flex; gap:12px; align-items:center; justify-content:space-between; }
+
+/* slider row */
+input[type="range"]{
+  -webkit-appearance:none;
+  appearance:none;
+  width: 100%;
+  height:10px;
+  background:transparent;
+  cursor:pointer;
+  margin-right:10px;
+}
+input[type="range"]::-webkit-slider-runnable-track{
+  height:8px;
+  background:linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.03);
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#e9eef7;
+  border:2px solid rgba(0,0,0,0.25);
+  margin-top:-4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+input[type="range"]:disabled{ opacity:.6; cursor:not-allowed; }
+
+/* slider value */
+.slider-value{
+  min-width:44px;
+  text-align:right;
+  color:rgba(255,255,255,0.9);
+  font-weight:600;
+}
+
+/* when slicing is off, grey out most controls but keep the main Slicing button active */
+.slicing-panel.disabled {
+  transition: filter .18s ease, opacity .18s ease;
+  filter: grayscale(0.6) brightness(0.88);
+  opacity: 0.7;
+  pointer-events: none; /* make rest inert */
+}
+
+/* keep the primary Slicing button visually active & interactive even when panel disabled */
+.slicing-panel.disabled .slicing-btn {
+  filter: none;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0); /* ensure no suppressed transform */
+}
+
+/* also ensure plane buttons, helper, flip visually indicate disabled state */
+.slicing-panel.disabled .plane-button,
+.slicing-panel.disabled .helper-btn,
+.slicing-panel.disabled .flip-btn {
+  opacity: 0.48;
+  filter: grayscale(0.9);
+  box-shadow: none;
+}
+
+/* small accessibility: when disabled by class, show reduced focus styles */
+.slicing-panel.disabled button:focus {
+  outline: none;
+}
+
+/* responsive tightening */
+@media (max-width:420px){
+  .slice-row{ gap:8px }
+  .plane-buttons-group{ gap:8px }
+  .efield-section{ padding:10px }
+}
+
+

@@ -170,14 +170,7 @@ export default function CreateButtons({
             </>
           )}
 
-          <button
-            className={`creative-toggle ${creativeMode ? 'on' : ''}`}
-            onClick={() => setCreativeMode(v => !v)}
-            title="Enable manual object creation"
-            aria-pressed={creativeMode}
-          >
-            Creative mode
-          </button>
+          
         </div>
 
         {/* Field objects — NÃO deslocar */}
