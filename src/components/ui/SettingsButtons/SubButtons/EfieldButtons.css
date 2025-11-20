@@ -26,10 +26,45 @@
 }
 
 .efield-row.compact {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;                    /* tighter */
-  align-items: center;         /* align inputs nicely */
+  display: flex;
+  gap: 8px;                 /* tight spacing so controls sit next to each other */
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;        /* keep items on one line */
+}
+
+/* make labels in compact rows inline (title + control) and shrink inputs to fit */
+.efield-row.compact .efield-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-width: 0;            /* allow shrinking */
+}
+
+/* tighten input widths when inside compact row */
+.efield-row.compact .efield-label input[type="number"] {
+  width: 64px;
+  min-width: 56px;
+}
+
+/* make slider and value sit tightly together */
+.efield-row.compact .efield-range {
+  width: 120px;
+  margin: 0 6px 0 0;
+}
+.efield-row.compact .slider-value {
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ensure checkbox stays small and inline */
+.efield-row.compact .efield-checkbox {
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  transform: translateY(-1px);
 }
 
 .efield-label {
