@@ -30,6 +30,8 @@ export default function SettingsButtons({
   setVectorMinTsl,
   vectorScale,
   setVectorScale,
+  vectorStep,
+  setVectorStep,
   lineMin,
   setLineMin,
   lineNumber,
@@ -201,10 +203,11 @@ export default function SettingsButtons({
   // Local edit buffers to allow clearing/backspacing
   const [scaleInput, setScaleInput] = useState(String(vectorScale ?? ''))
   const [lineNumInput, setLineNumInput] = useState(String(lineNumber ?? ''))
+  const [stepInput, setStepInput] = useState(String(vectorStep ?? ''))
 
   useEffect(() => { setScaleInput(String(vectorScale ?? '')) }, [vectorScale])
   useEffect(() => { setLineNumInput(String(lineNumber ?? '')) }, [lineNumber])
-
+  useEffect(() => { setStepInput(String(vectorStep ?? '')) }, [vectorStep])
   const commitScale = useCallback(() => {
     const v = parseFloat(scaleInput)
     if (Number.isFinite(v)) {
@@ -277,6 +280,8 @@ export default function SettingsButtons({
                     onToggleLines={onToggleLines}
                     vectorMinTsl={vectorMinTsl}
                     setVectorMinTsl={setVectorMinTsl}
+                    vectorStep={vectorStep}
+                    setVectorStep={setVectorStep}
                     activePlane={activePlane}
                     onPlaneSelect={onPlaneSelect}
                     showField={showField}

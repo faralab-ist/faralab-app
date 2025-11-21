@@ -169,6 +169,7 @@ function LoadingOverlay() {
     const [creativeMode, setCreativeMode] = useState(false)  // stays here (single source)
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
+    const [vectorStep, setVectorStep] = useState(1) 
     const [lineMin, setLineMin] = useState(0.1)         //LINE SETTINGS NEW
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
@@ -330,7 +331,7 @@ function LoadingOverlay() {
       showLines, onToggleLines: toggleLines,
       showEquipotentialSurface, onToggleEquipotentialSurface: toggleEquip,
       // settings setters
-      setVectorMinTsl, setVectorScale, setLineMin, setLineNumber
+      setVectorMinTsl, setVectorScale, setVectorStep, setLineMin, setLineNumber
     })
 
     useEffect(() => {
@@ -400,6 +401,7 @@ function LoadingOverlay() {
           settings={{
             vectorMinTsl,
             vectorScale,
+            vectorStep,
             lineMin,
             lineNumber,
             showField,
@@ -520,11 +522,12 @@ function LoadingOverlay() {
 
         {showField && (
           <FieldArrows
-        key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
+        key={`arrows-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
         objects={sceneObjects}
         showOnlyGaussianField={showOnlyGaussianField}
         minThreshold={vectorMinTsl}
         scaleMultiplier={vectorScale}
+        step={1 / (Number(vectorStep))} 
         planeFilter={activePlane}
         slicePlane={slicePlane}
         slicePos={slicePos}
@@ -586,6 +589,8 @@ function LoadingOverlay() {
           setVectorMinTsl={setVectorMinTsl}
           vectorScale={vectorScale}
           setVectorScale={setVectorScale}
+          vectorStep={vectorStep}
+          setVectorStep={setVectorStep}
           lineMin={lineMin}         //LINE SETTINGS NEW
           setLineMin={setLineMin}         //LINE SETTINGS NEW
           lineNumber={lineNumber}         //LINE SETTINGS NEW
