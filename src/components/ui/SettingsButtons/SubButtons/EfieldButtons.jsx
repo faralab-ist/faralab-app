@@ -14,6 +14,8 @@ export default function EfieldButtons({
     scaleInput, 
     setScaleInput, 
     commitScale, 
+    vectorStep,
+    setVectorStep,
     lineMin, 
     setLineMin, 
     showLines,
@@ -117,11 +119,25 @@ export default function EfieldButtons({
                              onChange={e => setScaleInput(e.target.value)}
                              onBlur={commitScale}
                              onKeyDown={e => { if (e.key === 'Enter') commitScale() }}
-                            disabled={!hasField || !showField}
+                             disabled={!hasField || !showField}
                              aria-disabled={!hasField}
                              title={!hasField || !showField ? disabledTitle_vectors : undefined}
                          />
                      </label>
+                     <label className="efield-label">
+                        <span className="label-text">Density</span>
+                        <input
+                            type="number"
+                            min={0.2}
+                            max={2}
+                            step={0.2}
+                            value={vectorStep}
+                            onChange={e => {setVectorStep(Number(e.target.value))}}
+                            disabled={!hasField || !showField}
+                            aria-disabled={!hasField}
+                            title={!hasField || !showField ? disabledTitle_vectors : undefined}
+                        />
+                    </label>
                  </div>
              </div>
              
