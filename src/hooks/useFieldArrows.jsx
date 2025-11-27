@@ -3,11 +3,11 @@ import calculateField from '../utils/calculateField.js';
 import Arrow from '../components/models/Arrow.jsx';
 import getFieldVector3 from '../utils/getFieldVectors.js';
 import React, { useMemo, useRef, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { Instance, Instances } from '@react-three/drei';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import vertexShaderSource from '../shaders/arrowVertex.glsl';
 import fragmentShaderSource from '../shaders/arrowFragment.glsl';
+import { useFrame } from '@react-three/fiber';
 
 // returns true if point is 'after' the plane
 function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
@@ -36,12 +36,7 @@ export default function FieldArrows({
     slicePos,
     useSlice,
     slicePlaneFlip
-    ,
-    wavePropagationEnabled = true,
-    waveDuration: propWaveDuration = 0.1
 }) {
-    const [previousVectors, setPreviousVectors] = React.useState([]);
-    const [isTransitioning, setIsTransitioning] = React.useState(false);
     
     const vectorsUnfiltered = useMemo( 
         () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
@@ -51,22 +46,7 @@ export default function FieldArrows({
         sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)
     );
     
-    // Detectar mudanças nos vetores
-    useEffect(() => {
-        if (previousVectors.length > 0 && vectors.length > 0) {
-            // Há vetores antigos e novos - iniciar transição
-            setIsTransitioning(true);
-            // Após a duração da animação da onda, remover os vetores antigos
-            const timeout = setTimeout(() => {
-                setPreviousVectors(vectors);
-                setIsTransitioning(false);
-            }, 200); // Reduced from 600ms to 200ms
-            return () => clearTimeout(timeout);
-        } else if (previousVectors.length === 0 && vectors.length > 0) {
-            // Primeira renderização - apenas salvar os vetores
-            setPreviousVectors(vectors);
-        }
-    }, [vectors.length, slicePlane, slicePos, useSlice, slicePlaneFlip]);
+    // No transition / propagation: show field instantly. No previousVectors handling.
 
     const MAX_L = useMemo(() => {
         let maxL = 0;
@@ -96,7 +76,7 @@ export default function FieldArrows({
     const createInstancedAttributes = React.useCallback((vectorList, isOld = false) => {
         // Deduplicate nearby positions (to avoid multiple arrows at the exact same point)
         // We'll quantize positions to a small grid and accumulate fields for duplicates.
-        const quant = 1e-3; // 1mm-ish quantization for dedupe (adjust if needed)
+        const quant = 1e-2; // quantization for dedupe (adjust if needed)
         const map = new Map();
         for (const { position, field } of vectorList) {
             const key = `${Math.round(position.x / quant)}|${Math.round(position.y / quant)}|${Math.round(position.z / quant)}`;
@@ -194,116 +174,175 @@ export default function FieldArrows({
     }, [vectors, arrowGeometry, createInstancedAttributes]);
 
     // Criar geometria para vetores antigos (se existirem)
-    const previousGeometry = useMemo(() => {
-        if (!isTransitioning || previousVectors.length === 0) return null;
-        
-        const geom = arrowGeometry.clone();
-        const attrs = createInstancedAttributes(previousVectors, true);
-        
-        geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(attrs.positions, 3));
-        geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(attrs.directions, 3));
-        geom.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(attrs.scales, 1));
-        geom.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(attrs.colors, 3));
-        geom.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(attrs.delays, 1));
-        geom.instanceCount = attrs.count;
-        
-        return geom;
-    }, [previousVectors, isTransitioning, arrowGeometry, createInstancedAttributes]);
+    // no previous geometry — immediate rendering only
 
-    // shader material with time uniforms for reveal wave
+    // shader material: no propagation uniforms, render fully visible
     const materialRef = useRef();
-    const previousMaterialRef = useRef();
     const meshRef = useRef();
-    const previousMeshRef = useRef();
-
-    // Determine effective wave duration: if propagation disabled, make it near-instant
-    const waveDuration = wavePropagationEnabled ? (Number.isFinite(propWaveDuration) ? propWaveDuration : 0.1) : 0.0001
+    const startTimeRef = useRef(0);
 
     const material = useMemo(() => {
         const m = new THREE.ShaderMaterial({
             vertexShader: vertexShaderSource,
             fragmentShader: fragmentShaderSource,
             vertexColors: true,
-            transparent: true,
-            uniforms: {
-                uTime: { value: 0.0 },
-                uStartTime: { value: performance.now()},
-                uWaveDuration: { value: waveDuration }
-            }
+            transparent: true
         });
         return m;
     }, [vertexShaderSource, fragmentShaderSource]);
 
-    const previousMaterial = useMemo(() => {
-        if (!isTransitioning) return null;
-        
-        const m = new THREE.ShaderMaterial({
-            vertexShader: vertexShaderSource,
-            fragmentShader: fragmentShaderSource,
-            vertexColors: true,
-            transparent: true,
-            uniforms: {
-                uTime: { value: 0.0 },
-                uStartTime: { value: -999. }, // Tempo muito antigo para que apareçam totalmente visíveis
-                uWaveDuration: { value: waveDuration }
-            }
-        });
-        return m;
-    }, [isTransitioning, vertexShaderSource, fragmentShaderSource]);
-
-    // keep ref to update uniforms each frame
+    // keep ref to material
     materialRef.current = material;
-    previousMaterialRef.current = previousMaterial;
 
-    useFrame((state) => {
-        if (materialRef.current && materialRef.current.uniforms) {
-            materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
+    // Track if animation is complete
+    const animationCompleteRef = useRef(false);
+    
+    // Create stable key for vectors to prevent re-runs
+    const vectorsKey = useMemo(() => {
+        return JSON.stringify(vectors.map(v => [
+            Math.round(v.position.x * 100) / 100,
+            Math.round(v.position.y * 100) / 100,
+            Math.round(v.position.z * 100) / 100,
+            Math.round(v.field.length() * 100) / 100
+        ]));
+    }, [vectors]);
+
+    // Setup geometry once when vectors change - ORDER BY DISTANCE TO OBJECTS
+    useEffect(() => {
+        const mesh = meshRef.current;
+        if (!mesh) {
+            return;
         }
-        if (previousMaterialRef.current && previousMaterialRef.current.uniforms) {
-            previousMaterialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
+
+        // Compute attributes fresh
+        const attrs = createInstancedAttributes(vectors);
+        const maxCount = attrs.count || 0;
+
+        if (maxCount === 0) {
+            console.warn('[FieldArrows] No instances to render');
+            mesh.count = 0;
+            return;
+        }
+
+        console.log('[FieldArrows] Setting up geometry with', maxCount, 'instances');
+
+        // Build distance list - special handling for planes
+        const vectorsWithDist = [];
+        
+        for (let i = 0; i < maxCount; i++) {
+            const px = attrs.positions[i * 3];
+            const py = attrs.positions[i * 3 + 1];
+            const pz = attrs.positions[i * 3 + 2];
+            const pos = new THREE.Vector3(px, py, pz);
+            
+            // Calculate distance differently for planes
+            let minDist = Infinity;
+            
+            for (const obj of objects) {
+                const objPos = new THREE.Vector3(...(obj.position || [0, 0, 0]));
+                
+                if (obj.type === 'plane') {
+                    // For planes: distance is measured along the field direction (perpendicular to plane)
+                    const planeNormal = new THREE.Vector3(...(obj.direction || [0, 1, 0])).normalize();
+                    const toPoint = pos.clone().sub(objPos);
+                    // Distance along normal direction (field propagates perpendicular to plane)
+                    const distAlongNormal = Math.abs(toPoint.dot(planeNormal));
+                    if (distAlongNormal < minDist) minDist = distAlongNormal;
+                } else {
+                    // For point charges/wires/spheres: radial distance
+                    const d = pos.distanceTo(objPos);
+                    if (d < minDist) minDist = d;
+                }
+            }
+            
+            if (!isFinite(minDist)) minDist = pos.length();
+            vectorsWithDist.push({ index: i, dist: minDist });
+        }
+
+        // SORT by distance (propagate from objects outward)
+        vectorsWithDist.sort((a, b) => a.dist - b.dist);
+
+        // Setup geometry with SORTED attributes
+        const geom = arrowGeometry.clone();
+        const posArray = new Float32Array(maxCount * 3);
+        const dirArray = new Float32Array(maxCount * 3);
+        const scaleArray = new Float32Array(maxCount);
+        const colorArray = new Float32Array(maxCount * 3);
+        const delayArray = new Float32Array(maxCount);
+
+        for (let i = 0; i < maxCount; i++) {
+            const srcIdx = vectorsWithDist[i].index;
+            posArray[i * 3] = attrs.positions[srcIdx * 3];
+            posArray[i * 3 + 1] = attrs.positions[srcIdx * 3 + 1];
+            posArray[i * 3 + 2] = attrs.positions[srcIdx * 3 + 2];
+            dirArray[i * 3] = attrs.directions[srcIdx * 3];
+            dirArray[i * 3 + 1] = attrs.directions[srcIdx * 3 + 1];
+            dirArray[i * 3 + 2] = attrs.directions[srcIdx * 3 + 2];
+            scaleArray[i] = attrs.scales[srcIdx];
+            colorArray[i * 3] = attrs.colors[srcIdx * 3];
+            colorArray[i * 3 + 1] = attrs.colors[srcIdx * 3 + 1];
+            colorArray[i * 3 + 2] = attrs.colors[srcIdx * 3 + 2];
+            delayArray[i] = attrs.delays[srcIdx];
+        }
+
+        geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(posArray, 3));
+        geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(dirArray, 3));
+        geom.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(scaleArray, 1));
+        geom.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(colorArray, 3));
+        geom.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(delayArray, 1));
+
+        mesh.geometry = geom;
+        mesh.frustumCulled = false;
+        mesh.count = 0; // start with nothing visible
+
+        // Reset animation state
+        startTimeRef.current = Date.now();
+        animationCompleteRef.current = false;
+
+        console.log('[FieldArrows] Geometry setup complete, starting animation from objects outward');
+
+        return () => {
+            geom.dispose();
+        };
+    }, [vectorsKey, arrowGeometry]);
+
+    // Get maxCount for useFrame
+    const attrs = useMemo(() => createInstancedAttributes(vectors), [vectors, createInstancedAttributes]);
+    const maxCount = attrs.count || 0;
+
+    // Animate instance count ONCE (no loop) - stop when complete
+    useFrame(() => {
+        const mesh = meshRef.current;
+        if (!mesh || !mesh.material || maxCount === 0) return;
+
+        // Skip if animation already complete
+        if (animationCompleteRef.current) return;
+
+        const elapsed = (Date.now() - startTimeRef.current) / 1000; // seconds
+        const animDuration = (gridSize / step) * .07; // 50ms per ring
+
+        const progress = Math.min(elapsed / animDuration, 1.0);
+        const targetCount = Math.floor(progress * maxCount);
+        
+        if (progress < 1.0) {
+            // Animation in progress
+            if (mesh.count !== targetCount) {
+                mesh.count = targetCount;
+            }
+        } else {
+            // Animation complete - set final count and mark as done
+            if (mesh.count !== maxCount) {
+                mesh.count = maxCount;
+            }
+            animationCompleteRef.current = true;
+            console.log('[FieldArrows] Animation complete - showing all', maxCount, 'instances');
         }
     });
 
-    // ensure shader uniform reflects current waveDuration when slider/toggle changes
-    useEffect(() => {
-        const effective = wavePropagationEnabled ? (Number.isFinite(propWaveDuration) ? propWaveDuration : 0.1) : 0.0001;
-        if (materialRef.current && materialRef.current.uniforms && typeof materialRef.current.uniforms.uWaveDuration !== 'undefined') {
-            materialRef.current.uniforms.uWaveDuration.value = effective;
-        }
-        if (previousMaterialRef.current && previousMaterialRef.current.uniforms && typeof previousMaterialRef.current.uniforms.uWaveDuration !== 'undefined') {
-            previousMaterialRef.current.uniforms.uWaveDuration.value = effective;
-        }
-    }, [propWaveDuration, wavePropagationEnabled]);
+    if (maxCount === 0) {
+        console.warn('[FieldArrows] Rendering nothing (maxCount=0)');
+        return null;
+    }
 
-    // restart wave when vectors or objects change
-    useEffect(() => {
-        if (materialRef.current && materialRef.current.uniforms) {
-            // nudge start time to center the reveal; subtract half the waveDuration for nicer timing
-            materialRef.current.uniforms.uStartTime.value = performance.now() / 1000.0 - (waveDuration / 2);
-        }
-    }, [vectorsUnfiltered.length, objects, showOnlyPlane, showOnlyGaussianField, planeFilter]);
-
-    const currentInstanced = useMemo(() => {
-        const attrs = createInstancedAttributes(vectors);
-        const mesh = new THREE.InstancedMesh(currentGeometry, material, attrs.count);
-        mesh.frustumCulled = false;
-        return mesh;
-    }, [currentGeometry, material, createInstancedAttributes, vectors]);
-
-    const previousInstanced = useMemo(() => {
-        if (!previousGeometry || !previousMaterial) return null;
-        const attrs = createInstancedAttributes(previousVectors, true);
-        const mesh = new THREE.InstancedMesh(previousGeometry, previousMaterial, attrs.count);
-        mesh.frustumCulled = false;
-        return mesh;
-    }, [previousGeometry, previousMaterial, previousVectors, createInstancedAttributes]);
-
-    return (
-        <>
-            <primitive ref={meshRef} object={currentInstanced} />
-            {isTransitioning && previousInstanced && (
-                <primitive ref={previousMeshRef} object={previousInstanced} />
-            )}
-        </>
-    );
+    return <instancedMesh ref={meshRef} args={[arrowGeometry, material, maxCount]} />;
 }
