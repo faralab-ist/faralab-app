@@ -154,24 +154,6 @@ export default function CreateButtons({
       )}
 
       <div className="create-buttons-container">
-        {/* Toolbar com Clear + Creative (SÓ ESTES são deslocados) */}
-        <div ref={toolbarRef} className="toolbar" style={toolbarStyle}>
-          {creativeMode && (
-            <>
-              <button
-                className="clear-canvas-btn"
-                onClick={handleClearCanvas}
-                title="Clear all objects"
-              >
-                Clear canvas
-              </button>
-              
-              {/* export/import moved into presets dropdown */}
-            </>
-          )}
-
-          
-        </div>
 
         {/* Field objects — NÃO deslocar */}
         {creativeMode && (
