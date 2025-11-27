@@ -38,17 +38,6 @@ export default function SettingsButtons({
   setLineNumber,
   activePlane,
   onPlaneSelect,
-  useSlice,
-  setUseSlice,
-  slicePlane,
-  setSlicePlane,
-  slicePos,
-  setSlicePos,
-  showSliceHelper,
-  setShowSliceHelper,
-  slicePlaneFlip,
-  setSlicePlaneFlip
-  ,
   // optional wave propagation props (passed from App)
   wavePropagationEnabled,
   setWavePropagationEnabled,
@@ -157,48 +146,6 @@ export default function SettingsButtons({
       y: Math.min(Math.max(pad, y), window.innerHeight - h - pad)
     }
   }, [])
-
- /* useEffect(() => {
-    if (selectedObjectId === prevSelectedRef.current) return
-    prevSelectedRef.current = selectedObjectId
-
-    // Do not show the popup if Flux is already on OR creativeMode is ON
-    if (showOnlyGaussianField) {
-      setFluxPrompt(p => ({ ...p, open: false }))
-      return
-    }
-
-    const sel = (sceneObjects ?? []).find(o => o?.id === selectedObjectId)
-    if (sel && isGaussian(sel)) {
-      const { x, y } = clampPos(lastPointer.current.x + 12, lastPointer.current.y - 20)
-      setFluxPrompt({ open: true, x, y, surfaceType: surfaceTypeOf(sel) })
-    } else {
-      setFluxPrompt(p => ({ ...p, open: false }))
-    }
-  }, [selectedObjectId, sceneObjects, clampPos, showOnlyGaussianField])
-
-  useEffect(() => {
-    if (!fluxPrompt.open) return
-    const onDown = e => {
-      if (e.target.closest('.flux-popup')) return
-      setFluxPrompt(p => ({ ...p, open: false }))
-    }
-    window.addEventListener('mousedown', onDown)
-    return () => window.removeEventListener('mousedown', onDown)
-  }, [fluxPrompt.open])
-
-  const acceptFlux = () => {
-    setOnlyGaussianField?.(true)
-    setFluxPrompt(p => ({ ...p, open: false }))
-  }
-  const closeFlux = () => setFluxPrompt(p => ({ ...p, open: false }))
-
-  // Close popup if Flux becomes ON or creativeMode turns ON while it's open
-  useEffect(() => {
-    if (showOnlyGaussianField) {
-      setFluxPrompt(p => ({ ...p, open: false }))
-    }
-  }, [showOnlyGaussianField, creativeMode])*/
 
   // Local edit buffers to allow clearing/backspacing
   const [scaleInput, setScaleInput] = useState(String(vectorScale ?? ''))
@@ -317,96 +264,6 @@ export default function SettingsButtons({
           )}
         </div>
 
-        {/* Slicing / rest of controls remain unchanged 
-        <div className="settings-group">
-          <button
-            className={`settings-main big ${open === 'slicing' ? 'open' : ''}`}
-            onClick={() => toggle('slicing')}
-          >
-            Slicing
-          </button>
-          {open === 'slicing' && (
-            <div className="slicing-panel">
-              <div className="slice-row">
-                <button
-                  onClick={() => setUseSlice?.(!useSlice)}
-                >
-                  {useSlice ? 'Slicing On' : 'Slicing Off'}
-                </button>
-                <button
-                 className={`helper-btn ${showSliceHelper ? 'active' : ''}`}
-                 onClick={() => setShowSliceHelper?.(!showSliceHelper)}
-                 disabled={!useSlice}
-                 title="Toggle slice helper"
-               >
-                 {showSliceHelper ? 'Hide Helper' : 'Show Helper'}
-               </button>
-               <button
-                className={`flip-btn ${slicePlaneFlip ? 'active' : ''}`}
-                onClick={() => setSlicePlaneFlip?.(!slicePlaneFlip)}
-                disabled={!useSlice}
-                title="Flip slice plane orientation"
-              >
-                Flip slice orientation
-              </button>
-              </div>
-
-              <div className="efield-section">
-                <div className="efield-section-title">Slicing Plane</div>
-                <div className="plane-buttons-group">
-
-                  <button
-                    className={`plane-button ${slicePlane === 'xy' && useSlice ? 'active' : 'inactive'}`}
-                    onClick={(e) => { if (!useSlice) return; setSlicePlane?.('xy') }}
-                    disabled={!useSlice}
-                    aria-disabled={!useSlice}
-                    title={!useSlice ? "Enable slicing to change plane" : "Select XY plane"}
-                  >
-                    XY
-                  </button>
-                  <button
-                    className={`plane-button ${slicePlane === 'yz' && useSlice ? 'active' : 'inactive'}`}
-                    onClick={(e) => { if (!useSlice) return; setSlicePlane?.('yz') }}
-                    disabled={!useSlice}
-                    aria-disabled={!useSlice}
-                    title={!useSlice ? "Enable slicing to change plane" : "Select YZ plane"}
-                  >
-                    YZ
-                  </button>
-                  <button
-                    className={`plane-button ${slicePlane === 'xz' && useSlice ? 'active' : 'inactive'}`}
-                    onClick={(e) => { if (!useSlice) return; setSlicePlane?.('xz') }}
-                    disabled={!useSlice}
-                    aria-disabled={!useSlice}
-                    title={!useSlice ? "Enable slicing to change plane" : "Select XZ plane"}
-                  >
-                    XZ
-                  </button>
-                </div>
-              </div>
-
-              <div className="efield-section">
-                <div className="efield-section-title">Slicing coordinate</div>
-                <div className="efield-row compact">
-               
-                    <input
-                      type="range"
-                      //this shouldnt be hardcoded ill fix later
-                      min={-10}
-                      max={10}
-                      step={0.1}
-                      value={slicePos ?? 0}
-                      onChange={e => setSlicePos?.(parseFloat(e.target.value))}
-                      disabled={!useSlice}
-                    />
-                    <span className="slider-value">{Number(slicePos ?? 0).toFixed(2)}</span>
-              
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-*/}
         <div className="settings-group">
           <button
             className={`settings-main big ${open === 'gaussian' ? 'open' : ''}`}
@@ -466,18 +323,6 @@ export default function SettingsButtons({
         </div>
       </div>
 
-     {/* {fluxPrompt.open && (
-        <div className="flux-popup" style={{ top: fluxPrompt.y, left: fluxPrompt.x }}>
-          <div className="flux-popup-header">
-            <span>Gaussian surface</span>
-            <button className="flux-popup-close" onClick={closeFlux} aria-label="Close">×</button>
-          </div>
-          <div className="flux-popup-body">Show flux on this surface?</div>
-          <div className="flux-popup-actions">
-            <button className="yes" onClick={acceptFlux}>Show Flux</button>
-          </div>
-        </div>
-      )} */}
     </>
   )
 }

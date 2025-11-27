@@ -116,7 +116,7 @@ export default function EfieldButtons({
                              max={5}
                              step={0.1}
                              value={scaleInput}
-                             onChange={e => setScaleInput(e.target.value)}
+                             onChange={e => {setScaleInput(e.target.value)}}
                              onBlur={commitScale}
                              onKeyDown={e => { if (e.key === 'Enter') commitScale() }}
                              disabled={!hasField || !showField}

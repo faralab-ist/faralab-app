@@ -62,7 +62,7 @@
 /* active / focused state with soft glow */
 .plane-button.active{
   background: linear-gradient(180deg, var(--accent), var(--accent-2));
-  border-color: rgba(79,154,255,0.9);
+  border-color: #53b0ff;
   color:#fff;
   box-shadow: 0 8px 28px rgba(79,154,255,0.16), 0 2px 6px rgba(0,0,0,0.5) inset;
   transform:translateY(-1px);

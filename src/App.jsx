@@ -597,16 +597,7 @@ function LoadingOverlay() {
           setLineNumber={setLineNumber}          //LINE SETTINGS NEW
           activePlane={activePlane}
           onPlaneSelect={handlePlaneSelect}
-          useSlice={useSlice}
-          setUseSlice={setUseSlice}
-          slicePlane={slicePlane}
-          setSlicePlane={setSlicePlane}
-          slicePos={slicePos}
-          setSlicePos={setSlicePos}
-          showSliceHelper={showSlicePlaneHelper}
-          setShowSliceHelper={setShowSlicePlaneHelper}
-          slicePlaneFlip={slicePlaneFlip}
-          setSlicePlaneFlip={setSlicePlaneFlip}
+         
           // Wave propagation controls for field arrows
           wavePropagationEnabled={wavePropagationEnabled}
           setWavePropagationEnabled={setWavePropagationEnabled}
