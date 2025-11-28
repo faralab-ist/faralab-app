@@ -2,21 +2,13 @@ attribute vec3 instancePosition;
 attribute vec3 instanceDirection;
 attribute float instanceScale;
 attribute vec3 instanceColor;
-attribute float instanceDelay;
-
-uniform float uTime;
-uniform float uStartTime;
-uniform float uWaveDuration;
 
 varying vec3 vColor;
-varying float vReveal;
 
 vec3 rotateToDirection(vec3 v, vec3 dir){
     vec3 up = vec3(0.0, 1.0, 0.0);
-    // since dir is normalized
     float cosTheta = dot(up, dir);
 
-    //avoid cross product being zero
     if (abs(cosTheta - 1.0) < 1e-5) {
         return v; 
     }
@@ -26,7 +18,6 @@ vec3 rotateToDirection(vec3 v, vec3 dir){
 
     vec3 rotationAxis = normalize(cross(up, dir));
     float angle = acos(clamp(cosTheta, -1.0, 1.0));
-    // Rodrigues' rotation formula
     return v * cos(angle)
      + cross(rotationAxis, v) * sin(angle) 
      + rotationAxis * dot(rotationAxis, v) * (1.0 - cos(angle));
@@ -34,20 +25,10 @@ vec3 rotateToDirection(vec3 v, vec3 dir){
 
 void main(){
     vec3 transformed = position;
-
-    // compute reveal progress for this instance (visual only)
-    float t = (uTime - uStartTime - instanceDelay) / max(0.0001, uWaveDuration);
-    float progress = clamp(t, 0.0, 1.0);
-    float reveal = smoothstep(0.0, 1.0, progress);
-
-    float finalScale = instanceScale * reveal;
-
     transformed = rotateToDirection(transformed, normalize(instanceDirection));
-    transformed *= finalScale;
+    transformed *= instanceScale;
     transformed += instancePosition;
 
     vColor = instanceColor;
-    vReveal = reveal;
-
     gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
 }

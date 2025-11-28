@@ -4,7 +4,7 @@ import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
 
 
-function Plane({ 
+export default function StackedPlanes({ 
   id, 
   position, 
   charge_density,
@@ -16,6 +16,8 @@ function Plane({
   updatePosition,
   updateDirection,
   updateObject,
+  spacing,
+  charge_densities,
   gridDimensions,
   dimensions,
   direction,
@@ -24,9 +26,10 @@ function Plane({
   planeHeight,
   rotation,
   quaternion,
-  isHovered,
+  hoveredId,
 }) {
   const isSelected = id === selectedId
+  const isHovered = id === hoveredId
   const { handleAxisDragStart } = useCameraSnap()
   const pivotRef = useRef()
   const meshRef = useRef()
@@ -136,31 +139,50 @@ function Plane({
       scale={0.86}
       lineWidth={2.5}
     >
-      <mesh
-        ref={meshRef}
-        rotation={baseEuler}               // lay plane flat
-        userData={{
-          id,
-          type: 'plane',
-          charge_density,
-          infinite,
-          material
-        }}
-        position={[0, 0, 0]}
-        onPointerDown={(e) => {
-          if (e.button !== undefined && e.button !== 0) return
-          e.stopPropagation()
-          setSelectedId(id)
-        }}
-      >
-        <planeGeometry args={[width, height, 10, 6]} />
-        <meshStandardMaterial
-          color={isSelected || isHovered ? 'lightblue' : 'lightgreen'}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
+      {/* Render a stack of planes centered at origin, spaced along local normal (Y in local space after baseEuler).
+          color each plane blue if its charge density is positive, red otherwise. */}
+      <group>
+        {(() => {
+          const planes = Array.isArray(charge_densities) && charge_densities.length > 0
+            ? charge_densities
+            : [charge_density ?? 0]
+          const s = typeof spacing === 'number' ? spacing : 1.0
+          const n = planes.length
+          const center = (n - 1) / 2
+
+          return planes.map((q, i) => {
+            const offset = (i - center) * s
+            const color = (q ?? 0) > 0 ? 'blue' : (q ?? 0) < 0 ?'red' : 'gray'
+            return (
+              <mesh
+                key={i}
+                ref={i === 0 ? meshRef : undefined}
+                rotation={baseEuler}               // lay plane flat
+                userData={{
+                  id,
+                  type: 'stackedPlanes',
+                  idx: i,
+                  charge_density: q,
+                  infinite,
+                  material
+                }}
+                position={[0, offset, 0]}
+                onPointerDown={(e) => {
+                  if (e.button !== undefined && e.button !== 0) return
+                  e.stopPropagation()
+                  setSelectedId(id)
+                }}
+              >
+                <planeGeometry args={[width, height, 10, 6]} />
+                <meshStandardMaterial
+                  color={color}
+                  side={THREE.DoubleSide}
+                />
+              </mesh>
+            )
+          })
+        })()}
+      </group>
     </PivotControls>
   )
 }
-
-export default Plane

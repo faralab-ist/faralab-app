@@ -3,6 +3,7 @@ import { useThree , useFrame} from '@react-three/fiber';
 import { useMemo } from 'react';
 import equipotentialShaderFragmentSource from '../../../shaders/equipotentialSurfaceFrag.glsl';
 import { EPSILON_0, K_E } from '../../../utils/constants.js';
+import chargePerSphereSurface from '../../../utils/chargePerSphereSurface.js';
 
 export default function EquipotentialSurface({ objects, targetValue = 5.0, transparency = 0.6, slicePlane, slicePos, useSlice, slicePlaneFlip}) {
     const { camera } = useThree();
@@ -43,6 +44,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 wirePositions: { value: new Array(MAX_INF_WIRES).fill(new THREE.Vector3()) },
                 wireDirections: { value: new Array(MAX_INF_WIRES).fill(new THREE.Vector3()) },
                 wireChargeDensity: { value: new Float32Array(MAX_INF_WIRES).fill(0) },
+                wireRadius: { value: new Float32Array(MAX_INF_WIRES).fill(0) },
                 chargedSphereCount: {value: 0},
                 chargedSpherePositions: { value: new Array(MAX_CHARGED_SPHERES).fill(new THREE.Vector3()) },
                 chargedSphereRadius: { value: new Float32Array(MAX_CHARGED_SPHERES).fill(0) },
@@ -93,6 +95,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 material.uniforms.wirePositions.value[wireIdx] = new THREE.Vector3(...obj.position);
                 material.uniforms.wireDirections.value[wireIdx] = new THREE.Vector3(...obj.direction).normalize();
                 material.uniforms.wireChargeDensity.value[wireIdx] = obj.charge_density;
+                material.uniforms.wireRadius.value[wireIdx] = obj.radius;
                 wireIdx++;
             } else if (obj.type === 'plane' && !obj.infinite) {
                 material.uniforms.finPlanePositions.value[finPlaneIdx] = new THREE.Vector3(...obj.position);
@@ -112,6 +115,50 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 material.uniforms.chargedSphereChargeDensity.value[chargedSphereIdx] = obj.charge_density;
                 material.uniforms.chargedSphereHollow.value[chargedSphereIdx] = obj.isHollow ? 1 : 0;
                 chargedSphereIdx ++;
+            } else if (obj.type === 'concentricSpheres') {
+                //console.log(obj.radiuses, obj.charges, obj.materials);
+                const chargePerSphereSurfaceArr = chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
+                //console.log(chargePerSphereSurfaceArr);
+                for (let i = 0; i < obj.radiuses.length; i++) {
+                    const rad = obj.radiuses[i];
+                    const chargeDensity = chargePerSphereSurfaceArr[i] / (4 * Math.PI * rad * rad);
+                    material.uniforms.chargedSpherePositions.value[chargedSphereIdx] = new THREE.Vector3(...obj.position);
+                    material.uniforms.chargedSphereRadius.value[chargedSphereIdx] = rad;
+                    material.uniforms.chargedSphereChargeDensity.value[chargedSphereIdx] = chargeDensity;
+                    material.uniforms.chargedSphereHollow.value[chargedSphereIdx] = 1;
+                    chargedSphereIdx ++;
+                }
+            } else if (obj.type === 'concentricInfWires') {
+                //console.log(obj.radiuses, obj.charges, obj.materials);
+                const chargePerSphereSurfaceArr = chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
+                for (let i = 0; i < obj.radiuses.length; i++) {
+                    material.uniforms.wirePositions.value[wireIdx] = new THREE.Vector3(...obj.position);
+                    material.uniforms.wireDirections.value[wireIdx] = new THREE.Vector3(...obj.direction).normalize();
+                    material.uniforms.wireChargeDensity.value[wireIdx] = chargePerSphereSurfaceArr[i];
+                    material.uniforms.wireRadius.value[wireIdx] = obj.radiuses[i];
+                    wireIdx++;
+                }
+            } else if (obj.type === 'stackedPlanes') {
+                const numPlanes = Array.isArray(obj.charge_densities) ? obj.charge_densities.length : 0;
+                const spacing = obj.spacing || 1;
+                const directionVec = new THREE.Vector3(...obj.direction).normalize();
+                const centerOffset = (numPlanes - 1) * spacing / 2;
+                for (let i = 0; i < numPlanes; i++) {
+                    const planePos = new THREE.Vector3(...obj.position).clone().add(directionVec.clone().multiplyScalar((i * spacing) - centerOffset));
+                    const chargeDensityForPlane = obj.charge_densities[i] || 0;
+                    if (obj.infinite) {
+                        material.uniforms.planePositions.value[planeIdx] = planePos;
+                        material.uniforms.planeNormals.value[planeIdx] = directionVec;
+                        material.uniforms.planeChargeDensity.value[planeIdx] = chargeDensityForPlane;
+                        planeIdx++;
+                    } else {
+                        material.uniforms.finPlanePositions.value[finPlaneIdx] = planePos;
+                        material.uniforms.finPlaneNormals.value[finPlaneIdx] = directionVec;
+                        material.uniforms.finPlaneChargeDensity.value[finPlaneIdx] = chargeDensityForPlane;
+                        material.uniforms.finPlaneDimensions.value[finPlaneIdx] = new THREE.Vector2(...obj.dimensions);
+                        finPlaneIdx++;
+                    }
+                }
             }
         });
 

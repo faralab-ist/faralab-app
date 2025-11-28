@@ -50,6 +50,21 @@ const objectFactories = {
     material: 'Dielectric',
     createdAt: Date.now(),
   }),
+  stackedPlanes: (index) => ({
+    id: `tmp-${index}`,
+    type: 'stackedPlanes',
+    name: `Stacked Planes ${index}`,
+    position: [0, 0, 0],
+    charge_densities: [0.1],
+    spacing: 1,
+    rotation: [0,0,0],
+    direction: [0, 1, 0], //normal
+    dimensions: [4 , 4],
+    planeWidth: 5,
+    planeHeight: 5,
+    infinite: false,
+    createdAt: Date.now(),
+  }),
   chargedSphere: (index) => ({
     id: `tmp-${index}`,
     type: 'chargedSphere',
@@ -62,6 +77,31 @@ const objectFactories = {
     radius: 1,
     isHollow: false,
     material: 'Dielectric',
+    createdAt: Date.now(),
+  }),
+  concentricSpheres: (index) => ({
+    id: `tmp-${index}`,
+    type: 'concentricSpheres',
+    name: `Concentric Sphere ${index}`,
+    position: [0, 0, 0],
+    radiuses:[],
+    materials:[], // 'conductor, 'dielectric'
+    dielectrics:[], // 1 for each dielectric delimited volume
+    charges: [], // 1 for each conductor delimited volume
+    direction: [0, 1, 0], // normal da esfera
+    createdAt: Date.now(),
+  }),
+  concentricInfWires: (index) => ({
+    id: `tmp-${index}`,
+    type: 'concentricInfWires',
+    name: `Concentric Infinite Wire ${index}`,
+    position: [0, 0, 0],
+    radiuses:[],
+    materials:[], // 'conductor, 'dielectric'
+    dielectrics:[], // 1 for each dielectric delimited volume
+    charges: [], // 1 for each conductor delimited volume
+    direction: [0, 1, 0], // normal do fio
+    rotation: [0,0,0],
     createdAt: Date.now(),
   }),
   sphere: (index) => ({
@@ -113,7 +153,7 @@ const objectFactories = {
 export default function useSceneObjects(initial = []) {
   const [sceneObjects, setSceneObjects] = useState(initial)
   const [counters, setCounters] = useState({
-    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0
+    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0,
   })
 
   const addObject = useCallback((type, overrides = {}) => {
@@ -159,6 +199,133 @@ export default function useSceneObjects(initial = []) {
     setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charges:[] } : o)))
   }, [])
 
+  const addPlaneToStackedPlanes = useCallback((id) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newChargeDensities = o.charge_densities ? [...o.charge_densities, 0.1] : [0.1];
+        return { ...o, charge_densities: newChargeDensities};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const removeLastPlaneFromStackedPlanes = useCallback((id) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newChargeDensities = o.charge_densities ? o.charge_densities.slice(0, -1) : [];
+        return { ...o, charge_densities: newChargeDensities};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const setSpacingForStackedPlanes = useCallback((id, spacing) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        return { ...o, spacing: spacing};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const setChargeDensityForPlaneInStackedPlanes = useCallback((id, planeIndex, charge_density) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newChargeDensities = o.charge_densities ? [...o.charge_densities] : [];
+        newChargeDensities[planeIndex] = charge_density;
+        return { ...o, charge_densities: newChargeDensities};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  //concentric spheres stuff
+  const addRadiusToChargedSphere = useCallback((id) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const currentMaxRadius = o.radiuses && o.radiuses.length > 0 ? Math.max(...o.radiuses) : 0;
+        const radius = currentMaxRadius + 1;
+        const newRadiuses = o.radiuses ? [...o.radiuses, radius] : [radius];
+        // add default material, dielectric and charge for the new layer
+        const newMaterials = o.materials ? [...o.materials, 'dielectric'] : ['dielectric'];
+        const newDielectrics = o.dielectrics ? [...o.dielectrics, 1] : [1];
+        const newCharges = o.charges ? [...o.charges, 0] : [0];
+        return { ...o, radiuses: newRadiuses, materials: newMaterials, dielectrics: newDielectrics, charges: newCharges};
+      }
+      return o;
+    }
+    ))
+  }, [])
+
+  const setRadiusToChargedSphere = useCallback((id, layerIndex, radius) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newRadiuses = o.radiuses ? [...o.radiuses] : [];
+        newRadiuses[layerIndex] = radius;
+        return { ...o, radiuses: newRadiuses};
+      }
+      return o;
+    }
+    ))
+  }, [])
+
+  const removeLastRadiusFromChargedSphere = useCallback((id) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newRadiuses = o.radiuses ? o.radiuses.slice(0, -1) : [];
+        // remove stuff to keep alignemeneenenent
+        const newMaterials = o.materials ? o.materials.slice(0, -1) : [];
+        const newDielectrics = o.dielectrics ? o.dielectrics.slice(0, -1) : [];
+        const newCharges = o.charges ? o.charges.slice(0, -1) : [];
+        return { ...o, radiuses: newRadiuses, materials: newMaterials, dielectrics: newDielectrics, charges: newCharges};
+      }
+      return o;
+    }
+    ))
+  }, [])
+
+  const setMaterialForLayerInChargedSphere = useCallback((id, layerIndex, material) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newMaterials = o.materials ? [...o.materials] : [];
+        newMaterials[layerIndex] = material;
+        return { ...o, materials: newMaterials};
+      }
+      return o;
+    }
+    ))
+  }, [])
+
+  const setDielectricForLayerInChargedSphere = useCallback((id, layerIndex, dielectric) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newDielectrics = o.dielectrics ? [...o.dielectrics] : [];
+        newDielectrics[layerIndex] = dielectric;
+        return { ...o, dielectrics: newDielectrics};
+      }
+      return o;
+    }
+    ))
+  }, [])
+
+  const setChargeForLayerInChargedSphere = useCallback((id, layerIndex, charge) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newCharges = o.charges ? [...o.charges] : [];
+        newCharges[layerIndex] = charge;
+        return { ...o, charges: newCharges};
+      }
+      return o;
+    }
+    ))
+  }, [])
+
+  // end of concentric sphere stuff
+
   const updateObject = useCallback((id, newProps) => {
     setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, ...newProps } : o)))
   }, [])
@@ -187,6 +354,16 @@ export default function useSceneObjects(initial = []) {
     updateDirection,
     addCharge,
     clearCharges,
+    addRadiusToChargedSphere,
+    removeLastRadiusFromChargedSphere,
+    setMaterialForLayerInChargedSphere,
+    setDielectricForLayerInChargedSphere,
+    setChargeForLayerInChargedSphere,
+    setRadiusToChargedSphere,
+    addPlaneToStackedPlanes,
+    removeLastPlaneFromStackedPlanes,
+    setSpacingForStackedPlanes,
+    setChargeDensityForPlaneInStackedPlanes,
     counts,
   }
 }

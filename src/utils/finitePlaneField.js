@@ -15,6 +15,11 @@ export default function finitePlaneField(planePos, planeNormal, planeDimensions,
     const vVec = new THREE.Vector3().crossVectors(normal, uVec).normalize();
     uVec.crossVectors(vVec, normal).normalize();
 
+    const dist = rVec.dot(normal);
+    if (Math.abs(dist) < 1e-6) {
+        return new THREE.Vector3(0, 0, 0);
+    }
+
     const xPrime = rVec.dot(uVec);
     const yPrime = rVec.dot(normal);
     const zPrime = rVec.dot(vVec);

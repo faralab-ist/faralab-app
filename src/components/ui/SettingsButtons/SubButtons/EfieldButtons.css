@@ -26,10 +26,45 @@
 }
 
 .efield-row.compact {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;                    /* tighter */
-  align-items: center;         /* align inputs nicely */
+  display: flex;
+  gap: 8px;                 /* tight spacing so controls sit next to each other */
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;        /* keep items on one line */
+}
+
+/* make labels in compact rows inline (title + control) and shrink inputs to fit */
+.efield-row.compact .efield-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-width: 0;            /* allow shrinking */
+}
+
+/* tighten input widths when inside compact row */
+.efield-row.compact .efield-label input[type="number"] {
+  width: 64px;
+  min-width: 56px;
+}
+
+/* make slider and value sit tightly together */
+.efield-row.compact .efield-range {
+  width: 120px;
+  margin: 0 6px 0 0;
+}
+.efield-row.compact .slider-value {
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ensure checkbox stays small and inline */
+.efield-row.compact .efield-checkbox {
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+  transform: translateY(-1px);
 }
 
 .efield-label {
@@ -72,6 +107,7 @@
   border-color: #4a6d94;
   background: #20252a;
   color: #ffffff;
+  outline: none
 }
 
 .efield-label input:disabled {
@@ -84,6 +120,8 @@
   gap: 8px;
   align-items: center;
 }
+
+
 
 /* toggle buttons (unchanged) */
 .efield-toggle-btn {
@@ -100,10 +138,16 @@
   transition: background .12s, border-color .12s, transform .06s, box-shadow .12s;
 }
 
+
+
 .efield-toggle-btn:hover {
   background: #202427;
   border-color: #4a6d94;
   transform: translateY(-1px);
+}
+
+.efield-toggle-btn:focus {
+ outline: none;
 }
 
 .efield-toggle-btn:active {
@@ -150,5 +194,82 @@
   background: rgba(255,255,255,0.03);
   color: rgba(255,255,255,0.6);
   border-color: rgba(255,255,255,0.06);
+}
+
+/* horizontal label variant: title + control inline and centered */
+.efield-label.horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+/* nicer compact checkbox */
+.efield-checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: #4f9aff; 
+  margin-left: 1px;
+}
+
+/* compact, sleeker range slider for Wave Duration */
+.efield-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 160px;
+  height: 8px;
+  background: transparent;
+  margin: 0 8px;
+  vertical-align: middle;
+}
+.efield-range::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.03);
+}
+.efield-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e9eef7;
+  border: 2px solid rgba(0,0,0,0.25);
+  margin-top: -2px; /* vertically center the thumb */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+}
+.efield-range:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* make the numeric value a bit tighter with slider */
+.efield-row .slider-value,
+.efield-row span[style] { min-width: 48px; text-align:center; }
+
+/* dimmed variant: keep tooltip/hover on the label, but disable the inner controls */
+.efield-label.dimmed {
+  opacity: 0.56;
+  filter: grayscale(50%) brightness(0.9);
+}
+
+/* allow the checkbox (which lives outside the dimmed row) to remain interactive */
+.efield-checkbox:disabled {
+  cursor: not-allowed;
+  opacity: 0.84; /* keep visible but subdued */
+}
+
+/* keep numeric/label text readable */
+.efield-label.dimmed .slider-value,
+.efield-label.dimmed .label-text {
+  opacity: 0.9;
+}
+
+/* small tweak: ensure entire section still animates in even when disabled */
+.efield-section.disabled {
+  opacity: 0.6;
+  transform: none;
+  filter: grayscale(40%);}
+
+/* small responsive tweak */
+@media (max-width: 420px) {
+  .efield-range { width: 120px; }
+  .efield-label.horizontal { gap: 8px; }
 }
 

@@ -30,6 +30,16 @@ export default function Sidebar({
   setHoveredId,
   selectedId,
   setSelectedId,
+  addRadiusToChargedSphere,
+  setRadiusToChargedSphere,
+  removeLastRadiusFromChargedSphere,
+  setMaterialForLayerInChargedSphere,
+  setDielectricForLayerInChargedSphere,
+  setChargeForLayerInChargedSphere,
+  addPlaneToStackedPlanes,
+  removeLastPlaneFromStackedPlanes,
+  setSpacingForStackedPlanes,
+  setChargeDensityForPlaneInStackedPlanes,
 }) {
   const [expandId, setExpandId] = useState(null);
   const sidebarRootRef = useRef(null)
@@ -110,7 +120,7 @@ export default function Sidebar({
     return 'surface';
   };
 
-  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'surface','chargedSphere'].includes(o.type));
+  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
 
   const typeCounters = {};
   const subtypeCounters = {};
@@ -232,6 +242,15 @@ export default function Sidebar({
               setSelectedId={setSelectedId}
               onHoverStart={hoverStart}
               onHoverEnd={hoverEnd}
+              addRadiusToChargedSphere={addRadiusToChargedSphere}
+              removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+              setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
+              setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
+              setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
+              addPlaneToStackedPlanes={addPlaneToStackedPlanes}
+              removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
+              setSpacingForStackedPlanes={setSpacingForStackedPlanes}
+              setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
             />
           </div>
         )}

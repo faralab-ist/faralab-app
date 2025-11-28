@@ -77,7 +77,7 @@
   border: 1px solid #2e2e2e;
   padding: 14px;
   border-radius: 12px;
-  width: 250px;                
+  width: 300px;                
   backdrop-filter: blur(6px);
   animation: panelFade .18s ease-out;
 }
@@ -383,6 +383,7 @@
 .fieldview-panel:focus-within {
   box-shadow: none !important;
   border-color: rgba(255,255,255,0.03) !important; /* keep subtle border if desired */
+  outline: none;
 }
 
 /* Remove button focus ring on the tabs themselves */
@@ -488,9 +489,9 @@
   min-width: 100px;
   max-width: 320px;
 
-  height: 430px;        /* fixed height  */
+  height: 490px;        /* fixed height  */
   min-height: 420px;
-  max-height: 420px;
+  max-height: 500px;
 
   box-sizing: border-box;
   overflow: hidden;     /* prevent panel itself from changing size */

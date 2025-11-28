@@ -5,7 +5,7 @@ export default function infinitePlaneField(point, chargeDensity, targetPoint, no
     const rVec = new THREE.Vector3().subVectors(targetPoint, point);
     const distance = rVec.dot(new THREE.Vector3(...normal).normalize());
 
-    if (distance === 0) {
+    if (Math.abs(distance) < 1e-6) {
         return new THREE.Vector3(0, 0, 0);
     }
 
