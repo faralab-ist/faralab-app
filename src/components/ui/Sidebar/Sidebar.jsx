@@ -1,14 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
 import ObjectList from "./ObjectList";
 import "./Sidebar.css";
+import PosChargeIcon from "../../../assets/pos_charge.svg";
+import NegChargeIcon from "../../../assets/neg_charge.svg";
+import WireIcon from "../../../assets/wire.svg";
+import SphereIcon from "../../../assets/sphere.svg";
+import CuboidIcon from "../../../assets/cuboid.svg";
+import CylinderIcon from "../../../assets/cylinder.svg";
+import PlaneIcon from "../../../assets/plane.svg";
+import ChargeSphereIcon from "../../../assets/charge_sphere.svg";
 
 /**
  * Sidebar agora suporta 3 estados:
  * - open: painel completo visível (isOpen === true)
- * - minimized: painel reduzido mostrando só as pills (isOpen === false && counts.total > 0)
+ * - minimized: painel reduzido mostrando só os ícones (isOpen === false && counts.total > 0)
  * - closed: completamente escondido (isOpen === false && counts.total === 0)
  *
- * Clicar numa pill ou na setinha abre o painel completo.
+ * Clicar num ícone ou na setinha abre o painel completo.
  */
 export default function Sidebar({ 
   objects, 
@@ -29,12 +37,10 @@ export default function Sidebar({
   // preserve previous selectedId while hovering
   const prevSelectedRef = useRef(null);
   const hoverStart = (id) => {
-    
-    if (typeof setSelectedId === 'function') setHoveredId(id);
+    if (typeof setHoveredId === 'function') setHoveredId(id);
   };
   const hoverEnd = () => {
     if (typeof setHoveredId === 'function') setHoveredId(prevSelectedRef.current);
-
   };
 
   const hasObjects = (counts?.total ?? 0) > 0;
@@ -56,29 +62,18 @@ export default function Sidebar({
     if (typeof onMinimizedChange === "function") onMinimizedChange(minimized);
   }, [minimized, onMinimizedChange]);
 
-  
-  useEffect(() => {
-    if (selectedId) {
-      setExpandId(selectedId);
-      if (!isOpen) {
-        setIsOpen(true);
-      }
+  // NEW: Open sidebar when clicking anywhere on it (minimized or closed)
+  const handleSidebarClick = (e) => {
+    if (!isOpen) {
+      setIsOpen(true);
     }
-  }, [selectedId, isOpen, setIsOpen])
-
-  const togglePanel = () => {
-    setExpandId(null)
-    setIsOpen((prev) => {
-      const next = !prev
-      // if closing, clear selection so useEffect won't immediately re-open (maybe fix it other way?)
-      if (!next && typeof setSelectedId === 'function') setSelectedId(null)
-      return next
-    })
   };
+  
   const openPanel = (idToOpen = null) => {
     if (idToOpen) setExpandId(idToOpen);
     setIsOpen?.(true);
   };
+  
   const handleRowClick = (item) => {
     if (typeof setSelectedId === 'function') {
       setSelectedId(selectedId === item.id ? null : item.id);
@@ -87,9 +82,24 @@ export default function Sidebar({
 
   // helper para detectar subtype em nomes de campo comuns
   const detectSubtype = (o) => {
-    if (!o) return null;
-    const candidates = ['subtype'];
+    if (!o || o.type !== 'surface') return null;
 
+    const has = (k) => typeof o?.[k] === 'number';
+    
+    // Sphere: só radius
+    if (has('radius') && !has('height') && !has('width') && !has('depth')) {
+      return 'sphere';
+    }
+    // Cylinder: radius + height
+    if (has('radius') && has('height') && !has('width') && !has('depth')) {
+      return 'cylinder';
+    }
+    // Cuboid: width + height + depth
+    if (has('width') && has('height') && has('depth')) {
+      return 'cuboid';
+    }
+    
+    // Fallback: check name
     if (o.name && typeof o.name === 'string') {
       const n = o.name.toLowerCase();
       if (n.includes('cuboid') || n.includes('box')) return 'cuboid';
@@ -97,7 +107,7 @@ export default function Sidebar({
       if (n.includes('cylinder')) return 'cylinder';
     }
 
-    return null;
+    return 'surface';
   };
 
   const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'surface','chargedSphere'].includes(o.type));
@@ -111,16 +121,18 @@ export default function Sidebar({
       const subtype = raw || 'surface';
       subtypeCounters[subtype] = (subtypeCounters[subtype] || 0) + 1;
       const label = `${subtype.charAt(0).toUpperCase() + subtype.slice(1)} ${subtypeCounters[subtype]}`;
-      return { id: o.id, type: 'surface', subtype, label, name: o.name };
+      return { id: o.id, type: 'surface', subtype, label, name: o.name, obj: o };
+    } else if (o.type === 'charge') {
+      const isNeg = o.charge < 0;
+      const t = isNeg ? 'neg_charge' : 'pos_charge';
+      typeCounters[t] = (typeCounters[t] || 0) + 1;
+      const label = `${isNeg ? 'Negative Charge' : 'Positive Charge'} ${typeCounters[t]}`;
+      return { id: o.id, type: t, subtype: null, label, name: o.name, obj: o, polarity: isNeg ? 'negative' : 'positive' };
     } else {
-      const t = o.type;
-      typeCounters[t] = (typeCounters[t] || 0) + 1; 
-      if (t === 'chargedSphere') { //Shouldn't be hardcoded, but for now it works :)
-        const label = `Charged Sphere ${typeCounters[t]}`
-        return { id: o.id, type: t, subtype: null, label, name: o.name };
-      }
-      const label = `${t.charAt(0).toUpperCase() + t.slice(1)} ${typeCounters[t]}`;
-      return { id: o.id, type: t, subtype: null, label, name: o.name };
+      const t = o.type === 'chargedSphere' ? 'charged_sphere' : o.type;
+      typeCounters[t] = (typeCounters[t] || 0) + 1;
+      const label = `${t.charAt(0).toUpperCase() + t.replace('_',' ').slice(1)} ${typeCounters[t]}`;
+      return { id: o.id, type: t, subtype: null, label, name: o.name, obj: o };
     }
   });
 
@@ -144,40 +156,60 @@ export default function Sidebar({
   }, [isOpen, setIsOpen])
   
   const effectiveClass = isOpen ? "open" : minimized ? "minimized" : "closed";
+  
   return (
     <div ref={sidebarRootRef} className={`sidebar-wrap ${effectiveClass}`}>
-       <button
-         className="toggle-tab"
-         aria-label={isOpen ? "Close panel" : "Open panel"}
-         onClick={togglePanel}
-         title={isOpen ? "Close" : "Open"}
-       >
-         {isOpen ? ">" : "<"}
-       </button>
-
-      <div className={`sidebar ${effectiveClass}`}>
-        {/* Minimized view: show individual pills (one per object) */}
+      <div className={`sidebar ${effectiveClass}`} onClick={handleSidebarClick}>
         {minimized ? (
           <div className="minibar" role="group" aria-label="Objects quick bar">
             {minibarItems.length === 0 ? (
               <div className="muted">No objects</div>
             ) : (
-              minibarItems.map((item) => (
-                <button
-                  key={item.id}
-                  className={`pill ${item.subtype || item.type} minibar-pill ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
-                  onClick={() => {openPanel(item.id); handleRowClick(item) }}
-                  onMouseEnter={() => hoverStart(item.id)}
-                  onMouseLeave={() => hoverEnd()}
-                  
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(item); }
-              }}
-                  title={item.name || item.label}
-                >
-                  <strong>{item.label}</strong>
-                </button>
-              ))
+              minibarItems.map((item) => {
+                const isNegativeCharge = item.type === 'charge' && item.obj?.charge < 0;
+                const chargeClass = item.type === 'charge' ? (isNegativeCharge ? 'negative' : 'positive') : '';
+                return (
+                  <button
+                    key={item.id}
+                    className={`${
+                      ['pos_charge','neg_charge','wire','plane','surface','charged_sphere'].includes(item.type)
+                        ? `${item.subtype || item.type}-icon-btn ${item.polarity || ''}`
+                        : `pill ${item.subtype || item.type} minibar-pill`
+                    } ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openPanel(item.id);
+                      handleRowClick(item);
+                    }}
+                    onMouseEnter={() => hoverStart(item.id)}
+                    onMouseLeave={() => hoverEnd()}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(item); }
+                    }}
+                    aria-label={item.name || item.label} // Novo: sem tooltip visual
+                  >
+                    {item.type === 'pos_charge' ? (
+                      <img src={PosChargeIcon} alt="Positive Charge" className="charge-icon" />
+                    ) : item.type === 'neg_charge' ? (
+                      <img src={NegChargeIcon} alt="Negative Charge" className="charge-icon" />
+                    ) : item.type === 'wire' ? (
+                      <img src={WireIcon} alt="Wire" className="wire-icon" />
+                    ) : item.type === 'plane' ? (
+                      <img src={PlaneIcon} alt="Plane" className="plane-icon" />
+                    ) : item.type === 'charged_sphere' ? (
+                      <img src={ChargeSphereIcon} alt="Charged Sphere" className="charged_sphere-icon" />
+                    ) : item.subtype === 'sphere' ? (
+                      <img src={SphereIcon} alt="Sphere" className="sphere-icon" />
+                    ) : item.subtype === 'cuboid' ? (
+                      <img src={CuboidIcon} alt="Cuboid" className="cuboid-icon" />
+                    ) : item.subtype === 'cylinder' ? (
+                      <img src={CylinderIcon} alt="Cylinder" className="cylinder-icon" />
+                    ) : (
+                      <strong>{item.label}</strong>
+                    )}
+                  </button>
+                );
+              })
             )}
           </div>
         ) : (
@@ -186,17 +218,6 @@ export default function Sidebar({
             <header className="panel-header">
               <div className="header-left">
                 <h3 className="panel-title">Panel</h3>
-                
-              </div>
-              <div className="header-pills">
-                <span className="pill objects">
-                  <strong>Objects</strong>
-                  <span className="count">{counts.total}</span>
-                </span>
-                <span className="pill surface">
-                  <strong>Surface</strong>
-                  <span className="count">{counts.surface}</span>
-                </span>
               </div>
             </header>
 
@@ -205,8 +226,8 @@ export default function Sidebar({
               updateObject={updateObject}
               removeObject={removeObject}
               expandId={expandId}
-              minimized={minimized}           /* pass to child if needed */
-              hoveredId ={hoveredId}
+              minimized={minimized}
+              hoveredId={hoveredId}
               selectedId={selectedId}
               setSelectedId={setSelectedId}
               onHoverStart={hoverStart}
@@ -218,6 +239,3 @@ export default function Sidebar({
     </div>
   );
 }
-
-
-
