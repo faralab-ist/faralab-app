@@ -12,8 +12,8 @@ import PotButtons from './SubButtons/PotButtons'
 export default function SettingsButtons({
   showField,
   onToggleField,
-  showLines,        // result of Field Lines first merge
-  onToggleLines,    // result of Field Lines first merge
+  showLines,        
+  onToggleLines,    
   showEquipotentialSurface,
   onToggleEquipotentialSurface,
   showOnlyGaussianField,

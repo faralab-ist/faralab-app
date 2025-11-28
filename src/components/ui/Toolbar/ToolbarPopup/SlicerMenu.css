@@ -163,20 +163,37 @@
   transform: translateY(0);
 }
 
+/* Apply active styling to slicing-btn AND helper-btn when active */
 .slice-row button.active,
-.slice-row .slicing-btn:active {
+.slice-row .slicing-btn:active,
+.slice-row .helper-btn:active {
   background: linear-gradient(180deg, var(--accent), var(--accent-2));
-  border-color: rgba(79, 154, 255, 0.9);
+  border-color: rgba(21, 78, 153, 0.9);
   box-shadow: 0 8px 28px rgba(79, 154, 255, 0.16), 0 2px 6px rgba(0, 0, 0, 0.5) inset;
   color: #fff;
 }
 
+
+.slice-row .flip-btn,
+.slice-row .helper-btn {
+  border-radius: 5px;
+}
+
+
+
+/* Exclude flip-btn from background/border changes when active, only image flips */
+.slice-row .flip-btn.active {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00)); /* keep default bg */
+  border-color: rgba(255, 255, 255, 0.04); /* keep default border */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) inset; /* keep default shadow */
+  color: #dfeaf5; /* keep default color */
+}
+
 /* Specific Hover for Active Primary Button */
 .slice-row .slicing-btn.active:hover {
-  background: rgba(70, 130, 255, 0.7);
+  background: #1191ed;
   border-color: rgba(100, 180, 255, 1);
   box-shadow: 0 0 25px rgba(70, 129, 255, 0.959);
-  /* Combined transforms into one line */
   transform: scale(1.02) translateY(-1px);
 }
 

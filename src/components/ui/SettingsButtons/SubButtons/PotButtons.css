@@ -1,3 +1,6 @@
+/* =========================================
+   1. Container & Layout
+   ========================================= */
 .potential-controls {
   position: absolute;
   left: 14px;
@@ -8,49 +11,51 @@
   gap: 8px;
   pointer-events: auto;
   z-index: 30;
- 
 }
 
-
-
+/* =========================================
+   2. Toggle Buttons
+   ========================================= */
 .pot-toggle-btn {
+  /* Layout */
   width: auto;
-  background: #1a1c1f;
-  border: 1px solid #3a3f46;
-  color: #eef4ff;
+  min-width: 120px;
   padding: 8px 10px;
-  border-radius: 8px;
+  
+  /* Text */
   font-weight: 700;
   font-size: 0.78rem;
-  min-width: 120px;
   text-align: center;
+  color: #eef4ff;
+  
+  /* Visuals */
+  background: #1a1c1f;
+  border: 1px solid #3a3f46;
+  border-radius: 8px;
   cursor: pointer;
   transition: background .12s, border-color .12s, transform .06s, box-shadow .12s;
-  
 }
 
+/* Hover State */
 .pot-toggle-btn:hover {
   background: #202427;
   border-color: #4a6d94;
   transform: translateY(-1px);
 }
 
-.pot-toggle-btn:active {
-  transform: translateY(0);
-}
-
+/* Active State */
 .pot-toggle-btn.active {
   background: linear-gradient(180deg, rgba(74,109,148,0.10), rgba(74,109,148,0.04));
-  border-color: #4a6d94;
+  border-color: rgba(21, 102, 153, 0.9);
   box-shadow: inset 0 -2px 6px rgba(74,109,148,0.04);
 }
 
-/*They're never disabled but keep this here cz it might help */
+/* Disabled State */
 .pot-toggle-btn.disabled {
   opacity: 0.48;
   cursor: not-allowed;
   filter: grayscale(12%);
-  pointer-events: auto; /* keep pointer so title appears, but clicks are ignored in code */
+  pointer-events: auto;
 }
 
 .pot-toggle-btn.disabled:hover {
@@ -59,9 +64,9 @@
   background: #131313;
 }
 
-
-
-
+/* =========================================
+   3. Settings Panel / Labels
+   ========================================= */
 .settings-panel .slider-row {
   display: flex;
   flex-direction: column;
@@ -70,20 +75,25 @@
   transform: translateY(-4px);
   animation: fadeInUp .16s ease forwards;
 }
+
 .settings-panel .slider-label {
   font-size: 0.7rem;
   color: #aebccc;
 }
+
 .settings-panel .slider-value {
   color: #d7e6f7;
   font-weight: 600;
   margin-left: 4px;
 }
+
 .settings-panel input[type="range"] {
   width: 100%;
 }
 
-/* Zero-centered range slider for Potential */
+/* =========================================
+   4. Slider Core (Reset)
+   ========================================= */
 .potential-slider {
   width: 100%;
   background: transparent;
@@ -92,18 +102,19 @@
   appearance: none;
 }
 
+/* Remove Focus Outlines */
+.potential-slider:focus { outline: none; }
+.potential-slider::-moz-focus-outer { border: 0; }
 
-/* Remove focus outline */
-.potential-slider:focus {
-  outline: none;
-}
-
+/* =========================================
+   5. Slider Track Styling
+   ========================================= */
+/* WebKit Track */
 .potential-slider::-webkit-slider-runnable-track {
   outline: none;
   height: 8px;
   border-radius: 9999px;
   border: 1px solid #2e2e2e;
-  /* Left half (neg) + right half (pos) + center marker */
   background:
     linear-gradient(90deg,
       rgba(116, 116, 116, 0.18) 0%,
@@ -118,65 +129,8 @@
     ),
     #1e1e1e;
 }
-.potential-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  margin-top: -5px; /* center the 14px thumb on 8px track */
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #e6e6e6;
-  border: 1px solid #3f3f3f;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
-}
-/* Remove the border-color change on focus if you don't want any visual feedback */
-.potential-slider:focus::-webkit-slider-runnable-track {
-  border-color: #2e2e2e; /* keep same as default, or remove this rule entirely */
-}
-.potential-slider:disabled {
-  opacity: .35;
-  cursor: not-allowed;
-}
 
-/* only show pointer cursor on the thumb when the slider is NOT disabled */
-.potential-slider:not(:disabled)::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  margin-top: -5px; /* center the 14px thumb on 8px track */
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #e6e6e6;
-  border: 1px solid #3f3f3f;
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
-  cursor: pointer;
-}
-
-/* same for Firefox */
-.potential-slider:not(:disabled)::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: #e6e6e6;
-  border: 1px solid #3f3f3f;
-  cursor: pointer;
-}
-
-/* ensure disabled state forces not-allowed (use !important to beat any UA behavior) */
-.potential-slider:disabled,
-.potential-slider[disabled] {
-  opacity: .35;
-  cursor: not-allowed !important;
-}
-
-.potential-slider:disabled::-webkit-slider-thumb,
-.potential-slider[disabled]::-webkit-slider-thumb,
-.potential-slider:disabled::-moz-range-thumb,
-.potential-slider[disabled]::-moz-range-thumb {
-  cursor: not-allowed !important;
-}
-
-/* Firefox */
+/* Firefox Track */
 .potential-slider::-moz-range-track {
   height: 8px;
   border-radius: 9999px;
@@ -195,7 +149,34 @@
     ),
     #1a1a1a;
 }
+
+/* Prevent border color change on focus */
+.potential-slider:focus::-webkit-slider-runnable-track {
+  border-color: #2e2e2e;
+}
+
+/* =========================================
+   6. Slider Thumb Styling
+   ========================================= */
+
+/* WebKit Thumb */
+.potential-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  margin-top: -5px; /* centers 14px thumb on 8px track */
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #e6e6e6;
+  border: 1px solid #3f3f3f;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.25) inset;
+  cursor: pointer;
+}
+
+/* Firefox Thumb */
 .potential-slider::-moz-range-thumb {
+  box-sizing: border-box;
   width: 14px;
   height: 14px;
   border-radius: 50%;
@@ -203,7 +184,15 @@
   border: 1px solid #3f3f3f;
   cursor: pointer;
 }
-/* Remove Firefox focus outline */
-.potential-slider::-moz-focus-outer {
-  border: 0;
+
+/* =========================================
+   7. Slider Disabled State
+   ========================================= */
+.potential-slider:disabled {
+  opacity: 0.35;
+  cursor: not-allowed !important;
 }
+
+/* Force not-allowed cursor on thumbs when disabled */
+.potential-slider:disabled::-webkit-slider-thumb { cursor: not-allowed !important; }
+.potential-slider:disabled::-moz-range-thumb    { cursor: not-allowed !important; }
