@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import NumberInput from "./NumberInput";
 import DimensionControls from "./DimensionControls";
+import StackedPlaneControls from "./StackedPlaneControls";
+import ConcentricSphereControls from "./ConcentricSphereControls";
+import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls"; // <--- 1. IMPORT NOVO
 import { TYPE_CONFIG, POS_MIN, POS_MAX, VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
 export default function ObjectItem({ 
@@ -10,13 +13,15 @@ export default function ObjectItem({
   toggleExpand, 
   setHoveredId, 
   updateObject, 
-  removeObject 
+  removeObject,
+  stackedPlaneActions,
+  concentricActions,
+  concentricWireActions // <--- 2. RECEBER PROPS NOVAS
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
 
-  // 1. Resolver Ícone e Subtipo
+  // 1. Resolver Ícone (Lógica existente)
   let iconData = { icon: null, alt: "", subtype: obj.type };
-  
   if (obj.type === 'surface') {
     const resolved = TYPE_CONFIG.surface.resolve(obj);
     iconData = { ...resolved };
@@ -29,17 +34,25 @@ export default function ObjectItem({
     };
   }
 
+  // Helpers de variante
+  const isPlaneVariant = obj.type === 'plane' || obj.type === 'stackedPlanes';
+  
+  const isSphereVariant = 
+    obj.type === 'concentricSpheres' || 
+    obj.type === 'chargedSphere' || 
+    (obj.type === 'surface' && iconData.subtype === 'sphere');
+
+  // 3. Helper para Variante de Fios
+  const isWireVariant = obj.type === 'wire' || obj.type === 'concentricInfWires';
+
   return (
     <li className="object-row-wrapper" data-objid={obj.id}>
       {/* Cabeçalho da Linha */}
       <div
         className={`object-row ${hovered ? 'hovered' : ''} ${expanded ? 'selected' : ''}`}
-        role="button"
-        tabIndex={0}
         onClick={() => toggleExpand(obj.id)}
         onMouseEnter={() => setHoveredId?.(obj.id)}
         onMouseLeave={() => setHoveredId?.(null)}
-        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggleExpand(obj.id)}
       >
         <span className={`pill ${iconData.subtype}`}>
           {iconData.icon && <img src={iconData.icon} alt={iconData.alt} />}
@@ -48,12 +61,11 @@ export default function ObjectItem({
         <div className="expand-btn">{expanded ? "▾" : "▸"}</div>
       </div>
 
-      {/* Detalhes Expansíveis */}
       {expanded && (
         <div className="object-details">
           <div className="details-grid">
             
-            {/* Posição (X, Y, Z) */}
+            {/* Posição (Igual) */}
             {Array.isArray(obj.position) && (
               <div className="detail-row">
                 <div className="detail-key">Position</div>
@@ -75,10 +87,203 @@ export default function ObjectItem({
               </div>
             )}
 
-            {/* Dimensões */}
-            <DimensionControls obj={obj} updateObject={updateObject} />
+            {/* Dimensões: Esconde se for Sistema Concêntrico (Esferas ou Fios) */}
+            {obj.type !== 'concentricSpheres' && obj.type !== 'concentricInfWires' && (
+               <DimensionControls obj={obj} updateObject={updateObject} />
+            )}
 
-            {/* Charge (Carga Pontual) */}
+            {/* --- TOGGLE PARA PLANES --- */}
+            {isPlaneVariant && (
+              <div className="detail-row">
+                <div className="detail-key">Mode</div>
+                <div className="detail-value">
+                  <label style={{ display: "inline-flex", gap: 8, alignItems: "center", cursor: "pointer" }}>
+                    <input 
+                      type="checkbox" 
+                      checked={obj.type === 'stackedPlanes'}
+                      onChange={(e) => {
+                        const isStacked = e.target.checked;
+                        if (isStacked) {
+                          updateObject(obj.id, { 
+                            type: 'stackedPlanes',
+                            charge_densities: [obj.charge_density ?? 0], 
+                            spacing: obj.spacing ?? 1.0,
+                            name: "Stacked Planes"
+                          });
+                        } else {
+                          updateObject(obj.id, { 
+                            type: 'plane',
+                            charge_density: (obj.charge_densities && obj.charge_densities[0]) ?? 0,
+                            name: "Plane"
+                          });
+                        }
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span style={{ fontSize: 13 }}>Stacked Planes</span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* --- TOGGLE PARA ESFERAS --- */}
+            {isSphereVariant && (
+              <div className="detail-row">
+                <div className="detail-key">Mode</div>
+                <div className="detail-value">
+                  <label style={{ display: "inline-flex", gap: 8, alignItems: "center", cursor: "pointer" }}>
+                    <input 
+                      type="checkbox" 
+                      checked={obj.type === 'concentricSpheres'}
+                      onChange={(e) => {
+                        const isConcentric = e.target.checked;
+                        if (isConcentric) {
+                          const r = obj.radius || 1;
+                          const q = obj.charge || 0;
+                          updateObject(obj.id, { 
+                            type: 'concentricSpheres',
+                            name: "Concentric System",
+                            radiuses: [r],
+                            materials: ['conductor'],
+                            charges: [q],
+                            dielectrics: [1]
+                          });
+                        } else {
+                          const r = (obj.radiuses && obj.radiuses[0]) || 1;
+                          const q = (obj.charges && obj.charges[0]) || 0;
+                          updateObject(obj.id, { 
+                            type: 'chargedSphere',
+                            name: "Charged Sphere",
+                            radius: r,
+                            charge: q
+                          });
+                        }
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span style={{ fontSize: 13 }}>Concentric System</span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {/* --- 4. TOGGLE PARA WIRES (NOVO) --- */}
+            {isWireVariant && (
+              <div className="detail-row">
+                <div className="detail-key">Mode</div>
+                <div className="detail-value">
+                  <label style={{ display: "inline-flex", gap: 8, alignItems: "center", cursor: "pointer" }}>
+                    <input 
+                      type="checkbox" 
+                      checked={obj.type === 'concentricInfWires'}
+                      onChange={(e) => {
+                        const isConcentric = e.target.checked;
+                        if (isConcentric) {
+                          // Converter para Concêntrico
+                          // Assumimos radius existente (ou default) e lambda existente
+                          const r = obj.radius || 1; 
+                          const lambda = obj.charge_density || 0;
+                          
+                          updateObject(obj.id, { 
+                            type: 'concentricInfWires',
+                            name: "Concentric Wires",
+                            radiuses: [r],
+                            materials: ['conductor'],
+                            charges: [lambda], // 'charges' armazena as densidades lineares aqui
+                            dielectrics: [1]
+                          });
+                        } else {
+                          // Converter para Fio Simples
+                          const r = (obj.radiuses && obj.radiuses[0]) || 1;
+                          const lambda = (obj.charges && obj.charges[0]) || 0;
+                          
+                          updateObject(obj.id, { 
+                            type: 'wire',
+                            name: "Wire",
+                            radius: r, // O Wire pode ou não usar radius visualmente, mas guardamos
+                            charge_density: lambda
+                          });
+                        }
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span style={{ fontSize: 13 }}>Concentric Wires</span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+
+            {/* --- Renderização Condicional dos Campos Específicos --- */}
+
+            {/* A) Plano Normal */}
+            {obj.type === 'plane' && (
+              <div className="detail-row">
+                <div className="detail-key">Superficial Density σ</div>
+                <div className="detail-value">
+                  <NumberInput
+                    value={obj.charge_density}
+                    min={VAL_MIN} max={VAL_MAX}
+                    style={{ width: 140 }}
+                    onChange={(v) => updateObject(obj.id, { charge_density: v })}
+                    onError={setErrorMsg}
+                    errorMsg={ERROR_MSG}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* B) Stacked Planes */}
+            {obj.type === 'stackedPlanes' && (
+              <StackedPlaneControls 
+                obj={obj}
+                updateObject={updateObject}
+                setSpacing={stackedPlaneActions?.setSpacing}
+                setChargeDensity={stackedPlaneActions?.setChargeDensity}
+                addPlane={stackedPlaneActions?.addPlane}
+                removeLastPlane={stackedPlaneActions?.removeLastPlane}
+                setErrorMsg={setErrorMsg}
+              />
+            )}
+
+            {/* C) Concentric Spheres */}
+            {obj.type === 'concentricSpheres' && (
+              <ConcentricSphereControls 
+                 obj={obj}
+                 updateObject={updateObject}
+                 setErrorMsg={setErrorMsg}
+                 {...concentricActions} 
+              />
+            )}
+
+            {/* D) Concentric Infinite Wires (NOVO) */}
+            {obj.type === 'concentricInfWires' && (
+              <ConcentricInfiniteWireControls 
+                 obj={obj}
+                 updateObject={updateObject}
+                 setErrorMsg={setErrorMsg}
+                 {...concentricWireActions} 
+              />
+            )}
+
+            {/* E) Charged Sphere Simples */}
+            {obj.type === 'chargedSphere' && (
+              <div className="detail-row">
+                <div className="detail-key">Intensity C</div>
+                <div className="detail-value">
+                   <NumberInput
+                      value={obj.charge}
+                      min={VAL_MIN} max={VAL_MAX}
+                      style={{ width: 140 }}
+                      onChange={(v) => updateObject(obj.id, { charge: v })}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                   />
+                </div>
+              </div>
+            )}
+
+            {/* F) Charge (Carga Pontual) */}
             {obj.type === 'charge' && (
               <div className="detail-row">
                 <div className="detail-key">Intensity C</div>
@@ -95,13 +300,10 @@ export default function ObjectItem({
               </div>
             )}
 
-            {/* Densidades e Infinite (Plane/Wire) */}
-            {(obj.type === 'plane' || obj.type === 'wire') && (
-              <>
-                <div className="detail-row">
-                  <div className="detail-key">
-                    {obj.type === 'plane' ? 'Superficial Density σ' : 'Linear Density λ'}
-                  </div>
+            {/* G) Wire Simples */}
+            {obj.type === 'wire' && (
+               <div className="detail-row">
+                  <div className="detail-key">Linear Density λ</div>
                   <div className="detail-value">
                     <NumberInput
                       value={obj.charge_density}
@@ -112,27 +314,29 @@ export default function ObjectItem({
                       errorMsg={ERROR_MSG}
                     />
                   </div>
-                </div>
-                <div className="detail-row">
-                   <div className="detail-key">Infinite</div>
-                   <div className="detail-value">
-                     <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
-                       <input 
-                         type="checkbox" 
-                         checked={obj.infinite || false}
-                         onChange={(e) => updateObject(obj.id, { infinite: e.target.checked })}
-                         onClick={(e) => e.stopPropagation()}
-                       />
-                     </label>
-                   </div>
-                </div>
-              </>
+               </div>
             )}
 
-            {/* Mensagem de Erro Global da Linha */}
-            {errorMsg && <div className="error-text" style={{padding: "0 12px 8px"}}>{errorMsg}</div>}
+            {/* Opção Infinite (Para Planes e Wire) */}
+            {(isPlaneVariant || obj.type === 'wire') && (
+              <div className="detail-row">
+                 <div className="detail-key">Infinite</div>
+                 <div className="detail-value">
+                   <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+                     <input 
+                       type="checkbox" 
+                       checked={obj.infinite || false}
+                       onChange={(e) => updateObject(obj.id, { infinite: e.target.checked })}
+                       onClick={(e) => e.stopPropagation()}
+                     />
+                   </label>
+                 </div>
+              </div>
+            )}
 
-            {/* Botão Remover */}
+            {/* Erros e Botão Remover (Igual) */}
+            {errorMsg && <div className="error-text" style={{padding: "0 12px 8px"}}>{errorMsg}</div>}
+            
             <div className="detail-row">
               <div className="detail-key">Actions</div>
               <div className="detail-value">

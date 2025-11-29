@@ -298,8 +298,11 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 .pos_charge-icon-btn,
 .neg_charge-icon-btn,
 .wire-icon-btn,
+.concentricInfWires-icon-btn,
 .plane-icon-btn,
+.stackedPlanes-icon-btn,
 .charged_sphere-icon-btn,
+.concentricSpheres-icon-btn,
 .sphere-icon-btn,
 .cuboid-icon-btn,
 .cylinder-icon-btn {
@@ -327,7 +330,8 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 }
 
 /* Ícone de wire  ##### É USADO ######*/
-.wire-icon-btn .wire-icon {
+.wire-icon-btn .wire-icon, 
+.concentricInfWires-icon-btn .wire-icon{
   width: 28px;
   height: 28px;
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
@@ -335,7 +339,8 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 }
 
 /* Ícone de plane ##### É USADO ######*/
-.plane-icon-btn .plane-icon {
+.plane-icon-btn .plane-icon,
+.stackedPlanes-icon-btn .plane-icon {
   width: 28px;
   height: 28px;
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
@@ -343,6 +348,7 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 }
 
 /* Ícone de charged_sphere ##### É USADO ######*/
+.concentricSpheres-icon-btn .charged_sphere-icon,
 .charged_sphere-icon-btn .charged_sphere-icon {
   width: 28px;
   height: 28px;

@@ -19,8 +19,11 @@ export const TYPE_CONFIG = {
     alt: (obj) => (obj.charge < 0 ? "Negative Charge" : "Positive Charge")
   },
   wire: { icon: WireIcon, alt: "Wire" },
+  concentricInfWires: { icon: WireIcon, alt: "Concentric Wires" },
   plane: { icon: PlaneIcon, alt: "Plane" },
+  stackedPlanes: { icon: PlaneIcon, alt: "Stacked Planes" },
   chargedSphere: { icon: ChargeSphereIcon, alt: "Charged Sphere" },
+  concentricSpheres: { icon: ChargeSphereIcon, alt: "Concentric Spheres" },
   surface: {
     // Função para decidir qual ícone mostrar baseado nas propriedades
     resolve: (obj) => {

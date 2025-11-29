@@ -10,7 +10,24 @@ export default function ObjectList({
   hoveredId,
   setHoveredId, // Corrigido para receber o setter do pai se existir, ou podes gerir localmente
   selectedId,
-  setSelectedId
+  setSelectedId,
+  addPlaneToStackedPlanes,
+  removeLastPlaneFromStackedPlanes,
+  setSpacingForStackedPlanes,
+  setChargeDensityForPlaneInStackedPlanes,
+  addRadiusToChargedSphere, 
+  removeLastRadiusFromChargedSphere,
+  setRadiusToChargedSphere,            // <--- Adiciona esta se não tiveres
+  setMaterialForLayerInChargedSphere,
+  setDielectricForLayerInChargedSphere,
+  setChargeForLayerInChargedSphere,
+  addRadiusToConcentricWire, 
+  removeLastRadiusFromConcentricWire,
+  setRadiusToConcentricWire,
+  setMaterialForLayerInConcentricWire,
+  setDielectricForLayerInConcentricWire,
+  setChargeForLayerInConcentricWire,
+  ...rest
 }) {
   const [expandedMap, setExpandedMap] = useState({});
 
@@ -59,6 +76,32 @@ export default function ObjectList({
           setHoveredId={setHoveredId} // Se não passares isto como prop no pai, remove aqui
           updateObject={updateObject}
           removeObject={removeObject}
+
+          stackedPlaneActions={{
+            addPlane: addPlaneToStackedPlanes,
+            removeLastPlane: removeLastPlaneFromStackedPlanes,
+            setSpacing: setSpacingForStackedPlanes,
+            setChargeDensity: setChargeDensityForPlaneInStackedPlanes
+          }}
+
+          concentricActions={{
+            addLayer: addRadiusToChargedSphere, 
+            removeLastLayer: removeLastRadiusFromChargedSphere,
+            setRadius: setRadiusToChargedSphere,
+            setMaterial: setMaterialForLayerInChargedSphere,
+            setDielectric: setDielectricForLayerInChargedSphere,
+            setCharge: setChargeForLayerInChargedSphere
+          }}
+
+          // Ações para Concentric Wires
+          concentricWireActions={{
+            addLayer: addRadiusToConcentricWire, 
+            removeLastLayer: removeLastRadiusFromConcentricWire,
+            setRadius: setRadiusToConcentricWire,
+            setMaterial: setMaterialForLayerInConcentricWire,
+            setDielectric: setDielectricForLayerInConcentricWire,
+            setCharge: setChargeForLayerInConcentricWire
+          }}
         />
       ))}
     </ul>

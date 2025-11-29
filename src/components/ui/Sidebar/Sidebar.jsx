@@ -30,16 +30,25 @@ export default function Sidebar({
   setHoveredId,
   selectedId,
   setSelectedId,
+  // --- Esferas ---
   addRadiusToChargedSphere,
   setRadiusToChargedSphere,
   removeLastRadiusFromChargedSphere,
   setMaterialForLayerInChargedSphere,
   setDielectricForLayerInChargedSphere,
   setChargeForLayerInChargedSphere,
+  // --- Planos ---
   addPlaneToStackedPlanes,
   removeLastPlaneFromStackedPlanes,
   setSpacingForStackedPlanes,
   setChargeDensityForPlaneInStackedPlanes,
+  // --- Fios Concêntricos (ADICIONADO AQUI) ---
+  addRadiusToConcentricInfiniteWire,
+  removeLastRadiusFromConcentricInfiniteWire,
+  setRadiusToConcentricInfiniteWire,
+  setMaterialForLayerInConcentricInfiniteWire,
+  setDielectricForLayerInConcentricInfiniteWire,
+  setChargeForLayerInConcentricInfiniteWire,
 }) {
   const [expandId, setExpandId] = useState(null);
   const sidebarRootRef = useRef(null)
@@ -177,12 +186,12 @@ export default function Sidebar({
             ) : (
               minibarItems.map((item) => {
                 const isNegativeCharge = item.type === 'charge' && item.obj?.charge < 0;
-                const chargeClass = item.type === 'charge' ? (isNegativeCharge ? 'negative' : 'positive') : '';
+                // const chargeClass = item.type === 'charge' ? (isNegativeCharge ? 'negative' : 'positive') : '';
                 return (
                   <button
                     key={item.id}
                     className={`${
-                      ['pos_charge','neg_charge','wire','plane','surface','charged_sphere'].includes(item.type)
+                      ['pos_charge','neg_charge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires'].includes(item.type)
                         ? `${item.subtype || item.type}-icon-btn ${item.polarity || ''}`
                         : `pill ${item.subtype || item.type} minibar-pill`
                     } ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
@@ -196,7 +205,7 @@ export default function Sidebar({
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleRowClick(item); }
                     }}
-                    aria-label={item.name || item.label} // Novo: sem tooltip visual
+                    aria-label={item.name || item.label} 
                   >
                     {item.type === 'pos_charge' ? (
                       <img src={PosChargeIcon} alt="Positive Charge" className="charge-icon" />
@@ -204,10 +213,16 @@ export default function Sidebar({
                       <img src={NegChargeIcon} alt="Negative Charge" className="charge-icon" />
                     ) : item.type === 'wire' ? (
                       <img src={WireIcon} alt="Wire" className="wire-icon" />
+                    ) : item.type === 'concentricInfWires' ? (
+                      <img src={WireIcon} alt="Concentric Wires" className="wire-icon" />  
                     ) : item.type === 'plane' ? (
                       <img src={PlaneIcon} alt="Plane" className="plane-icon" />
+                    ) : item.type === 'stackedPlanes' ? (
+                      <img src={PlaneIcon} alt="StackedPlanes" className="plane-icon" />  
                     ) : item.type === 'charged_sphere' ? (
                       <img src={ChargeSphereIcon} alt="Charged Sphere" className="charged_sphere-icon" />
+                    ) : item.type === 'concentricSpheres' ? (
+                      <img src={ChargeSphereIcon} alt="Concentric Spheres" className="charged_sphere-icon" />  
                     ) : item.subtype === 'sphere' ? (
                       <img src={SphereIcon} alt="Sphere" className="sphere-icon" />
                     ) : item.subtype === 'cuboid' ? (
@@ -242,15 +257,28 @@ export default function Sidebar({
               setSelectedId={setSelectedId}
               onHoverStart={hoverStart}
               onHoverEnd={hoverEnd}
+              
+              // --- Esferas ---
               addRadiusToChargedSphere={addRadiusToChargedSphere}
               removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+              setRadiusToChargedSphere={setRadiusToChargedSphere}
               setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
               setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
               setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
+              
+              // --- Planos ---
               addPlaneToStackedPlanes={addPlaneToStackedPlanes}
               removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
               setSpacingForStackedPlanes={setSpacingForStackedPlanes}
               setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
+
+              // --- Fios (ADICIONADO AQUI) ---
+              addRadiusToConcentricInfiniteWire={addRadiusToConcentricInfiniteWire}
+              removeLastRadiusFromConcentricInfiniteWire={removeLastRadiusFromConcentricInfiniteWire}
+              setRadiusToConcentricInfiniteWire={setRadiusToConcentricInfiniteWire}
+              setMaterialForLayerInConcentricInfiniteWire={setMaterialForLayerInConcentricInfiniteWire}
+              setDielectricForLayerInConcentricInfiniteWire={setDielectricForLayerInConcentricInfiniteWire}
+              setChargeForLayerInConcentricInfiniteWire={setChargeForLayerInConcentricInfiniteWire}
             />
           </div>
         )}
