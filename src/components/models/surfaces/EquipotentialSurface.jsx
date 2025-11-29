@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { useThree , useFrame} from '@react-three/fiber';
 import { useMemo } from 'react';
 import equipotentialShaderFragmentSource from '../../../shaders/equipotentialSurfaceFrag.glsl';
-import { EPSILON_0, K_E } from '../../../utils/constants.js';
-import chargePerSphereSurface from '../../../utils/chargePerSphereSurface.js';
+import { EPSILON_0, K_E } from '../../../physics/constants';
+import { efields } from '../../../physics'
 
 export default function EquipotentialSurface({ objects, targetValue = 5.0, transparency = 0.6, slicePlane, slicePos, useSlice, slicePlaneFlip}) {
     const { camera } = useThree();
@@ -117,7 +117,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 chargedSphereIdx ++;
             } else if (obj.type === 'concentricSpheres') {
                 //console.log(obj.radiuses, obj.charges, obj.materials);
-                const chargePerSphereSurfaceArr = chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
+                const chargePerSphereSurfaceArr = efields.chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
                 //console.log(chargePerSphereSurfaceArr);
                 for (let i = 0; i < obj.radiuses.length; i++) {
                     const rad = obj.radiuses[i];
@@ -130,7 +130,7 @@ export default function EquipotentialSurface({ objects, targetValue = 5.0, trans
                 }
             } else if (obj.type === 'concentricInfWires') {
                 //console.log(obj.radiuses, obj.charges, obj.materials);
-                const chargePerSphereSurfaceArr = chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
+                const chargePerSphereSurfaceArr = efields.chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
                 for (let i = 0; i < obj.radiuses.length; i++) {
                     material.uniforms.wirePositions.value[wireIdx] = new THREE.Vector3(...obj.position);
                     material.uniforms.wireDirections.value[wireIdx] = new THREE.Vector3(...obj.direction).normalize();

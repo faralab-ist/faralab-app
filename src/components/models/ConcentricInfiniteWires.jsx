@@ -1,7 +1,7 @@
-import React, { useRef, useLayoutEffect, useEffect, useMemo, use} from 'react'
+import React, { useRef, useLayoutEffect, useEffect, useMemo} from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
-import chargePerSphereSurface from '../../utils/chargePerSphereSurface'
+import { efields } from '../../physics'
 import * as THREE from 'three'
 
 export default function ConcentricInfiniteWires({ 
@@ -34,7 +34,7 @@ export default function ConcentricInfiniteWires({
   const meshRef = useRef()
   const isDraggingRef = useRef(false)
   const chargePerSurfaceArr = useMemo(() => {
-    return chargePerSphereSurface(radiuses, charges, materials, dielectrics);
+    return efields.chargePerSphereSurface(radiuses, charges, materials, dielectrics);
   }, [radiuses, materials, dielectrics, charges])
   const height = 20;
 

@@ -1,9 +1,8 @@
-import React, { useRef, useLayoutEffect, useEffect, useMemo, use} from 'react'
+import React, { useRef, useLayoutEffect, useMemo} from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
-import chargePerSphereSurface from '../../utils/chargePerSphereSurface'
+import { efields } from '../../physics'
 import * as THREE from 'three'
-
 export default function ConcentricSpheres({ 
     id, 
     position, 
@@ -28,7 +27,7 @@ export default function ConcentricSpheres({
   const meshRef = useRef()
   const isDraggingRef = useRef(false)
   const chargePerSphereSurfaceArr = useMemo(() => {
-    return chargePerSphereSurface(radiuses, charges, materials, dielectrics);
+    return efields.chargePerSphereSurface(radiuses, charges, materials, dielectrics);
   }, [radiuses, materials, dielectrics, charges])
 
   useLayoutEffect(() => {

@@ -1,6 +1,4 @@
 import * as THREE from 'three';
-import calculateField from '../utils/calculateField.js';
-import Arrow from '../components/models/Arrow.jsx';
 import showVectorField from '../utils/getFieldVectors.js';
 import React, { useMemo, useRef, useEffect } from 'react';
 import { Instance, Instances } from '@react-three/drei';
