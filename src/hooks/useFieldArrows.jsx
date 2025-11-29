@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import calculateField from '../utils/calculateField.js';
 import Arrow from '../components/models/Arrow.jsx';
-import getFieldVector3 from '../utils/getFieldVectors.js';
+import showVectorField from '../utils/getFieldVectors.js';
 import React, { useMemo, useRef, useEffect } from 'react';
 import { Instance, Instances } from '@react-three/drei';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -39,7 +39,7 @@ export default function FieldArrows({
 }) {
     
     const vectorsUnfiltered = useMemo( 
-        () => getFieldVector3(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
+        () => showVectorField(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
         [objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter]
     );
     const vectors = vectorsUnfiltered.filter(({position, field}) => 
