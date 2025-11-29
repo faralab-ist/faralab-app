@@ -94,7 +94,13 @@ export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
    const renderFor = (name) => {
      switch (name) {
        case 'Slice':
-         return <SlicerMenu {...popupProps} onClose={() => setActive?.(null)} />
+         return (
+           <SlicerMenu
+             {...popupProps}
+             minimized={minimized}
+             onClose={() => setActive?.(null)}
+           />
+         )
        default:
          return null
      }
@@ -153,7 +159,7 @@ export default function ToolbarPopup({ active, setActive, popupProps = {} }) {
        </div>
 
        <h3 className={`${active}`}>{active}</h3>
-       {!minimized && renderFor(active)}
+       {renderFor(active)}  {/* always render; SlicerMenu decides what to show when minimized */}
      </div>
    )
 }

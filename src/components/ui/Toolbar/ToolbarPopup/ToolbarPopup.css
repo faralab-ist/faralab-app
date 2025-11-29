@@ -84,7 +84,18 @@
 .toolbar-popup.minimized {
   padding-bottom: 6px;
 }
-.toolbar-popup.minimized .slicing-panel { display: none; }
+.toolbar-popup.minimized .slicing-panel { 
+  display: block;                 /* keep panel visible */
+}
+/* show only the primary slice row when minimized */
+.toolbar-popup.minimized .slicing-panel > :not(.slice-row) {
+  display: none !important;
+}
+/* within the slice row, hide helper/flip buttons when minimized */
+.toolbar-popup.minimized .slice-row .helper-btn,
+.toolbar-popup.minimized .slice-row .flip-btn {
+  display: none !important;
+}
 
 /* controls (pin / minimize / close) placed at top-right inside the handle */
 .toolbar-popup-handle {
@@ -116,40 +127,8 @@
   margin: 0;
 }
 
-/* unify popup buttons to match SlicerMenu appearance,
-   but exclude .plane-button and .tp-icon-btn so tp icons keep their own style */
-.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):not(.slicing-btn),
-.toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):not(.slicing-btn),
-.toolbar-popup .flip-btn:not(.plane-button):not(.tp-icon-btn):not(.slicing-btn) {
-  -webkit-appearance: none;
-  appearance: none;
-  border-radius: 9999px;
-  font-size: 0.8rem;
-  background: #1a1a1a;
-  color: white;
-  border: 1px solid #333;
-  padding: 8px 12px;
-  font-size: 0.9rem;            
-  font-weight: 700;
-  border-radius: 4px;
-  text-align: left;
-  cursor: pointer;
-  transition: background .15s, border-color .15s;
-}
 
-.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):hover:not(.slicing-btn):hover,
-.toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):hover,
-.toolbar-popup .flip-btn:not(.plane-button):not(.tp-icon-btn):hover {
-  transform: translateY(-2px);
-  background: #2a2a2a;         
-  border-color: #444; 
-}
 
-.toolbar-popup button:not(.plane-button):not(.tp-icon-btn):active,
-.toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):active,
-.toolbar-popup .flip-btn:not(.plane-button):not(.tp-icon-btn):active {
-  transform: translateY(-1);
-}
 
 .toolbar-popup button:not(.plane-button):not(.tp-icon-btn):disabled,
 .toolbar-popup .helper-btn:not(.plane-button):not(.tp-icon-btn):disabled,

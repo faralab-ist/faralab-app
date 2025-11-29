@@ -13,7 +13,6 @@ import React, { useState, useEffect, useMemo } from 'react'
 
   // UI components
   import CreateButtons from './components/ui/CreateButtons'
-  import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'

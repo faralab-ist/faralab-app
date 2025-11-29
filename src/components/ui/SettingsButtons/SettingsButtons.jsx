@@ -12,8 +12,8 @@ import PotButtons from './SubButtons/PotButtons'
 export default function SettingsButtons({
   showField,
   onToggleField,
-  showLines,        // result of Field Lines first merge
-  onToggleLines,    // result of Field Lines first merge
+  showLines,        
+  onToggleLines,    
   showEquipotentialSurface,
   onToggleEquipotentialSurface,
   showOnlyGaussianField,
@@ -148,7 +148,7 @@ export default function SettingsButtons({
   }, [])
 
   // Local edit buffers to allow clearing/backspacing
-  const [scaleInput, setScaleInput] = useState(String(vectorScale ?? ''))
+  /*const [scaleInput, setScaleInput] = useState(String(vectorScale ?? ''))
   const [lineNumInput, setLineNumInput] = useState(String(lineNumber ?? ''))
   const [stepInput, setStepInput] = useState(String(vectorStep ?? ''))
 
@@ -176,7 +176,7 @@ export default function SettingsButtons({
       setLineNumInput(String(lineNumber ?? ''))
     }
   }, [lineNumInput, setLineNumber, lineNumber])
-
+*/
   // wavePropagation props are accepted from parent; defaults handled in child
 
   return (
@@ -232,15 +232,13 @@ export default function SettingsButtons({
                     activePlane={activePlane}
                     onPlaneSelect={onPlaneSelect}
                     showField={showField}
-                    scaleInput={scaleInput}
-                    setScaleInput={setScaleInput}
-                    commitScale={commitScale}
+                    vectorScale={vectorScale}
+                    setVectorScale={setVectorScale}
                     lineMin={lineMin}
                     setLineMin={setLineMin}
                     showLines={showLines}
-                    lineNumInput={lineNumInput}
-                    setLineNumInput={setLineNumInput}
-                    commitLineNum={commitLineNum}
+                    lineNumber={lineNumber}
+                    setLineNumber={setLineNumber}
                   />
                 )}
 
