@@ -79,20 +79,6 @@ export default function calculateFieldAtPoint(objects, targetPos) {
         resultFieldAtPoint.add(fieldFromPlane);
       }
     }
-    /*else {
-      for (const c of obj.charges) {
-        const chargePos = new THREE.Vector3(
-            sourcePosition.x + (c.position?.[0] || 0),
-            sourcePosition.y + (c.position?.[1] || 0),
-            sourcePosition.z + (c.position?.[2] || 0),
-        );
-        const rVec = new THREE.Vector3().subVectors(targetPos, chargePos);
-        const rSq = rVec.lengthSq();
-        if (rSq < 1e-6) continue;
-        const fieldMagnitude = multiplier * c.charge / rSq;
-        resultFieldAtPoint.addScaledVector(rVec.normalize(), fieldMagnitude);
-      }
-    }*/
   }
 
   return resultFieldAtPoint;

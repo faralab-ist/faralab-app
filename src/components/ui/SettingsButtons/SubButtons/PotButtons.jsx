@@ -10,7 +10,7 @@ export default function PotButons({
     const content = (
     <div className="potential-controls">
               <button 
-              className='pot-toggle-btn'
+              className={`pot-toggle-btn ${showEquipotentialSurface ? 'active' : ''} `}
               onClick={onToggleEquipotentialSurface}
               >
                 {showEquipotentialSurface ? 'Hide Equipotential' : 'Show Equipotential'}
