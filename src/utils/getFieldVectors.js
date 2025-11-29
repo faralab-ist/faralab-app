@@ -2,26 +2,29 @@ import * as THREE from 'three'
 
 import calculateFieldAtPoint from './calculateField'
 
-export default function getFieldVector3(
-    objects, gridSize = 10, step = 1, showOnlyPlane = false,
-    showOnlyElectricField = false, min, planeFilter = null) {
+export default function showVectorField(
+    chargedObjects, gridSize = 10, step = 1, showOnlyPlane = false,
+    showOnlyElectricField = false, minThreshold, planeFilter = null) {
   const fieldVectors = []
+  const nSteps = Math.floor(gridSize / step)
 
-      if (!showOnlyElectricField) {
-    const yLevel = showOnlyPlane ? 0 : gridSize
-    for (let x = -gridSize; x <= gridSize; x += step) {
-      for (let y = -yLevel; y <= yLevel; y += step) {
-        for (let z = -gridSize; z <= gridSize; z += step) {
-          // Filtro de plano
-          if (planeFilter === 'xy' && z !== 0)
-            continue 
-          if (planeFilter === 'yz' && x !== 0) continue 
-          if (planeFilter === 'xz' && y !== 0) continue
+  if (!showOnlyElectricField) {
+    for (let ix = -nSteps; ix <= nSteps; ix++) {
+    const x = ix * step
+      for (let iy = -nSteps; iy <= nSteps; iy++) {
+        const y = iy * step
+        for (let iz = -nSteps; iz <= nSteps; iz++) {
+          const z = iz * step
 
-                const targetPos = new THREE.Vector3(x, y, z)
-            const fieldAtPoint = calculateFieldAtPoint(objects, targetPos)
-            if (fieldAtPoint.length() > min)
-            fieldVectors.push({position: targetPos, field: fieldAtPoint})
+            if (planeFilter === 'xy' && z !== 0) continue 
+            if (planeFilter === 'yz' && x !== 0) continue 
+            if (planeFilter === 'xz' && y !== 0) continue
+
+          const targetPos = new THREE.Vector3(x, y, z)
+          const fieldAtPoint = calculateFieldAtPoint(chargedObjects, targetPos)
+
+          if (fieldAtPoint.length() > minThreshold)
+            fieldVectors.push({ position: targetPos, field: fieldAtPoint })
         }
       }
     }
@@ -31,7 +34,7 @@ export default function getFieldVector3(
   //--------------------------------------------------------------------
   // NAO FAÇO IDEIA COMO FUNCIONA FOI O CHATGPT QUE FEZ E FUNCIONA
   // sample on Gaussian surfaces
-  for (const obj of objects) {
+  for (const obj of chargedObjects) {
     if (!(obj.type === 'surface'))
       continue
 
@@ -234,7 +237,7 @@ export default function getFieldVector3(
     let final_vectors = []
 
     for (const pointVector3 of gridVector3) {
-      const fieldAtPoint = calculateFieldAtPoint(objects, pointVector3)
+      const fieldAtPoint = calculateFieldAtPoint(chargedObjects, pointVector3)
       fieldVectors.push({position: pointVector3, field: fieldAtPoint})
     }
   }
