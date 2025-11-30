@@ -139,44 +139,8 @@ export default function SettingsButtons({
     return () => window.removeEventListener('pointermove', move)
   }, [])
 
-  const clampPos = useCallback((x, y) => {
-    const pad = 8, w = 200, h = 120
-    return {
-      x: Math.min(Math.max(pad, x), window.innerWidth - w - pad),
-      y: Math.min(Math.max(pad, y), window.innerHeight - h - pad)
-    }
-  }, [])
 
-  // Local edit buffers to allow clearing/backspacing
-  /*const [scaleInput, setScaleInput] = useState(String(vectorScale ?? ''))
-  const [lineNumInput, setLineNumInput] = useState(String(lineNumber ?? ''))
-  const [stepInput, setStepInput] = useState(String(vectorStep ?? ''))
 
-  useEffect(() => { setScaleInput(String(vectorScale ?? '')) }, [vectorScale])
-  useEffect(() => { setLineNumInput(String(lineNumber ?? '')) }, [lineNumber])
-  useEffect(() => { setStepInput(String(vectorStep ?? '')) }, [vectorStep])
-  const commitScale = useCallback(() => {
-    const v = parseFloat(scaleInput)
-    if (Number.isFinite(v)) {
-      const clamped = Math.max(0.1, Math.min(5, v))
-      setVectorScale(clamped)
-      setScaleInput(String(clamped))
-    } else {
-      setScaleInput(String(vectorScale ?? ''))
-    }
-  }, [scaleInput, setVectorScale, vectorScale])
-
-  const commitLineNum = useCallback(() => {
-    const v = parseInt(lineNumInput, 10)
-    if (Number.isFinite(v)) {
-      const clamped = Math.max(1, Math.min(50, v))
-      setLineNumber(clamped)
-      setLineNumInput(String(clamped))
-    } else {
-      setLineNumInput(String(lineNumber ?? ''))
-    }
-  }, [lineNumInput, setLineNumber, lineNumber])
-*/
   // wavePropagation props are accepted from parent; defaults handled in child
 
   return (
