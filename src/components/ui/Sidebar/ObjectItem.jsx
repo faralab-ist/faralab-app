@@ -40,8 +40,7 @@ export default function ObjectItem({
   
   const isSphereVariant = 
     obj.type === 'concentricSpheres' || 
-    obj.type === 'chargedSphere' || 
-    (obj.type === 'surface' && iconData.subtype === 'sphere');
+    obj.type === 'chargedSphere';
 
   // 3. Helper para Variante de Fios
   const isWireVariant = obj.type === 'wire' || obj.type === 'concentricInfWires';
