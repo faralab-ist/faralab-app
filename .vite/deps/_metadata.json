@@ -1,0 +1,70 @@
+{
+  "hash": "d99aa3d3",
+  "configHash": "568f42c9",
+  "lockfileHash": "b059921f",
+  "browserHash": "dafc9219",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "ede4110c",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "5e35fe6c",
+      "needsInterop": true
+    },
+    "@react-three/fiber": {
+      "src": "../../node_modules/@react-three/fiber/dist/react-three-fiber.esm.js",
+      "file": "@react-three_fiber.js",
+      "fileHash": "b40a44eb",
+      "needsInterop": false
+    },
+    "@react-three/drei": {
+      "src": "../../node_modules/@react-three/drei/index.js",
+      "file": "@react-three_drei.js",
+      "fileHash": "f149f2e3",
+      "needsInterop": false
+    },
+    "three": {
+      "src": "../../node_modules/three/build/three.module.js",
+      "file": "three.js",
+      "fileHash": "e8206254",
+      "needsInterop": false
+    },
+    "three/examples/jsm/utils/BufferGeometryUtils.js": {
+      "src": "../../node_modules/three/examples/jsm/utils/BufferGeometryUtils.js",
+      "file": "three_examples_jsm_utils_BufferGeometryUtils__js.js",
+      "fileHash": "7a61e26b",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-AH3K6ISD": {
+      "file": "chunk-AH3K6ISD.js"
+    },
+    "chunk-3MLZUQLL": {
+      "file": "chunk-3MLZUQLL.js"
+    },
+    "chunk-ULSRCYB6": {
+      "file": "chunk-ULSRCYB6.js"
+    },
+    "chunk-BOTZAUPG": {
+      "file": "chunk-BOTZAUPG.js"
+    },
+    "hls-IYG6ZBPK": {
+      "file": "hls-IYG6ZBPK.js"
+    },
+    "chunk-66UR6YF2": {
+      "file": "chunk-66UR6YF2.js"
+    },
+    "vision_bundle-SQYBGID6": {
+      "file": "vision_bundle-SQYBGID6.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
+}

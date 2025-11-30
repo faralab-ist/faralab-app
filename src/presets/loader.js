@@ -1,4 +1,10 @@
-import presets from './context.json'
+const modules = import.meta.glob('./*.json', { eager: true })
+let presets = {}
+for (const path in modules) {
+  const mod = modules[path]
+  const data = mod && (mod.default ?? mod)
+  if (data && typeof data === 'object') presets = { ...presets, ...data }
+}
 
 // eval $ expressions
 function evalExpr(expr, ctx) {
