@@ -1,6 +1,7 @@
 import React from "react";
 import NumberInput from "./NumberInput";
-import { VAL_MIN, VAL_MAX, DIM_MIN, ERROR_MSG } from "./utils";
+import { VAL_MIN, VAL_MAX, DIM_MIN, ERROR_MSG, DIM_MAX } from "./utils";
+import { min } from "three/tsl";
 
 export default function ConcentricSphereControls({ 
   obj, 
@@ -44,10 +45,11 @@ export default function ConcentricSphereControls({
                 <span style={{ fontSize: "0.8em", opacity: 0.7 }}>R:</span>
                 <NumberInput
                   value={rad}
-                  min={DIM_MIN}
+                  min={ i === 0 ? DIM_MIN : radiuses[i - 1]}
+                  max={ radiuses[i + 1]}
                   style={{ flex: 1 }}
                   onChange={(val) => {
-                     if (setRadius) setRadius(obj.id, i, val);
+                     if (setRadius && rad >= radiuses[i-1] && rad <= radiuses[i+1]) setRadius(obj.id, i, val);
                      else {
                        const newRadiuses = [...radiuses];
                        newRadiuses[i] = val;

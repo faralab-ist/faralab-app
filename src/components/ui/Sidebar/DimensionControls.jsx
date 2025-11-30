@@ -1,6 +1,6 @@
 import React from "react";
 import NumberInput from "./NumberInput";
-import { DIM_MIN } from "./utils";
+import { DIM_MIN, DIM_MAX } from "./utils";
 
 // Componente auxiliar definido FORA para evitar re-criação e perda de foco
 const DimInput = ({ value, onChange }) => (
@@ -8,7 +8,9 @@ const DimInput = ({ value, onChange }) => (
     value={value} 
     onChange={onChange} 
     min={DIM_MIN} 
+    max={DIM_MAX}
     style={{ width: 72 }} 
+    
   />
 );
 
@@ -16,9 +18,8 @@ export default function DimensionControls({ obj, updateObject }) {
   if (obj.type === 'charge') return null;
 
   const update = (field, val) => updateObject(obj.id, { [field]: val });
-
   // Plane
-  if (obj.type === 'plane') {
+  if (obj.type === 'plane' || obj.type === 'stackedPlanes') {
     if (obj.infinite) return null;
     return (
       <div className="detail-row">
@@ -32,7 +33,7 @@ export default function DimensionControls({ obj, updateObject }) {
   }
 
   // Wire
-  if (obj.type === 'wire') {
+  if (obj.type === 'wire' ) {
     if (obj.infinite) return null;
     return (
       <div className="detail-row">

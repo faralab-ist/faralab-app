@@ -57,7 +57,8 @@ export default function ConcentricInfiniteWireControls({
                 <span style={{ fontSize: "0.8em", opacity: 0.8 }}>R:</span>
                 <NumberInput
                   value={r}
-                  min={minRadius}
+                  min={ i === 0 ? DIM_MIN : radiuses[i - 1]}
+                   max= {radiuses[i + 1]}
                   step={0.1}
                   style={{ flex: 1 }}
                   onChange={(val) => {

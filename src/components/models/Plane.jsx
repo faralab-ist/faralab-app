@@ -16,10 +16,9 @@ function Plane({
   updatePosition,
   updateDirection,
   updateObject,
-  gridDimensions,
   dimensions,
   direction,
-  creativeMode,            // NEW
+  creativeMode,           
   planeWidth,
   planeHeight,
   rotation,

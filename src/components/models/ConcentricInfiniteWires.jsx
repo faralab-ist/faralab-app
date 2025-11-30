@@ -26,6 +26,8 @@ export default function ConcentricInfiniteWires({
     updateDirection,
     dielectrics,
     charges,
+  
+    
 }) {
     const groupRef = useRef()
   const isSelected = id === selectedId
@@ -36,7 +38,7 @@ export default function ConcentricInfiniteWires({
   const chargePerSurfaceArr = useMemo(() => {
     return chargePerSphereSurface(radiuses, charges, materials, dielectrics);
   }, [radiuses, materials, dielectrics, charges])
-  const height = 20;
+  const trueHeight = 20
 
     // Sync from external state only when NOT dragging
     useEffect(() => {
@@ -167,18 +169,22 @@ useEffect(() => {
             setSelectedId(id)
             }}
         >
-            <cylinderGeometry args={[rad, rad, height, 16, 1, true]} />
+            <cylinderGeometry args={[rad, rad, trueHeight, 16, 1, true]} />
             <meshStandardMaterial
-            color={
-                (chargePerSurfaceArr?.[i] ?? 0) > 0 ? 'blue'
-                : (chargePerSurfaceArr?.[i] ?? 0) < 0 ? 'red'
-                : 'gray'
-            }
-            side={THREE.DoubleSide}
-            opacity={Math.exp(-0.4 * i)}
-            transparent={false}
-            depthWrite={true}
-            clippingPlanes={clippingPlanes}
+              color={
+                isHovered
+                  ? 'lightblue'
+                  : ((chargePerSurfaceArr?.[i] ?? 0) > 0
+                      ? 'blue'
+                      : (chargePerSurfaceArr?.[i] ?? 0) < 0
+                        ? 'red'
+                        : 'gray')
+              }
+              side={THREE.DoubleSide}
+              opacity={Math.exp(-0.4 * i)}
+              transparent={false}
+              depthWrite={true}
+              clippingPlanes={clippingPlanes}
             />
         </mesh>)}
       </group> 

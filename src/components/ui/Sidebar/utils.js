@@ -9,7 +9,7 @@ import ChargeSphereIcon from "../../../assets/charge_sphere.svg";
 
 export const POS_MIN = -10, POS_MAX = 10;
 export const VAL_MIN = -5, VAL_MAX = 5;
-export const DIM_MIN = 0.001;
+export const DIM_MIN = 0.001, DIM_MAX = 10;
 export const ERROR_MSG = `Please keep the value between ${VAL_MIN} and ${VAL_MAX}`;
 
 // Configuração centralizada dos ícones

@@ -30,7 +30,7 @@ export default function Sidebar({
   setHoveredId,
   selectedId,
   setSelectedId,
-  // --- Esferas ---
+  // --- Esferas e Fios ---
   addRadiusToChargedSphere,
   setRadiusToChargedSphere,
   removeLastRadiusFromChargedSphere,
@@ -42,13 +42,6 @@ export default function Sidebar({
   removeLastPlaneFromStackedPlanes,
   setSpacingForStackedPlanes,
   setChargeDensityForPlaneInStackedPlanes,
-  // --- Fios Concêntricos (ADICIONADO AQUI) ---
-  addRadiusToConcentricInfiniteWire,
-  removeLastRadiusFromConcentricInfiniteWire,
-  setRadiusToConcentricInfiniteWire,
-  setMaterialForLayerInConcentricInfiniteWire,
-  setDielectricForLayerInConcentricInfiniteWire,
-  setChargeForLayerInConcentricInfiniteWire,
 }) {
   const [expandId, setExpandId] = useState(null);
   const sidebarRootRef = useRef(null)
@@ -273,12 +266,12 @@ export default function Sidebar({
               setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
 
               // --- Fios (ADICIONADO AQUI) ---
-              addRadiusToConcentricInfiniteWire={addRadiusToConcentricInfiniteWire}
-              removeLastRadiusFromConcentricInfiniteWire={removeLastRadiusFromConcentricInfiniteWire}
-              setRadiusToConcentricInfiniteWire={setRadiusToConcentricInfiniteWire}
-              setMaterialForLayerInConcentricInfiniteWire={setMaterialForLayerInConcentricInfiniteWire}
-              setDielectricForLayerInConcentricInfiniteWire={setDielectricForLayerInConcentricInfiniteWire}
-              setChargeForLayerInConcentricInfiniteWire={setChargeForLayerInConcentricInfiniteWire}
+              addRadiusToConcentricInfiniteWire={addRadiusToChargedSphere}
+              removeLastRadiusFromConcentricInfiniteWire={removeLastRadiusFromChargedSphere}
+              setRadiusToConcentricInfiniteWire={setRadiusToChargedSphere}
+              setMaterialForLayerInConcentricInfiniteWire={setMaterialForLayerInChargedSphere}
+              setDielectricForLayerInConcentricInfiniteWire={setDielectricForLayerInChargedSphere}
+              setChargeForLayerInConcentricInfiniteWire={setChargeForLayerInChargedSphere}
             />
           </div>
         )}

@@ -3,7 +3,8 @@ import NumberInput from "./NumberInput";
 import DimensionControls from "./DimensionControls";
 import StackedPlaneControls from "./StackedPlaneControls";
 import ConcentricSphereControls from "./ConcentricSphereControls";
-import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls"; // <--- 1. IMPORT NOVO
+import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls"; 
+import RotationControls from "./RotationControls"; // <--- add rotation controls
 import { TYPE_CONFIG, POS_MIN, POS_MAX, VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
 export default function ObjectItem({ 
@@ -45,6 +46,20 @@ export default function ObjectItem({
   // 3. Helper para Variante de Fios
   const isWireVariant = obj.type === 'wire' || obj.type === 'concentricInfWires';
 
+  // Show rotation for all except charges and spheres
+  const canRotate =
+    expanded &&
+    obj &&
+    !['charge', 'chargedSphere', 'concentricSpheres'].includes(obj.type);
+
+  // robust check: handle both explicit 'stackedPlanes' type and cases where
+  // stacked-plane is encoded as a plane subtype (obj.subtype or iconData.subtype)
+  const isConcentricExcluded = obj.type === 'concentricSpheres' || obj.type === 'concentricInfWires';
+  const isStackedPlanes = obj.type === 'stackedPlanes' ||
+    (obj.type === 'plane');
+
+
+  const showDimensions = isStackedPlanes || !isConcentricExcluded;
   return (
     <li className="object-row-wrapper" data-objid={obj.id}>
       {/* Cabeçalho da Linha */}
@@ -87,9 +102,14 @@ export default function ObjectItem({
               </div>
             )}
 
+            {/* Rotation Controls (hide for charges and spheres) */}
+            {canRotate && (
+              <RotationControls obj={obj} updateObject={updateObject} />
+            )}
+  
             {/* Dimensões: Esconde se for Sistema Concêntrico (Esferas ou Fios) */}
-            {obj.type !== 'concentricSpheres' && obj.type !== 'concentricInfWires' && (
-               <DimensionControls obj={obj} updateObject={updateObject} />
+            { showDimensions && (
+              <DimensionControls obj={obj} updateObject={updateObject} />
             )}
 
             {/* --- TOGGLE PARA PLANES --- */}
@@ -167,7 +187,7 @@ export default function ObjectItem({
               </div>
             )}
 
-            {/* --- 4. TOGGLE PARA WIRES (NOVO) --- */}
+            {/* --- 4. TOGGLE PARA WIRES --- */}
             {isWireVariant && (
               <div className="detail-row">
                 <div className="detail-key">Mode</div>
@@ -243,6 +263,7 @@ export default function ObjectItem({
                 addPlane={stackedPlaneActions?.addPlane}
                 removeLastPlane={stackedPlaneActions?.removeLastPlane}
                 setErrorMsg={setErrorMsg}
+
               />
             )}
 

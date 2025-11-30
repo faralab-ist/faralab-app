@@ -17,16 +17,16 @@ export default function ObjectList({
   setChargeDensityForPlaneInStackedPlanes,
   addRadiusToChargedSphere, 
   removeLastRadiusFromChargedSphere,
-  setRadiusToChargedSphere,            // <--- Adiciona esta se não tiveres
+  setRadiusToChargedSphere,           
   setMaterialForLayerInChargedSphere,
   setDielectricForLayerInChargedSphere,
   setChargeForLayerInChargedSphere,
-  addRadiusToConcentricWire, 
-  removeLastRadiusFromConcentricWire,
-  setRadiusToConcentricWire,
-  setMaterialForLayerInConcentricWire,
-  setDielectricForLayerInConcentricWire,
-  setChargeForLayerInConcentricWire,
+  addRadiusToConcentricInfiniteWire, 
+  removeLastRadiusFromConcentricInfiniteWire,
+  setRadiusToConcentricInfiniteWire,
+  setMaterialForLayerInConcentricInfiniteWire,
+  setDielectricForLayerInConcentricInfiniteWire,
+  setChargeForLayerInConcentricInfiniteWire,
   ...rest
 }) {
   const [expandedMap, setExpandedMap] = useState({});
@@ -95,12 +95,12 @@ export default function ObjectList({
 
           // Ações para Concentric Wires
           concentricWireActions={{
-            addLayer: addRadiusToConcentricWire, 
-            removeLastLayer: removeLastRadiusFromConcentricWire,
-            setRadius: setRadiusToConcentricWire,
-            setMaterial: setMaterialForLayerInConcentricWire,
-            setDielectric: setDielectricForLayerInConcentricWire,
-            setCharge: setChargeForLayerInConcentricWire
+            addLayer: addRadiusToConcentricInfiniteWire, 
+            removeLastLayer: removeLastRadiusFromConcentricInfiniteWire,
+            setRadius: setRadiusToConcentricInfiniteWire,
+            setMaterial: setMaterialForLayerInConcentricInfiniteWire,
+            setDielectric: setDielectricForLayerInConcentricInfiniteWire,
+            setCharge: setChargeForLayerInConcentricInfiniteWire
           }}
         />
       ))}

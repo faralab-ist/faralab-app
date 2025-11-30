@@ -5,7 +5,7 @@
   right: 0;
   height: 100vh;
   width: 0;
-  z-index: 100;
+  z-index: 1;
   pointer-events: none;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
@@ -16,6 +16,7 @@
   top: 0;
   right: 0;
   width: 325px;
+  top: 20px;
   height: 100vh;
   background: #101010;
   color: #eaeaea;
@@ -89,10 +90,11 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 .object-row.selected,
 .object-row:focus-visible {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-color: #2b2b2b;
+  border-color:rgba(21, 78, 153, 0.9);
   transform: translateY(-2px);
-  filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);
-  
+ /* filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);*/
+  filter: invert(63%) sepia(61%) saturate(3550%) hue-rotate(180deg) brightness(96%) contrast(100%);
+/* Don't know which one is better*/
 }
 
 /* Name highlight when row is hovered ##### É USADO ###### */
@@ -161,7 +163,7 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   padding: 8px 12px;        /* tighter */
   font-size: 12px;
   line-height: 1.4;
-  max-width: 250px;        /* narrower */
+  max-width: 295px;        /* narrower */
   width: calc(100% + 12px);
 }
 
@@ -226,7 +228,7 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 .object-details input[type="number"]:focus,
 .object-details input[type="text"]:focus,
 .object-details select:focus {
-  border-color: #3e5a80;
+  border-color:rgba(21, 78, 153, 0.9);
 }
 /* grupo de inputs para detalhes do objeto ##### NÃO SEI SE É USADO ######*/
 .object-details .input-group {
