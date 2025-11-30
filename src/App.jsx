@@ -521,9 +521,10 @@ function LoadingOverlay() {
 
         {showField && (
           <FieldArrows
-        key={`arrows-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
+            key={`arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
+    }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
         objects={sceneObjects}
-        showOnlyGaussianField={showOnlyGaussianField}
+        showOnlyGaussianField={showOnlyGaussianField}s
         minThreshold={vectorMinTsl}
         scaleMultiplier={vectorScale}
         step={1 / (Number(vectorStep))} 
