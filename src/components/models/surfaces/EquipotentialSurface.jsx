@@ -3,7 +3,6 @@ import { useThree , useFrame} from '@react-three/fiber';
 import { useMemo, useEffect, useRef } from 'react';
 import equipotentialShaderFragmentSource from '../../../shaders/equipotentialSurfaceFrag.glsl';
 import computeShaderSrc from '../../../shaders/equipotentialComputeFrag.glsl';
-import chargePerSphereSurface from '../../../utils/chargePerSphereSurface.js';
 import { EPSILON_0, K_E } from '../../../physics/constants';
 import { efields } from '../../../physics'
 
