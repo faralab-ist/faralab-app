@@ -160,7 +160,7 @@ function LoadingOverlay() {
     const [showLines, setShowLines] = useState(false)
     const [showOnlyGaussianField, setShowOnlyGaussianField] = useState(false)
     const [showEquipotentialSurface, setShowEquipotentialSurface] = useState(false)
-    const [equipotentialTarget, setEquipotentialTarget] = useState(5.0) 
+    const [equipotentialTarget, setEquipotentialTarget] = useState(1.0) 
     const [dragOwnerId, setDragOwnerId] = useState(null)
     const [isPanelMinimized, setIsPanelMinimized] = useState(false)
     const [isSidebarMinimized, setIsSidebarMinimized] = useState(false)
