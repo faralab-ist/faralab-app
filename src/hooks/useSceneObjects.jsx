@@ -187,9 +187,25 @@ export default function useSceneObjects(initial = []) {
     setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charge_density } : o)))
   }, [])  
 
-  const updateDirection = useCallback((id, direction) => {
-    setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, direction } : o)))
-  }, [])
+const updateDirection = useCallback((id, direction) => {
+  setSceneObjects(prev =>
+    prev.map(o => {
+      if (o.id !== id) return o;
+
+      const same =
+        Array.isArray(o.direction) &&
+        o.direction.length === direction.length &&
+        o.direction.every((v, i) => v === direction[i]);
+
+      if (same) {
+        return o;
+      }
+
+      return { ...o, direction };
+    })
+  );
+}, []);
+
 
   const addCharge = useCallback((id, position, charge) => {
     setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charges:[...o.charges, {position:position, charge:charge}] } : o)))
