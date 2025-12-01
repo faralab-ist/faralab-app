@@ -154,31 +154,6 @@ export default function CreateButtons({
       )}
 
       <div className="create-buttons-container">
-        {/* Toolbar com Clear + Creative (SÓ ESTES são deslocados) */}
-        <div ref={toolbarRef} className="toolbar" style={toolbarStyle}>
-          {creativeMode && (
-            <>
-              <button
-                className="clear-canvas-btn"
-                onClick={handleClearCanvas}
-                title="Clear all objects"
-              >
-                Clear canvas
-              </button>
-              
-              {/* export/import moved into presets dropdown */}
-            </>
-          )}
-
-          <button
-            className={`creative-toggle ${creativeMode ? 'on' : ''}`}
-            onClick={() => setCreativeMode(v => !v)}
-            title="Enable manual object creation"
-            aria-pressed={creativeMode}
-          >
-            Creative mode
-          </button>
-        </div>
 
         {/* Field objects — NÃO deslocar */}
         {creativeMode && (
@@ -187,11 +162,11 @@ export default function CreateButtons({
             <div className="buttons-group">
               <button onClick={() => addObject('charge', { position: [0,0,0], charge: 1 })}>Add Charge</button>
               <button onClick={() => addObject('wire', { position: [0,0,0]})}>Add Wire</button>
-              <button onClick={() => addObject('plane', { position: [0,0,0] })}>Add Plane</button>
+            <button onClick={() => addObject('plane', { position: [0,0,0] })}>Add Plane</button>
               <button onClick={() => addObject('chargedSphere', { position: [0,0,0] })}>Add Charged Sphere</button>
-              <button onClick={() => addObject('concentricSpheres', { position: [0,0,0] })}>Add Concentric Sphere System</button>
+           {/*    <button onClick={() => addObject('concentricSpheres', { position: [0,0,0] })}>Add Concentric Sphere System</button>
               <button onClick={() => addObject('concentricInfWires', { position: [0,0,0] })}>Add Concentric Infinite Wire System</button>
-              <button onClick={() => addObject('stackedPlanes', { position: [0,0,0] })}>Add Stacked Planes</button>
+              <button onClick={() => addObject('stackedPlanes', { position: [0,0,0] })}>Add Stacked Planes</button> */} 
             </div>
           </div>
         )}

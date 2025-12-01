@@ -1,7 +1,7 @@
-import React, { useRef, useLayoutEffect, useEffect, useMemo, use} from 'react'
+import React, { useRef, useLayoutEffect, useEffect, useMemo} from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
-import chargePerSphereSurface from '../../utils/chargePerSphereSurface'
+import { efields } from '../../physics'
 import * as THREE from 'three'
 
 export default function ConcentricInfiniteWires({ 
@@ -26,6 +26,8 @@ export default function ConcentricInfiniteWires({
     updateDirection,
     dielectrics,
     charges,
+  
+    
 }) {
     const groupRef = useRef()
   const isSelected = id === selectedId
@@ -34,9 +36,9 @@ export default function ConcentricInfiniteWires({
   const meshRef = useRef()
   const isDraggingRef = useRef(false)
   const chargePerSurfaceArr = useMemo(() => {
-    return chargePerSphereSurface(radiuses, charges, materials, dielectrics);
+    return efields.chargePerSphereSurface(radiuses, charges, materials, dielectrics);
   }, [radiuses, materials, dielectrics, charges])
-  const height = 20;
+  const trueHeight = 20
 
     // Sync from external state only when NOT dragging
     useEffect(() => {
@@ -167,18 +169,22 @@ useEffect(() => {
             setSelectedId(id)
             }}
         >
-            <cylinderGeometry args={[rad, rad, height, 16, 1, true]} />
+            <cylinderGeometry args={[rad, rad, trueHeight, 16, 1, true]} />
             <meshStandardMaterial
-            color={
-                (chargePerSurfaceArr?.[i] ?? 0) > 0 ? 'blue'
-                : (chargePerSurfaceArr?.[i] ?? 0) < 0 ? 'red'
-                : 'gray'
-            }
-            side={THREE.DoubleSide}
-            opacity={Math.exp(-0.4 * i)}
-            transparent={false}
-            depthWrite={true}
-            clippingPlanes={clippingPlanes}
+              color={
+                isHovered
+                  ? 'lightblue'
+                  : ((chargePerSurfaceArr?.[i] ?? 0) > 0
+                      ? 'blue'
+                      : (chargePerSurfaceArr?.[i] ?? 0) < 0
+                        ? 'red'
+                        : 'gray')
+              }
+              side={THREE.DoubleSide}
+              opacity={Math.exp(-0.4 * i)}
+              transparent={false}
+              depthWrite={true}
+              clippingPlanes={clippingPlanes}
             />
         </mesh>)}
       </group> 

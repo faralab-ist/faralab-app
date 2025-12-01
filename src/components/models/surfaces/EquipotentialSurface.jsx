@@ -3,8 +3,9 @@ import { useThree , useFrame} from '@react-three/fiber';
 import { useMemo, useEffect, useRef } from 'react';
 import equipotentialShaderFragmentSource from '../../../shaders/equipotentialSurfaceFrag.glsl';
 import computeShaderSrc from '../../../shaders/equipotentialComputeFrag.glsl';
-import { EPSILON_0, K_E } from '../../../utils/constants.js';
 import chargePerSphereSurface from '../../../utils/chargePerSphereSurface.js';
+import { EPSILON_0, K_E } from '../../../physics/constants';
+import { efields } from '../../../physics'
 
 const RESOLUTION = 64;
 const GRID_MIN = new THREE.Vector3(-10, -10, -10);
@@ -176,7 +177,9 @@ export default function EquipotentialSurface({ objects, targetValue = 1.0, trans
                 computeMaterial.uniforms.chargedSphereHollow.value[chargedSphereIdx] = obj.isHollow ? 1 : 0;
                 chargedSphereIdx++;
             } else if (obj.type === 'concentricSpheres') {
-                const chargePerSphereSurfaceArr = chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
+                //console.log(obj.radiuses, obj.charges, obj.materials);
+                const chargePerSphereSurfaceArr = efields.chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
+                //console.log(chargePerSphereSurfaceArr);
                 for (let i = 0; i < obj.radiuses.length; i++) {
                     const rad = obj.radiuses[i];
                     const chargeDensity = chargePerSphereSurfaceArr[i] / (4 * Math.PI * rad * rad);
@@ -187,7 +190,8 @@ export default function EquipotentialSurface({ objects, targetValue = 1.0, trans
                     chargedSphereIdx ++;
                 }
             } else if (obj.type === 'concentricInfWires') {
-                const chargePerSphereSurfaceArr = chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
+                //console.log(obj.radiuses, obj.charges, obj.materials);
+                const chargePerSphereSurfaceArr = efields.chargePerSphereSurface(obj.radiuses, obj.charges, obj.materials);
                 for (let i = 0; i < obj.radiuses.length; i++) {
                     computeMaterial.uniforms.wirePositions.value[wireIdx] = new THREE.Vector3(...obj.position);
                     computeMaterial.uniforms.wireDirections.value[wireIdx] = new THREE.Vector3(...obj.direction).normalize();

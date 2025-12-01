@@ -13,10 +13,11 @@ import React, { useState, useEffect, useMemo } from 'react'
 
   // UI components
   import CreateButtons from './components/ui/CreateButtons'
-  import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
+  import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
+  import Toolbar from './components/ui/Toolbar/Toolbar' // already imported below in your file; keep as-is
 
   // Hooks
   import {useSceneObjects, 
@@ -167,6 +168,7 @@ function LoadingOverlay() {
     const [creativeMode, setCreativeMode] = useState(false)  // stays here (single source)
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
+    const [vectorStep, setVectorStep] = useState(1) 
     const [lineMin, setLineMin] = useState(0.1)         //LINE SETTINGS NEW
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
@@ -179,7 +181,12 @@ function LoadingOverlay() {
     const [useSlice, setUseSlice] = useState(false)
     const [showSlicePlaneHelper, setShowSlicePlaneHelper] = useState(true)
     const [slicePlaneFlip, setSlicePlaneFlip] = useState(false)
+      // Wave propagation settings for field arrows
+      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(true)
+      const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
+
+    const [toolbarActive, setToolbarActive] = useState(false);
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -323,15 +330,62 @@ function LoadingOverlay() {
       showLines, onToggleLines: toggleLines,
       showEquipotentialSurface, onToggleEquipotentialSurface: toggleEquip,
       // settings setters
-      setVectorMinTsl, setVectorScale, setLineMin, setLineNumber
+      setVectorMinTsl, setVectorScale, setVectorStep, setLineMin, setLineNumber
     })
 
-    return (
+    useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key !== 'Backspace' && e.key !== 'Delete') return
+      const active = document.activeElement
+      if (!active) return
+      const tag = active.tagName
+      const isFormField = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active.isContentEditable
+      if (isFormField) return
+      if (selectedId == null) return
+      e.preventDefault() // avoid back-navigation on Backspace
+      removeObject?.(selectedId)
+      setSelectedId(null)
+    }
 
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [selectedId, removeObject, setSelectedId])
+
+    return (
+      
     <>
     {/* <LoadingOverlay /> */}
 
-    <div id="canvas-container">
+    <div id="app-root">
+      <div className="toolbar-root">     {/* new same-container wrapper */}
+     <Toolbar 
+      creativeMode={creativeMode}
+       setCreativeMode={setCreativeMode} 
+       setSceneObjects={setSceneObjects} 
+       active={toolbarActive}
+       setActive={setToolbarActive}
+        useSlice={useSlice} setUseSlice={setUseSlice}
+        showSliceHelper={showSlicePlaneHelper} 
+        setShowSliceHelper={setShowSlicePlaneHelper}
+        setSlicePlane={setSlicePlane} 
+        slicePlane={slicePlane}
+        slicePos={slicePos} setSlicePos={setSlicePos}
+        slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
+       />
+       <ToolbarPopup
+          active={toolbarActive}
+          setActive={setToolbarActive}
+          popupProps={{
+            useSlice, setUseSlice,
+            showSliceHelper: showSlicePlaneHelper, setShowSliceHelper: setShowSlicePlaneHelper,
+            setSlicePlane, slicePlane,
+            slicePos, setSlicePos,
+            slicePlaneFlip, setSlicePlaneFlip
+          }}
+        />
+       </div>
+       <div id="canvas-container">
+        {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
         <CreateButtons
           addObject={addObject}
           setSceneObjects={setSceneObjects}
@@ -346,6 +400,7 @@ function LoadingOverlay() {
           settings={{
             vectorMinTsl,
             vectorScale,
+            vectorStep,
             lineMin,
             lineNumber,
             showField,
@@ -354,7 +409,8 @@ function LoadingOverlay() {
             showOnlyGaussianField
           }}
         />
-        
+
+
        {/* <ObjectPopup
           selectedObject={sceneObjects.find(o => o.id === selectedId)}
           updateObject={updateObject}
@@ -465,16 +521,20 @@ function LoadingOverlay() {
 
         {showField && (
           <FieldArrows
-        key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
+            key={`arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
+          }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
         objects={sceneObjects}
         showOnlyGaussianField={showOnlyGaussianField}
         minThreshold={vectorMinTsl}
         scaleMultiplier={vectorScale}
+        step={1 / (Number(vectorStep))} 
         planeFilter={activePlane}
         slicePlane={slicePlane}
         slicePos={slicePos}
         useSlice={useSlice}
         slicePlaneFlip={slicePlaneFlip}
+        wavePropagationEnabled={wavePropagationEnabled}
+        waveDuration={waveDuration}
         />
         )}
 
@@ -529,25 +589,24 @@ function LoadingOverlay() {
           setVectorMinTsl={setVectorMinTsl}
           vectorScale={vectorScale}
           setVectorScale={setVectorScale}
+          vectorStep={vectorStep}
+          setVectorStep={setVectorStep}
           lineMin={lineMin}         //LINE SETTINGS NEW
           setLineMin={setLineMin}         //LINE SETTINGS NEW
           lineNumber={lineNumber}         //LINE SETTINGS NEW
           setLineNumber={setLineNumber}          //LINE SETTINGS NEW
           activePlane={activePlane}
           onPlaneSelect={handlePlaneSelect}
-          useSlice={useSlice}
-          setUseSlice={setUseSlice}
-          slicePlane={slicePlane}
-          setSlicePlane={setSlicePlane}
-          slicePos={slicePos}
-          setSlicePos={setSlicePos}
-          showSliceHelper={showSlicePlaneHelper}
-          setShowSliceHelper={setShowSlicePlaneHelper}
-          slicePlaneFlip={slicePlaneFlip}
-          setSlicePlaneFlip={setSlicePlaneFlip}
+         
+          // Wave propagation controls for field arrows
+          wavePropagationEnabled={wavePropagationEnabled}
+          setWavePropagationEnabled={setWavePropagationEnabled}
+          waveDuration={waveDuration}
+          setWaveDuration={setWaveDuration}
         />
       </div>
-      </>
+    </div>
+    </>
     )
   }
 
