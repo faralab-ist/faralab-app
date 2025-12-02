@@ -120,7 +120,7 @@ export function finiteWireEField(wirePos, wireDir, wireLength, wireRadius, charg
 /**     INFINITE SURFACES    **/
 
 
-export function infiniteWireField(position, chargeDensity, targPoint, direction = [0, 1, 0]) {
+export function infiniteWireEField(position, chargeDensity, targPoint, direction = [0, 1, 0]) {
     const multiplier = EPSILON_0;
     direction = new THREE.Vector3(...direction).normalize()
     const rVec = new THREE.Vector3().subVectors(targPoint, position)
@@ -131,7 +131,7 @@ export function infiniteWireField(position, chargeDensity, targPoint, direction 
     return rPerp.normalize().multiplyScalar(fieldMagnitude)
 }
 
-export function infinitePlaneField(point, chargeDensity, targetPoint, normal) {
+export function infinitePlaneEField(point, chargeDensity, targetPoint, normal) {
     const rVec = new THREE.Vector3().subVectors(targetPoint, point);
     const distance = rVec.dot(new THREE.Vector3(...normal).normalize());
 
