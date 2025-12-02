@@ -8,7 +8,7 @@ export function InlineDecimalInput({
   onChange,
 }) {
   const spanRef = useRef(null);
-  const spinRef = useRef(null); // para repetição contínua
+  const spinRef = useRef(null);
 
   function format(v) {
     if (isNaN(v)) v = 0;
@@ -51,9 +51,7 @@ export function InlineDecimalInput({
   }
 
   function startSpin(delta) {
-    // um passo imediato
     stepValue(delta);
-    // e depois repete
     stopSpin();
     spinRef.current = setInterval(() => stepValue(delta), 100);
   }
@@ -70,18 +68,16 @@ export function InlineDecimalInput({
     if (!el) return;
 
     let txt = el.textContent || "";
-    txt = txt.replace(/[^\d.]/g, "");
 
-    const f = txt.indexOf(".");
-    if (f !== -1) {
-      const before = txt.slice(0, f + 1);
-      let after = txt.slice(f + 1).replace(/\./g, "");
-      after = after.slice(0, 2); // máximo 2 casas
+    txt = txt.replace(/,/g, ".");
+    txt = txt.replace(/[^\d.]/g, ""); // removes everything except , or .
+
+    const first = txt.indexOf(".");
+    if (first !== -1) {
+      const before = txt.slice(0, first + 1);
+      let after = txt.slice(first + 1).replace(/\./g, "");
+      after = after.slice(0, 2); // 2 decimal max
       txt = before + after;
-    }
-
-    if (!txt.includes(".")) {
-      txt = txt === "" ? "." : txt + ".";
     }
 
     if (txt !== el.textContent) {
@@ -95,13 +91,15 @@ export function InlineDecimalInput({
     }
   }
 
+  // when exiting, Enter grants the X.XX format
   function normalizeOnBlur() {
     const el = spanRef.current;
     if (!el) return;
     stopSpin();
 
     let txt = el.textContent || "";
-    txt = txt.replace(/[^\d.]/g, "");
+    txt = txt.replace(/,/g, ".");       // grants point
+    txt = txt.replace(/[^\d.]/g, "");   // clear
 
     if (txt === "" || txt === ".") {
       writeValue(0);
@@ -142,7 +140,7 @@ export function InlineDecimalInput({
     const el = spanRef.current;
     if (!el) return;
 
-    // ENTER: submete e perde foco
+    // ENTER: normalizes and loses focus
     if (e.key === "Enter") {
       e.preventDefault();
       normalizeOnBlur();
@@ -157,33 +155,18 @@ export function InlineDecimalInput({
     const range = sel.getRangeAt(0);
     const pos = range.startOffset;
 
-    if (e.key === "Backspace" && text[pos - 1] === ".") {
-      e.preventDefault();
-      return;
-    }
-    if (e.key === "Delete" && text[pos] === ".") {
-      e.preventDefault();
-      return;
-    }
-
-    const allow = ["Backspace", "Delete", "Tab", "Home", "End"];
+    const allow = [
+      "Backspace",
+      "Delete",
+      "Tab",
+      "Home",
+      "End",
+      "ArrowLeft",
+      "ArrowRight"
+    ];
     if (allow.includes(e.key)) return;
 
-    if (e.key === ".") {
-      e.preventDefault();
-      return;
-    }
-
-    // impedir 3ª casa decimal
-    const dot = text.indexOf(".");
-    if (dot !== -1 && pos > dot) {
-      const decimals = text.slice(dot + 1);
-      if (decimals.length >= 2 && e.key.length === 1 && /[0-9]/.test(e.key)) {
-        e.preventDefault();
-        return;
-      }
-    }
-
+    // setas para spin
     if (e.key === "ArrowUp") {
       e.preventDefault();
       if (!spinRef.current) startSpin(step);
@@ -195,7 +178,21 @@ export function InlineDecimalInput({
       return;
     }
 
-    if (e.key.length === 1 && !/[0-9]/.test(e.key)) {
+    if (e.key === "." || e.key === ",") return;
+
+    if (e.key.length === 1 && /[0-9]/.test(e.key)) {
+      const dot = text.indexOf(".");
+      if (dot !== -1 && pos > dot) {
+        const decimals = text.slice(dot + 1);
+        if (decimals.length >= 2) {
+          e.preventDefault();
+          return;
+        }
+      }
+      return;
+    }
+
+    if (e.key.length === 1) {
       e.preventDefault();
     }
   };
