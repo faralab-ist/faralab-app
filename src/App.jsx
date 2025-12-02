@@ -16,6 +16,7 @@ import React, { useState, useEffect, useMemo } from 'react'
   import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
+  import Toolbar from './components/ui/Toolbar/Toolbar'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
 
   // Hooks
@@ -325,6 +326,8 @@ function LoadingOverlay() {
     {/* <LoadingOverlay /> */}
 
     <div id="canvas-container">
+        <Toolbar />
+        
         <CreateButtons
           addObject={addObject}
           setSceneObjects={setSceneObjects}

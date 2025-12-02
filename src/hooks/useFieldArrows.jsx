@@ -45,8 +45,6 @@ export default function FieldArrows({
     const vectors = vectorsUnfiltered.filter(({position, field}) => 
         sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)
     );
-    
-    // No transition / propagation: show field instantly. No previousVectors handling.
 
     const MAX_L = useMemo(() => {
         let maxL = 0;
@@ -197,17 +195,39 @@ export default function FieldArrows({
     // Track if animation is complete
     const animationCompleteRef = useRef(false);
     
-    // Create stable key for vectors to prevent re-runs
+    // Create stable key for vectors to prevent re-runs - include plane directions for rotation detection
     const vectorsKey = useMemo(() => {
-        return JSON.stringify(vectors.map(v => [
+        const vectorsHash = JSON.stringify(vectors.map(v => [
             Math.round(v.position.x * 100) / 100,
             Math.round(v.position.y * 100) / 100,
             Math.round(v.position.z * 100) / 100,
             Math.round(v.field.length() * 100) / 100
         ]));
-    }, [vectors]);
+        
+        // Include plane/wire directions, quaternions and charge_density to detect all rotations
+        const objectsHash = objects.map(o => {
+            if (o.type === 'plane') {
+                const dir = o.direction || [0, 1, 0];
+                const quat = o.quaternion || [];
+                return `${o.id}:${dir[0].toFixed(2)},${dir[1].toFixed(2)},${dir[2].toFixed(2)}:${quat.map(q => q.toFixed(2)).join(',')}:${(o.charge_density || 0).toFixed(3)}`;
+            }
+            if (o.type === 'wire') {
+                const dir = o.direction || [0, 1, 0];
+                const pos = o.position || [0, 0, 0];
+                const quat = o.quaternion || [];
+                return `${o.id}:${pos[0].toFixed(2)},${pos[1].toFixed(2)},${pos[2].toFixed(2)}:${dir[0].toFixed(2)},${dir[1].toFixed(2)},${dir[2].toFixed(2)}:${quat.map(q => q.toFixed(2)).join(',')}:${(o.charge || 0).toFixed(3)}`;
+            }
+            const pos = o.position || [0, 0, 0];
+            return `${o.id}:${pos[0].toFixed(2)},${pos[1].toFixed(2)},${pos[2].toFixed(2)}:${(o.charge || 0).toFixed(3)}`;
+        }).join(';');
+        
+        return `${vectorsHash}__${objectsHash}`;
+    }, [vectors, objects]);
 
-    // Setup geometry once when vectors change - ORDER BY DISTANCE TO OBJECTS
+    // Store distance rings for batch rendering
+    const distanceRingsRef = useRef([]);
+
+    // Setup geometry once when vectors change - GROUP BY DISTANCE RINGS
     useEffect(() => {
         const mesh = meshRef.current;
         if (!mesh) {
@@ -262,6 +282,39 @@ export default function FieldArrows({
         // SORT by distance (propagate from objects outward)
         vectorsWithDist.sort((a, b) => a.dist - b.dist);
 
+        // GROUP vectors into distance rings (buckets) - all vectors at similar distance appear together
+        const ringSize = step * 0.8; // tolerance for grouping by distance
+        const rings = [];
+        let currentRing = [];
+        let currentDist = vectorsWithDist[0]?.dist || 0;
+        
+        for (const v of vectorsWithDist) {
+            if (Math.abs(v.dist - currentDist) > ringSize) {
+                // Start new ring
+                if (currentRing.length > 0) {
+                    rings.push([...currentRing]);
+                }
+                currentRing = [v];
+                currentDist = v.dist;
+            } else {
+                // Add to current ring
+                currentRing.push(v);
+            }
+        }
+        if (currentRing.length > 0) {
+            rings.push(currentRing);
+        }
+
+        // Convert rings to cumulative counts
+        distanceRingsRef.current = [];
+        let cumulative = 0;
+        for (const ring of rings) {
+            cumulative += ring.length;
+            distanceRingsRef.current.push(cumulative);
+        }
+
+        console.log(`[FieldArrows] Created ${rings.length} distance rings for propagation`);
+
         // Setup geometry with SORTED attributes
         const geom = arrowGeometry.clone();
         const posArray = new Float32Array(maxCount * 3);
@@ -304,13 +357,13 @@ export default function FieldArrows({
         return () => {
             geom.dispose();
         };
-    }, [vectorsKey, arrowGeometry]);
+    }, [vectorsKey, arrowGeometry, step]);
 
     // Get maxCount for useFrame
     const attrs = useMemo(() => createInstancedAttributes(vectors), [vectors, createInstancedAttributes]);
     const maxCount = attrs.count || 0;
 
-    // Animate instance count ONCE (no loop) - stop when complete
+    // Animate by distance rings - all vectors at same distance appear together
     useFrame(() => {
         const mesh = meshRef.current;
         if (!mesh || !mesh.material || maxCount === 0) return;
@@ -318,14 +371,23 @@ export default function FieldArrows({
         // Skip if animation already complete
         if (animationCompleteRef.current) return;
 
+        const rings = distanceRingsRef.current;
+        if (!rings || rings.length === 0) {
+            // No rings defined, show all immediately
+            mesh.count = maxCount;
+            animationCompleteRef.current = true;
+            return;
+        }
+
         const elapsed = (Date.now() - startTimeRef.current) / 1000; // seconds
-        const animDuration = (gridSize / step) * .07; // 50ms per ring
+        const animDuration = rings.length * 0.1; // 30ms per ring
 
         const progress = Math.min(elapsed / animDuration, 1.0);
-        const targetCount = Math.floor(progress * maxCount);
+        const ringIndex = Math.floor(progress * rings.length);
         
         if (progress < 1.0) {
-            // Animation in progress
+            // Animation in progress - show complete rings only
+            const targetCount = ringIndex < rings.length ? rings[ringIndex] : maxCount;
             if (mesh.count !== targetCount) {
                 mesh.count = targetCount;
             }
@@ -335,7 +397,7 @@ export default function FieldArrows({
                 mesh.count = maxCount;
             }
             animationCompleteRef.current = true;
-            console.log('[FieldArrows] Animation complete - showing all', maxCount, 'instances');
+            console.log('[FieldArrows] Animation complete - showing all', maxCount, 'instances in', rings.length, 'rings');
         }
     });
 
