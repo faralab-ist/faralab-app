@@ -166,9 +166,9 @@ button:hover {
 /* Top-left standalone Presets button (container removed) */
 .presets-btn {
   position: fixed;
-  top: 20px;
+  top: 45px;
   left: 20px;
-  z-index: 1400;
+  z-index: 20;
   padding: 12px 24px;
   font-size: 0.95rem;
   letter-spacing: .7px;
@@ -181,8 +181,8 @@ button:hover {
   border-radius: 30px;
   cursor: pointer;
   /*backdrop-filter: blur(4px);*/
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;  /*box-shadow: 0 6px 20px rgba(60, 120, 220, 0.18), 0 0 28px rgba(70, 130, 255, 0.28);*/
-  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;  
+  /*box-shadow: 0 6px 20px rgba(60, 120, 220, 0.18), 0 0 28px rgba(70, 130, 255, 0.28);*/  
   
 }
 .presets-btn:hover {

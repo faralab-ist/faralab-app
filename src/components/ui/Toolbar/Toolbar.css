@@ -7,7 +7,7 @@
   gap: 6px;
   align-items: center;
   padding: calc(env(safe-area-inset-top, 0) + 4px) 10px 6px 10px;
-  background: rgba(12, 12, 14, 0.6);
+  background:  #101010;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   box-shadow: 0 6px 20px rgba(0,0,0,0.35);
   backdrop-filter: blur(6px);

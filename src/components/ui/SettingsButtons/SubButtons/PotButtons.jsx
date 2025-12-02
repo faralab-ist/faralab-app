@@ -19,14 +19,14 @@ export default function PotButons({
              
               <div className="slider-row">
                 <label className="slider-label">
-                  Target V: <span className="slider-value">{Number(potentialTarget).toFixed(2)}</span>
+                  Target V (exp): <span className="slider-value">{Number(potentialTarget).toFixed(1)}</span>
                 </label>
                 <input
                   className="potential-slider"                
                   type="range"
-                  min={-20}
-                  max={20}
-                  step={0.1}
+                  min={-1}
+                  max={1}
+                  step={0.05}
                   value={potentialTarget ?? 0}
                   onChange={(e) => setPotentialTarget?.(parseFloat(e.target.value))}
                   disabled={!showEquipotentialSurface}

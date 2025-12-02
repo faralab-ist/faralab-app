@@ -51,10 +51,10 @@ export default function calculateFieldAtPoint(objects, targetPos) {
       const fieldFromSphere = efields.chargedSphereEField(sourcePosition, obj.radius, chargeDensity, obj.isHollow, targetPos);
       resultFieldAtPoint.add(fieldFromSphere);
     } else if (obj.type === 'concentricSpheres') {
-      const fieldFromConcentricSpheres = efields.concentricSpheresEField(sourcePosition, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, targetPos);
+      const fieldFromConcentricSpheres = efields.concentricSpheresField(sourcePosition, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, targetPos);
       resultFieldAtPoint.add(fieldFromConcentricSpheres);
     } else if (obj.type === 'concentricInfWires') {
-      const fieldFromConcentricWires = efields.concentricInfiniteWiresEField(sourcePosition, obj.direction, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, targetPos);
+      const fieldFromConcentricWires = efields.concentricInfiniteWiresField(sourcePosition, obj.direction, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, targetPos);
       resultFieldAtPoint.add(fieldFromConcentricWires);
     } else if (obj.type === 'stackedPlanes') {
       // if infinite use infinite plane field
@@ -68,7 +68,7 @@ export default function calculateFieldAtPoint(objects, targetPos) {
         const chargeDensityForPlane = obj.charge_densities[i] || 0;
         let fieldFromPlane;
         if (obj.infinite) {
-          fieldFromPlane = efields.infinitePlaneEField(planePos, chargeDensityForPlane, targetPos, obj.direction);
+          fieldFromPlane = efields.infinitePlaneField(planePos, chargeDensityForPlane, targetPos, obj.direction);
         } else {
           fieldFromPlane = efields.finitePlaneEField(planePos, obj.direction, obj.dimensions, chargeDensityForPlane, targetPos);
         }

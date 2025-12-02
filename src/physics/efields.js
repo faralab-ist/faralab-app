@@ -120,7 +120,7 @@ export function finiteWireEField(wirePos, wireDir, wireLength, wireRadius, charg
 /**     INFINITE SURFACES    **/
 
 
-export function infiniteWireEField(position, chargeDensity, targPoint, direction = [0, 1, 0]) {
+export function infiniteWireField(position, chargeDensity, targPoint, direction = [0, 1, 0]) {
     const multiplier = EPSILON_0;
     direction = new THREE.Vector3(...direction).normalize()
     const rVec = new THREE.Vector3().subVectors(targPoint, position)
@@ -131,7 +131,7 @@ export function infiniteWireEField(position, chargeDensity, targPoint, direction
     return rPerp.normalize().multiplyScalar(fieldMagnitude)
 }
 
-export function infinitePlaneEField(point, chargeDensity, targetPoint, normal) {
+export function infinitePlaneField(point, chargeDensity, targetPoint, normal) {
     const rVec = new THREE.Vector3().subVectors(targetPoint, point);
     const distance = rVec.dot(new THREE.Vector3(...normal).normalize());
 
@@ -157,7 +157,7 @@ export function infinitePlaneEField(point, chargeDensity, targetPoint, normal) {
 /**     SMART SURFACES   **/
 
 
-export function concentricSpheresEField(spherePos, radiuses, materials, dielectrics, charges, targetPos){
+export function concentricSpheresField(spherePos, radiuses, materials, dielectrics, charges, targetPos){
     const rVec = new THREE.Vector3().subVectors(targetPos, spherePos);
     const rVecLength = rVec.length();
     const rVecLengthSq = rVec.lengthSq();
@@ -203,7 +203,7 @@ export function concentricSpheresEField(spherePos, radiuses, materials, dielectr
     return rVec.clone().normalize().multiplyScalar(field);
 }
 
-export function concentricInfiniteWiresEField(spherePos, dir, radiuses, materials, dielectrics, charges, targetPos){
+export function concentricInfiniteWiresField(spherePos, dir, radiuses, materials, dielectrics, charges, targetPos){
     const rVecF = new THREE.Vector3().subVectors(targetPos, spherePos);
     const direction = new THREE.Vector3(...dir).normalize()
     const axialComp = direction.clone().normalize().multiplyScalar(rVecF.dot(direction.clone().normalize()));
