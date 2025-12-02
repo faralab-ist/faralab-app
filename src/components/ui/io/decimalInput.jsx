@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+
 export function InlineDecimalInput({
   initialValue = 0,
   step = 0.01,
@@ -7,6 +8,7 @@ export function InlineDecimalInput({
   onChange,
 }) {
   const spanRef = useRef(null);
+  const spinRef = useRef(null); // para repetição contínua
 
   function format(v) {
     if (isNaN(v)) v = 0;
@@ -48,6 +50,21 @@ export function InlineDecimalInput({
     if (onChange) onChange(readValue());
   }
 
+  function startSpin(delta) {
+    // um passo imediato
+    stepValue(delta);
+    // e depois repete
+    stopSpin();
+    spinRef.current = setInterval(() => stepValue(delta), 100);
+  }
+
+  function stopSpin() {
+    if (spinRef.current) {
+      clearInterval(spinRef.current);
+      spinRef.current = null;
+    }
+  }
+
   function sanitizeDuringEdit() {
     const el = spanRef.current;
     if (!el) return;
@@ -58,7 +75,8 @@ export function InlineDecimalInput({
     const f = txt.indexOf(".");
     if (f !== -1) {
       const before = txt.slice(0, f + 1);
-      const after = txt.slice(f + 1).replace(/\./g, "");
+      let after = txt.slice(f + 1).replace(/\./g, "");
+      after = after.slice(0, 2); // máximo 2 casas
       txt = before + after;
     }
 
@@ -80,6 +98,8 @@ export function InlineDecimalInput({
   function normalizeOnBlur() {
     const el = spanRef.current;
     if (!el) return;
+    stopSpin();
+
     let txt = el.textContent || "";
     txt = txt.replace(/[^\d.]/g, "");
 
@@ -91,29 +111,22 @@ export function InlineDecimalInput({
     const first = txt.indexOf(".");
     if (first === -1) {
       let digits = txt.replace(/\D/g, "");
-      if (digits.length === 0) digits = "000";
-      if (digits.length === 1) digits = "0" + digits;
-      if (digits.length === 2) digits = "0" + digits;
+      if (digits.length < 3) digits = digits.padStart(3, "0");
       const intPart = digits.slice(0, -2);
       const fracPart = digits.slice(-2);
       el.textContent = intPart + "." + fracPart;
     } else {
       let pre = txt.slice(0, first).replace(/\D/g, "");
       let pos = txt.slice(first + 1).replace(/\D/g, "");
-
       if (pre === "") pre = "0";
-      if (pos.length === 0) pos = "00";
-      else if (pos.length === 1) pos = pos + "0";
-      else if (pos.length > 2) pos = pos.slice(0, 2);
-
+      pos = pos.padEnd(2, "0").slice(0, 2);
       el.textContent = pre + "." + pos;
     }
 
     const v = readValue();
     writeValue(v);
     if (onChange) onChange(v);
-    const sel = window.getSelection();
-    sel.removeAllRanges();
+    window.getSelection().removeAllRanges();
   }
 
   const handleMouseDown = (e) => {
@@ -161,19 +174,35 @@ export function InlineDecimalInput({
       return;
     }
 
+    // impedir 3ª casa decimal
+    const dot = text.indexOf(".");
+    if (dot !== -1 && pos > dot) {
+      const decimals = text.slice(dot + 1);
+      if (decimals.length >= 2 && e.key.length === 1 && /[0-9]/.test(e.key)) {
+        e.preventDefault();
+        return;
+      }
+    }
+
     if (e.key === "ArrowUp") {
       e.preventDefault();
-      stepValue(step);
+      if (!spinRef.current) startSpin(step);
       return;
     }
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      stepValue(-step);
+      if (!spinRef.current) startSpin(-step);
       return;
     }
 
     if (e.key.length === 1 && !/[0-9]/.test(e.key)) {
       e.preventDefault();
+    }
+  };
+
+  const handleKeyUp = (e) => {
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      stopSpin();
     }
   };
 
@@ -185,14 +214,18 @@ export function InlineDecimalInput({
     normalizeOnBlur();
   };
 
-  const handleArrowUpClick = (e) => {
+  const handleArrowUpMouseDown = (e) => {
     e.preventDefault();
-    stepValue(step);
+    startSpin(step);
   };
 
-  const handleArrowDownClick = (e) => {
+  const handleArrowDownMouseDown = (e) => {
     e.preventDefault();
-    stepValue(-step);
+    startSpin(-step);
+  };
+
+  const handleArrowMouseUpLeave = () => {
+    stopSpin();
   };
 
   useEffect(() => {
@@ -209,15 +242,26 @@ export function InlineDecimalInput({
         onMouseDown={handleMouseDown}
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
         onInput={handleInput}
         onBlur={handleBlur}
         style={{ paddingRight: 22 }}
       />
       <div className="inline-decimal-arrows">
-        <div className="inline-decimal-arrow" onMouseDown={handleArrowUpClick}>
+        <div
+          className="inline-decimal-arrow"
+          onMouseDown={handleArrowUpMouseDown}
+          onMouseUp={handleArrowMouseUpLeave}
+          onMouseLeave={handleArrowMouseUpLeave}
+        >
           ▲
         </div>
-        <div className="inline-decimal-arrow" onMouseDown={handleArrowDownClick}>
+        <div
+          className="inline-decimal-arrow"
+          onMouseDown={handleArrowDownMouseDown}
+          onMouseUp={handleArrowMouseUpLeave}
+          onMouseLeave={handleArrowMouseUpLeave}
+        >
           ▼
         </div>
       </div>
