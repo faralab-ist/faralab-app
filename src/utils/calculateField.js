@@ -68,7 +68,7 @@ export default function calculateFieldAtPoint(objects, targetPos) {
         const chargeDensityForPlane = obj.charge_densities[i] || 0;
         let fieldFromPlane;
         if (obj.infinite) {
-          fieldFromPlane = efields.infinitePlaneField(planePos, chargeDensityForPlane, targetPos, obj.direction);
+          fieldFromPlane = efields.infinitePlaneEField(planePos, chargeDensityForPlane, targetPos, obj.direction);
         } else {
           fieldFromPlane = efields.finitePlaneEField(planePos, obj.direction, obj.dimensions, chargeDensityForPlane, targetPos);
         }
