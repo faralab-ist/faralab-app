@@ -63,20 +63,19 @@ export function InlineDecimalInput({
     }
   }
 
+ 
   function sanitizeDuringEdit() {
     const el = spanRef.current;
     if (!el) return;
 
     let txt = el.textContent || "";
-
-    txt = txt.replace(/,/g, ".");
-    txt = txt.replace(/[^\d.]/g, ""); // removes everything except , or .
+    txt = txt.replace(/,/g, ".").replace(/[^\d.]/g, "");
 
     const first = txt.indexOf(".");
     if (first !== -1) {
       const before = txt.slice(0, first + 1);
       let after = txt.slice(first + 1).replace(/\./g, "");
-      after = after.slice(0, 2); // 2 decimal max
+      after = after.slice(0, 2);
       txt = before + after;
     }
 
@@ -91,15 +90,13 @@ export function InlineDecimalInput({
     }
   }
 
-  // when exiting, Enter grants the X.XX format
   function normalizeOnBlur() {
     const el = spanRef.current;
     if (!el) return;
     stopSpin();
 
     let txt = el.textContent || "";
-    txt = txt.replace(/,/g, ".");       // grants point
-    txt = txt.replace(/[^\d.]/g, "");   // clear
+    txt = txt.replace(/,/g, ".").replace(/[^\d.]/g, "");
 
     if (txt === "" || txt === ".") {
       writeValue(0);
@@ -108,16 +105,15 @@ export function InlineDecimalInput({
 
     const first = txt.indexOf(".");
     if (first === -1) {
-      let digits = txt.replace(/\D/g, "");
-      if (digits.length < 3) digits = digits.padStart(3, "0");
-      const intPart = digits.slice(0, -2);
-      const fracPart = digits.slice(-2);
-      el.textContent = intPart + "." + fracPart;
+      let intPart = txt || "0";
+      el.textContent = intPart + ".00";
     } else {
-      let pre = txt.slice(0, first).replace(/\D/g, "");
-      let pos = txt.slice(first + 1).replace(/\D/g, "");
+      let pre = txt.slice(0, first);
+      let pos = txt.slice(first + 1);
+
       if (pre === "") pre = "0";
-      pos = pos.padEnd(2, "0").slice(0, 2);
+      pos = pos.slice(0, 2).padEnd(2, "0");
+
       el.textContent = pre + "." + pos;
     }
 
@@ -140,20 +136,12 @@ export function InlineDecimalInput({
     const el = spanRef.current;
     if (!el) return;
 
-    // ENTER: normalizes and loses focus
     if (e.key === "Enter") {
       e.preventDefault();
       normalizeOnBlur();
       el.blur();
       return;
     }
-
-    const sel = window.getSelection();
-    const text = el.textContent || "";
-    if (!sel || !sel.rangeCount) return;
-
-    const range = sel.getRangeAt(0);
-    const pos = range.startOffset;
 
     const allow = [
       "Backspace",
@@ -162,11 +150,10 @@ export function InlineDecimalInput({
       "Home",
       "End",
       "ArrowLeft",
-      "ArrowRight"
+      "ArrowRight",
     ];
     if (allow.includes(e.key)) return;
 
-    // setas para spin
     if (e.key === "ArrowUp") {
       e.preventDefault();
       if (!spinRef.current) startSpin(step);
@@ -177,6 +164,12 @@ export function InlineDecimalInput({
       if (!spinRef.current) startSpin(-step);
       return;
     }
+
+    const sel = window.getSelection();
+    const text = el.textContent || "";
+    if (!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    const pos = range.startOffset;
 
     if (e.key === "." || e.key === ",") return;
 
@@ -228,6 +221,10 @@ export function InlineDecimalInput({
   useEffect(() => {
     writeValue(initialValue);
   }, [initialValue]);
+
+  useEffect(() => {
+    return () => stopSpin();
+  }, []);
 
   return (
     <div className="inline-decimal-wrapper">
