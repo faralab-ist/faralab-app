@@ -6,7 +6,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes} from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, TestCharge} from './components/models'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -476,6 +476,7 @@ function LoadingOverlay() {
             } else {
               switch(obj.type) {
                 case 'charge': ObjectComponent = Charge; break
+                case 'testPointCharge': ObjectComponent = TestCharge; break
                 case 'wire': ObjectComponent = Wire; break
                 case 'plane': ObjectComponent = Plane; break
                 case 'chargedSphere': ObjectComponent = ChargedSphere; break

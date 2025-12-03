@@ -73,7 +73,7 @@ export default function ObjectList({
           expanded={!!expandedMap[obj.id]}
           hovered={hoveredId === obj.id}
           toggleExpand={toggleExpand}
-          setHoveredId={setHoveredId} // Se não passares isto como prop no pai, remove aqui
+          setHoveredId={setHoveredId}
           updateObject={updateObject}
           removeObject={removeObject}
 

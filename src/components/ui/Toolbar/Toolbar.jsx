@@ -3,6 +3,7 @@ import './Toolbar.css'
 import Slice from '../../../assets/slice.svg'
 import Edit from '../../../assets/edit.svg'
 import Clean from '../../../assets/clean.svg'
+import TestCharge from '../../../assets/lowercase_q2.svg'
 
 export default function Toolbar({
   creativeMode,
@@ -22,6 +23,17 @@ export default function Toolbar({
     <div className="top-toolbar">
       
       <div className="tb-group">
+
+        <button
+          className={`tb-btn ${active === 'TestCharge' ? 'active' : ''}`}
+          onClick={(e) => handleClick('TestCharge', e)}
+          title="TestCharge"
+          aria-pressed={active === 'TestCharge'}
+        >
+          <img className="tb-icon" src={TestCharge} alt="" />
+        </button>
+
+
         <button
           className={`tb-btn ${active === 'Slice' ? 'active' : ''}`}
           onClick={(e) => handleClick('Slice', e)}
