@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ObjectItem from "./ObjectItem";
 import "./Sidebar.css"; // Certifica-te que copiaste o CSS para aqui
+import { add } from "three/tsl";
 
 export default function ObjectList({ 
   items = [], 
@@ -27,6 +28,12 @@ export default function ObjectList({
   setMaterialForLayerInConcentricInfiniteWire,
   setDielectricForLayerInConcentricInfiniteWire,
   setChargeForLayerInConcentricInfiniteWire,
+  addPointToPath,
+  removeLastPointFromPath,
+  setPointInPath,
+  changePathChargeCount,
+  changePathCharge,
+  changePathVelocity,
   ...rest
 }) {
   const [expandedMap, setExpandedMap] = useState({});
@@ -101,6 +108,16 @@ export default function ObjectList({
             setMaterial: setMaterialForLayerInConcentricInfiniteWire,
             setDielectric: setDielectricForLayerInConcentricInfiniteWire,
             setCharge: setChargeForLayerInConcentricInfiniteWire
+          }}
+
+          // path
+          pathActions={{
+            addPoint: addPointToPath,
+            removeLastPoint: removeLastPointFromPath,
+            setPoint: setPointInPath,
+            changeChargeCount: changePathChargeCount,
+            changeCharge: changePathCharge,
+            changeVelocity: changePathVelocity
           }}
         />
       ))}

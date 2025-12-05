@@ -4,6 +4,7 @@ import DimensionControls from "./DimensionControls";
 import StackedPlaneControls from "./StackedPlaneControls";
 import ConcentricSphereControls from "./ConcentricSphereControls";
 import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls"; 
+import PathControls from "./PathControls";
 import RotationControls from "./RotationControls"; // <--- add rotation controls
 import { TYPE_CONFIG, POS_MIN, POS_MAX, VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
@@ -17,7 +18,8 @@ export default function ObjectItem({
   removeObject,
   stackedPlaneActions,
   concentricActions,
-  concentricWireActions // <--- 2. RECEBER PROPS NOVAS
+  concentricWireActions, // <--- 2. RECEBER PROPS NOVAS
+  pathActions,
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
 
@@ -234,6 +236,20 @@ export default function ObjectItem({
 
 
             {/* --- Renderização Condicional dos Campos Específicos --- */}
+
+            {obj.type === 'path' && (
+              <PathControls
+                  obj={obj}
+                  addPoint={pathActions?.addPoint}
+                  removeLastPoint={pathActions?.removeLastPoint}
+                  setPoint={pathActions?.setPoint}
+                  changeChargeCount={pathActions?.changeChargeCount}
+                  changeCharge={pathActions?.changeCharge}
+                  changeVelocity={pathActions?.changeVelocity}
+                  updateObject={updateObject}
+                  setErrorMsg={setErrorMsg}
+              />
+            )}
 
             {/* A) Plano Normal */}
             {obj.type === 'plane' && (

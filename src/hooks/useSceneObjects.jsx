@@ -148,13 +148,91 @@ const objectFactories = {
     rotation: [0,0,0],
     createdAt: Date.now(),
   }),
+  path: (index) => ({
+    id: `tmp-${index}`,
+    type: 'path',
+    name: `Path ${index}`,
+    points: [], // positions of each point of path
+    position: [0, 0, 0], //global position
+    charges: [], //position of each point charge
+    tangents: [],
+    chargeCount: 1, // number of point charges
+    charge: 1, // charge of each charge
+    velocity: 1, //speed of charges
+    isClosedPath: false,
+    createdAt: Date.now(),
+  })
 }
 
 export default function useSceneObjects(initial = []) {
   const [sceneObjects, setSceneObjects] = useState(initial)
   const [counters, setCounters] = useState({
-    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0,
+    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0, path: 0,
   })
+
+  const addPointToPath = useCallback((id) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newPoints = o.points ? [...o.points, [0,0,0]] : [[0,0,0]];
+        return { ...o, points: newPoints};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const removeLastPointFromPath = useCallback((id) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newPoints = o.points ? o.points.slice(0, -1) : [];
+        return { ...o, points: newPoints};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const setPointInPath = useCallback((id, pointIndex, point) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newPoints = o.points ? [...o.points] : [];
+        newPoints[pointIndex] = point;
+        return { ...o, points: newPoints};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const changePathChargeCount = useCallback((id, newCount) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        return { ...o, chargeCount: newCount};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const changePathCharge = useCallback((id, newCharge) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        return { ...o, charge: newCharge};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const changePathVelocity = useCallback((id, newVelocity) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        return { ...o, velocity: newVelocity};
+      }
+      return o;
+    }
+    ))
+  }, []);
 
   const addObject = useCallback((type, overrides = {}) => {
     const id = genUid()
@@ -356,6 +434,7 @@ const updateDirection = useCallback((id, direction) => {
     plane: sceneObjects.filter(o => o.type === 'plane').length,
     chargedSphere: sceneObjects.filter(o => o.type === 'chargedSphere').length,
     surface: sceneObjects.filter(o => o.type === 'surface').length,
+    path: sceneObjects.filter(o => o.type === 'path').length,
     total: sceneObjects.length,
   }), [sceneObjects])
 
@@ -380,6 +459,12 @@ const updateDirection = useCallback((id, direction) => {
     removeLastPlaneFromStackedPlanes,
     setSpacingForStackedPlanes,
     setChargeDensityForPlaneInStackedPlanes,
+    addPointToPath,
+    removeLastPointFromPath,
+    setPointInPath,
+    changePathChargeCount,
+    changePathCharge,
+    changePathVelocity,
     counts,
   }
 }

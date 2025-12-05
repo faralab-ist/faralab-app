@@ -25,8 +25,8 @@ export default function DimensionControls({ obj, updateObject }) {
       <div className="detail-row">
         <div className="detail-key">Dimensions (W x H)</div>
         <div className="detail-value" style={{ display: "flex", gap: 6 }}>
-          <DimInput value={obj.planeWidth ?? obj.width ?? 5} onChange={(v) => update("planeWidth", v)} />
-          <DimInput value={obj.planeHeight ?? obj.height ?? 5} onChange={(v) => update("planeHeight", v)} />
+          <DimInput value={obj.dimensions[0]} onChange={(v) => update("dimensions", [v, obj.dimensions[1]])} />
+          <DimInput value={obj.dimensions[1]} onChange={(v) => update("dimensions", [obj.dimensions[0], v])} />
         </div>
       </div>
     );

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import showVectorField from '../utils/getFieldVectors.js';
+import showVectorField, { showMagVectorField } from '../utils/getFieldVectors.js';
 import React, { useMemo, useRef, useEffect } from 'react';
 import { Instance, Instances } from '@react-three/drei';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -20,10 +20,9 @@ function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
     }
 }
 
-export default function FieldArrows({ 
+export default function MagFieldArrows({ 
      objects, 
      showOnlyPlane = false, 
-     showOnlyGaussianField = false, 
      fieldThreshold = 0.1, 
      gridSize = 10, 
      step = 1, 
@@ -38,8 +37,12 @@ export default function FieldArrows({
  }) {
     
     const vectorsUnfiltered = useMemo( 
-        () => showVectorField(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
-        [objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter]
+        () => {
+            const magField = showMagVectorField(objects, gridSize, step, showOnlyPlane, minThreshold, planeFilter)
+            //console.log(magField);
+            return magField;
+        },
+        [objects, gridSize, step, showOnlyPlane, minThreshold, planeFilter]
     );
     const vectors = vectorsUnfiltered.filter(({position, field}) => 
         sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)
@@ -48,6 +51,7 @@ export default function FieldArrows({
     // No transition / propagation: show field instantly. No previousVectors handling.
 
     const MAX_L = useMemo(() => {
+        //console.log('[useMagFieldArrows] vectors.length=', vectors.length);
         let maxL = 0;
         for (const {field} of vectors) {
             const mag = field.length();
@@ -357,7 +361,7 @@ export default function FieldArrows({
      });
  
      if (maxCount === 0) {
-         console.warn('[FieldArrows] Rendering nothing (maxCount=0)');
+         //console.warn('[FieldArrows] Rendering nothing (maxCount=0)');
          return null;
      }
  

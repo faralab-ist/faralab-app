@@ -36,6 +36,13 @@ export function presetParallelPlates(addObject, setSceneObjects) {
 }
 
 /**
+ * Caminho circular com corrente
+ */
+export function presetCurrentLoop(addObject, setSceneObjects) {
+  return applyPresetByName('currentLoop', addObject, setSceneObjects)
+}
+
+/**
  * Esfera gaussiana com carga pontual no centro
  */
 export function presetGaussianSphere(addObject, setSceneObjects) {

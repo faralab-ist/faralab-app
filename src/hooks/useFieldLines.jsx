@@ -199,8 +199,9 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
                     }
                 });
             }
-            else {
-
+            else if (obj.type === 'path') {
+                // placehodler
+            } else{
                 for (let i = 0; i < linesPerCharge; i++) {
                     const points = [];
                     const chargePos = new THREE.Vector3(...obj.position);
