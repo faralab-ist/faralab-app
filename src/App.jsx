@@ -186,7 +186,7 @@ function LoadingOverlay() {
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
 
-    const [toolbarActive, setToolbarActive] = useState(false);
+
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -359,11 +359,13 @@ function LoadingOverlay() {
     <div id="app-root">
       <div className="toolbar-root">     {/* new same-container wrapper */}
      <Toolbar 
-      creativeMode={creativeMode}
-       setCreativeMode={setCreativeMode} 
-       setSceneObjects={setSceneObjects} 
-       active={toolbarActive}
-       setActive={setToolbarActive}
+        addObject={addObject}
+        updatePosition={updatePosition}
+        sceneObjects={sceneObjects}
+        counts={counts}
+        creativeMode={creativeMode}
+        setCreativeMode={setCreativeMode} 
+        setSceneObjects={setSceneObjects} 
         useSlice={useSlice} setUseSlice={setUseSlice}
         showSliceHelper={showSlicePlaneHelper} 
         setShowSliceHelper={setShowSlicePlaneHelper}
@@ -372,17 +374,7 @@ function LoadingOverlay() {
         slicePos={slicePos} setSlicePos={setSlicePos}
         slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
        />
-       <ToolbarPopup
-          active={toolbarActive}
-          setActive={setToolbarActive}
-          popupProps={{
-            useSlice, setUseSlice,
-            showSliceHelper: showSlicePlaneHelper, setShowSliceHelper: setShowSlicePlaneHelper,
-            setSlicePlane, slicePlane,
-            slicePos, setSlicePos,
-            slicePlaneFlip, setSlicePlaneFlip
-          }}
-        />
+       
        </div>
        <div id="canvas-container">
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}

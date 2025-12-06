@@ -85,7 +85,7 @@ export default function ObjectItem({
         <div className="object-details">
           <div className="details-grid">
             {/* Position com InlineDecimalInput */}
-            {Array.isArray(obj.position) && (
+            {Array.isArray(obj.position)  && (
               <div className="detail-row">
                 <div className="detail-key">Position</div>
                 <div
