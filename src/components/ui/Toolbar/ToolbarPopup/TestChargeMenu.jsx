@@ -74,6 +74,14 @@ const clampWithError = (val, min, max) => {
 
           <div className="config-actions">
             <button 
+              onClick={handleConfirm} 
+              className="action-btn primary" 
+              title="Confirm"
+            >
+              <img src={Confirm} alt="Confirm" />
+            </button>
+            
+            <button 
               onClick={() => setPosition([0, 0, 0])} 
               className="action-btn secondary" 
               title="Reset"
@@ -81,13 +89,7 @@ const clampWithError = (val, min, max) => {
               <img src={Reset} alt="Reset" />
             </button>
             
-            <button 
-              onClick={handleConfirm} 
-              className="action-btn primary" 
-              title="Confirm"
-            >
-              <img src={Confirm} alt="Confirm" />
-            </button>
+            
           </div>
 
         </div>
