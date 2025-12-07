@@ -490,6 +490,7 @@ function LoadingOverlay() {
               <ObjectComponent
                 key={obj.id}
                 {...obj}
+                fluxValue={0} // <--- Passa o valor do fluxo aqui quando calcularmos
                 creativeMode={creativeMode}           
                 selectedId={selectedId}
                 setSelectedId={handleSelect}

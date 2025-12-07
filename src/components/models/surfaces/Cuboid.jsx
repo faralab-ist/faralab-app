@@ -3,6 +3,9 @@ import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
 
+import { Html } from '@react-three/drei'
+import FluxWindow from '../../../components/ui/FluxWindow/fluxWindow'
+
 function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
     if(!useSlice) return true;
     switch(slicePlane){
@@ -38,7 +41,10 @@ export default function Cuboid({
   rotation= [0,0,0],
   quaternion,
   updateObject,
-  isHovered
+  isHovered,
+  // flux value
+  fluxValue = 0
+
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -176,6 +182,20 @@ export default function Cuboid({
             clippingPlanes={clippingPlanes}
           />
         </mesh>
+
+        <Html
+          position={[0, (height / 2) + 0.5, 0]} // Topo do cubo
+          distanceFactor={10}
+          zIndexRange={[100, 0]}
+          style={{ 
+            transform: 'translate3d(-50%, -100%, 0)', // Ancora pela base
+            pointerEvents: 'none',
+            userSelect: 'none',
+            paddingBottom: '10px'
+          }}
+        >
+          <FluxWindow value={fluxValue} visible={true} />
+        </Html>
 
         {isSelected && (
           <group name="cuboid-normals">
