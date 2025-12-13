@@ -60,7 +60,9 @@
   
 }
 .plane-button.inactive{ opacity:.8; color:var(--muted) }
-.plane-button:hover{ transform:translateY(-4px); border-color:rgba(255,255,255,0.07) }
+.plane-button:hover{ transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15); }
 
 /* active / focused state with soft glow */
 .plane-button.active{
@@ -72,11 +74,9 @@
 }
 
 .plane-button.inactive:hover {
-  background: rgba(100, 100, 100, 0.7);
-  border-color: rgba(255, 255, 255, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-  transform: scale(1.05);
-  transform:translateY(-4px);
+transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
   transition: all .16s ease;
 }
 .plane-button:focus{

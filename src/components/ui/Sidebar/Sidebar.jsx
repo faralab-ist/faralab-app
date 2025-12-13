@@ -3,6 +3,7 @@ import ObjectList from "./ObjectList";
 import "./Sidebar.css";
 import PosChargeIcon from "../../../assets/pos_charge.svg";
 import NegChargeIcon from "../../../assets/neg_charge.svg";
+import LowercaseQIcon from "../../../assets/lowercase_q2.svg"
 import WireIcon from "../../../assets/wire.svg";
 import SphereIcon from "../../../assets/sphere.svg";
 import CuboidIcon from "../../../assets/cuboid.svg";
@@ -122,7 +123,7 @@ export default function Sidebar({
     return 'surface';
   };
 
-  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
+  const pillObjects = (objects || []).filter(o => ['charge','testPointCharge', 'wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
 
   const typeCounters = {};
   const subtypeCounters = {};
@@ -184,7 +185,7 @@ export default function Sidebar({
                   <button
                     key={item.id}
                     className={`${
-                      ['pos_charge','neg_charge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires'].includes(item.type)
+                      ['pos_charge','neg_charge','testPointCharge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires'].includes(item.type)
                         ? `${item.subtype || item.type}-icon-btn ${item.polarity || ''}`
                         : `pill ${item.subtype || item.type} minibar-pill`
                     } ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
@@ -204,6 +205,8 @@ export default function Sidebar({
                       <img src={PosChargeIcon} alt="Positive Charge" className="charge-icon" />
                     ) : item.type === 'neg_charge' ? (
                       <img src={NegChargeIcon} alt="Negative Charge" className="charge-icon" />
+                    ) : item.type === 'testPointCharge' ? (
+                      <img src={LowercaseQIcon} alt="Test Charge" className="test-charge-icon" />
                     ) : item.type === 'wire' ? (
                       <img src={WireIcon} alt="Wire" className="wire-icon" />
                     ) : item.type === 'concentricInfWires' ? (
@@ -265,7 +268,7 @@ export default function Sidebar({
               setSpacingForStackedPlanes={setSpacingForStackedPlanes}
               setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
 
-              // --- Fios (ADICIONADO AQUI) ---
+              // --- Fios ---
               addRadiusToConcentricInfiniteWire={addRadiusToChargedSphere}
               removeLastRadiusFromConcentricInfiniteWire={removeLastRadiusFromChargedSphere}
               setRadiusToConcentricInfiniteWire={setRadiusToChargedSphere}
