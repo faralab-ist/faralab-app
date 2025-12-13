@@ -85,7 +85,7 @@ export default function ObjectItem({
         <div className="object-details">
           <div className="details-grid">
             {/* Position com InlineDecimalInput */}
-            {Array.isArray(obj.position) && (
+            {Array.isArray(obj.position)  && (
               <div className="detail-row">
                 <div className="detail-key">Position</div>
                 <div
@@ -144,7 +144,7 @@ export default function ObjectItem({
                             type: "stackedPlanes",
                             charge_densities: [obj.charge_density ?? 0],
                             spacing: obj.spacing ?? 1.0,
-                            name: "Stacked Planes"
+                            
                           });
                         } else {
                           updateObject(obj.id, {
@@ -153,7 +153,7 @@ export default function ObjectItem({
                               (obj.charge_densities &&
                                 obj.charge_densities[0]) ??
                               0,
-                            name: "Plane"
+                           
                           });
                         }
                       }}
@@ -339,7 +339,7 @@ export default function ObjectItem({
             )}
 
             {/* Point charge */}
-            {obj.type === "charge" && (
+            {(obj.type === "charge" || obj.type === "testPointCharge") && (
               <div className="detail-row">
                 <div className="detail-key">Intensity C</div>
                 <div className="detail-value">

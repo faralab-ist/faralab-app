@@ -25,7 +25,7 @@ Instituto Superior Técnico (IST) – Lisbon, Portugal
 
 **Core Team**  
 - **Telmo Viana Vaz** – Project Lead, Physics Engine & UI/UX  
-- **Bernardo Grandela** – Physics Engine & Modeling  
+- **António Fortes** – Frontend & UX Development  
 - **Felipe Sant’Ana** – Field Simulation & Visualization  
 - **Gabriel Bennett Carvalho** – Frontend & Visualization  
 - **Gustavo Carvalhais** – Frontend & UI Design  
