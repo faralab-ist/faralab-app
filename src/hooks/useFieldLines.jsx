@@ -127,6 +127,7 @@ const traceFieldLineFromPoint = (startPoint, sourceObj, allObjects, stepsPerLine
         const fieldStrength = field.length();
 
         if (fieldStrength < minStrength) break;
+        if (fieldStrength > 1000) break;
 
         const direction = field.normalize();
         // For negative charge density, reverse direction
@@ -171,7 +172,7 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
             // For planes: generate field lines from multiple points on the plane surface
             if (obj.type === 'plane') {
                 // Generate field lines from various points on the plane
-                const planePoints = generatePlaneStartPoints(obj, linesPerCharge*10);
+                const planePoints = generatePlaneStartPoints(obj, Math.max(4, linesPerCharge * 0.5));
                 planePoints.forEach(planePoint => {
                     const points = traceFieldLineFromPoint(planePoint, obj, charges, 
                         stepsPerLine=stepsPerLine, stepSize=stepSize, minStrength=minStrength, planeFilter);
@@ -186,7 +187,7 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
             }
             // For wires: generate field lines from points along the wire
             else if (obj.type === 'wire') {
-                const wirePoints = generateWireStartPoints(obj, linesPerCharge*1);
+                const wirePoints = generateWireStartPoints(obj, Math.max(2, linesPerCharge * 0.3));
                 wirePoints.forEach(wirePoint => {
                     const points = traceFieldLineFromPoint(wirePoint, obj, charges, 
                         stepsPerLine=stepsPerLine, stepSize=stepSize, minStrength=minStrength, planeFilter);
@@ -206,29 +207,18 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
                     const points = [];
                     const chargePos = new THREE.Vector3(...obj.position);
                     
-                    // Direction based on charge type
-                    let startDir;
-                    if (obj.charge > 0) {
-                        const goldenRatio = (1 + Math.sqrt(5)) / 2;
-                        const theta = 2 * Math.PI * i / goldenRatio;
-                        const phi = Math.acos(1 - 2 * (i + 0.5) / linesPerCharge);
-                        
-                        startDir = new THREE.Vector3(
-                            Math.sin(phi) * Math.cos(theta),
-                            Math.sin(phi) * Math.sin(theta),
-                            Math.cos(phi)
-                        );
-                    } else {
-                        const goldenRatio = (1 + Math.sqrt(5)) / 2;
-                        const theta = 2 * Math.PI * i / goldenRatio;
-                        const phi = Math.acos(1 - 2 * (i + 0.5) / linesPerCharge);
-                        
-                        startDir = new THREE.Vector3(
-                            -Math.sin(phi) * Math.cos(theta),
-                            -Math.sin(phi) * Math.sin(theta),
-                            -Math.cos(phi)
-                        );
-                    }
+                    // Direction based on charge type (usando Fibonacci sphere)
+                    const goldenRatio = (1 + Math.sqrt(5)) / 2;
+                    const theta = 2 * Math.PI * i / goldenRatio;
+                    const phi = Math.acos(1 - 2 * (i + 0.5) / linesPerCharge);
+                    
+                    const startDir = new THREE.Vector3(
+                        Math.sin(phi) * Math.cos(theta),
+                        Math.sin(phi) * Math.sin(theta),
+                        Math.cos(phi)
+                    );
+                    
+                    if (obj.charge < 0) startDir.negate();
 
                     let currentPos = chargePos.clone().add(startDir.multiplyScalar(0.8));
                     points.push(currentPos.clone());
@@ -239,6 +229,7 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
                         const fieldStrength = field.length();
 
                         if (fieldStrength < minStrength) break;
+                        if (fieldStrength > 1000) break; // Evita explosão numérica
 
                         const direction = field.normalize();
                         if (obj.charge < 0) direction.negate();
@@ -298,7 +289,7 @@ export default function FieldLines({ charges, stepsPerLine = 30, stepSize = 0.5,
             elements.push(fieldLine);
 
             // Add arrowheads along the field line (ORIGINAL LOGIC)
-            const arrowSpacing = 4; // Fixed spacing like original
+            const arrowSpacing = Math.max(6, Math.floor(lineData.points.length / 5)); // Menos setas
             for (let i = 0; i < lineData.points.length - 1; i += arrowSpacing) {
                 if (i + 1 < lineData.points.length) {
                     const start = lineData.points[i];
