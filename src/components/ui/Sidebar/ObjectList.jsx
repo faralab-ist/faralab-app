@@ -34,7 +34,8 @@ export default function ObjectList({
   changePathChargeCount,
   changePathCharge,
   changePathVelocity,
-  ...rest
+  changeRadius,
+  changeSides 
 }) {
   const [expandedMap, setExpandedMap] = useState({});
 
@@ -80,7 +81,7 @@ export default function ObjectList({
           expanded={!!expandedMap[obj.id]}
           hovered={hoveredId === obj.id}
           toggleExpand={toggleExpand}
-          setHoveredId={setHoveredId} // Se não passares isto como prop no pai, remove aqui
+          setHoveredId={setHoveredId} 
           updateObject={updateObject}
           removeObject={removeObject}
 
@@ -119,6 +120,15 @@ export default function ObjectList({
             changeCharge: changePathCharge,
             changeVelocity: changePathVelocity
           }}
+
+          coilActions={{
+            changeChargeCount: changePathChargeCount,
+            changeCharge: changePathCharge,
+            changeVelocity: changePathVelocity,
+            changeRadius: changeRadius,
+            changeSides: changeSides
+          }}
+            
         />
       ))}
     </ul>

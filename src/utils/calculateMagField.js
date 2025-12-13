@@ -5,11 +5,13 @@ export default function calculateMagFieldAtPoint(objects, point) {
   let resultMagFieldAtPoint = new THREE.Vector3(0, 0, 0);
 
     for (const obj of objects) {
-        if (obj.type === 'path') {
+        // Handle both paths and coils (coils use path for charge animation)
+        if (obj.type === 'path' || obj.type === 'coil') {
             const objPos = new THREE.Vector3(...obj.position);
             const chargePositions = Array.isArray(obj.charges) ? obj.charges : [];
             const tangents = Array.isArray(obj.tangents) ? obj.tangents : [];
             const velocity = obj.velocity || 0;
+            
             for (let i = 0; i < chargePositions.length; i++) {
                 const chargePosArr = chargePositions[i];
                 const chargePos = objPos.clone().add(new THREE.Vector3(...chargePosArr));

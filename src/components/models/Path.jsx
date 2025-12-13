@@ -18,9 +18,14 @@ export default function Path({
   charge,
   velocity,
   creativeMode,
-    updateObject,
-    isClosedPath,
+  updateObject,
+  isClosedPath,
+  isChild,
   renderCharges = true,
+  renderPoints = true,
+  parentRotation,
+  parentQuaternion,
+  groupRef: parentGroupRef,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -162,14 +167,48 @@ export default function Path({
         tangents.push([tangent.x, tangent.y, tangent.z]);
         positions.push([pos.x, pos.y, pos.z]);
     }
-    updateObject?.(id, { tangents: tangents });
+    // Note: tangents are now updated in useFrame to include rotation
 
     return positions;
   };
 
   useFrame(() => {
     const pos = getChargePositions();
-    updateObject?.(id, { charges: pos });
+    
+    // If this is a child of a rotated parent (like a coil), apply parent's rotation
+    if (isChild && parentGroupRef?.current) {
+      const parentQuat = parentGroupRef.current.quaternion;
+      
+      // Transform charge positions and tangents by parent rotation
+      const rotatedPositions = pos.map(p => {
+        const vec = new THREE.Vector3(p[0], p[1], p[2]);
+        vec.applyQuaternion(parentQuat);
+        return [vec.x, vec.y, vec.z];
+      });
+      
+      // Get tangents from the current frame
+      const tangents = [];
+      const nCharges = pos.length;
+      for (let i = 0; i < nCharges; i++) {
+        const t = i / nCharges;
+        const tangent = catmullCurve.getTangentAt(t);
+        const rotatedTangent = tangent.clone().applyQuaternion(parentQuat);
+        tangents.push([rotatedTangent.x, rotatedTangent.y, rotatedTangent.z]);
+      }
+      
+      updateObject?.(id, { charges: rotatedPositions, tangents: tangents });
+    } else {
+      // Original behavior for non-rotated paths
+      const tangents = [];
+      const nCharges = pos.length;
+      for (let i = 0; i < nCharges; i++) {
+        const t = i / nCharges;
+        const tangent = catmullCurve.getTangentAt(t);
+        tangents.push([tangent.x, tangent.y, tangent.z]);
+      }
+      updateObject?.(id, { charges: pos, tangents: tangents });
+    }
+    
     setChargePositions(pos);
   });
 
@@ -178,7 +217,7 @@ export default function Path({
       ref={pivotRef}
       anchor={[0, 0, 0]}
       depthTest={false}
-      enabled={creativeMode && isSelected}   // CHANGED
+      enabled={creativeMode && isSelected && !isChild}   // CHANGED
       disableScaling
       disableRotations
       onDragStart={(axes) => {
@@ -199,7 +238,7 @@ export default function Path({
     >
       <group ref={groupRef}>
         {/* debug points for path */}
-        {points?.map((pt, i) => {
+        {renderPoints && points?.map((pt, i) => {
           const pos = Array.isArray(pt) ? pt : [0, 0, 0]
           return (
             <mesh

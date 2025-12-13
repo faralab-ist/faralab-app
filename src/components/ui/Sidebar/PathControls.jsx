@@ -100,70 +100,75 @@ export default function PathControls({
         </div>
       </div>
 
-      <div className="detail-row" style={{ marginTop: 8 }}>
-        <div className="detail-key">Closed path</div>
-        <div className="detail-value">
-          <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
-            <input
-              type="checkbox"
-              checked={!!obj.isClosedPath}
-              onChange={(e) => {
-                e.stopPropagation();
-                updateObject?.(obj.id, { isClosedPath: e.target.checked });
-              }}
-              onMouseDown={(e) => e.stopPropagation()}
+
+      {obj.type === 'path' && (
+  <> 
+    <div className="detail-row" style={{ marginTop: 8 }}>
+      <div className="detail-key">Closed path</div>
+      <div className="detail-value">
+        <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+          <input
+            type="checkbox"
+            checked={!!obj.isClosedPath}
+            onChange={(e) => {
+              e.stopPropagation();
+              updateObject?.(obj.id, { isClosedPath: e.target.checked });
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+          />
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>Loop</span>
+        </label>
+      </div>
+    </div>
+
+    <div className="detail-row" style={{ marginTop: 8 }}>
+      <div className="detail-key">Path points</div>
+      <div className="detail-value" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {points.map((pt, idx) => (
+          <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div style={{ width: 36, fontSize: 12, opacity: 0.8 }}>#{idx + 1}</div>
+            <NumberInput
+              value={(pt && pt[0]) ?? 0}
+              step={0.1}
+              onChange={(v) => onSetPoint(idx, 0, v)}
+              style={{ width: 80 }}
             />
-            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>Loop</span>
-          </label>
-        </div>
-      </div>
-
-      <div className="detail-row" style={{ marginTop: 8 }}>
-        <div className="detail-key">Path points</div>
-        <div className="detail-value" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {points.map((pt, idx) => (
-            <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <div style={{ width: 36, fontSize: 12, opacity: 0.8 }}>#{idx+1}</div>
-              <NumberInput
-                value={(pt && pt[0]) ?? 0}
-                step={0.1}
-                onChange={(v) => onSetPoint(idx, 0, v)}
-                style={{ width: 80 }}
-              />
-              <NumberInput
-                value={(pt && pt[1]) ?? 0}
-                step={0.1}
-                onChange={(v) => onSetPoint(idx, 1, v)}
-                style={{ width: 80 }}
-              />
-              <NumberInput
-                value={(pt && pt[2]) ?? 0}
-                step={0.1}
-                onChange={(v) => onSetPoint(idx, 2, v)}
-                style={{ width: 80 }}
-              />
-            </div>
-          ))}
-
-          <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-            <button
-              onClick={(e) => { e.stopPropagation(); addPoint?.(obj.id); }}
-              className="action-btn"
-              style={{ flex: 1, padding: 6 }}
-            >
-              + Point
-            </button>
-            <button
-              onClick={(e) => { e.stopPropagation(); removeLastPoint?.(obj.id); }}
-              className="action-btn"
-              style={{ flex: 1, padding: 6 }}
-              disabled={points.length === 0}
-            >
-              - Remove
-            </button>
+            <NumberInput
+              value={(pt && pt[1]) ?? 0}
+              step={0.1}
+              onChange={(v) => onSetPoint(idx, 1, v)}
+              style={{ width: 80 }}
+            />
+            <NumberInput
+              value={(pt && pt[2]) ?? 0}
+              step={0.1}
+              onChange={(v) => onSetPoint(idx, 2, v)}
+              style={{ width: 80 }}
+            />
           </div>
+        ))}
+
+        <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); addPoint?.(obj.id); }}
+            className="action-btn"
+            style={{ flex: 1, padding: 6 }}
+          >
+            + Point
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); removeLastPoint?.(obj.id); }}
+            className="action-btn"
+            style={{ flex: 1, padding: 6 }}
+            disabled={points.length === 0}
+          >
+            - Remove
+          </button>
         </div>
       </div>
+    </div>
+  </> 
+)}
     </>
   );
 }

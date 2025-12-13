@@ -161,13 +161,51 @@ const objectFactories = {
     velocity: 1, //speed of charges
     isClosedPath: false,
     createdAt: Date.now(),
+  }),
+  ringCoil: (index) => ({
+    id: `tmp-${index}`,
+    type: 'coil',
+    coilType: 'ring',
+    name: `Ring Coil ${index}`,
+    position: [0, 0, 0],
+    coilRadius: 1.5,
+    tubeRadius: 0.01,
+    coilColor: '#6ea8ff',
+    direction: [0, 1, 0],     // normal vector (area direction)
+    rotation: [0, 0, 0],      // Euler angles for rotation
+    chargeCount: 5,
+    charge: 1,
+    velocity: 1,
+    renderCharges: true,
+    charges: [],
+    createdAt: Date.now(),
+  }),
+  polygonCoil: (index) => ({
+    id: `tmp-${index}`,
+    type: 'coil',
+    coilType: 'polygon',
+    name: `Polygon Coil ${index}`,
+    position: [0, 0, 0],
+    coilRadius: 1.5,
+    tubeRadius: 0.01,
+    coilColor: '#6ea8ff',
+    direction: [0, 1, 0],     // normal vector (area direction)
+    rotation: [0, 0, 0],      // Euler angles for rotation
+    sides: 3,                 // default to square
+    chargeCount: 5,
+    charge: 1,
+    velocity: 1,
+    renderCharges: true,
+    charges: [],
+    createdAt: Date.now(),
   })
 }
 
 export default function useSceneObjects(initial = []) {
   const [sceneObjects, setSceneObjects] = useState(initial)
   const [counters, setCounters] = useState({
-    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0, path: 0,
+    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0, path: 0, 
+    ringCoil: 0, polygonCoil: 0
   })
 
   const addPointToPath = useCallback((id) => {
@@ -238,8 +276,21 @@ export default function useSceneObjects(initial = []) {
     const id = genUid()
 
     setSceneObjects(prev => {
-      const nextIndex = prev.filter(o => o.type === type).length + 1
-      const base = objectFactories[type](nextIndex)
+      // For coils, count by coilType if specified in overrides
+      let nextIndex
+      if (type === 'coil' || type === 'ringCoil' || type === 'polygonCoil') {
+        const coilType = overrides.coilType || (type === 'polygonCoil' ? 'polygon' : 'ring')
+        nextIndex = prev.filter(o => o.type === 'coil' && o.coilType === coilType).length + 1
+      } else {
+        nextIndex = prev.filter(o => o.type === type).length + 1
+      }
+      
+      // Map type to correct factory
+      let factoryType = type
+      if (type === 'ringCoil') factoryType = 'ringCoil'
+      else if (type === 'polygonCoil') factoryType = 'polygonCoil'
+      
+      const base = objectFactories[factoryType](nextIndex)
 
       const newObj = {
         ...base,
@@ -435,6 +486,8 @@ const updateDirection = useCallback((id, direction) => {
     chargedSphere: sceneObjects.filter(o => o.type === 'chargedSphere').length,
     surface: sceneObjects.filter(o => o.type === 'surface').length,
     path: sceneObjects.filter(o => o.type === 'path').length,
+    coil: sceneObjects.filter(o => o.type === 'coil').length,
+    ringCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'ring').length,
     total: sceneObjects.length,
   }), [sceneObjects])
 

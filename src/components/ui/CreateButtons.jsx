@@ -165,6 +165,8 @@ export default function CreateButtons({
             <button onClick={() => addObject('plane', { position: [0,0,0] })}>Add Plane</button>
               <button onClick={() => addObject('chargedSphere', { position: [0,0,0] })}>Add Charged Sphere</button>
               <button onClick={() => addObject('path', { position: [0,0,0] })}>Add Path</button>
+              <button onClick={() => addObject('ringCoil', { position: [0,0,0] }) }>Add Ring Coil</button>
+              <button onClick={() => addObject('polygonCoil', { position: [0,0,0]}) }>Add Polygon Coil</button>
            {/*    <button onClick={() => addObject('concentricSpheres', { position: [0,0,0] })}>Add Concentric Sphere System</button>
               <button onClick={() => addObject('concentricInfWires', { position: [0,0,0] })}>Add Concentric Infinite Wire System</button>
               <button onClick={() => addObject('stackedPlanes', { position: [0,0,0] })}>Add Stacked Planes</button> */} 

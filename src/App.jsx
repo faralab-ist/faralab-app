@@ -8,6 +8,9 @@ import React, { useState, useEffect, useMemo } from 'react'
   // Core components
   import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, Path} from './components/models'
 
+  // Coil components
+  import { RingCoil, PolygonCoil } from './components/models/coils'
+
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
 
@@ -498,6 +501,15 @@ function LoadingOverlay() {
                 case 'concentricInfWires': ObjectComponent = ConcentricInfiniteWires; break
                 case 'stackedPlanes': ObjectComponent = StackedPlanes; break
                 case 'path': ObjectComponent = Path; break
+                case 'coil':
+                  // Select coil component based on coilType
+                  switch(obj.coilType) {
+                    case 'ring': ObjectComponent = RingCoil; break
+                    case 'polygon': ObjectComponent = PolygonCoil; break
+                    default: ObjectComponent = RingCoil; break
+                  }
+                  break
+                case 'ringCoil': ObjectComponent = RingCoil; break // Legacy support
                 default: return null;
               } 
             }

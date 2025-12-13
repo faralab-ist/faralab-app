@@ -55,7 +55,8 @@ export function buildChargeTextures(objects){
     const factor = [];
     const MU_04PI = MU_0 / (4 * Math.PI);
     for (const obj of objects){
-        if (obj.type !== 'path') continue;
+        // Handle both paths and coils (coils use path for charge animation)
+        if (obj.type !== 'path' && obj.type !== 'coil') continue;
         const basePos = obj.position;
         const positions = Array.isArray(obj.charges) ? obj.charges : [];
         const vel = Number.isFinite(obj.velocity) ? obj.velocity : 0.0;

@@ -18,8 +18,9 @@ export default function ObjectItem({
   removeObject,
   stackedPlaneActions,
   concentricActions,
-  concentricWireActions, // <--- 2. RECEBER PROPS NOVAS
+  concentricWireActions, 
   pathActions,
+  coilActions,
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
 
@@ -246,6 +247,17 @@ export default function ObjectItem({
                   changeChargeCount={pathActions?.changeChargeCount}
                   changeCharge={pathActions?.changeCharge}
                   changeVelocity={pathActions?.changeVelocity}
+                  updateObject={updateObject}
+                  setErrorMsg={setErrorMsg}
+              />
+            )}
+
+            {obj.type === 'coil' && (
+              <PathControls
+                  obj={obj}
+                  changeChargeCount={coilActions?.changeChargeCount}
+                  changeCharge={coilActions?.changeCharge}
+                  changeVelocity={coilActions?.changeVelocity}
                   updateObject={updateObject}
                   setErrorMsg={setErrorMsg}
               />
