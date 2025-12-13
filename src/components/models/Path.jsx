@@ -126,6 +126,7 @@ export default function Path({
 
     let curve = new THREE.CatmullRomCurve3(uniquePts);
     curve.closed = isClosedPath;
+    //console.log("is closed: ", curve.closed);
     return curve;
   }, [points, isClosedPath]);
 
@@ -176,6 +177,12 @@ export default function Path({
     const pos = getChargePositions();
     
     // If this is a child of a rotated parent (like a coil), apply parent's rotation
+
+    const curveLength = catmullCurve.getLength();
+    const nCharges = pos.length;
+    const timePerLoop = curveLength / Math.max(0.1, Math.abs(velocity));
+    const currLoopTime = clockRef.current ? clockRef.current.getElapsedTime() % timePerLoop : 0;
+    let currLoopt = currLoopTime / timePerLoop;
     if (isChild && parentGroupRef?.current) {
       const parentQuat = parentGroupRef.current.quaternion;
       
@@ -190,25 +197,29 @@ export default function Path({
       const tangents = [];
       const nCharges = pos.length;
       for (let i = 0; i < nCharges; i++) {
-        const t = i / nCharges;
+        let t = (i / nCharges + currLoopt) % 1;
+        t = velocity >= 0 ? t : (1 - t);
         const tangent = catmullCurve.getTangentAt(t);
+        //console.log("Original tangent:", tangent);
         const rotatedTangent = tangent.clone().applyQuaternion(parentQuat);
         tangents.push([rotatedTangent.x, rotatedTangent.y, rotatedTangent.z]);
       }
-      
+      //console.log("Applying parent rotation to path charges");
       updateObject?.(id, { charges: rotatedPositions, tangents: tangents });
     } else {
+      //console.log("Not applying parent rotation");
       // Original behavior for non-rotated paths
       const tangents = [];
       const nCharges = pos.length;
       for (let i = 0; i < nCharges; i++) {
-        const t = i / nCharges;
+        let t = (i / nCharges + currLoopt) % 1;
+        t = velocity >= 0 ? t : (1 - t);
         const tangent = catmullCurve.getTangentAt(t);
+        //console.log("Tangent:", tangent);
         tangents.push([tangent.x, tangent.y, tangent.z]);
       }
       updateObject?.(id, { charges: pos, tangents: tangents });
     }
-    
     setChargePositions(pos);
   });
 
