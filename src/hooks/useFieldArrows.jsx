@@ -1,10 +1,6 @@
 import * as THREE from 'three';
-import showVectorField from '../utils/getFieldVectors.js';
-import React, { useMemo, useRef, useEffect } from 'react';
-import { Instance, Instances } from '@react-three/drei';
-import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import vertexShaderSource from '../shaders/arrowVertex.glsl';
-import fragmentShaderSource from '../shaders/arrowFragment.glsl';
+import getFieldVector3 from '../utils/getFieldVectors.js';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 
 // returns true if point is 'after' the plane
@@ -33,314 +29,171 @@ export default function FieldArrows({
     slicePlane,
     slicePos,
     useSlice,
-    slicePlaneFlip
+    slicePlaneFlip,
+    propagationSpeed = 2, // units per second
+    enablePropagation = true
 }) {
+    const [propagationRadius, setPropagationRadius] = useState(0);
+    const [updateTrigger, setUpdateTrigger] = useState(0);
+    const vectorsFilteredRef = useRef([]);
+    const vectorMapRef = useRef(new Map());
+    const objectPositionsRef = useRef([]);
+    const updatedKeysRef = useRef(new Set());
+    const objectsKeyRef = useRef('');
     
     const vectorsUnfiltered = useMemo( 
-        () => showVectorField(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
-        [objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter]
+        () => getFieldVector3(objects, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter),
+        [objects, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter]
     );
+    
     const vectors = vectorsUnfiltered.filter(({position, field}) => 
         sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)
     );
     
-    // No transition / propagation: show field instantly. No previousVectors handling.
-
-    const MAX_L = useMemo(() => {
-        let maxL = 0;
-        for (const {field} of vectors) {
-            const mag = field.length();
-            if (mag > maxL) maxL = mag;
-        }
-        return maxL;
-    }, [vectors]);
-
-    // avoid divide-by-zero / NaN if no field
-    const logMax = MAX_L > 0 ? Math.log1p(MAX_L) : 1;
-    
-    const arrowGeometry = useMemo(() => { 
-        const s = scaleMultiplier || 1;
-        const shaft = new THREE.CylinderGeometry(0.01, 0.01, 0.8 * s, 6);
-        const head = new THREE.ConeGeometry(0.05, 0.2, 8);
-        head.translate(0, 0.4 * s, 0);
-        const merged = BufferGeometryUtils.mergeGeometries([shaft, head]);
-        merged.computeVertexNormals();
-        merged.translate(0, 0.4 * s, 0);
-        merged.computeBoundingSphere();
-        return merged;
-    }, [scaleMultiplier]);
-
-    // Função helper para criar os atributos instanciados
-    const createInstancedAttributes = React.useCallback((vectorList, isOld = false) => {
-        // Deduplicate nearby positions (to avoid multiple arrows at the exact same point)
-        // We'll quantize positions to a small grid and accumulate fields for duplicates.
-        const quant = 1e-2; // quantization for dedupe (adjust if needed)
-        const map = new Map();
-        for (const { position, field } of vectorList) {
-            const key = `${Math.round(position.x / quant)}|${Math.round(position.y / quant)}|${Math.round(position.z / quant)}`;
-            const entry = map.get(key);
-            if (!entry) {
-                map.set(key, { position: position.clone(), field: field.clone(), count: 1 });
-            } else {
-                entry.field.add(field);
-                entry.count++;
-            }
-        }
-
-        const unique = [];
-        for (const v of map.values()) {
-            // average the accumulated field to avoid bias
-            v.field.divideScalar(v.count);
-            unique.push({ position: v.position, field: v.field });
-        }
-
-        const positions = new Float32Array(unique.length * 3);
-        const directions = new Float32Array(unique.length * 3);
-        const scales = new Float32Array(unique.length);
-        const colors = new Float32Array(unique.length * 3);
-        const delays = new Float32Array(unique.length);
-
-        // compute object centers and max distance for delay normalization
-        const objectCenters = (objects && objects.length)
-            ? objects.map(o => new THREE.Vector3(...(o.position || [0, 0, 0])))
-            : [new THREE.Vector3(0, 0, 0)];
-
-        let maxDist = 0;
-        for (const { position } of unique) {
-            let minD = Infinity;
-            for (const c of objectCenters) {
-                const d = position.distanceTo(c);
-                if (d < minD) minD = d;
-            }
-            if (!isFinite(minD)) minD = position.length();
-            if (minD > maxDist) maxDist = minD;
-        }
-
-        let i = 0;
-        for (const { position, field } of unique) {
-            const mag = field.length();
-            if (mag <= fieldThreshold) continue;
-            const logMag = Math.log1p(mag);
-            const normalized = logMax > 0 ? Math.min(Math.max(logMag / logMax, 0), 1) : 0;
-            const hue = (1 - normalized) * 0.66;
-            const color = new THREE.Color().setHSL(hue, 1, 0.5);
-            const dir = field.clone().normalize();
-
-            positions[i * 3] = position.x;
-            positions[i * 3 + 1] = position.y;
-            positions[i * 3 + 2] = position.z;
-
-            directions[i * 3] = dir.x;
-            directions[i * 3 + 1] = dir.y;
-            directions[i * 3 + 2] = dir.z;
-
-            const parameter = 1 - Math.exp(-logMag);
-            scales[i] = (Math.min(Math.max(parameter, 0), 1.0));
-
-            colors[i * 3] = color.r;
-            colors[i * 3 + 1] = color.g;
-            colors[i * 3 + 2] = color.b;
-
-            let minDistToObject = Infinity;
-            for (const c of objectCenters) {
-                const d = position.distanceTo(c);
-                if (d < minDistToObject) minDistToObject = d;
-            }
-            if (!isFinite(minDistToObject)) minDistToObject = position.length();
-            const dist = minDistToObject;
-            delays[i] = maxDist > 0 ? dist / maxDist : 0;
-
-            i++;
-        }
-
-        return { positions, directions, scales, colors, delays, count: i };
-    }, [objects, fieldThreshold, logMax]);
-
-    // Criar geometria e material para os vetores atuais
-    const currentGeometry = useMemo(() => {
-        const geom = arrowGeometry.clone();
-        const attrs = createInstancedAttributes(vectors);
-        
-        geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(attrs.positions, 3));
-        geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(attrs.directions, 3));
-        geom.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(attrs.scales, 1));
-        geom.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(attrs.colors, 3));
-        geom.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(attrs.delays, 1));
-        geom.instanceCount = attrs.count;
-        
-        return geom;
-    }, [vectors, arrowGeometry, createInstancedAttributes]);
-
-    // Criar geometria para vetores antigos (se existirem)
-    // no previous geometry — immediate rendering only
-
-    // shader material: no propagation uniforms, render fully visible
-    const materialRef = useRef();
-    const meshRef = useRef();
-    const startTimeRef = useRef(0);
-
-    const material = useMemo(() => {
-        const m = new THREE.ShaderMaterial({
-            vertexShader: vertexShaderSource,
-            fragmentShader: fragmentShaderSource,
-            vertexColors: true,
-            transparent: true
-        });
-        return m;
-    }, [vertexShaderSource, fragmentShaderSource]);
-
-    // keep ref to material
-    materialRef.current = material;
-
-    // Track if animation is complete
-    const animationCompleteRef = useRef(false);
-    
-    // Create stable key for vectors to prevent re-runs
-    const vectorsKey = useMemo(() => {
-        return JSON.stringify(vectors.map(v => [
-            Math.round(v.position.x * 100) / 100,
-            Math.round(v.position.y * 100) / 100,
-            Math.round(v.position.z * 100) / 100,
-            Math.round(v.field.length() * 100) / 100
-        ]));
-    }, [vectors]);
-
-    // Setup geometry once when vectors change - ORDER BY DISTANCE TO OBJECTS
+    // Reset propagation when objects change
     useEffect(() => {
-        const mesh = meshRef.current;
-        if (!mesh) {
-            return;
-        }
-
-        // Compute attributes fresh
-        const attrs = createInstancedAttributes(vectors);
-        const maxCount = attrs.count || 0;
-
-        if (maxCount === 0) {
-            console.warn('[FieldArrows] No instances to render');
-            mesh.count = 0;
-            return;
-        }
-
-        console.log('[FieldArrows] Setting up geometry with', maxCount, 'instances');
-
-        // Build distance list - special handling for planes
-        const vectorsWithDist = [];
+        const objectsKey = JSON.stringify(objects);
         
-        for (let i = 0; i < maxCount; i++) {
-            const px = attrs.positions[i * 3];
-            const py = attrs.positions[i * 3 + 1];
-            const pz = attrs.positions[i * 3 + 2];
-            const pos = new THREE.Vector3(px, py, pz);
+        if (enablePropagation && objectsKey !== objectsKeyRef.current) {
+            objectsKeyRef.current = objectsKey;
             
-            // Calculate distance differently for planes
-            let minDist = Infinity;
+            // Keep existing vectors, will update them gradually
+            if (vectorsFilteredRef.current.length === 0) {
+                vectorsFilteredRef.current = vectors;
+            }
             
+            // Cache object positions as Vector3
+            objectPositionsRef.current = objects.map(obj => 
+                new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z)
+            );
+            
+            // Build position map for fast lookup
+            vectorMapRef.current.clear();
+            updatedKeysRef.current.clear(); // CRITICAL: limpa o set para nova propagação
+            vectorsFilteredRef.current.forEach((v, i) => {
+                const key = `${v.position.x.toFixed(2)},${v.position.y.toFixed(2)},${v.position.z.toFixed(2)}`;
+                vectorMapRef.current.set(key, i);
+            });
+            
+            setPropagationRadius(0);
+        } else if (!enablePropagation) {
+            vectorsFilteredRef.current = vectors;
+        }
+    }, [objects, vectors, enablePropagation]);
+    
+    // Calculate max distance for propagation
+    const maxDistance = useMemo(() => {
+        let max = 0;
+        for (const {position} of vectors) {
+            // Find distance to nearest object
+            let minDistToObject = Infinity;
             for (const obj of objects) {
-                const objPos = new THREE.Vector3(...(obj.position || [0, 0, 0]));
-                
-                if (obj.type === 'plane') {
-                    // For planes: distance is measured along the field direction (perpendicular to plane)
-                    const planeNormal = new THREE.Vector3(...(obj.direction || [0, 1, 0])).normalize();
-                    const toPoint = pos.clone().sub(objPos);
-                    // Distance along normal direction (field propagates perpendicular to plane)
-                    const distAlongNormal = Math.abs(toPoint.dot(planeNormal));
-                    if (distAlongNormal < minDist) minDist = distAlongNormal;
-                } else {
-                    // For point charges/wires/spheres: radial distance
-                    const d = pos.distanceTo(objPos);
-                    if (d < minDist) minDist = d;
-                }
+                const objPos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
+                const dist = position.distanceTo(objPos);
+                if (dist < minDistToObject) minDistToObject = dist;
+            }
+            if (minDistToObject > max) max = minDistToObject;
+        }
+        return max;
+    }, [vectors, objects]);
+    
+    // Animate propagation radius
+    useFrame((state, delta) => {
+        if (!enablePropagation) return;
+        
+        setPropagationRadius(prev => {
+            const newRadius = prev + propagationSpeed * delta;
+            // Stop growing after max distance to prevent infinite growth
+            return newRadius > maxDistance ? maxDistance : newRadius;
+        });
+        
+        let updated = false;
+        
+        // Update vectors inside current radius from any object
+        for (const newVector of vectors) {
+            const key = `${newVector.position.x.toFixed(2)},${newVector.position.y.toFixed(2)},${newVector.position.z.toFixed(2)}`;
+            
+            // Skip if already updated
+            if (updatedKeysRef.current.has(key)) continue;
+            
+            // Find distance to nearest object (cached positions)
+            let minDistToObject = Infinity;
+            for (const objPos of objectPositionsRef.current) {
+                const dist = newVector.position.distanceTo(objPos);
+                if (dist < minDistToObject) minDistToObject = dist;
             }
             
-            if (!isFinite(minDist)) minDist = pos.length();
-            vectorsWithDist.push({ index: i, dist: minDist });
+            // Update if inside radius
+            if (minDistToObject <= propagationRadius) {
+                const index = vectorMapRef.current.get(key);
+                
+                if (index !== undefined) {
+                    vectorsFilteredRef.current[index] = newVector;
+                } else {
+                    vectorsFilteredRef.current.push(newVector);
+                    vectorMapRef.current.set(key, vectorsFilteredRef.current.length - 1);
+                }
+                updatedKeysRef.current.add(key);
+                updated = true;
+            }
         }
-
-        // SORT by distance (propagate from objects outward)
-        vectorsWithDist.sort((a, b) => a.dist - b.dist);
-
-        // Setup geometry with SORTED attributes
-        const geom = arrowGeometry.clone();
-        const posArray = new Float32Array(maxCount * 3);
-        const dirArray = new Float32Array(maxCount * 3);
-        const scaleArray = new Float32Array(maxCount);
-        const colorArray = new Float32Array(maxCount * 3);
-        const delayArray = new Float32Array(maxCount);
-
-        for (let i = 0; i < maxCount; i++) {
-            const srcIdx = vectorsWithDist[i].index;
-            posArray[i * 3] = attrs.positions[srcIdx * 3];
-            posArray[i * 3 + 1] = attrs.positions[srcIdx * 3 + 1];
-            posArray[i * 3 + 2] = attrs.positions[srcIdx * 3 + 2];
-            dirArray[i * 3] = attrs.directions[srcIdx * 3];
-            dirArray[i * 3 + 1] = attrs.directions[srcIdx * 3 + 1];
-            dirArray[i * 3 + 2] = attrs.directions[srcIdx * 3 + 2];
-            scaleArray[i] = attrs.scales[srcIdx];
-            colorArray[i * 3] = attrs.colors[srcIdx * 3];
-            colorArray[i * 3 + 1] = attrs.colors[srcIdx * 3 + 1];
-            colorArray[i * 3 + 2] = attrs.colors[srcIdx * 3 + 2];
-            delayArray[i] = attrs.delays[srcIdx];
-        }
-
-        geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(posArray, 3));
-        geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(dirArray, 3));
-        geom.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(scaleArray, 1));
-        geom.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(colorArray, 3));
-        geom.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(delayArray, 1));
-
-        mesh.geometry = geom;
-        mesh.frustumCulled = false;
-        mesh.count = 0; // start with nothing visible
-
-        // Reset animation state
-        startTimeRef.current = Date.now();
-        animationCompleteRef.current = false;
-
-        console.log('[FieldArrows] Geometry setup complete, starting animation from objects outward');
-
-        return () => {
-            geom.dispose();
-        };
-    }, [vectorsKey, arrowGeometry]);
-
-    // Get maxCount for useFrame
-    const attrs = useMemo(() => createInstancedAttributes(vectors), [vectors, createInstancedAttributes]);
-    const maxCount = attrs.count || 0;
-
-    // Animate instance count ONCE (no loop) - stop when complete
-    useFrame(() => {
-        const mesh = meshRef.current;
-        if (!mesh || !mesh.material || maxCount === 0) return;
-
-        // Skip if animation already complete
-        if (animationCompleteRef.current) return;
-
-        const elapsed = (Date.now() - startTimeRef.current) / 1000; // seconds
-        const animDuration = (gridSize / step) * .07; // 50ms per ring
-
-        const progress = Math.min(elapsed / animDuration, 1.0);
-        const targetCount = Math.floor(progress * maxCount);
         
-        if (progress < 1.0) {
-            // Animation in progress
-            if (mesh.count !== targetCount) {
-                mesh.count = targetCount;
-            }
-        } else {
-            // Animation complete - set final count and mark as done
-            if (mesh.count !== maxCount) {
-                mesh.count = maxCount;
-            }
-            animationCompleteRef.current = true;
-            console.log('[FieldArrows] Animation complete - showing all', maxCount, 'instances');
+        if (updated) {
+            setUpdateTrigger(prev => prev + 1);
         }
     });
+    
+    const arrowGroup = useMemo(() => {
+        const vectorsToRender = enablePropagation ? vectorsFilteredRef.current : vectors;
+        
+        // Find max magnitude for normalization
+        let maxMag = 0;
+        for (const {field} of vectorsToRender) {
+            const mag = field.length();
+            if (mag > maxMag) maxMag = mag;
+        }
+        const logMax = maxMag > 0 ? Math.log1p(maxMag) : 1;
+        
+        const group = new THREE.Group();
+        
+        for (const { position, field } of vectorsToRender) {
+            const mag = field.length();
+            if (mag <= fieldThreshold) continue;
+            
+            const logMag = Math.log1p(mag);
+            
+            // Color: red (strong) to blue (weak)
+            const normalized = logMax > 0 ? logMag / logMax : 0;
+            const hue = (1 - normalized) * 0.66;
+            const color = new THREE.Color().setHSL(hue, 1, 0.5);
+            
+            // Scale based on magnitude
+            const scale = (1 - Math.exp(-logMag));
+            const length = scale * scaleMultiplier;
+            const headLength = scale * 0.2;
+            const headWidth = scale * 0.1;
+            
+            // Direction
+            const dir = field.clone().normalize();
+            
+            // Create ArrowHelper
+            const arrow = new THREE.ArrowHelper(
+                dir,
+                position,
+                length,
+                color,
+                headLength,
+                headWidth
+            );
+            
+            // Make shaft thicker
+            arrow.line.scale.set(10, 10, 10);
+            
+            group.add(arrow);
+        }
+        
+        return group;
+    }, [vectorsFilteredRef.current, vectors, enablePropagation, fieldThreshold, scaleMultiplier, updateTrigger]);
 
-    if (maxCount === 0) {
-        console.warn('[FieldArrows] Rendering nothing (maxCount=0)');
-        return null;
-    }
-
-    return <instancedMesh ref={meshRef} args={[arrowGeometry, material, maxCount]} />;
+    return <primitive object={arrowGroup} />;
 }

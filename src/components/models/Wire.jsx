@@ -52,7 +52,7 @@ function Wire({
 
   // Apply rotation from saved quaternion or direction
   useLayoutEffect(() => {
-    if (!groupRef.current || isDraggingRef.current) return
+    if (!groupRef.current) return
 
     // Prefer quaternion if available (most accurate)
     if (quaternion && quaternion.length === 4) {
@@ -60,7 +60,7 @@ function Wire({
       groupRef.current.quaternion.copy(q)
 
       // keep direction in sync with quaternion: local Z is our "forward"
-      if (typeof updateDirection === 'function') {
+      if (typeof updateDirection === 'function' && !isDraggingRef.current) {
         const dirWorld = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
         const [dx = 0, dy = 0, dz = 0] = direction || []
         const eps = 1e-6
@@ -76,7 +76,7 @@ function Wire({
       const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
       groupRef.current.rotation.copy(e)
       // compute resulting forward direction (local Z) and update object if changed
-      if (typeof updateDirection === 'function') {
+      if (typeof updateDirection === 'function' && !isDraggingRef.current) {
         const dirWorld = new THREE.Vector3(0, 0, 1).applyEuler(e).normalize()
         const [dx = 0, dy = 0, dz = 0] = direction || []
         const eps = 1e-6
@@ -88,7 +88,7 @@ function Wire({
     }
 
     // Fallback to direction vector -> quaternion using local Z as base
-    if (direction) {
+    if (direction && !isDraggingRef.current) {
       const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
       if (dir.lengthSq() === 0) return
       dir.normalize()
@@ -118,6 +118,9 @@ function Wire({
         const s = new THREE.Vector3()
         matrix.decompose(p, q, s)
 
+        // Apply transform immediately to groupRef for visual sync
+        groupRef.current.position.copy(p)
+        groupRef.current.quaternion.copy(q)
 
         const pWorld = new THREE.Vector3().setFromMatrixPosition(matrix)
         updatePosition(id, [pWorld.x, pWorld.y, pWorld.z])
@@ -146,7 +149,10 @@ function Wire({
             charge_density,
             infinite,
             material,
-            direction,
+            direction, // This updates reactively
+            position, // Include position in userData
+            height,
+            radius,
           }}
           position={[0, 0, 0]}
           // rotate mesh so its native Y-axis (three.js cylinder) aligns with local Z used by group
