@@ -5,6 +5,7 @@ import StackedPlaneControls from "./StackedPlaneControls";
 import ConcentricSphereControls from "./ConcentricSphereControls";
 import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls"; 
 import PathControls from "./PathControls";
+import CoilControls from "./CoilControls";
 import RotationControls from "./RotationControls"; // <--- add rotation controls
 import { TYPE_CONFIG, POS_MIN, POS_MAX, VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
@@ -253,14 +254,23 @@ export default function ObjectItem({
             )}
 
             {obj.type === 'coil' && (
-              <PathControls
-                  obj={obj}
-                  changeChargeCount={coilActions?.changeChargeCount}
-                  changeCharge={coilActions?.changeCharge}
-                  changeVelocity={coilActions?.changeVelocity}
-                  updateObject={updateObject}
-                  setErrorMsg={setErrorMsg}
-              />
+              <>
+                <PathControls
+                    obj={obj}
+                    changeChargeCount={coilActions?.changeChargeCount}
+                    changeCharge={coilActions?.changeCharge}
+                    changeVelocity={coilActions?.changeVelocity}
+                    updateObject={updateObject}
+                    setErrorMsg={setErrorMsg}
+                />
+                <CoilControls
+                    obj={obj}
+                    changeRadius={coilActions?.changeRadius}
+                    changeSides={coilActions?.changeSides}
+                    updateObject={updateObject}
+                    setErrorMsg={setErrorMsg}
+                />
+              </>
             )}
 
             {/* A) Plano Normal */}

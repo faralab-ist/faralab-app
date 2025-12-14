@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react'
+import React, { useMemo, useCallback, useEffect } from 'react'
 import * as THREE from 'three'
 import BaseCoil from './BaseCoil'
 
@@ -63,6 +63,46 @@ export default function RingCoil({
     return points
   }, [coilRadius])
 
+  // Generate grid of surface points inside the ring (XZ plane)
+  // Memoized to avoid recalculation - transformation happens on-demand
+  const getRingSurfacePoints = useCallback((resolution = 20) => {
+    const points = []
+    const gridSize = (2 * coilRadius) / resolution
+
+    // Get rotation quaternion at time of call
+    const quat = quaternion && quaternion.length === 4
+      ? new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+      : new THREE.Quaternion().setFromEuler(new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ'))
+    
+    const posVec = new THREE.Vector3(position[0], position[1], position[2])
+
+    // Create grid and test if points are inside the circle
+    for (let i = 0; i < resolution; i++) {
+      for (let j = 0; j < resolution; j++) {
+        const x = -coilRadius + (i + 0.5) * gridSize
+        const z = -coilRadius + (j + 0.5) * gridSize
+        const y = 0 // Ring lies in XZ plane (local space)
+
+        // Check if point is inside the circle
+        const distFromCenter = Math.sqrt(x * x + z * z)
+        if (distFromCenter <= coilRadius) {
+          // Transform to world space: apply rotation then add position
+          const localPoint = new THREE.Vector3(x, y, z)
+          const worldPoint = localPoint.applyQuaternion(quat).add(posVec)
+          
+          // Round to 4 decimal places to avoid floating-point precision issues
+          points.push([
+            Math.round(worldPoint.x * 10000) / 10000,
+            Math.round(worldPoint.y * 10000) / 10000,
+            Math.round(worldPoint.z * 10000) / 10000
+          ])
+        }
+      }
+    }
+
+    return points
+  }, [coilRadius]) // Only depend on coilRadius, capture rotation/position at call time
+
   // Ring geometry (toroid)
   const ringGeometry = useMemo(() => {
     const torusGeo = new THREE.TorusGeometry(coilRadius, tubeRadius, 16, 64)
@@ -71,6 +111,22 @@ export default function RingCoil({
     return torusGeo
   }, [coilRadius, tubeRadius])
 
+  /*// TEST: Log surface points on mount and expose to window for testing
+  useEffect(() => {
+    const testPoints = getRingSurfacePoints(10)
+    console.log(`[RingCoil ${id}] Surface points (resolution=10):`, testPoints)
+    console.log(`[RingCoil ${id}] Total points: ${testPoints.length}`)
+    
+    // Expose to window for manual testing
+    window.testRingSurface = (resolution = 20) => {
+      const points = getRingSurfacePoints(resolution)
+      console.log(`Ring surface points (resolution=${resolution}):`, points)
+      console.log(`Total points: ${points.length}`)
+      console.log(`Sample point:`, points[0])
+      return points
+    }
+  }, [id, getRingSurfacePoints])
+*/
   return (
     <BaseCoil
       id={id}
@@ -97,6 +153,7 @@ export default function RingCoil({
       isClosedPath={true}
       computeNormal={computeRingNormal}
       getPathPoints={getCirclePoints}
+      getSurfacePoints={getRingSurfacePoints}
       coilGeometry={
         <mesh
           geometry={ringGeometry}

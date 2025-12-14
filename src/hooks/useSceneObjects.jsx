@@ -486,7 +486,7 @@ const updateDirection = useCallback((id, direction) => {
     chargedSphere: sceneObjects.filter(o => o.type === 'chargedSphere').length,
     surface: sceneObjects.filter(o => o.type === 'surface').length,
     path: sceneObjects.filter(o => o.type === 'path').length,
-    coil: sceneObjects.filter(o => o.type === 'coil').length,
+    polygonCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'polygon').length,
     ringCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'ring').length,
     total: sceneObjects.length,
   }), [sceneObjects])

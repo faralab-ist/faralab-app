@@ -92,6 +92,9 @@ const handlers = {
   },
 };
 
+// Coil uses the same handler as path since it has charges
+handlers.coil = handlers.path;
+
 export default function calculateFieldAtPoint(objects = [], targetPosArr) {
   const targetPos = toVec3(targetPosArr);
   let result = new THREE.Vector3(0, 0, 0);
