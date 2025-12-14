@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react'
+import React, { useRef, useEffect, useMemo } from 'react'
 import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
+import CuboidShape from '../../../Surfaces/cuboidShape'
 
 function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
     if(!useSlice) return true;
@@ -43,20 +44,9 @@ export default function Cuboid({
   const isSelected = id === selectedId
   const meshRef = useRef()
   const pivotRef = useRef()
-  const rootRef = useRef()                 // 👈 new: move this group, not the mesh
-  const [center, setCenter] = useState([0, 0, 0])
+  const rootRef = useRef()                 // 👈 move this group, not the mesh
+  const center = useMemo(() => [0, 0, 0], [])
   const clickArmed = useRef(false) // 👈 adia a seleção para o pointerup
-
-  // ⚙️ Recalcula o centro da geometria sempre que as dimensões e posição mudam
-  useEffect(() => {
-    if (meshRef.current?.geometry) {
-      meshRef.current.geometry.computeBoundingBox()
-      const box = meshRef.current.geometry.boundingBox
-      const centerVec = new THREE.Vector3()
-      box.getCenter(centerVec)
-      setCenter([centerVec.x, centerVec.y, centerVec.z])
-    }
-  }, [width, height, depth])
 
   // ⚙️ Mantém o objeto sincronizado com a posição global
   useEffect(() => {
@@ -83,16 +73,8 @@ export default function Cuboid({
     rootRef.current.quaternion.identity()
   }, [rotation, quaternion, isDragging])
 
-  const faceNormals = useMemo(() => {
-    const n = []
-    n.push({ origin: new THREE.Vector3(+width / 2, 0, 0), dir: new THREE.Vector3(1, 0, 0) })
-    n.push({ origin: new THREE.Vector3(-width / 2, 0, 0), dir: new THREE.Vector3(-1, 0, 0) })
-    n.push({ origin: new THREE.Vector3(0, +height / 2, 0), dir: new THREE.Vector3(0, 1, 0) })
-    n.push({ origin: new THREE.Vector3(0, -height / 2, 0), dir: new THREE.Vector3(0, -1, 0) })
-    n.push({ origin: new THREE.Vector3(0, 0, +depth / 2), dir: new THREE.Vector3(0, 0, 1) })
-    n.push({ origin: new THREE.Vector3(0, 0, -depth / 2), dir: new THREE.Vector3(0, 0, -1) })
-    return n
-  }, [width, height, depth])
+  const cuboid = useMemo(() => new CuboidShape({ width, height, depth }), [width, height, depth])
+  const faceNormals = useMemo(() => cuboid.getFaceNormals(), [cuboid])
 
   const arrowLen = useMemo(
     () => Math.max(0.1, Math.min(width, height, depth) * 0.35),
@@ -196,4 +178,3 @@ export default function Cuboid({
     </PivotControls>
   )
 }
-

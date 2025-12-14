@@ -17,7 +17,8 @@ import React, { useState, useEffect, useMemo } from 'react'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
-  import Toolbar from './components/ui/Toolbar/Toolbar' // already imported below in your file; keep as-is
+import Toolbar from './components/ui/Toolbar/Toolbar' // already imported below in your file; keep as-is
+import calculateFlux from './utils/calculateFlux'
 
   // Hooks
   import {useSceneObjects, 
@@ -263,6 +264,22 @@ function LoadingOverlay() {
         setShowOnlyGaussianField(false)
       }
     }, [counts.surface, showOnlyGaussianField])
+
+    useEffect(() => {
+      if (!showOnlyGaussianField) return
+      const surfaces = sceneObjects?.filter(obj => obj?.type === 'surface') ?? []
+      if (!surfaces.length) return
+
+      const results = calculateFlux(sceneObjects)
+      if (!results.length) return
+
+      console.log('[Flux] Gaussian surface results:')
+      results.forEach(result => {
+        const label = result.name ?? result.id
+        const value = Number.isFinite(result.flux) ? result.flux : 0
+        console.log(`  ${label}: ${value.toExponential(3)} N·m²/C`)
+      })
+    }, [showOnlyGaussianField, sceneObjects])
     const [camFns, setCamFns] = useState(null)
 
     const handlePlaneSelect = (plane) => {
