@@ -174,12 +174,45 @@ export function estimateWireEnclosedCharge(surface, wire) {
 
 // Simple bounding-sphere test to see if a charged sphere intersects the surface.
 export function chargedSphereIntersectsSurface(surface, sphereObj) {
-  const radius = getSurfaceBoundingRadius(surface)
-  const center = toVector3(surface.position || [0, 0, 0])
-  const sphereCenter = toVector3(sphereObj.position || [0, 0, 0])
+  const surfaceCenter = toVector3(surface.position || [0, 0, 0])
+  const sphereCenterWorld = toVector3(sphereObj.position || [0, 0, 0])
   const sphereRadius = Math.abs(sphereObj.radius ?? 1)
-  const dist = center.distanceTo(sphereCenter)
-  return dist <= radius + sphereRadius
+
+  switch (surface.surfaceType) {
+    case 'sphere': {
+      const surfaceRadius = Math.abs(surface.radius ?? 1)
+      const centerDistance = sphereCenterWorld.distanceTo(surfaceCenter)
+      return centerDistance <= surfaceRadius + sphereRadius
+    }
+    case 'cuboid': {
+      const surfaceQuat = CuboidShape.buildQuaternion(surface)
+      const inv = surfaceQuat.clone().invert()
+      const sphereCenterLocal = sphereCenterWorld.clone().sub(surfaceCenter).applyQuaternion(inv)
+      const halfExtents = getHalfExtents(surface)
+      const dx = Math.max(Math.abs(sphereCenterLocal.x) - halfExtents.x, 0)
+      const dy = Math.max(Math.abs(sphereCenterLocal.y) - halfExtents.y, 0)
+      const dz = Math.max(Math.abs(sphereCenterLocal.z) - halfExtents.z, 0)
+      return (dx * dx + dy * dy + dz * dz) <= sphereRadius * sphereRadius
+    }
+    case 'cylinder': {
+      const surfaceQuat = CuboidShape.buildQuaternion(surface)
+      const inv = surfaceQuat.clone().invert()
+      const sphereCenterLocal = sphereCenterWorld.clone().sub(surfaceCenter).applyQuaternion(inv)
+      const radius = Math.abs(surface.radius ?? 1)
+      const halfHeight = Math.abs(surface.height ?? 1) / 2
+      const radialDist = Math.hypot(sphereCenterLocal.x, sphereCenterLocal.z)
+
+      const insideSide = Math.abs(sphereCenterLocal.y) <= halfHeight
+      if (insideSide && radialDist <= radius + sphereRadius) return true
+
+      const radialPenetration = Math.max(radialDist - radius, 0)
+      const verticalPenetration = Math.max(Math.abs(sphereCenterLocal.y) - halfHeight, 0)
+      return (radialPenetration * radialPenetration + verticalPenetration * verticalPenetration) <= (sphereRadius * sphereRadius)
+    }
+    default: {
+      return false
+    }
+  }
 }
 
 // Checks whether any of the planes in a stack intersect the Gaussian surface.
