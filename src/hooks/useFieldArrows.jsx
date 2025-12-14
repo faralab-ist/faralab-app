@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import getFieldVector3 from '../utils/getFieldVectors.js';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 // returns true if point is 'after' the plane
 function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
@@ -30,7 +31,7 @@ export default function FieldArrows({
     slicePos,
     useSlice,
     slicePlaneFlip,
-    propagationSpeed = 2, // units per second
+    propagationSpeed = 10, // units per second
     enablePropagation = true
 }) {
     const [propagationRadius, setPropagationRadius] = useState(0);
@@ -143,7 +144,15 @@ export default function FieldArrows({
         }
     });
     
-    const arrowGroup = useMemo(() => {
+    // Shared arrow geometry
+    const arrowGeometry = useMemo(() => {
+        const shaft = new THREE.CylinderGeometry(0.04, 0.04, 0.7, 6);
+        const head = new THREE.ConeGeometry(0.12, 0.25, 8);
+        head.translate(0, 0.475, 0);
+        return BufferGeometryUtils.mergeGeometries([shaft, head]);
+    }, []);
+    
+    const instancedMesh = useMemo(() => {
         const vectorsToRender = enablePropagation ? vectorsFilteredRef.current : vectors;
         
         // Find max magnitude for normalization
@@ -154,12 +163,22 @@ export default function FieldArrows({
         }
         const logMax = maxMag > 0 ? Math.log1p(maxMag) : 1;
         
-        const group = new THREE.Group();
+        // Filter valid vectors
+        const validVectors = vectorsToRender.filter(v => v.field.length() > fieldThreshold);
+        if (validVectors.length === 0) return null;
         
-        for (const { position, field } of vectorsToRender) {
+        const mesh = new THREE.InstancedMesh(
+            arrowGeometry,
+            new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.1 }),
+            validVectors.length
+        );
+        
+        const matrix = new THREE.Matrix4();
+        const quaternion = new THREE.Quaternion();
+        const yAxis = new THREE.Vector3(0, 1, 0);
+        
+        validVectors.forEach(({ position, field }, i) => {
             const mag = field.length();
-            if (mag <= fieldThreshold) continue;
-            
             const logMag = Math.log1p(mag);
             
             // Color: red (strong) to blue (weak)
@@ -168,32 +187,25 @@ export default function FieldArrows({
             const color = new THREE.Color().setHSL(hue, 1, 0.5);
             
             // Scale based on magnitude
-            const scale = (1 - Math.exp(-logMag));
-            const length = scale * scaleMultiplier;
-            const headLength = scale * 0.2;
-            const headWidth = scale * 0.1;
+            const scale = (1 - Math.exp(-logMag)) * scaleMultiplier;
             
-            // Direction
+            // Rotation: align Y-axis with field direction
             const dir = field.clone().normalize();
+            quaternion.setFromUnitVectors(yAxis, dir);
             
-            // Create ArrowHelper
-            const arrow = new THREE.ArrowHelper(
-                dir,
-                position,
-                length,
-                color,
-                headLength,
-                headWidth
-            );
+            // Build matrix
+            matrix.compose(position, quaternion, new THREE.Vector3(1, scale, 1));
             
-            // Make shaft thicker
-            arrow.line.scale.set(10, 10, 10);
-            
-            group.add(arrow);
-        }
+            mesh.setMatrixAt(i, matrix);
+            mesh.setColorAt(i, color);
+        });
         
-        return group;
-    }, [vectorsFilteredRef.current, vectors, enablePropagation, fieldThreshold, scaleMultiplier, updateTrigger]);
+        mesh.instanceMatrix.needsUpdate = true;
+        mesh.instanceColor.needsUpdate = true;
+        
+        return mesh;
+    }, [vectorsFilteredRef.current, vectors, enablePropagation, fieldThreshold, scaleMultiplier, updateTrigger, arrowGeometry]);
 
-    return <primitive object={arrowGroup} />;
+    if (!instancedMesh) return null;
+    return <primitive object={instancedMesh} />;
 }
