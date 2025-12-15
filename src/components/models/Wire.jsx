@@ -105,6 +105,7 @@ function Wire({
       depthTest={false}
       enabled={isSelected && creativeMode}
       disableScaling={true}
+      disableRotations={true}
       // prevent gizmo from also transforming children
       onDragStart={(activeAxes) => {
         isDraggingRef.current = true;

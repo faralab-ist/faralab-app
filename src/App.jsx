@@ -508,6 +508,7 @@ function LoadingOverlay() {
                 dragOwnerId={dragOwnerId}
                 isHovered={obj.id === hoveredId}
                 gridDimensions={obj.type === 'wire' || obj.type === 'plane' ? [20, 20] : undefined}
+                sceneObjects={sceneObjects}
               />
             )
           })}
