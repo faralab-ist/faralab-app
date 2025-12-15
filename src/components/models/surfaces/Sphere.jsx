@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react'
+import React, { useRef, useEffect, useMemo } from 'react'
 import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
+import SphereShape from '../../../Surfaces/sphereShape'
 
 import { Html } from '@react-three/drei' // <--- 1. Importar Html
 import FluxWindow from '../../../components/ui/FluxWindow/fluxWindow' // <--- 2. Importar FluxWindow
@@ -41,35 +42,11 @@ export default function Sphere({
   const meshRef = useRef()
   const pivotRef = useRef()
   const rootRef = useRef() // 👈 move this group, not just the mesh
-  const [center, setCenter] = useState([0, 0, 0])
+  const center = useMemo(() => [0, 0, 0], [])
   const clickArmed = useRef(false)
+  const shape = useMemo(() => new SphereShape({ radius }), [radius])
+  const representativeNormals = useMemo(() => shape.getRepresentativeNormals(), [shape])
   const arrowLen = useMemo(() => Math.max(0.1, radius * 0.35), [radius])
-
-  // Use a diagonal direction by default (not at the poles)
-  const normalUnitDir = useMemo(
-    () => new THREE.Vector3(1, 1, 1).normalize(),
-    []
-  )
-
-  // One normal at that diagonal spot on the surface
-  const mainNormal = useMemo(
-    () => ({
-      origin: normalUnitDir.clone().multiplyScalar(radius),
-      dir: normalUnitDir.clone(),
-    }),
-    [normalUnitDir, radius]
-  )
-
-  // ⚙️ Recalcula o centro da geometria sempre que o raio muda
-  useEffect(() => {
-    if (meshRef.current?.geometry) {
-      meshRef.current.geometry.computeBoundingBox()
-      const box = meshRef.current.geometry.boundingBox
-      const centerVec = new THREE.Vector3()
-      box.getCenter(centerVec)
-      setCenter([centerVec.x, centerVec.y, centerVec.z])
-    }
-  }, [radius])
 
   // 👇 sync world position via root group so gizmo + arrow follow
   useEffect(() => {
@@ -174,18 +151,22 @@ export default function Sphere({
 
         {isSelected && (
           <group name="sphere-normal">
-            {sliceByPlane(mainNormal.origin, slicePlane, slicePos, useSlice, slicePlaneFlip) && 
-            <NormalArrow
-              origin={mainNormal.origin}
-              dir={mainNormal.dir}
-              length={arrowLen}
-              color="red"
-              opacity={opacity}
-            />}
+            {representativeNormals.map((normal, idx) => {
+              if (!sliceByPlane(normal.origin, slicePlane, slicePos, useSlice, slicePlaneFlip)) return null
+              return (
+                <NormalArrow
+                  key={idx}
+                  origin={normal.origin}
+                  dir={normal.dir}
+                  length={arrowLen}
+                  color="red"
+                  opacity={opacity}
+                />
+              )
+            })}
           </group>
         )}
       </group>
     </PivotControls>
   )
 }
-

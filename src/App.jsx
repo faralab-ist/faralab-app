@@ -6,7 +6,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes} from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, TestCharge} from './components/models'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -17,7 +17,8 @@ import React, { useState, useEffect, useMemo } from 'react'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
-  import Toolbar from './components/ui/Toolbar/Toolbar' // already imported below in your file; keep as-is
+import Toolbar from './components/ui/Toolbar/Toolbar' // already imported below in your file; keep as-is
+import calculateFlux from './utils/calculateFlux'
 
   // Hooks
   import {useSceneObjects, 
@@ -186,7 +187,7 @@ function LoadingOverlay() {
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
 
-    const [toolbarActive, setToolbarActive] = useState(false);
+
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -263,6 +264,22 @@ function LoadingOverlay() {
         setShowOnlyGaussianField(false)
       }
     }, [counts.surface, showOnlyGaussianField])
+
+    useEffect(() => {
+      if (!showOnlyGaussianField) return
+      const surfaces = sceneObjects?.filter(obj => obj?.type === 'surface') ?? []
+      if (!surfaces.length) return
+
+      const results = calculateFlux(sceneObjects)
+      if (!results.length) return
+
+      console.log('[Flux] Gaussian surface results:')
+      results.forEach(result => {
+        const label = result.name ?? result.id
+        const value = Number.isFinite(result.flux) ? result.flux : 0
+        console.log(`  ${label}: ${value.toExponential(3)} N·m²/C`)
+      })
+    }, [showOnlyGaussianField, sceneObjects])
     const [camFns, setCamFns] = useState(null)
 
     const handlePlaneSelect = (plane) => {
@@ -359,11 +376,13 @@ function LoadingOverlay() {
     <div id="app-root">
       <div className="toolbar-root">     {/* new same-container wrapper */}
      <Toolbar 
-      creativeMode={creativeMode}
-       setCreativeMode={setCreativeMode} 
-       setSceneObjects={setSceneObjects} 
-       active={toolbarActive}
-       setActive={setToolbarActive}
+        addObject={addObject}
+        updatePosition={updatePosition}
+        sceneObjects={sceneObjects}
+        counts={counts}
+        creativeMode={creativeMode}
+        setCreativeMode={setCreativeMode} 
+        setSceneObjects={setSceneObjects} 
         useSlice={useSlice} setUseSlice={setUseSlice}
         showSliceHelper={showSlicePlaneHelper} 
         setShowSliceHelper={setShowSlicePlaneHelper}
@@ -372,17 +391,7 @@ function LoadingOverlay() {
         slicePos={slicePos} setSlicePos={setSlicePos}
         slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
        />
-       <ToolbarPopup
-          active={toolbarActive}
-          setActive={setToolbarActive}
-          popupProps={{
-            useSlice, setUseSlice,
-            showSliceHelper: showSlicePlaneHelper, setShowSliceHelper: setShowSlicePlaneHelper,
-            setSlicePlane, slicePlane,
-            slicePos, setSlicePos,
-            slicePlaneFlip, setSlicePlaneFlip
-          }}
-        />
+       
        </div>
        <div id="canvas-container">
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
@@ -476,6 +485,7 @@ function LoadingOverlay() {
             } else {
               switch(obj.type) {
                 case 'charge': ObjectComponent = Charge; break
+                case 'testPointCharge': ObjectComponent = TestCharge; break
                 case 'wire': ObjectComponent = Wire; break
                 case 'plane': ObjectComponent = Plane; break
                 case 'chargedSphere': ObjectComponent = ChargedSphere; break

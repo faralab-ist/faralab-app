@@ -15,12 +15,17 @@ export default function calculateFieldAtPoint(objects, targetPos) {
     const charge = obj.charge;
     const chargeDensity = obj.charge_density;
 
-    if (obj.type === 'charge') {
+    if (obj.type === 'charge' || obj.type === 'testPointCharge') {
       const rVec = new THREE.Vector3().subVectors(targetPos, sourcePosition);
       const rSq = rVec.lengthSq();
       if (rSq < 1e-6) continue;
       const fieldMagnitude = multiplier * charge / rSq;
       resultFieldAtPoint.addScaledVector(rVec.normalize(), fieldMagnitude);
+      // nao faço menor ideia oq meter aí (￣▽￣*)ゞ	
+      if (obj.type === 'testPointCharge') {
+        //obj.eFieldValue = ???;
+        //obj.eFieldDirection = ??;
+      }
     } else if (obj.infinite && (obj.type === 'plane' || obj.type === 'wire')) {
       switch (obj.type) {
         case 'wire':

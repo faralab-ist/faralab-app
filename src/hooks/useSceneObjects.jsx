@@ -5,13 +5,26 @@ const genUid = () =>
   (globalThis.crypto?.randomUUID?.() ?? `${Math.random().toString(36).slice(2)}_${Date.now()}`)
 
 // mantém as factories como tens (não precisas mexer nelas aqui)
-const generateIdFromName = (baseName, index) => `${baseName.split(' ')[0]} ${index}`
+const generateIdFromName = (baseName, index) => {
+  // Remove trailing number from base name if it exists, then append the new index
+  const nameWithoutNumber = baseName.replace(/\s+\d+$/, '')
+  return `${nameWithoutNumber} ${index}`
+}
 
 const objectFactories = {
   charge: (index) => ({
     id: `tmp-${index}`, // será sobrescrito
     type: 'charge',
     name: `Charge ${index}`,
+    position: [0, 0, 0],
+    charge: 1,
+    radius: 0.1,
+    createdAt: Date.now(),
+  }),
+    testPointCharge: (index) => ({
+    id: `tmp-${index}`, // será sobrescrito
+    type: 'testPointCharge',
+    name: `Test Charge ${index}`,
     position: [0, 0, 0],
     charge: 1,
     radius: 0.1,
@@ -153,7 +166,7 @@ const objectFactories = {
 export default function useSceneObjects(initial = []) {
   const [sceneObjects, setSceneObjects] = useState(initial)
   const [counters, setCounters] = useState({
-    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0,
+    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, stackedPlanes: 0, concentricInfWires:0, concentricSpheres:0,
   })
 
   const addObject = useCallback((type, overrides = {}) => {

@@ -1,7 +1,8 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react'
+import React, { useRef, useEffect, useMemo } from 'react'
 import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
+import CylinderShape from '../../../Surfaces/cylinderShape'
 
 import { Html } from '@react-three/drei'
 import FluxWindow from '../../../components/ui/FluxWindow/fluxWindow'
@@ -48,31 +49,11 @@ export default function Cylinder({
   const meshRef = useRef()
   const pivotRef = useRef()
   const rootRef = useRef() // 👈 move this group, not just the mesh
-  const [center, setCenter] = useState([0, 0, 0])
+  const center = useMemo(() => [0, 0, 0], [])
   const clickArmed = useRef(false)
+  const shape = useMemo(() => new CylinderShape({ radius, height }), [radius, height])
+  const normals = useMemo(() => shape.getRepresentativeNormals(), [shape])
   const arrowLen = useMemo(() => Math.max(0.1, Math.min(radius, height) * 0.4), [radius, height])
-
-  const normals = useMemo(() => {
-    const arr = []
-    // bases
-    arr.push({ origin: new THREE.Vector3(0, +height / 2, 0), dir: new THREE.Vector3(0,  1, 0) })
-    arr.push({ origin: new THREE.Vector3(0, -height / 2, 0), dir: new THREE.Vector3(0, -1, 0) })
-    // side (diagonal) at mid-height
-    const dir = new THREE.Vector3(1, 0, 1).normalize()
-    const origin = dir.clone().multiplyScalar(radius)
-    arr.push({ origin, dir })
-    return arr
-  }, [radius, height])
-
-  useEffect(() => {
-    if (meshRef.current?.geometry) {
-      meshRef.current.geometry.computeBoundingBox()
-      const box = meshRef.current.geometry.boundingBox
-      const centerVec = new THREE.Vector3()
-      box.getCenter(centerVec)
-      setCenter([centerVec.x, centerVec.y, centerVec.z])
-    }
-  }, [radius, height])
 
   // 👇 sync world position via root group so gizmo + arrows follow
   useEffect(() => {
@@ -222,4 +203,3 @@ export default function Cylinder({
     </PivotControls>
   )
 }
-

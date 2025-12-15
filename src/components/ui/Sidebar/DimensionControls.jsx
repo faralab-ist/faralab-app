@@ -15,7 +15,7 @@ const DimInput = ({ value, onChange }) => (
 );
 
 export default function DimensionControls({ obj, updateObject }) {
-  if (obj.type === 'charge') return null;
+  if (obj.type === 'charge' || obj.type === 'testPointCharge') return null;
 
   const update = (field, val) => updateObject(obj.id, { [field]: val });
   // Plane

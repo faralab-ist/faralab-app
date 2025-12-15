@@ -44,23 +44,8 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   gap: 8px;
 }
 
-/* Charge icon ####### É USADO ######*/ 
-.object-row .charge img {
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
-}
-
-/* Wire icon  ###### É USADO ###### */
-.object-row .wire img {
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
-}
-
-/* Plane icon   ###### É USADO ######*/
-.object-row .plane img {
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
-}
-
-/* Garantir que não é sobrescrito por algo genérico antes ###### É USADO ###### */
-.object-row .chargedSphere img {
+/*object list imgs*/
+.object-row img {
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 
@@ -299,6 +284,7 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 /* Botão apenas com ícone (sem pill) - charge, wire, plane, charged_sphere e surfaces */
 .pos_charge-icon-btn,
 .neg_charge-icon-btn,
+.testPointCharge-icon-btn,
 .wire-icon-btn,
 .concentricInfWires-icon-btn,
 .plane-icon-btn,
@@ -321,14 +307,6 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   gap: 0;
   transform: none;
   margin: 0 auto; /* igual ao wire */
-}
-
-/* Ícone de charge */
-.charge-icon-btn .charge-icon {
-  width: 28px;
-  height: 28px;
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
-  transition: filter .12s, transform .08s;
 }
 
 /* Ícone de wire  ##### É USADO ######*/
@@ -396,6 +374,15 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   transform: scale(1.1);
   filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);
 
+}
+
+
+/* Add styling for the icon inside */
+.testPointCharge-icon-btn .test-charge-icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  transition: filter .12s, transform .08s;
 }
 
 
