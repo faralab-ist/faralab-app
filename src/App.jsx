@@ -194,7 +194,7 @@ function LoadingOverlay() {
     const [showSlicePlaneHelper, setShowSlicePlaneHelper] = useState(true)
     const [slicePlaneFlip, setSlicePlaneFlip] = useState(false)
       // Wave propagation settings for field arrows
-      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(true)
+      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(false)
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
 

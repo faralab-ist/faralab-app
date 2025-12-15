@@ -35,7 +35,12 @@ export default function EfieldButtons({
     const disabledTitle_lines = "Enable the field lines to use this";
 
     const content = (
-        <div className="efield-controls">
+      
+       <div className="efield-controls">
+        {/*
+            COMMENTED OUT FOR NOW SINCE WAVE PROPAGATION IS DISABLED IN MAIN: TOFIX
+            
+
             <div className="efield-row compact" style={{alignItems: 'center', gap: 8}}>
                 <label className="efield-label horizontal">
                     <span className="label-text" style= {{justifyContent:'normal'}}>Wave Propagation</span>
@@ -50,6 +55,7 @@ export default function EfieldButtons({
                 </label>
 
                 {/* Always render the Wave Duration row — greyed/disabled when wavePropagationEnabled is false */}
+                 {/*
                 <label
                     className={`efield-label ${(!wavePropagationEnabled || !showField) ? 'dimmed' : ''}`}
                     style={{display:'flex', alignItems:'center', gap:8}}
@@ -70,6 +76,7 @@ export default function EfieldButtons({
                     <span className="slider-value" style={{minWidth:48, textAlign:'right'}}>{(waveDuration ?? 0.1).toFixed(2)}</span>
                 </label>
             </div>
+            */}
             <div className="field-divider">
                 <button
                     type="button"
