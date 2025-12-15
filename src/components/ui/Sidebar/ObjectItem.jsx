@@ -339,7 +339,7 @@ export default function ObjectItem({
             )}
 
             {/* Point charge */}
-            {(obj.type === "charge" || obj.type === "testPointCharge") && (
+            {(obj.type === "charge") && (
               <div className="detail-row">
                 <div className="detail-key">Intensity C</div>
                 <div className="detail-value">

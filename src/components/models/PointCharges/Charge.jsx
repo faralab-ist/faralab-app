@@ -2,8 +2,8 @@ import React, { useMemo } from 'react'
 import * as THREE from 'three'
 import BaseCharge from './BaseCharge'
 
-export default function Charge({ charge, radius, ...props }) {
-  
+export default function Charge({ charge, ...props }) {
+  const radius = props.radius
   const { glowColor, glowString, visualScale, visualOpacity } = useMemo(() => {
     const sign = charge >= 0 ? 1 : -1
     

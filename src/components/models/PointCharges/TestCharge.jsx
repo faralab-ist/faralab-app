@@ -7,27 +7,14 @@ import './TestCharge.css'
 
 export default function TestCharge({ eFieldValue = 0, eFieldDirection = [0, 0, 0], position = [0, 0, 0], sceneObjects, updateObject, ...props }) {
   
-  // Fixed visuals for a test charge
+  // Fixed visuals for a test charge - subtle glow to prevent recording bloom
   const visuals = useMemo(() => ({
-    baseColor: new THREE.Color(0xffffff), // White
-    glowString: 'rgba(255, 255, 255,',      // White string for canvas
-    visualScale: 1.0,                     // Fixed small size
-    visualOpacity: 0.2,                   // Slightly distinct opacity
+    baseColor: new THREE.Color(0xaaaaaa), // Medium gray
+    glowString: 'rgba(170,170,170,',        // Medium gray string for proper gradient
+    visualScale: 1.15,                       // Small scale to prevent bloom
+    visualOpacity: 0.6,                    // Low opacity to prevent solid appearance
     hitboxRadius: 0.4
   }), [])
-
-  // Format the field magnitude
-  const fieldMagnitude = useMemo(() => {
-    return eFieldValue.toExponential(2)
-  }, [eFieldValue])
-
-  // Format direction vector (normalized)
-  const directionText = useMemo(() => {
-    const [x, y, z] = eFieldDirection
-    const mag = Math.sqrt(x*x + y*y + z*z)
-    if (mag === 0) return '(0, 0, 0)'
-    return `(${(x/mag).toFixed(2)}, ${(y/mag).toFixed(2)}, ${(z/mag).toFixed(2)})`
-  }, [eFieldDirection])
 
 
   // Calculate E-field, excluding this test charge itself
