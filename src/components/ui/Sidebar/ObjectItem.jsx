@@ -102,7 +102,7 @@ export default function ObjectItem({
                       initialValue={obj.position[idx]}
                       min={POS_MIN}
                       max={POS_MAX}
-                      step={0.01}
+                      step={0.1}
                       onChange={(val) => {
                         const safe = clampWithError(val, POS_MIN, POS_MAX);
                         const newPos = [...obj.position];
