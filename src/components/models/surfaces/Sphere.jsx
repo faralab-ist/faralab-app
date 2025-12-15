@@ -36,7 +36,8 @@ export default function Sphere({
   slicePos,
   useSlice,
   slicePlaneFlip,
-  isHovered
+  isHovered,
+  showOnlyGaussianField
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -123,7 +124,7 @@ export default function Sphere({
             clippingPlanes={clippingPlanes}
           />
         </mesh>
-
+{showOnlyGaussianField && (
         <Html
           // 1. Colocamos exatamente na superfície (radius), sem folga extra
           position={[0, radius, 0]} 
@@ -148,6 +149,7 @@ export default function Sphere({
         >
           <FluxWindow value={fluxValue} visible={true} />
         </Html>
+)}
 
         {isSelected && (
           <group name="sphere-normal">

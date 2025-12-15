@@ -44,7 +44,8 @@ export default function Cuboid({
   updateObject,
   isHovered,
   // flux value
-  fluxValue = 0
+  fluxValue = 0,
+  showOnlyGaussianField
 
 }) {
   const isSelected = id === selectedId
@@ -164,7 +165,7 @@ export default function Cuboid({
             clippingPlanes={clippingPlanes}
           />
         </mesh>
-
+    {showOnlyGaussianField && (
         <Html
           position={[0, (height / 2) + 0.5, 0]} // Topo do cubo
           distanceFactor={10}
@@ -178,7 +179,7 @@ export default function Cuboid({
         >
           <FluxWindow value={fluxValue} visible={true} />
         </Html>
-
+)}
         {isSelected && (
           <group name="cuboid-normals">
             {faceNormals.map((n, i) => {

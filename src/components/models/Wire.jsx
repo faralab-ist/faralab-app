@@ -36,11 +36,11 @@ function Wire({
  //   : height
   const trueHeight = infinite ? 20 : height
 
-  // Sync from external state only when NOT dragging
+  // Keep group at local origin since PivotControls handles world position
   useEffect(() => {
-    if (!groupRef.current || isDraggingRef.current) return
-    groupRef.current.position.set(position[0], position[1], position[2])
-  }, [position])
+    if (!groupRef.current) return
+    groupRef.current.position.set(0, 0, 0)
+  }, [])
 
   // Initialize direction if not set
   useEffect(() => {
@@ -50,32 +50,27 @@ function Wire({
     }
   }, []) // Run only once on mount
 
-  // Apply rotation from saved quaternion or direction
+  // Sync PivotControls matrix only (it will handle group rotation)
   useLayoutEffect(() => {
-    if (!groupRef.current || isDraggingRef.current) return
-
-    // Prefer quaternion if available (most accurate)
+    if (isDraggingRef.current || !pivotRef.current) return
+    
+    // Determine rotation quaternion
+    let rotQuat = new THREE.Quaternion()
     if (quaternion && quaternion.length === 4) {
-      const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
-      groupRef.current.quaternion.copy(q)
-
-      // keep direction in sync with quaternion: local Z is our "forward"
+      rotQuat.set(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+      // Keep direction in sync
       if (typeof updateDirection === 'function') {
-        const dirWorld = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
+        const dirWorld = new THREE.Vector3(0, 0, 1).applyQuaternion(rotQuat).normalize()
         const [dx = 0, dy = 0, dz = 0] = direction || []
         const eps = 1e-6
         if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
           updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
         }
       }
-      return
-    }
-
-    // If rotation Euler (radians) is provided, apply it (XYZ) and keep direction in sync
-    if (Array.isArray(rotation) && rotation.length >= 3) {
+    } else if (Array.isArray(rotation) && rotation.length >= 3) {
       const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
-      groupRef.current.rotation.copy(e)
-      // compute resulting forward direction (local Z) and update object if changed
+      rotQuat.setFromEuler(e)
+      // Keep direction in sync
       if (typeof updateDirection === 'function') {
         const dirWorld = new THREE.Vector3(0, 0, 1).applyEuler(e).normalize()
         const [dx = 0, dy = 0, dz = 0] = direction || []
@@ -84,19 +79,23 @@ function Wire({
           updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
         }
       }
-      return
-    }
-
-    // Fallback to direction vector -> quaternion using local Z as base
-    if (direction) {
+    } else if (direction) {
       const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
-      if (dir.lengthSq() === 0) return
-      dir.normalize()
-      const from = new THREE.Vector3(0, 0, 1) // use Z as cylinder "neutral" axis
-      const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
-      groupRef.current.quaternion.copy(q)
+      if (dir.lengthSq() > 0) {
+        dir.normalize()
+        const from = new THREE.Vector3(0, 0, 1)
+        rotQuat.setFromUnitVectors(from, dir)
+      }
     }
-  }, [direction, quaternion, rotation, updateDirection, id])
+    
+    // Apply position and rotation to PivotControls matrix
+    const pos = new THREE.Vector3(...position)
+    const mat = new THREE.Matrix4().setPosition(pos)
+    mat.multiply(new THREE.Matrix4().makeRotationFromQuaternion(rotQuat))
+    if (pivotRef.current.matrix) {
+      pivotRef.current.matrix.copy(mat)
+    }
+  }, [position, quaternion, rotation, direction, updateDirection, id])
 
   return (
     <PivotControls

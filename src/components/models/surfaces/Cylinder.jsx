@@ -43,7 +43,8 @@ export default function Cylinder({
   updateDirection,
   isHovered,
   // flux value
-  fluxValue = 0
+  fluxValue = 0,
+  showOnlyGaussianField
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -169,7 +170,7 @@ export default function Cylinder({
             clippingPlanes={clippingPlanes}
           />
         </mesh>
-
+{showOnlyGaussianField && (
         <Html
           position={[0, (height / 2) + 0.7, 0]} // Topo do cilindro
           distanceFactor={10}
@@ -183,6 +184,7 @@ export default function Cylinder({
         >
           <FluxWindow value={fluxValue} visible={true} />
         </Html>
+)}
 
         {isSelected && (
           <group name="cylinder-normals">
