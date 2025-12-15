@@ -6,7 +6,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, Path} from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, Path, TestCharge} from './components/models'
 
   // Coil components
   import { RingCoil, PolygonCoil } from './components/models/coils'
@@ -18,9 +18,11 @@ import React, { useState, useEffect, useMemo } from 'react'
   import CreateButtons from './components/ui/CreateButtons'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
+  import Toolbar from './components/ui/Toolbar/Toolbar'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
-  import Toolbar from './components/ui/Toolbar/Toolbar' // already imported below in your file; keep as-is
+  import calculateFlux from './utils/calculateFlux'
+  import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
 
   // Hooks
   import {useSceneObjects, 
@@ -186,6 +188,7 @@ function LoadingOverlay() {
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
     
     const [hoveredId, setHoveredId] = useState(null)
+    const [fluxResults, setFluxResults] = useState([]) // Store flux calculation results
     
     // slicing planes stuff
     const [slicePlane, setSlicePlane] = useState('xz') // 'xy', 'yz', 'xz'
@@ -198,7 +201,7 @@ function LoadingOverlay() {
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
 
-    const [toolbarActive, setToolbarActive] = useState(false);
+
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -275,6 +278,30 @@ function LoadingOverlay() {
         setShowOnlyGaussianField(false)
       }
     }, [counts.surface, showOnlyGaussianField])
+
+    useEffect(() => {
+      if (!showOnlyGaussianField) {
+        setFluxResults([])
+        return
+      }
+      const surfaces = sceneObjects?.filter(obj => obj?.type === 'surface') ?? []
+      if (!surfaces.length) {
+        setFluxResults([])
+        return
+      }
+
+      const results = calculateFlux(sceneObjects)
+      setFluxResults(results)
+      
+      if (results.length) {
+        console.log('[Flux] Gaussian surface results:')
+        results.forEach(result => {
+          const label = result.name ?? result.id
+          const value = Number.isFinite(result.flux) ? result.flux : 0
+          console.log(`  ${label}: ${value.toExponential(3)} N·m²/C`)
+        })
+      }
+    }, [showOnlyGaussianField, sceneObjects])
     const [camFns, setCamFns] = useState(null)
 
     const handlePlaneSelect = (plane) => {
@@ -371,11 +398,13 @@ function LoadingOverlay() {
     <div id="app-root">
       <div className="toolbar-root">     {/* new same-container wrapper */}
      <Toolbar 
-      creativeMode={creativeMode}
-       setCreativeMode={setCreativeMode} 
-       setSceneObjects={setSceneObjects} 
-       active={toolbarActive}
-       setActive={setToolbarActive}
+        addObject={addObject}
+        updatePosition={updatePosition}
+        sceneObjects={sceneObjects}
+        counts={counts}
+        creativeMode={creativeMode}
+        setCreativeMode={setCreativeMode} 
+        setSceneObjects={setSceneObjects} 
         useSlice={useSlice} setUseSlice={setUseSlice}
         showSliceHelper={showSlicePlaneHelper} 
         setShowSliceHelper={setShowSlicePlaneHelper}
@@ -384,17 +413,7 @@ function LoadingOverlay() {
         slicePos={slicePos} setSlicePos={setSlicePos}
         slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
        />
-       <ToolbarPopup
-          active={toolbarActive}
-          setActive={setToolbarActive}
-          popupProps={{
-            useSlice, setUseSlice,
-            showSliceHelper: showSlicePlaneHelper, setShowSliceHelper: setShowSlicePlaneHelper,
-            setSlicePlane, slicePlane,
-            slicePos, setSlicePos,
-            slicePlaneFlip, setSlicePlaneFlip
-          }}
-        />
+       
        </div>
        <div id="canvas-container">
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
@@ -494,6 +513,7 @@ function LoadingOverlay() {
             } else {
               switch(obj.type) {
                 case 'charge': ObjectComponent = Charge; break
+                case 'testPointCharge': ObjectComponent = TestCharge; break
                 case 'wire': ObjectComponent = Wire; break
                 case 'plane': ObjectComponent = Plane; break
                 case 'chargedSphere': ObjectComponent = ChargedSphere; break
@@ -549,6 +569,9 @@ function LoadingOverlay() {
                 dragOwnerId={dragOwnerId}
                 isHovered={obj.id === hoveredId}
                 gridDimensions={obj.type === 'wire' || obj.type === 'plane' ? [20, 20] : undefined}
+                fluxValue={fluxResults.find(r => r.id === obj.id)?.flux ?? 0}
+                showOnlyGaussianField={showOnlyGaussianField}
+                sceneObjects={sceneObjects}
               />
             )
           })}
@@ -556,9 +579,9 @@ function LoadingOverlay() {
         {showField && (
           <FieldArrows
             key={`arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
-          }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
+    }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
         objects={sceneObjects}
-        showOnlyGaussianField={showOnlyGaussianField}
+        showOnlyGaussianField={showOnlyGaussianField}s
         minThreshold={vectorMinTsl}
         scaleMultiplier={vectorScale}
         step={1 / (Number(vectorStep))} 

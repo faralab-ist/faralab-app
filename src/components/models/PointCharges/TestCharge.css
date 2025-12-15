@@ -1,0 +1,21 @@
+.test-charge-label {
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+ font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;  
+ white-space: nowrap;
+  text-align: center;
+  z-index: 2px;
+}
+
+.test-charge-magnitude {
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.test-charge-direction {
+  font-size: 9px;
+  opacity: 0.8;
+}

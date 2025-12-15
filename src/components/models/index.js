@@ -1,4 +1,5 @@
-export { default as Charge } from './Charge'
+export { default as Charge } from './PointCharges/Charge'
+export { default as TestCharge } from './PointCharges/TestCharge'
 export { default as Wire } from './Wire'
 export { default as Plane } from './Plane'
 export { default as Sphere } from './surfaces/Sphere'

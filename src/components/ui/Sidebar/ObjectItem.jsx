@@ -1,21 +1,23 @@
 import React, { useState } from "react";
-import NumberInput from "./NumberInput";
+import { InlineDecimalInput } from "../io/decimalInput";
+import "../io/decimalInput.css";
+
 import DimensionControls from "./DimensionControls";
 import StackedPlaneControls from "./StackedPlaneControls";
 import ConcentricSphereControls from "./ConcentricSphereControls";
-import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls"; 
+import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls";
 import PathControls from "./PathControls";
 import CoilControls from "./CoilControls";
-import RotationControls from "./RotationControls"; // <--- add rotation controls
+import RotationControls from "./RotationControls";
 import { TYPE_CONFIG, POS_MIN, POS_MAX, VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
-export default function ObjectItem({ 
-  obj, 
-  expanded, 
-  hovered, 
-  toggleExpand, 
-  setHoveredId, 
-  updateObject, 
+export default function ObjectItem({
+  obj,
+  expanded,
+  hovered,
+  toggleExpand,
+  setHoveredId,
+  updateObject,
   removeObject,
   stackedPlaneActions,
   concentricActions,
@@ -25,49 +27,53 @@ export default function ObjectItem({
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
 
-  // 1. Resolver Ícone (Lógica existente)
+  // ícone
   let iconData = { icon: null, alt: "", subtype: obj.type };
-  if (obj.type === 'surface') {
+  if (obj.type === "surface") {
     const resolved = TYPE_CONFIG.surface.resolve(obj);
     iconData = { ...resolved };
   } else if (TYPE_CONFIG[obj.type]) {
     const conf = TYPE_CONFIG[obj.type];
     iconData = {
-      icon: typeof conf.icon === 'function' ? conf.icon(obj) : conf.icon,
-      alt: typeof conf.alt === 'function' ? conf.alt(obj) : conf.alt,
+      icon: typeof conf.icon === "function" ? conf.icon(obj) : conf.icon,
+      alt: typeof conf.alt === "function" ? conf.alt(obj) : conf.alt,
       subtype: obj.type
     };
   }
 
-  // Helpers de variante
-  const isPlaneVariant = obj.type === 'plane' || obj.type === 'stackedPlanes';
-  
-  const isSphereVariant = 
-    obj.type === 'concentricSpheres' || 
-    obj.type === 'chargedSphere';
+  const isPlaneVariant = obj.type === "plane" || obj.type === "stackedPlanes";
+  const isSphereVariant =
+    obj.type === "concentricSpheres" || obj.type === "chargedSphere";
+  const isWireVariant =
+    obj.type === "wire" || obj.type === "concentricInfWires";
 
-  // 3. Helper para Variante de Fios
-  const isWireVariant = obj.type === 'wire' || obj.type === 'concentricInfWires';
-
-  // Show rotation for all except charges and spheres
   const canRotate =
     expanded &&
     obj &&
-    !['charge', 'chargedSphere', 'concentricSpheres'].includes(obj.type);
+    !["charge", "chargedSphere", "concentricSpheres"].includes(obj.type);
 
-  // robust check: handle both explicit 'stackedPlanes' type and cases where
-  // stacked-plane is encoded as a plane subtype (obj.subtype or iconData.subtype)
-  const isConcentricExcluded = obj.type === 'concentricSpheres' || obj.type === 'concentricInfWires';
-  const isStackedPlanes = obj.type === 'stackedPlanes' ||
-    (obj.type === 'plane');
-
+  const isConcentricExcluded =
+    obj.type === "concentricSpheres" || obj.type === "concentricInfWires";
+  const isStackedPlanes =
+    obj.type === "stackedPlanes" || obj.type === "plane";
 
   const showDimensions = isStackedPlanes || !isConcentricExcluded;
+
+  const clampWithError = (v, min, max) => {
+    if (v < min || v > max) {
+      setErrorMsg(ERROR_MSG);
+      return Math.min(max, Math.max(min, v));
+    }
+    setErrorMsg(null);
+    return v;
+  };
+
   return (
     <li className="object-row-wrapper" data-objid={obj.id}>
-      {/* Cabeçalho da Linha */}
       <div
-        className={`object-row ${hovered ? 'hovered' : ''} ${expanded ? 'selected' : ''}`}
+        className={`object-row ${hovered ? "hovered" : ""} ${
+          expanded ? "selected" : ""
+        }`}
         onClick={() => toggleExpand(obj.id)}
         onMouseEnter={() => setHoveredId?.(obj.id)}
         onMouseLeave={() => setHoveredId?.(null)}
@@ -82,21 +88,25 @@ export default function ObjectItem({
       {expanded && (
         <div className="object-details">
           <div className="details-grid">
-            
-            {/* Posição (Igual) */}
-            {Array.isArray(obj.position) && (
+            {/* Position com InlineDecimalInput */}
+            {Array.isArray(obj.position)  && (
               <div className="detail-row">
                 <div className="detail-key">Position</div>
-                <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+                <div
+                  className="detail-value"
+                  style={{ display: "flex", gap: 6 }}
+                >
                   {[0, 1, 2].map((idx) => (
-                    <NumberInput
+                    <InlineDecimalInput
                       key={idx}
-                      value={obj.position[idx]}
-                      min={POS_MIN} max={POS_MAX}
-                      style={{ width: 72 }}
+                      initialValue={obj.position[idx]}
+                      min={POS_MIN}
+                      max={POS_MAX}
+                      step={0.01}
                       onChange={(val) => {
+                        const safe = clampWithError(val, POS_MIN, POS_MAX);
                         const newPos = [...obj.position];
-                        newPos[idx] = val;
+                        newPos[idx] = safe;
                         updateObject(obj.id, { position: newPos });
                       }}
                     />
@@ -105,39 +115,49 @@ export default function ObjectItem({
               </div>
             )}
 
-            {/* Rotation Controls (hide for charges and spheres) */}
+            {/* Rotation Controls */}
             {canRotate && (
               <RotationControls obj={obj} updateObject={updateObject} />
             )}
-  
-            {/* Dimensões: Esconde se for Sistema Concêntrico (Esferas ou Fios) */}
-            { showDimensions && (
+
+            {/* Dimensões (não para sistemas concêntricos) */}
+            {showDimensions && (
               <DimensionControls obj={obj} updateObject={updateObject} />
             )}
 
-            {/* --- TOGGLE PARA PLANES --- */}
+            {/* TOGGLE Planes */}
             {isPlaneVariant && (
               <div className="detail-row">
                 <div className="detail-key">Mode</div>
                 <div className="detail-value">
-                  <label style={{ display: "inline-flex", gap: 8, alignItems: "center", cursor: "pointer" }}>
-                    <input 
-                      type="checkbox" 
-                      checked={obj.type === 'stackedPlanes'}
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      gap: 8,
+                      alignItems: "center",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={obj.type === "stackedPlanes"}
                       onChange={(e) => {
                         const isStacked = e.target.checked;
                         if (isStacked) {
-                          updateObject(obj.id, { 
-                            type: 'stackedPlanes',
-                            charge_densities: [obj.charge_density ?? 0], 
+                          updateObject(obj.id, {
+                            type: "stackedPlanes",
+                            charge_densities: [obj.charge_density ?? 0],
                             spacing: obj.spacing ?? 1.0,
-                            name: "Stacked Planes"
+                            
                           });
                         } else {
-                          updateObject(obj.id, { 
-                            type: 'plane',
-                            charge_density: (obj.charge_densities && obj.charge_densities[0]) ?? 0,
-                            name: "Plane"
+                          updateObject(obj.id, {
+                            type: "plane",
+                            charge_density:
+                              (obj.charge_densities &&
+                                obj.charge_densities[0]) ??
+                              0,
+                           
                           });
                         }
                       }}
@@ -149,33 +169,42 @@ export default function ObjectItem({
               </div>
             )}
 
-            {/* --- TOGGLE PARA ESFERAS --- */}
+            {/* TOGGLE Esferas */}
             {isSphereVariant && (
               <div className="detail-row">
                 <div className="detail-key">Mode</div>
                 <div className="detail-value">
-                  <label style={{ display: "inline-flex", gap: 8, alignItems: "center", cursor: "pointer" }}>
-                    <input 
-                      type="checkbox" 
-                      checked={obj.type === 'concentricSpheres'}
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      gap: 8,
+                      alignItems: "center",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={obj.type === "concentricSpheres"}
                       onChange={(e) => {
                         const isConcentric = e.target.checked;
                         if (isConcentric) {
                           const r = obj.radius || 1;
                           const q = obj.charge || 0;
-                          updateObject(obj.id, { 
-                            type: 'concentricSpheres',
+                          updateObject(obj.id, {
+                            type: "concentricSpheres",
                             name: "Concentric System",
                             radiuses: [r],
-                            materials: ['conductor'],
+                            materials: ["conductor"],
                             charges: [q],
                             dielectrics: [1]
                           });
                         } else {
-                          const r = (obj.radiuses && obj.radiuses[0]) || 1;
-                          const q = (obj.charges && obj.charges[0]) || 0;
-                          updateObject(obj.id, { 
-                            type: 'chargedSphere',
+                          const r =
+                            (obj.radiuses && obj.radiuses[0]) || 1;
+                          const q =
+                            (obj.charges && obj.charges[0]) || 0;
+                          updateObject(obj.id, {
+                            type: "chargedSphere",
                             name: "Charged Sphere",
                             radius: r,
                             charge: q
@@ -190,40 +219,46 @@ export default function ObjectItem({
               </div>
             )}
 
-            {/* --- 4. TOGGLE PARA WIRES --- */}
+            {/* TOGGLE Wires */}
             {isWireVariant && (
               <div className="detail-row">
                 <div className="detail-key">Mode</div>
                 <div className="detail-value">
-                  <label style={{ display: "inline-flex", gap: 8, alignItems: "center", cursor: "pointer" }}>
-                    <input 
-                      type="checkbox" 
-                      checked={obj.type === 'concentricInfWires'}
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      gap: 8,
+                      alignItems: "center",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={obj.type === "concentricInfWires"}
                       onChange={(e) => {
                         const isConcentric = e.target.checked;
                         if (isConcentric) {
-                          // Converter para Concêntrico
-                          // Assumimos radius existente (ou default) e lambda existente
-                          const r = obj.radius || 1; 
+                          const r = obj.radius || 1;
                           const lambda = obj.charge_density || 0;
-                          
-                          updateObject(obj.id, { 
-                            type: 'concentricInfWires',
+
+                          updateObject(obj.id, {
+                            type: "concentricInfWires",
                             name: "Concentric Wires",
                             radiuses: [r],
-                            materials: ['conductor'],
-                            charges: [lambda], // 'charges' armazena as densidades lineares aqui
+                            materials: ["conductor"],
+                            charges: [lambda],
                             dielectrics: [1]
                           });
                         } else {
-                          // Converter para Fio Simples
-                          const r = (obj.radiuses && obj.radiuses[0]) || 1;
-                          const lambda = (obj.charges && obj.charges[0]) || 0;
-                          
-                          updateObject(obj.id, { 
-                            type: 'wire',
+                          const r =
+                            (obj.radiuses && obj.radiuses[0]) || 1;
+                          const lambda =
+                            (obj.charges && obj.charges[0]) || 0;
+
+                          updateObject(obj.id, {
+                            type: "wire",
                             name: "Wire",
-                            radius: r, // O Wire pode ou não usar radius visualmente, mas guardamos
+                            radius: r,
                             charge_density: lambda
                           });
                         }
@@ -278,21 +313,23 @@ export default function ObjectItem({
               <div className="detail-row">
                 <div className="detail-key">Superficial Density σ</div>
                 <div className="detail-value">
-                  <NumberInput
-                    value={obj.charge_density}
-                    min={VAL_MIN} max={VAL_MAX}
-                    style={{ width: 140 }}
-                    onChange={(v) => updateObject(obj.id, { charge_density: v })}
-                    onError={setErrorMsg}
-                    errorMsg={ERROR_MSG}
+                  <InlineDecimalInput
+                    initialValue={obj.charge_density ?? 0}
+                    min={VAL_MIN}
+                    max={VAL_MAX}
+                    step={0.01}
+                    onChange={(v) => {
+                      const safe = clampWithError(v, VAL_MIN, VAL_MAX);
+                      updateObject(obj.id, { charge_density: safe });
+                    }}
                   />
                 </div>
               </div>
             )}
 
-            {/* B) Stacked Planes */}
-            {obj.type === 'stackedPlanes' && (
-              <StackedPlaneControls 
+            {/* StackedPlanes (mantém controle próprio interno) */}
+            {obj.type === "stackedPlanes" && (
+              <StackedPlaneControls
                 obj={obj}
                 updateObject={updateObject}
                 setSpacing={stackedPlaneActions?.setSpacing}
@@ -300,113 +337,134 @@ export default function ObjectItem({
                 addPlane={stackedPlaneActions?.addPlane}
                 removeLastPlane={stackedPlaneActions?.removeLastPlane}
                 setErrorMsg={setErrorMsg}
-
               />
             )}
 
-            {/* C) Concentric Spheres */}
-            {obj.type === 'concentricSpheres' && (
-              <ConcentricSphereControls 
-                 obj={obj}
-                 updateObject={updateObject}
-                 setErrorMsg={setErrorMsg}
-                 {...concentricActions} 
+            {/* Concentric Spheres */}
+            {obj.type === "concentricSpheres" && (
+              <ConcentricSphereControls
+                obj={obj}
+                updateObject={updateObject}
+                setErrorMsg={setErrorMsg}
+                {...concentricActions}
               />
             )}
 
-            {/* D) Concentric Infinite Wires (NOVO) */}
-            {obj.type === 'concentricInfWires' && (
-              <ConcentricInfiniteWireControls 
-                 obj={obj}
-                 updateObject={updateObject}
-                 setErrorMsg={setErrorMsg}
-                 {...concentricWireActions} 
+            {/* Concentric Infinite Wires */}
+            {obj.type === "concentricInfWires" && (
+              <ConcentricInfiniteWireControls
+                obj={obj}
+                updateObject={updateObject}
+                setErrorMsg={setErrorMsg}
+                {...concentricWireActions}
               />
             )}
 
-            {/* E) Charged Sphere Simples */}
-            {obj.type === 'chargedSphere' && (
+            {/* Charged Sphere */}
+            {obj.type === "chargedSphere" && (
               <div className="detail-row">
                 <div className="detail-key">Intensity C</div>
                 <div className="detail-value">
-                   <NumberInput
-                      value={obj.charge}
-                      min={VAL_MIN} max={VAL_MAX}
-                      style={{ width: 140 }}
-                      onChange={(v) => updateObject(obj.id, { charge: v })}
-                      onError={setErrorMsg}
-                      errorMsg={ERROR_MSG}
-                   />
+                  <InlineDecimalInput
+                    initialValue={obj.charge ?? 0}
+                    min={VAL_MIN}
+                    max={VAL_MAX}
+                    step={0.01}
+                    onChange={(v) => {
+                      const safe = clampWithError(v, VAL_MIN, VAL_MAX);
+                      updateObject(obj.id, { charge: safe });
+                    }}
+                  />
                 </div>
               </div>
             )}
 
-            {/* F) Charge (Carga Pontual) */}
-            {obj.type === 'charge' && (
+            {/* Point charge */}
+            {(obj.type === "charge") && (
               <div className="detail-row">
                 <div className="detail-key">Intensity C</div>
                 <div className="detail-value">
-                   <NumberInput
-                      value={obj.charge}
-                      min={VAL_MIN} max={VAL_MAX} step={0.25}
-                      style={{ width: 140 }}
-                      onChange={(v) => updateObject(obj.id, { charge: v })}
-                      onError={setErrorMsg}
-                      errorMsg={ERROR_MSG}
-                   />
+                  <InlineDecimalInput
+                    initialValue={obj.charge ?? 0}
+                    min={VAL_MIN}
+                    max={VAL_MAX}
+                    step={0.25}
+                    onChange={(v) => {
+                      const safe = clampWithError(v, VAL_MIN, VAL_MAX);
+                      updateObject(obj.id, { charge: safe });
+                    }}
+                  />
                 </div>
               </div>
             )}
 
-            {/* G) Wire Simples */}
-            {obj.type === 'wire' && (
-               <div className="detail-row">
-                  <div className="detail-key">Linear Density λ</div>
-                  <div className="detail-value">
-                    <NumberInput
-                      value={obj.charge_density}
-                      min={VAL_MIN} max={VAL_MAX}
-                      style={{ width: 140 }}
-                      onChange={(v) => updateObject(obj.id, { charge_density: v })}
-                      onError={setErrorMsg}
-                      errorMsg={ERROR_MSG}
+            {/* Wire simples */}
+            {obj.type === "wire" && (
+              <div className="detail-row">
+                <div className="detail-key">Linear Density λ</div>
+                <div className="detail-value">
+                  <InlineDecimalInput
+                    initialValue={obj.charge_density ?? 0}
+                    min={VAL_MIN}
+                    max={VAL_MAX}
+                    step={0.01}
+                    onChange={(v) => {
+                      const safe = clampWithError(v, VAL_MIN, VAL_MAX);
+                      updateObject(obj.id, { charge_density: safe });
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Infinite toggle */}
+            {(isPlaneVariant || obj.type === "wire") && (
+              <div className="detail-row">
+                <div className="detail-key">Infinite</div>
+                <div className="detail-value">
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      gap: 8,
+                      alignItems: "center"
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={obj.infinite || false}
+                      onChange={(e) =>
+                        updateObject(obj.id, { infinite: e.target.checked })
+                      }
+                      onClick={(e) => e.stopPropagation()}
                     />
-                  </div>
-               </div>
-            )}
-
-            {/* Opção Infinite (Para Planes e Wire) */}
-            {(isPlaneVariant || obj.type === 'wire') && (
-              <div className="detail-row">
-                 <div className="detail-key">Infinite</div>
-                 <div className="detail-value">
-                   <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
-                     <input 
-                       type="checkbox" 
-                       checked={obj.infinite || false}
-                       onChange={(e) => updateObject(obj.id, { infinite: e.target.checked })}
-                       onClick={(e) => e.stopPropagation()}
-                     />
-                   </label>
-                 </div>
+                  </label>
+                </div>
               </div>
             )}
 
-            {/* Erros e Botão Remover (Igual) */}
-            {errorMsg && <div className="error-text" style={{padding: "0 12px 8px"}}>{errorMsg}</div>}
-            
+            {errorMsg && (
+              <div
+                className="error-text"
+                style={{ padding: "0 12px 8px" }}
+              >
+                {errorMsg}
+              </div>
+            )}
+
             <div className="detail-row">
               <div className="detail-key">Actions</div>
               <div className="detail-value">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); removeObject?.(obj.id); }} 
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeObject?.(obj.id);
+                  }}
                   style={{ padding: "6px 8px" }}
                 >
                   Remove
                 </button>
               </div>
             </div>
-
           </div>
         </div>
       )}

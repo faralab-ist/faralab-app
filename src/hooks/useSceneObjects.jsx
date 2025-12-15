@@ -5,7 +5,11 @@ const genUid = () =>
   (globalThis.crypto?.randomUUID?.() ?? `${Math.random().toString(36).slice(2)}_${Date.now()}`)
 
 // mantém as factories como tens (não precisas mexer nelas aqui)
-const generateIdFromName = (baseName, index) => `${baseName.split(' ')[0]} ${index}`
+const generateIdFromName = (baseName, index) => {
+  // Remove trailing number from base name if it exists, then append the new index
+  const nameWithoutNumber = baseName.replace(/\s+\d+$/, '')
+  return `${nameWithoutNumber} ${index}`
+}
 
 const objectFactories = {
   charge: (index) => ({
@@ -14,7 +18,16 @@ const objectFactories = {
     name: `Charge ${index}`,
     position: [0, 0, 0],
     charge: 1,
-    radius: 0.1,
+    radius: 0.06,
+    createdAt: Date.now(),
+  }),
+    testPointCharge: (index) => ({
+    id: `tmp-${index}`, // será sobrescrito
+    type: 'testPointCharge',
+    name: `Test Charge ${index}`,
+    position: [0, 0, 0],
+    charge: 0, // In reality its 1, but this way it doesn't affect the field
+    radius: 0.03,
     createdAt: Date.now(),
   }),
   wire: (index) => ({
@@ -276,19 +289,22 @@ export default function useSceneObjects(initial = []) {
     const id = genUid()
 
     setSceneObjects(prev => {
-      // For coils, count by coilType if specified in overrides
+      // Calculate nextIndex based on object type
       let nextIndex
+      let factoryType = type
+      
       if (type === 'coil' || type === 'ringCoil' || type === 'polygonCoil') {
+        // For coils, count by coilType
         const coilType = overrides.coilType || (type === 'polygonCoil' ? 'polygon' : 'ring')
         nextIndex = prev.filter(o => o.type === 'coil' && o.coilType === coilType).length + 1
+        factoryType = type === 'polygonCoil' ? 'polygonCoil' : type === 'ringCoil' ? 'ringCoil' : type
+      } else if (type === 'sphere' || type === 'cylinder' || type === 'cuboid') {
+        // For surfaces, count by surfaceType
+        nextIndex = prev.filter(o => o.type === 'surface' && o.surfaceType === type).length + 1
       } else {
+        // For other types, count by type
         nextIndex = prev.filter(o => o.type === type).length + 1
       }
-      
-      // Map type to correct factory
-      let factoryType = type
-      if (type === 'ringCoil') factoryType = 'ringCoil'
-      else if (type === 'polygonCoil') factoryType = 'polygonCoil'
       
       const base = objectFactories[factoryType](nextIndex)
 
@@ -484,6 +500,9 @@ const updateDirection = useCallback((id, direction) => {
     wire: sceneObjects.filter(o => o.type === 'wire').length,
     plane: sceneObjects.filter(o => o.type === 'plane').length,
     chargedSphere: sceneObjects.filter(o => o.type === 'chargedSphere').length,
+    cylinder: sceneObjects.filter(o => o.type === 'surface' && o.surfaceType === 'cylinder').length,
+    sphere: sceneObjects.filter(o => o.type === 'surface' && o.surfaceType === 'sphere').length,
+    cuboid: sceneObjects.filter(o => o.type === 'surface' && o.surfaceType === 'cuboid').length,
     surface: sceneObjects.filter(o => o.type === 'surface').length,
     path: sceneObjects.filter(o => o.type === 'path').length,
     polygonCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'polygon').length,
