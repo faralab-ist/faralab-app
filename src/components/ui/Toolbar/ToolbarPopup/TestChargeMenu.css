@@ -1,0 +1,324 @@
+/* =========================================
+   Container Layout
+   ========================================= */
+.test-charge-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  width: 100%;
+  position: relative;
+}
+
+/* =========================================
+   The Main Button 
+   ========================================= */
+.add-test-charge-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  height: 44px;
+  min-height: 40px;
+  padding: 8px 12px;
+  
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55), inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  color: #dfeaf5;
+  cursor: pointer;
+  transition: all .16s ease;
+  z-index: 2;
+}
+
+.add-test-charge-btn .btn-label {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  color: inherit;
+}
+
+.add-test-charge-btn:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+.add-test-charge-btn.active {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-color: rgba(21, 78, 153, 0.9);
+  box-shadow: 0 8px 28px rgba(79, 154, 255, 0.16), 0 2px 6px rgba(0, 0, 0, 0.5) inset;
+  color: #fff;
+}
+
+.add-test-charge-btn.active:hover {
+  background: #1191ed;
+  border-color: rgba(100, 180, 255, 1);
+  box-shadow: 0 0 25px rgba(70, 129, 255, 0.959);
+}
+
+/* =========================================
+   The Dropdown Panel
+   ========================================= */
+.test-charge-config {
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  
+  animation: slideDown 0.2s ease-out;
+  transform-origin: top;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px) scaleY(0.98); }
+  to { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+.section-title {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: .6px;
+}
+
+/* =========================================
+   Input Grid & Actions
+   ========================================= */
+.xyz-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.xyz-grid input {
+  width: 64px;
+  min-width: 64px;
+  display: flex;
+  flex-direction: row;
+  height: 26px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+  line-height: 1.1;
+  background: #1a1c1f;
+  border: 1px solid #3a3f46;
+  color: #eef4ff;
+  border-radius: 6px;
+  outline: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: border-color .15s, background .15s, color .15s;
+}
+
+.xyz-grid input:focus {
+  border-color: #5a8fd8;
+  outline: none;
+  background: #252930;
+}
+
+/* =========================================
+   Action Buttons (Reset & Confirm)
+   ========================================= */
+.config-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.action-btn {
+  height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+/* =========================================
+   Icons
+   ========================================= */
+.action-btn.primary img {
+  width: 22px;
+  height: 22px;
+  transition: transform 0.2s ease;
+}
+
+.action-btn.secondary img {
+  width: 16px;
+  height: 16px;
+  filter: invert(1);
+}
+
+.action-btn.primary img {
+  filter: invert(63%) sepia(61%) saturate(3550%) hue-rotate(180deg) brightness(96%) contrast(100%);
+}
+
+
+
+
+/* Divider with Label */
+.subsection-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 6px 0; /* Spacing above/below */
+  opacity: 0.6;
+}
+
+.subsection-header span {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #dfeaf5;
+}
+
+.subsection-line {
+  flex-grow: 1; /* Takes up remaining space */
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+}
+/* =========================================
+   Test Charges List
+   ========================================= */
+.charges-divider {
+  height: 1px;
+  background: #2a2a2a;
+  margin: 0;
+}
+
+.charges-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 8px;
+  scroll-behavior: smooth;
+}
+
+.charges-header {
+  font-size: 11px;
+  font-weight: 700;
+  color: #999;
+  letter-spacing: .6px;
+  padding: 0;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.charge-item {
+  padding: 8px 10px;
+  border: 1px solid #202020;
+  border-radius: 8px;
+  background: #121212;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.charge-item:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-color: rgba(21, 78, 153, 0.9);
+  transform: translateY(-2px);
+}
+
+.charge-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.charge-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #eee;
+  flex: 1;
+}
+
+.charge-value {
+  flex-shrink: 0;
+}
+
+/* Style the decimal input inside charge item */
+.charge-value .inline-decimal-wrapper {
+  width: auto;
+}
+
+.charge-value #inline-decimal {
+  font-size: 10px;
+  font-weight: 700;
+  color: #eef4ff;
+  background: #1a1c1f;
+  border: 1px solid #3a3f46;
+  padding: 2px 4px !important;
+  border-radius: 4px;
+  min-width: 50px;
+  text-align: right;
+}
+
+.charge-value #inline-decimal:focus {
+  border-color: #5a8fd8;
+  background: #252930;
+  outline: none;
+}
+
+.charge-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  color: #999;
+  font-family: monospace;
+}
+
+.charge-direction {
+  display: block;
+}
+
+/* Scrollbar styling - Separated with padding */
+.charges-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.charges-list::-webkit-scrollbar-track {
+  background: transparent;
+  margin-right: 4px;
+}
+
+.charges-list::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+  margin-right: 4px;
+}
+
+.charges-list::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}

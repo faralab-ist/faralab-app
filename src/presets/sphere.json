@@ -1,0 +1,21 @@
+{
+    "sphere": {
+        "context": { "r": 1.8, "lambda": 5},
+        "camera": {
+        "position": [7, 5, 7],
+        "target": [0, 0, 0]
+        },
+        "settings": {
+        "vectorMinTsl": 0.05,
+        "vectorScale": 1.2,
+        "lineMin": 0.12,
+        "lineNumber": 28,
+        "showField": true,
+        "showLines": false,
+        "showEquipotentialSurface": false
+        },
+        "objects": [
+            { "type": "chargedSphere", "props": { "position": [0, 0, 0], "charge": "$lambda", "radius": "$r"} }
+        ]
+    }
+}

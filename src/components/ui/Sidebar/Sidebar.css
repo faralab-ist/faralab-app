@@ -1,45 +1,22 @@
-/* === WRAPPER DO PAINEL (mantém o botão sempre visível) === */
+/* === WRAPPER DO PAINEL === ##### É USADO ######*/
 .sidebar-wrap {
   position: fixed;
   top: 0;
   right: 0;
   height: 100vh;
   width: 0;
-  z-index: 100;
+  z-index: 1;
   pointer-events: none;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
-/* Botão lateral fixo (abre/fecha o painel) */
-.toggle-tab {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  right: 0;
-  width: 28px;
-  height: 56px;
-  border: 1px solid #2a2a2a;
-  border-right: none;
-  border-radius: 6px 0 0 6px;
-  background: #171717;
-  color: #eaeaea;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  font-weight: 600;
-  pointer-events: auto;
-}
-
-.sidebar-wrap.open .toggle-tab {
-  right: 325px; /* igual à largura do painel */
-}
-
-/* Painel lateral fixo */
+/* Painel lateral fixo ##### É USADO ###### */
 .sidebar {
   position: fixed;
   top: 0;
   right: 0;
   width: 325px;
+  top: 20px;
   height: 100vh;
   background: #101010;
   color: #eaeaea;
@@ -49,155 +26,38 @@
   overflow: hidden;
   box-sizing: border-box;
   pointer-events: auto;
+  cursor: pointer;
 }
 
 .sidebar.open {
   transform: translateX(0);
+  cursor: default;
 }
 
-.panel-content {
-  height: 100%;
-  overflow-y: auto;
-  padding: 12px 14px 16px;
-}
-
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
-}
-
-.header-left {
-  display: flex;
-  flex-direction: column;
-}
-
-.panel-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-  letter-spacing: 0.2px;
-}
-
-.panel-sub {
-  margin: 2px 0 0;
-  font-size: 12px;
-  color: rgba(255,255,255,0.6);
-}
-
-/* novo: area de pills no header */
-.header-pills {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-/* estilo mais agradável para as pills do topo */
-.header-pills .pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border: 1px solid rgba(255,255,255,0.04);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* contador dentro da pill */
-.header-pills .pill .count {
-  margin-left: 6px;
-  background: rgba(0,0,0,0.25);
-  padding: 2px 6px;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 12px;
-  color: #fff;
-}
-
-/* sub-legend (charges/wires/planes) permanece discreta */
-.sub-legend {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin: 10px 14px;
-}
-
-.legend {
-  display: flex;
-  gap: 6px;
-}
-
-.pill {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid #2a2a2a;
-  font-size: 12px;
-  line-height: 1.6;
-  background: #161616;
-}
-
-.pill.charge {
-  border-color: #682c00;
-  color: #e98000;
-}
-
-.pill.wire {
-  border-color: #5a0000;
-  color: #ff7070;
-}
-
-.pill.plane {
-  border-color: #037813;
-  color: #3fe244cf;
-}
-
-.pill.surface {
-  border-color: #00566e;
-  color: #84b5ff;
-}
-
-/* Subtype pills for surfaces — mantém mesmo estilo que surface */
-.pill.sphere {
-  border-color: #00566e;
-  color: #84b5ff;
-}
-
-.pill.cuboid {
-  border-color: #00566e;
-  color: #84b5ff;
-}
-
-.pill.cylinder {
-  border-color: #00566e;
-  color: #84b5ff;
-}
-
-/* === LISTA DE OBJETOS === */
+/* === LISTA DE OBJETOS === ##### É USADO ###### 
+altera as posições e cenas dos objetos na side bar maximiziada*/
 .object-list {
   list-style: none;
   margin: 0;
-  padding: 6px 0 0;
+  padding: 0;
   display: grid;
   gap: 8px;
 }
 
+/*object list imgs*/
+.object-row img {
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+}
+
+
+ /* quando apago deixa os popups do objeto meio mal ##### É USADO ######*/
 .object-row-wrapper {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-.object-row-wrapper
 
+/*deixa as filas de cada objeto bonitinhas na sidebar maximizada ##### É USADO ######*/
 .object-row {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -207,58 +67,51 @@
   border: 1px solid #202020;
   border-radius: 8px;
   background: #121212;
-  cursor: pointer;
-
-  /* new: smooth transitions for hover/focus state */
-  transition: background .12s ease, border-color .12s ease, transform .06s ease, box-shadow .12s ease;
+  cursor: pointer;  
 }
 
-/* Highlight whole row on hover and visible focus (keyboard) */
+/* Highlight whole row on hover and visible focus (keyboard) ##### É USADO ###### */
 .object-row:hover,
+.object-row.selected,
 .object-row:focus-visible {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-color: #2b2b2b;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  border-color:rgba(21, 78, 153, 0.9);
   transform: translateY(-2px);
+ /* filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);*/
+  filter: invert(63%) sepia(61%) saturate(3550%) hue-rotate(180deg) brightness(96%) contrast(100%);
+/* Don't know which one is better*/
 }
 
-/* Highlight row when scene object is hovered */
-.object-row.hovered {
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border-color: rgba(255,255,255,0.04);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.32);
-}
-
+/* Name highlight when row is hovered ##### É USADO ###### */
 .object-row.hovered .name {
   color: #ffffff;
   font-weight: 600;
 }
 
-/* Subtle active press effect */
+.object-row.selected .name {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* Subtle active press effect ##### É USADO ###### mas não consigo ver a diferença*/
 .object-row:active {
   transform: translateY(0);
   box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+  
 }
 
-/* Tidy child tweaks when row is highlighted */
+/* Tidy child tweaks when row is highlighted ##### É USADO ###### faz tremer as letras quando hover */
 .object-row:hover .name,
 .object-row:focus-visible .name {
   color: #fff;
   font-weight: 600;
 }
 
-.object-row:hover .pill,
-.object-row:focus-visible .pill {
-  filter: brightness(1.05);
-  border-color: rgba(255,255,255,0.04);
 
-}
-
-/* Keep expand button visuals independent and usable */
+/* Keep expand button visuals independent and usable ##### É USADO ######*/
 .expand-btn { z-index: 2; }
 
-/* Botão da setinha de expandir */
+/* Botão da setinha de expandir ##### É USADO ###### altera um pouco a row*/
 .expand-btn {
   background: none;
   border: none;
@@ -269,26 +122,44 @@
   padding: 5px 20px;
 }
 
+/* Ícones dentro da lista (agora sem pill) */
+.object-row img {
+  width: 20px;
+  height: 20px;
+  display: block;
+  transition: filter .12s, transform .08s;
+}
 
-/* Detalhes expandidos */
+/* Full panel content ###### É USADO ######*/
+.panel-content {
+  padding: 16px;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Detalhes expandidos ##### É USADO ###### talvez mudar */
 .object-details {
   margin-top: -5px;
+  margin-right: 12px;
   border: 1px solid #222;
   border-radius: 6px;
   background: #181818;
   padding: 8px 12px;        /* tighter */
   font-size: 12px;
   line-height: 1.4;
-  max-width: 270px;        /* narrower */
-  width: 100%;
+  max-width: 295px;        /* narrower */
+  width: calc(100% + 12px);
 }
 
+/* aumenta o espaço das linhas dos detalhes dos objetos ##### É USADO ###### */
 .details-grid {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
+/* quando apago, ele apaga as linhas entra os detalhes do objeto ##### É USADO ###### */
 .detail-row {
   display: flex;
   flex-wrap: wrap;           /* allow inputs to wrap */
@@ -298,15 +169,18 @@
   border-bottom: 1px solid #222;
 }
 
+/*apaga a linha por debaixo do ultimo detalhe do objeto ##### É USADO ######*/
 .detail-row:last-child {
   border-bottom: none;
 }
 
+/* chave/valor dos detalhes do objeto ##### É USADO ######*/
 .detail-key {
   flex: 0 0 auto;
-  color: #999;
+  color: #999; /* cor do nome dos detalhes do objeto */
 }
 
+/* valor e organiza os valores dos detalhes do objeto ##### É USADO ######*/
 .detail-value {
   flex: 1 1 100%;
   display: flex;
@@ -316,9 +190,9 @@
   font-family: monospace;
   font-size: 11px;
   overflow: hidden;
-  padding: 1px;
 }
 
+/* estilos dos inputs dos detalhes do objeto ##### É USADO ######*/
 .object-details input[type="number"],
 .object-details input[type="text"],
 .object-details select {
@@ -335,16 +209,13 @@
   outline: none;
 }
 
+/* estilos dos inputs dos detalhes do objeto ##### ACHO QUE NÃO É USADO ######*/
 .object-details input[type="number"]:focus,
 .object-details input[type="text"]:focus,
 .object-details select:focus {
-  border-color: #3e5a80;
+  border-color:rgba(21, 78, 153, 0.9);
 }
-
-.object-details .wide-input {
-  width: 100%;               /* use this class for any full-width field */
-}
-
+/* grupo de inputs para detalhes do objeto ##### NÃO SEI SE É USADO ######*/
 .object-details .input-group {
   display: flex;
   flex-wrap: wrap;
@@ -352,6 +223,7 @@
   width: 100%;
 }
 
+/* grupo de inputs para detalhes do objeto ##### NÃO SEI SE É USADO ######*/
 .object-details .input-group > label {
   display: flex;
   flex-direction: column;
@@ -360,6 +232,7 @@
   color: #aaa;
 }
 
+/* grupo de inputs para detalhes do objeto ##### NÃO SEI SE É USADO ######*/
 .object-details .error-text {
   width: 100%;
   color: #ff5c5c;
@@ -368,24 +241,20 @@
   margin-top: 2px;
 }
 
+/* wrapper para inputs inline nos detalhes do objeto ##### NÃO SEI SE É USADO ######*/
 .object-details .inline-input-wrapper { display: flex; flex-direction: column; gap: 2px; }
 .object-details .inline-input-wrapper input.has-error { border: 1px solid #c23535; }
 .object-details .input-error { color: #ff5c5c; font-size: 10px; line-height: 1.1; font-weight: 600; }
 
-.object-row.hovered .object-details {
-  max-width: 220px;
-}
+/* === MODO MINIMIZADO / MINIBAR === ##### É USADO ######
 
-/* acrescentos para modo minimizado */
+# PROBLEMA COM NOMES QUE SÃO USADOS AQUI E NA SIEBAR.JSX E NA OBJECTLIST.JSX
+*/
 
-/* quando minimizado, empurra toggle-tab menos (para encaixar minibar) */
-.sidebar-wrap.minimized .toggle-tab {
-  right: 96px; /* 80px minibar + 16px gap */
-}
 
-/* minibar: barra pequena que mostra só as pills */
+/* minibar: ##### É USADO ###### */
 .sidebar.minimized {
-  width: 96px; /* keep some padding */
+  width: 50px; /* keep some padding */
   transform: translateX(0);
   overflow: visible;
   display: flex;
@@ -394,13 +263,14 @@
   padding: 12px 8px;
 }
 
-/* esconder o conteúdo normal quando minimizado */
+/* esconder o conteúdo normal quando minimizado ##### É USADO ######*/
 .sidebar.minimized .panel-content {
   display: none;
 }
 
-/* layout vertical das pills na minibar */
+/* layout vertical dos itens na minibar deixa bem espaçados etc ##### É USADO ###### */
 .minibar {
+  outline: none;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -410,60 +280,113 @@
   pointer-events: auto;
 }
 
-/* estilo específico das pills na minibar */
-.minibar-pill {
+/*altera tudo menos as cherges ber ISSSOOO ##### É USADO ###### */
+/* Botão apenas com ícone (sem pill) - charge, wire, plane, charged_sphere e surfaces */
+.pos_charge-icon-btn,
+.neg_charge-icon-btn,
+.testPointCharge-icon-btn,
+.wire-icon-btn,
+.concentricInfWires-icon-btn,
+.plane-icon-btn,
+.stackedPlanes-icon-btn,
+.charged_sphere-icon-btn,
+.concentricSpheres-icon-btn,
+.sphere-icon-btn,
+.cuboid-icon-btn,
+.cylinder-icon-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  width: auto;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  width: 72px;
-  text-align: center;
-  font-size: 12px;
+  gap: 0;
+  transform: none;
+  margin: 0 auto; /* igual ao wire */
 }
 
-/* ajustar contador nas pills pequenas */
-.minibar-pill .count {
-  margin-left: 0;
-  margin-top: 2px;
-  background: rgba(0,0,0,0.3);
-  padding: 2px 6px;
-  border-radius: 999px;
-  font-size: 12px;
+/* Ícone de wire  ##### É USADO ######*/
+.wire-icon-btn .wire-icon, 
+.concentricInfWires-icon-btn .wire-icon{
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  transition: filter .12s, transform .08s;
 }
 
-/* Minibar pill base */
-.minibar-pill {
-  transition: background .12s, border-color .12s, transform .08s, box-shadow .15s, color .08s;
+/* Ícone de plane ##### É USADO ######*/
+.plane-icon-btn .plane-icon,
+.stackedPlanes-icon-btn .plane-icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  transition: filter .12s, transform .08s;
 }
 
-/* Hover highlight in minimized mode */
-.sidebar.minimized .minibar-pill:hover {
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.025));
-  border-color: rgba(255,255,255,0.08);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.45);
-  color: #fff;
-  font-weight: 700;
+/* Ícone de charged_sphere ##### É USADO ######*/
+.concentricSpheres-icon-btn .charged_sphere-icon,
+.charged_sphere-icon-btn .charged_sphere-icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  transition: filter .12s, transform .08s;
 }
 
-/* Scene-hovered object pill (same style) */
-.sidebar.minimized .minibar-pill.hovered {
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-  border-color: rgba(255,255,255,0.12);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-  color: #fff;
-  font-weight: 700;
+/* Ícones de cargas positivas e negativas ##### É USADO ######*/
+.pos_charge-icon-btn .charge-icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
-/* whole bunch of lines holy moly*/
-/* garante comportamento responsivo: se janela muito pequena, minimizar é estreito */
-@media (max-width: 520px) {
-  .sidebar.minimized { width: 84px; }
-  .sidebar-wrap.minimized .toggle-tab { right: 80px; }
+
+.neg_charge-icon-btn .charge-icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
+
+/* Ícones de superfícies */
+.sphere-icon-btn .sphere-icon,
+.cuboid-icon-btn .cuboid-icon,
+.cylinder-icon-btn .cylinder-icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  transition: filter .12s, transform .08s;
+}
+
+
+/* No modo minimizado, o botão não ganha hover visual */
+.sidebar.minimized button:hover {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Destaque apenas na imagem no modo minimizado */
+.sidebar.minimized button:hover img,
+.sidebar.minimized button.hovered img {
+  transform: scale(1.1);
+  filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);
+
+}
+
+
+/* Add styling for the icon inside */
+.testPointCharge-icon-btn .test-charge-icon {
+  width: 28px;
+  height: 28px;
+  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  transition: filter .12s, transform .08s;
+}
+
+
+
 
 
 

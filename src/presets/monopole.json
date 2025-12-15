@@ -1,0 +1,18 @@
+{
+    "monopole": {
+        "context": { "r": 0.1, "q": 1 },
+        "camera": { "position": [5, 4, 5], "target": [0, 0, 0] },
+        "settings": {
+        "vectorMinTsl": 0.08,
+        "vectorScale": 1.2,
+        "lineMin": 0.12,
+        "lineNumber": 28,
+        "showField": true,
+        "showLines": false,
+        "showEquipotentialSurface": false
+        },
+        "objects": [
+            { "type": "charge", "props": { "position": [0, 0, 0], "charge": "$q", "radius": "$r"} }
+        ]
+  }
+}

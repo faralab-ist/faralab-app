@@ -1,3 +1,4 @@
+import { Center } from '@react-three/drei';
 import './EfieldButtons.css'
 import PlaneButtons from './PlaneButtons'
 
@@ -10,15 +11,15 @@ export default function EfieldButtons({
     activePlane,
     onPlaneSelect,
     showField, 
-    scaleInput, 
-    setScaleInput, 
-    commitScale, 
+    vectorScale, 
+    setVectorScale, 
+    vectorStep,
+    setVectorStep,
     lineMin, 
     setLineMin, 
     showLines,
-    lineNumInput,
-    setLineNumInput,
-    commitLineNum,
+    lineNumber,
+    setLineNumber,
     inline,
     hasField = true,
     // wave propagation props
@@ -33,30 +34,38 @@ export default function EfieldButtons({
     const content = (
         <div className="efield-controls">
             <div className="efield-row compact" style={{alignItems: 'center', gap: 8}}>
-                <label className="efield-label" style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                <label className="efield-label horizontal">
+                    <span className="label-text" style= {{justifyContent:'normal'}}>Wave Propagation</span>
                     <input
                         type="checkbox"
                         checked={!!wavePropagationEnabled}
                         onChange={e => setWavePropagationEnabled?.(e.target.checked)}
-                        disabled={!hasField}
+                        title={(!wavePropagationEnabled || !hasField) ? 'Enable field vectors to control this' : undefined}
+                        disabled={!hasField || !showField}
+                        className="efield-checkbox"
                     />
-                    <span className="label-text">Wave Propagation</span>
                 </label>
-                {wavePropagationEnabled && (
-                    <label className="efield-label" style={{display:'flex', alignItems:'center', gap:8}}>
-                        <span className="label-text">Wave Duration (s)</span>
-                        <input
-                            type="range"
-                            min={0.02}
-                            max={1.0}
-                            step={0.01}
-                            value={waveDuration ?? 0.1}
-                            onChange={e => setWaveDuration?.(parseFloat(e.target.value))}
-                            disabled={!hasField}
-                        />
-                        <span style={{minWidth:48, textAlign:'right'}}>{(waveDuration ?? 0.1).toFixed(2)}</span>
-                    </label>
-                )}
+
+                {/* Always render the Wave Duration row — greyed/disabled when wavePropagationEnabled is false */}
+                <label
+                    className={`efield-label ${(!wavePropagationEnabled || !showField) ? 'dimmed' : ''}`}
+                    style={{display:'flex', alignItems:'center', gap:8}}
+                    title={(!wavePropagationEnabled || !showField) ? 'Enable field vectors to control this' : undefined}
+                    aria-hidden={!showField && !wavePropagationEnabled ? 'true' : undefined}
+                >
+                    <span className="label-text">Wave Duration (s)</span>
+                    <input
+                        type="range"
+                        min={0.02}
+                        max={1.0}
+                        step={0.01}
+                        value={waveDuration ?? 0.1}
+                        onChange={e => setWaveDuration?.(parseFloat(e.target.value))}
+                        disabled={!wavePropagationEnabled || !showField}
+                        className="efield-range"
+                    />
+                    <span className="slider-value" style={{minWidth:48, textAlign:'right'}}>{(waveDuration ?? 0.1).toFixed(2)}</span>
+                </label>
             </div>
             <div className="field-buttons-row">
                 <button
@@ -87,32 +96,44 @@ export default function EfieldButtons({
                      <label className="efield-label">
                          <span className="label-text">Min Threshold</span>
                          <input
-                             type="number"
-                             min={0.00}
-                             step={0.05}
-                             value={vectorMinTsl}
-                             onChange={e => setVectorMinTsl(Number(e.target.value))}
-                             disabled={!hasField || !showField}
-                             aria-disabled={!hasField}
-                             title={!hasField || !showField ? disabledTitle_vectors : undefined}
+                            type="number"
+                            min={0.00}
+                            step={0.05}
+                            value={vectorMinTsl}
+                            onChange={e => setVectorMinTsl(Number(e.target.value))}
+                            disabled={!hasField || !showField}
+                            aria-disabled={!hasField}
+                            title={!hasField || !showField ? disabledTitle_vectors : undefined}
                          />
                      </label>
                      <label className="efield-label">
                          <span className="label-text">Scale</span>
                          <input
-                             type="number"
-                             min={0.1}
-                             max={5}
-                             step={0.1}
-                             value={scaleInput}
-                             onChange={e => setScaleInput(e.target.value)}
-                             onBlur={commitScale}
-                             onKeyDown={e => { if (e.key === 'Enter') commitScale() }}
+                            type="number"
+                            min={0.1}
+                            max={5}
+                            step={0.1}
+                            value={vectorScale}
+                            onChange={e => {setVectorScale(Number(e.target.value))}}
                             disabled={!hasField || !showField}
-                             aria-disabled={!hasField}
-                             title={!hasField || !showField ? disabledTitle_vectors : undefined}
+                            aria-disabled={!hasField}
+                            title={!hasField || !showField ? disabledTitle_vectors : undefined}
                          />
                      </label>
+                     <label className="efield-label">
+                        <span className="label-text">Density</span>
+                        <input
+                            type="number"
+                            min={0.2}
+                            max={2}
+                            step={0.2}
+                            value={vectorStep}
+                            onChange={e => {setVectorStep(Number(e.target.value))}}
+                            disabled={!hasField || !showField}
+                            aria-disabled={!hasField}
+                            title={!hasField || !showField ? disabledTitle_vectors : undefined}
+                        />
+                    </label>
                  </div>
              </div>
              
@@ -125,32 +146,30 @@ export default function EfieldButtons({
                      <label className="efield-label">
                          <span className="label-text">Min Threshold</span>
                          <input
-                             type="number"
-                             min={0.00}
-                             step={0.05}
-                             value={lineMin}
-                             onChange={e => setLineMin(Number(e.target.value))}
-                             disabled={!hasField || !showLines}
-                             aria-disabled={!hasField}
-                             title={!hasField || ! showLines? disabledTitle_lines : undefined}
-                             placeholder="0.1"
+                            type="number"
+                            min={0.00}
+                            step={0.05}
+                            value={lineMin}
+                            onChange={e => setLineMin(Number(e.target.value))}
+                            disabled={!hasField || !showLines}
+                            aria-disabled={!hasField}
+                            title={!hasField || ! showLines? disabledTitle_lines : undefined}
+                            placeholder="0.1"
                          />
                      </label>
                      <label className="efield-label">
                          <span className="label-text">Nº of Lines</span>
                          <input
-                             type="number"
-                             min={1}
-                             max={50}
-                             step={1}
-                             value={lineNumInput}
-                             onChange={e => setLineNumInput(e.target.value)}
-                             onBlur={commitLineNum}
-                             onKeyDown={e => { if (e.key === 'Enter') commitLineNum() }}
-                             placeholder="20"
-                             disabled={!hasField || !showLines}
-                             aria-disabled={!hasField}
-                             title={!hasField || !showLines ? disabledTitle_lines : undefined}
+                            type="number"
+                            min={1}
+                            max={50}
+                            step={1}
+                            value={lineNumber}
+                            onChange={e => setLineNumber(Number(e.target.value))}
+                            placeholder="20"
+                            disabled={!hasField || !showLines}
+                            aria-disabled={!hasField}
+                            title={!hasField || !showLines ? disabledTitle_lines : undefined}
                          />
                      </label>
                  </div>

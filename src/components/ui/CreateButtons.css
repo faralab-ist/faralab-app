@@ -166,32 +166,35 @@ button:hover {
 /* Top-left standalone Presets button (container removed) */
 .presets-btn {
   position: fixed;
-  top: 20px;
+  top: 45px;
   left: 20px;
-  z-index: 1400;
+  z-index: 20;
   padding: 12px 24px;
   font-size: 0.95rem;
   letter-spacing: .7px;
   font-weight: 700;
+  border-color: black ;
   /* make presets visually match active plane buttons */
-  background: rgba(100, 180, 255, 0.662);
+  background:  #53b0ff;
   color: #ffffff;
   border: 1px solid rgba(100, 180, 255, 0.95);
   border-radius: 30px;
   cursor: pointer;
   /*backdrop-filter: blur(4px);*/
-  transition: background .15s, border-color .15s, color .15s, transform .12s;
-  /*box-shadow: 0 6px 20px rgba(60, 120, 220, 0.18), 0 0 28px rgba(70, 130, 255, 0.28);*/
-  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;  
+  /*box-shadow: 0 6px 20px rgba(60, 120, 220, 0.18), 0 0 28px rgba(70, 130, 255, 0.28);*/  
+  
 }
 .presets-btn:hover {
-  background: rgba(100, 180, 255, 0.832);
-  border-color: rgba(100, 200, 255, 1);
+  background:  #04abff;
   color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 30px rgba(60, 130, 230, 0.22), 0 0 40px rgba(80, 150, 255, 0.32);
-
+  transform: translateY(1px);
+  box-shadow:
+    0 18px 40px rgba(4,171,255,0.10),   /* soft colored halo */
+    0 6px 18px rgba(4,171,255,0.06),    /* supporting glow */
+    0 2px 6px rgba(0,0,0,0.35);         /* depth */
 }
+
 
 /*.presets-btn::before {
   content: '';
@@ -210,7 +213,7 @@ button:hover {
 /* Dropdown under Presets button */
 .preset-dropdown.tl {
   position: fixed;
-  top: 20px; /* just below button */
+  top: 52px; 
   left: 150px;
   z-index: 1450;
 }

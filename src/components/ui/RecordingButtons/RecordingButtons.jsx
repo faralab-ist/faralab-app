@@ -237,6 +237,7 @@ export default function RecordingButtons() {
       </button>
 
       {/* Botão de GIF */}
+      {/* COMMENTED FOR NOW SINCE IT'S GOING INTO MAIN: TOFIX
       <button
         className={`rec-btn ${isRecordingGif ? 'recording' : ''} ${isProcessingGif ? 'processing' : ''}`}
         onClick={isRecordingGif ? stopGifRecording : startGifRecording}
@@ -257,6 +258,7 @@ export default function RecordingButtons() {
         </span>
         {isRecordingGif && <span className="rec-indicator" />}
       </button>
+      */}
     </div>
   )
 }

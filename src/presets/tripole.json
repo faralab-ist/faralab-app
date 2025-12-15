@@ -1,0 +1,23 @@
+{
+    "tripole": {
+        "context": {  "r": 0.06, "d": 3, "q": 1, "tq": 2 },
+        "camera": {
+        "position": [0, 2.7, 7],
+        "target": [0, 0, 0]
+        },
+        "settings": {
+        "vectorMinTsl": 0.08,
+        "vectorScale": 1.2,
+        "lineMin": 0.12,
+        "lineNumber": 28,
+        "showField": true,
+        "showLines": false,
+        "showEquipotentialSurface": false
+        },
+        "objects": [
+            { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },
+            { "type": "charge", "props": { "position": ["$d", 0, 0], "charge": "$(q)", "radius": "$r" } },
+            { "type": "charge", "props": { "position": [0, "$d", 0], "charge": "$(-tq)", "radius": "$r" } }
+        ]
+    }
+}

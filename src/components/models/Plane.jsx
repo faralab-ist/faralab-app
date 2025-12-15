@@ -16,18 +16,16 @@ function Plane({
   updatePosition,
   updateDirection,
   updateObject,
-  gridDimensions,
   dimensions,
   direction,
-  creativeMode,            // NEW
+  creativeMode,           
   planeWidth,
   planeHeight,
   rotation,
   quaternion,
-  hoveredId,
+  isHovered,
 }) {
   const isSelected = id === selectedId
-  const isHovered = id === hoveredId
   const { handleAxisDragStart } = useCameraSnap()
   const pivotRef = useRef()
   const meshRef = useRef()

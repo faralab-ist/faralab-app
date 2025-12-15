@@ -1,0 +1,301 @@
+:root {
+  --slice-btn-size: 68px;
+}
+
+/* =========================================
+   Layout & Containers
+   ========================================= */
+
+/* Main Panel */
+.slicing-panel {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: 1px;
+  border: none;
+  background: transparent;
+  color: #dfeaf5;
+  font-size: 13px;
+}
+
+/* Button Row Container */
+.slice-row {
+  display: flex;
+  flex-wrap: wrap; /* allow main button to occupy full row */
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* Unified Section Look */
+.efield-section {
+  padding: 12px;
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
+  box-shadow: var(--soft-shadow);
+  overflow: hidden;
+}
+
+.efield-section-title {
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: .6px;
+}
+
+.efield-row.compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* =========================================
+   Buttons (Shared & Specific)
+   ========================================= */
+
+/* Base Style for All Top Buttons (Square by default) */
+.slice-row button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  justify-self: start;
+  
+  /* Dimensions */
+  width: var(--slice-btn-size);
+  height: var(--slice-btn-size);
+  min-width: var(--slice-btn-size);
+  padding: 8px 6px;
+  gap: 6px;
+
+  /* Appearance */
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) inset;
+  color: #dfeaf5;
+  text-align: center;
+  
+  cursor: pointer;
+  transition: all .16s ease;
+}
+
+/* Primary Slicing Button */
+.slice-row .slicing-btn {
+  /* Layout: Full width, row orientation */
+  flex: 0 0 100%;
+  max-width: 100%;
+  flex-direction: row; 
+  align-items: center;
+  
+  /* Dimensions */
+  height: 44px;
+  min-height: 40px;
+  padding: 8px 12px;
+  gap: 10px;
+  
+  /* Appearance */
+  border-radius: 4px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55), inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+}
+
+/* =========================================
+   Button Inner Content (Icons & Labels)
+   ========================================= */
+
+/* General Image Styling */
+.slice-row button img {
+  display: block;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  filter: invert() brightness(1.1);
+}
+
+/* Primary Button Image Overrides */
+.slice-row .slicing-btn img {
+  width: 20px;
+  height: 20px;
+  filter: invert(); /* Reset filter for primary btn if needed */
+}
+
+/* General Label Styling */
+.slice-row .btn-label {
+  margin: 0;
+  color: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Primary Button Label Overrides */
+.slice-row .slicing-btn .btn-label {
+  font-size: 13px;
+  /* Removed redundant margins */
+}
+
+/* Flip Button Icon Animation */
+.flip-btn img {
+  transition: transform 0.3s ease;
+}
+.flip-btn.active img {
+  transform: scaleX(-1);
+}
+
+/* =========================================
+   Interactive States (Hover, Active, Disabled)
+   ========================================= */
+
+/* 1. Hover States */
+.slice-row button:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+
+/* 2. Active States (Pressed/Selected) */
+.slice-row button:active {
+  transform: translateY(0);
+}
+
+/* Apply active styling to slicing-btn AND helper-btn when active */
+.slice-row button.active,
+.slice-row .slicing-btn:active,
+.slice-row .helper-btn:active {
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-color: rgba(21, 78, 153, 0.9);
+  box-shadow: 0 8px 28px rgba(79, 154, 255, 0.16), 0 2px 6px rgba(0, 0, 0, 0.5) inset;
+  color: #fff;
+}
+
+
+.slice-row .flip-btn,
+.slice-row .helper-btn {
+  border-radius: 5px;
+}
+
+
+
+/* Exclude flip-btn from background/border changes when active, only image flips */
+.slice-row .flip-btn.active {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00)); /* keep default bg */
+  border-color: rgba(255, 255, 255, 0.04); /* keep default border */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) inset; /* keep default shadow */
+  color: #dfeaf5; /* keep default color */
+}
+
+/* Specific Hover for Active Primary Button */
+.slice-row .slicing-btn.active:hover {
+  background: #1191ed;
+  border-color: rgba(100, 180, 255, 1);
+  box-shadow: 0 0 25px rgba(70, 129, 255, 0.959);
+  transform: scale(1.02) translateY(-1px);
+}
+
+/* 3. Disabled States (General Button) */
+.slice-row button:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================
+   Panel Disabled Logic
+   ========================================= */
+
+/* Grey out panel */
+.slicing-panel.disabled {
+  transition: filter .18s ease, opacity .18s ease;
+  filter: grayscale(0.6) brightness(0.88);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Exceptions: Keep Primary Button Interactive */
+.slicing-panel.disabled .slicing-btn {
+  filter: none;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* Visuals for inert buttons inside disabled panel */
+.slicing-panel.disabled .plane-button,
+.slicing-panel.disabled .helper-btn,
+.slicing-panel.disabled .flip-btn {
+  opacity: 0.48;
+  filter: grayscale(0.9);
+  box-shadow: none;
+}
+
+.slicing-panel.disabled button:focus {
+  outline: none;
+}
+
+/* Subtle Hover Effect for interactive elements in disabled panel */
+.slicing-panel.disabled .slice-row button:hover,
+.slicing-panel.disabled .slice-row .slicing-btn:hover {
+  background: rgba(100, 100, 100, 0.7);
+  border-color: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  transform: scale(1.02) translateY(-1px);
+}
+
+/* =========================================
+   Inputs (Range Slider)
+   ========================================= */
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  margin-right: 10px;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -4px;
+  border: 2px solid rgba(0, 0, 0, 0.25);
+  border-radius: 50%;
+  background: #e9eef7;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+input[type="range"]:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.slider-value {
+  min-width: 44px;
+  font-weight: 600;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* =========================================
+   Media Queries
+   ========================================= */
+
+@media (max-width: 420px) {
+  .slice-row { gap: 8px; }
+  .plane-buttons-group { gap: 8px; }
+  .efield-section { padding: 10px; }
+}

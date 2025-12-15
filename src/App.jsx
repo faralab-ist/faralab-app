@@ -6,18 +6,19 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper} from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, TestCharge} from './components/models'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
 
   // UI components
   import CreateButtons from './components/ui/CreateButtons'
-  import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   import Toolbar from './components/ui/Toolbar/Toolbar'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
+  import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
+  import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
 
   // Hooks
   import {useSceneObjects, 
@@ -140,6 +141,16 @@ function LoadingOverlay() {
       updateChargeDensity,
       updateDirection,
       addObject,
+      addRadiusToChargedSphere,
+      removeLastRadiusFromChargedSphere,
+      setMaterialForLayerInChargedSphere,
+      setDielectricForLayerInChargedSphere,
+      setChargeForLayerInChargedSphere,
+      setRadiusToChargedSphere,
+      addPlaneToStackedPlanes,
+      removeLastPlaneFromStackedPlanes,
+      setSpacingForStackedPlanes,
+      setChargeDensityForPlaneInStackedPlanes,
       counts,
     } = useSceneObjects()
     
@@ -150,7 +161,7 @@ function LoadingOverlay() {
     const [showLines, setShowLines] = useState(false)
     const [showOnlyGaussianField, setShowOnlyGaussianField] = useState(false)
     const [showEquipotentialSurface, setShowEquipotentialSurface] = useState(false)
-    const [equipotentialTarget, setEquipotentialTarget] = useState(5.0) 
+    const [equipotentialTarget, setEquipotentialTarget] = useState(1.0) 
     const [dragOwnerId, setDragOwnerId] = useState(null)
     const [isPanelMinimized, setIsPanelMinimized] = useState(false)
     const [isSidebarMinimized, setIsSidebarMinimized] = useState(false)
@@ -158,6 +169,7 @@ function LoadingOverlay() {
     const [creativeMode, setCreativeMode] = useState(false)  // stays here (single source)
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
+    const [vectorStep, setVectorStep] = useState(1) 
     const [lineMin, setLineMin] = useState(0.1)         //LINE SETTINGS NEW
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
@@ -174,6 +186,8 @@ function LoadingOverlay() {
       const [wavePropagationEnabled, setWavePropagationEnabled] = useState(true)
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
+
+
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -317,17 +331,54 @@ function LoadingOverlay() {
       showLines, onToggleLines: toggleLines,
       showEquipotentialSurface, onToggleEquipotentialSurface: toggleEquip,
       // settings setters
-      setVectorMinTsl, setVectorScale, setLineMin, setLineNumber
+      setVectorMinTsl, setVectorScale, setVectorStep, setLineMin, setLineNumber
     })
 
-    return (
+    useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key !== 'Backspace' && e.key !== 'Delete') return
+      const active = document.activeElement
+      if (!active) return
+      const tag = active.tagName
+      const isFormField = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active.isContentEditable
+      if (isFormField) return
+      if (selectedId == null) return
+      e.preventDefault() // avoid back-navigation on Backspace
+      removeObject?.(selectedId)
+      setSelectedId(null)
+    }
 
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [selectedId, removeObject, setSelectedId])
+
+    return (
+      
     <>
     {/* <LoadingOverlay /> */}
 
-    <div id="canvas-container">
-        <Toolbar />
-        
+    <div id="app-root">
+      <div className="toolbar-root">     {/* new same-container wrapper */}
+     <Toolbar 
+        addObject={addObject}
+        updatePosition={updatePosition}
+        sceneObjects={sceneObjects}
+        counts={counts}
+        creativeMode={creativeMode}
+        setCreativeMode={setCreativeMode} 
+        setSceneObjects={setSceneObjects} 
+        useSlice={useSlice} setUseSlice={setUseSlice}
+        showSliceHelper={showSlicePlaneHelper} 
+        setShowSliceHelper={setShowSlicePlaneHelper}
+        setSlicePlane={setSlicePlane} 
+        slicePlane={slicePlane}
+        slicePos={slicePos} setSlicePos={setSlicePos}
+        slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
+       />
+       
+       </div>
+       <div id="canvas-container">
+        {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
         <CreateButtons
           addObject={addObject}
           setSceneObjects={setSceneObjects}
@@ -342,6 +393,7 @@ function LoadingOverlay() {
           settings={{
             vectorMinTsl,
             vectorScale,
+            vectorStep,
             lineMin,
             lineNumber,
             showField,
@@ -350,7 +402,8 @@ function LoadingOverlay() {
             showOnlyGaussianField
           }}
         />
-        
+
+
        {/* <ObjectPopup
           selectedObject={sceneObjects.find(o => o.id === selectedId)}
           updateObject={updateObject}
@@ -375,6 +428,16 @@ function LoadingOverlay() {
           setHoveredId={setHoveredId}
           selectedId={selectedId}
           setSelectedId={setSelectedId}
+          addRadiusToChargedSphere={addRadiusToChargedSphere}
+          removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+          setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
+          setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
+          setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
+          setRadiusToChargedSphere={setRadiusToChargedSphere}
+          addPlaneToStackedPlanes={addPlaneToStackedPlanes}
+          removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
+          setSpacingForStackedPlanes={setSpacingForStackedPlanes}
+          setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
         />
 
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
@@ -406,9 +469,13 @@ function LoadingOverlay() {
             } else {
               switch(obj.type) {
                 case 'charge': ObjectComponent = Charge; break
+                case 'testPointCharge': ObjectComponent = TestCharge; break
                 case 'wire': ObjectComponent = Wire; break
                 case 'plane': ObjectComponent = Plane; break
                 case 'chargedSphere': ObjectComponent = ChargedSphere; break
+                case 'concentricSpheres': ObjectComponent = ConcentricSpheres; break
+                case 'concentricInfWires': ObjectComponent = ConcentricInfiniteWires; break
+                case 'stackedPlanes': ObjectComponent = StackedPlanes; break
                 default: return null;
               } 
             }
@@ -426,6 +493,15 @@ function LoadingOverlay() {
                 updateDirection={updateDirection}
                 updateObject={updateObject}
                 removeObject={removeObject}
+                addRadiusToChargedSphere={addRadiusToChargedSphere}
+                removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+                setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
+                setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
+                setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
+                addPlaneToStackedPlanes={addPlaneToStackedPlanes}
+                removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
+                setSpacingForStackedPlanes={setSpacingForStackedPlanes}
+                setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
                 slicePlane={slicePlane}
                 slicePos={slicePos}
                 useSlice={useSlice}
@@ -433,17 +509,20 @@ function LoadingOverlay() {
                 dragOwnerId={dragOwnerId}
                 isHovered={obj.id === hoveredId}
                 gridDimensions={obj.type === 'wire' || obj.type === 'plane' ? [20, 20] : undefined}
+                sceneObjects={sceneObjects}
               />
             )
           })}
 
         {showField && (
           <FieldArrows
-        key={`arrows-${vectorMinTsl}-${vectorScale}-${showOnlyGaussianField}-${showField}-${activePlane}`}
+            key={`arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
+    }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
         objects={sceneObjects}
-        showOnlyGaussianField={showOnlyGaussianField}
+        showOnlyGaussianField={showOnlyGaussianField}s
         minThreshold={vectorMinTsl}
         scaleMultiplier={vectorScale}
+        step={1 / (Number(vectorStep))} 
         planeFilter={activePlane}
         slicePlane={slicePlane}
         slicePos={slicePos}
@@ -489,6 +568,11 @@ function LoadingOverlay() {
           onToggleEquipotentialSurface={() => setShowEquipotentialSurface(v => !v)}
           showOnlyGaussianField={showOnlyGaussianField}
           setOnlyGaussianField={setShowOnlyGaussianField}
+          addRadiusToChargedSphere={addRadiusToChargedSphere}
+          removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+          setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
+          setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
+          setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
           creativeMode={creativeMode}
           addObject={addObject}
           sceneObjects={sceneObjects}
@@ -500,22 +584,15 @@ function LoadingOverlay() {
           setVectorMinTsl={setVectorMinTsl}
           vectorScale={vectorScale}
           setVectorScale={setVectorScale}
+          vectorStep={vectorStep}
+          setVectorStep={setVectorStep}
           lineMin={lineMin}         //LINE SETTINGS NEW
           setLineMin={setLineMin}         //LINE SETTINGS NEW
           lineNumber={lineNumber}         //LINE SETTINGS NEW
           setLineNumber={setLineNumber}          //LINE SETTINGS NEW
           activePlane={activePlane}
           onPlaneSelect={handlePlaneSelect}
-          useSlice={useSlice}
-          setUseSlice={setUseSlice}
-          slicePlane={slicePlane}
-          setSlicePlane={setSlicePlane}
-          slicePos={slicePos}
-          setSlicePos={setSlicePos}
-          showSliceHelper={showSlicePlaneHelper}
-          setShowSliceHelper={setShowSlicePlaneHelper}
-          slicePlaneFlip={slicePlaneFlip}
-          setSlicePlaneFlip={setSlicePlaneFlip}
+         
           // Wave propagation controls for field arrows
           wavePropagationEnabled={wavePropagationEnabled}
           setWavePropagationEnabled={setWavePropagationEnabled}
@@ -523,7 +600,8 @@ function LoadingOverlay() {
           setWaveDuration={setWaveDuration}
         />
       </div>
-      </>
+    </div>
+    </>
     )
   }
 
