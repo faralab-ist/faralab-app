@@ -18,6 +18,7 @@ import React, { useState, useEffect, useMemo } from 'react'
   import Toolbar from './components/ui/Toolbar/Toolbar'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
+  import calculateFlux from './utils/calculateFlux'
   import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
 
   // Hooks
@@ -175,6 +176,7 @@ function LoadingOverlay() {
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
     
     const [hoveredId, setHoveredId] = useState(null)
+    const [fluxResults, setFluxResults] = useState([]) // Store flux calculation results
     
     // slicing planes stuff
     const [slicePlane, setSlicePlane] = useState('xz') // 'xy', 'yz', 'xz'
@@ -264,6 +266,30 @@ function LoadingOverlay() {
         setShowOnlyGaussianField(false)
       }
     }, [counts.surface, showOnlyGaussianField])
+
+    useEffect(() => {
+      if (!showOnlyGaussianField) {
+        setFluxResults([])
+        return
+      }
+      const surfaces = sceneObjects?.filter(obj => obj?.type === 'surface') ?? []
+      if (!surfaces.length) {
+        setFluxResults([])
+        return
+      }
+
+      const results = calculateFlux(sceneObjects)
+      setFluxResults(results)
+      
+      if (results.length) {
+        console.log('[Flux] Gaussian surface results:')
+        results.forEach(result => {
+          const label = result.name ?? result.id
+          const value = Number.isFinite(result.flux) ? result.flux : 0
+          console.log(`  ${label}: ${value.toExponential(3)} N·m²/C`)
+        })
+      }
+    }, [showOnlyGaussianField, sceneObjects])
     const [camFns, setCamFns] = useState(null)
 
     const handlePlaneSelect = (plane) => {
@@ -509,6 +535,8 @@ function LoadingOverlay() {
                 dragOwnerId={dragOwnerId}
                 isHovered={obj.id === hoveredId}
                 gridDimensions={obj.type === 'wire' || obj.type === 'plane' ? [20, 20] : undefined}
+                fluxValue={fluxResults.find(r => r.id === obj.id)?.flux ?? 0}
+                showOnlyGaussianField={showOnlyGaussianField}
                 sceneObjects={sceneObjects}
               />
             )

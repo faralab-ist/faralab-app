@@ -173,7 +173,14 @@ export default function useSceneObjects(initial = []) {
     const id = genUid()
 
     setSceneObjects(prev => {
-      const nextIndex = prev.filter(o => o.type === type).length + 1
+      // For surfaces, count by surfaceType; for others, count by type
+      const nextIndex = prev.filter(o => {
+        if (type === 'sphere' || type === 'cylinder' || type === 'cuboid') {
+          return o.type === 'surface' && o.surfaceType === type
+        }
+        return o.type === type
+      }).length + 1
+      
       const base = objectFactories[type](nextIndex)
 
       const newObj = {
@@ -368,7 +375,9 @@ const updateDirection = useCallback((id, direction) => {
     wire: sceneObjects.filter(o => o.type === 'wire').length,
     plane: sceneObjects.filter(o => o.type === 'plane').length,
     chargedSphere: sceneObjects.filter(o => o.type === 'chargedSphere').length,
-    surface: sceneObjects.filter(o => o.type === 'surface').length,
+    cylinder: sceneObjects.filter(o => o.type === 'surface' && o.surfaceType === 'cylinder').length,
+    sphere: sceneObjects.filter(o => o.type === 'surface' && o.surfaceType === 'sphere').length,
+    cuboid: sceneObjects.filter(o => o.type === 'surface' && o.surfaceType === 'cuboid').length,
     total: sceneObjects.length,
   }), [sceneObjects])
 
