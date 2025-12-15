@@ -17,7 +17,8 @@ export default function BaseCharge({
   visualScale,    // Number: size of the glow
   visualOpacity,  // Number: opacity of the glow
   hitboxRadius,   // Number: size of the selection area
-  type = 'charge' // userData type identifier
+  type = 'charge', // userData type identifier
+  radius = 0.06,       // visual radius of the center dot
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -113,7 +114,7 @@ export default function BaseCharge({
 
         {/* Center Dot */}
         <mesh position={[0, 0, 0]} renderOrder={999}>
-          <sphereGeometry args={[0.06]} />
+          <sphereGeometry args={[radius]} />
           <meshBasicMaterial color={0xffffff} toneMapped={false} depthWrite={false} />
         </mesh>
 

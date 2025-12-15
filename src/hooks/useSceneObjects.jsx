@@ -18,7 +18,7 @@ const objectFactories = {
     name: `Charge ${index}`,
     position: [0, 0, 0],
     charge: 1,
-    radius: 0.1,
+    radius: 0.06,
     createdAt: Date.now(),
   }),
     testPointCharge: (index) => ({
@@ -26,8 +26,8 @@ const objectFactories = {
     type: 'testPointCharge',
     name: `Test Charge ${index}`,
     position: [0, 0, 0],
-    charge: 1,
-    radius: 0.1,
+    charge: 0, // In reality its 1, but this way it doesn't affect the field
+    radius: 0.03,
     createdAt: Date.now(),
   }),
   wire: (index) => ({
