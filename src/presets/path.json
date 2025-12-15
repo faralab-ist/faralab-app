@@ -1,0 +1,18 @@
+{
+    "currentLoop": {
+        "context": {"size": 8, "sigma": 0.1 },
+        "camera": {
+        "position": [0, 1, 5],
+        "target": [0, 0, 0]
+        },
+        "settings": {
+        "showField": false,
+        "showLines": false,
+        "showEquipotentialSurface": false,
+        "showBField": true
+        },
+        "objects": [
+            { "type": "path", "props": { "position": [0, 0, 0], "points": [[-1,0,-1],[1,0,-1],[1,0,1],[-1,0,1]], "chargeCount": 10, "isClosedPath": true} }
+        ]
+    }
+}

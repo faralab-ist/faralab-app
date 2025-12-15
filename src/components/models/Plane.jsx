@@ -16,11 +16,9 @@ function Plane({
   updatePosition,
   updateDirection,
   updateObject,
-  dimensions,
   direction,
   creativeMode,           
-  planeWidth,
-  planeHeight,
+  dimensions,
   rotation,
   quaternion,
   isHovered,
@@ -32,8 +30,8 @@ function Plane({
   const isDraggingRef = useRef(false)
 
   // Use dimensions (width/height) or fallback
-  const finiteWidth  = planeWidth  ?? dimensions?.[0] ?? 4
-  const finiteHeight = planeHeight ?? dimensions?.[1] ?? 4
+  const finiteWidth  = dimensions?.[0]
+  const finiteHeight = dimensions?.[1]
   
   const width  = infinite ? 20 : finiteWidth
   const height = infinite ? 20 : finiteHeight

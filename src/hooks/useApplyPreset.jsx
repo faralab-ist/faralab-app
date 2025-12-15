@@ -22,7 +22,9 @@ export default function useApplyPreset({
   setVectorMinTsl,
   setVectorScale,
   setLineMin,
-  setLineNumber
+  setLineNumber,
+  onToggleBField,
+  showBField
 }) {
   return useCallback((nameOrPreset, { animate = true, isCustom = false } = {}) => {
     const onCamera = animate ? animateCameraPreset : setCameraPreset
@@ -37,6 +39,10 @@ export default function useApplyPreset({
       if (st.showField !== undefined && onToggleField) {
         visProvided.field = true
         if (st.showField !== showField) onToggleField()
+      }
+      if (st.showBField !== undefined && onToggleBField) {
+        visProvided.field = true
+        if (st.showBField !== showBField) onToggleBField()
       }
       if (st.showOnlyGaussianField !== undefined && onToggleOnlyGaussianField) {
         visProvided.onlyGauss = true

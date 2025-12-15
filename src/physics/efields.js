@@ -1,8 +1,20 @@
 import * as THREE from "three";
 import { K_E, EPSILON_0 } from "./constants";
 
+export function pointChargeEField(chargePos, charge, targetPos) {
+    chargePos = new THREE.Vector3(...chargePos);
+    targetPos = new THREE.Vector3(...targetPos);
+    const rVec = new THREE.Vector3().subVectors(targetPos, chargePos);
+    const rSq = rVec.lengthSq();
+    if (rSq < 1e-6) return new THREE.Vector3(0, 0, 0);
+    const fieldMagnitude = K_E * charge / rSq;
+    return rVec.normalize().multiplyScalar(fieldMagnitude);
+}
+
 /**     FINITE SURFACES     **/
 export function chargedSphereEField(spherePos, radius, chargeDensity, isHollow, targetPos){
+    spherePos = new THREE.Vector3(...spherePos);
+    targetPos = new THREE.Vector3(...targetPos);
   const rVec = new THREE.Vector3().subVectors(targetPos, spherePos);
   const rVecLength = rVec.length();
   if (rVecLength === 0) return new THREE.Vector3(0,0,0);
@@ -26,10 +38,11 @@ export function chargedSphereEField(spherePos, radius, chargeDensity, isHollow, 
 export function finitePlaneEField(planePos, planeNormal, planeDimensions, chargeDensity, targPoint) {
     const width = planeDimensions[0];
     const height = planeDimensions[1];
-
+    const targePointVec = new THREE.Vector3(...targPoint);
+    const planePosVec = new THREE.Vector3(...planePos);
     const normal = new THREE.Vector3(...planeNormal).normalize();
 
-    const rVec = new THREE.Vector3().subVectors(targPoint, planePos);
+    const rVec = new THREE.Vector3().subVectors(targePointVec, planePosVec);
 
     const uVec = new THREE.Vector3(1, 0, 0);
     if (Math.abs(normal.dot(uVec)) > 0.99) uVec.set(0, 1, 0); // avoid parallel
@@ -89,7 +102,8 @@ export function finitePlaneEField(planePos, planeNormal, planeDimensions, charge
 export function finiteWireEField(wirePos, wireDir, wireLength, wireRadius, chargeDensity, targetPos){
 
     const u = new THREE.Vector3(...wireDir).normalize();
-
+    wirePos = new THREE.Vector3(...wirePos);
+    targetPos = new THREE.Vector3(...targetPos);
     const rVec = new THREE.Vector3().subVectors(targetPos, wirePos);
 
     const z0 = rVec.dot(u);
@@ -121,6 +135,8 @@ export function finiteWireEField(wirePos, wireDir, wireLength, wireRadius, charg
 
 
 export function infiniteWireEField(position, chargeDensity, targPoint, direction = [0, 1, 0]) {
+    position = new THREE.Vector3(...position);
+    targPoint = new THREE.Vector3(...targPoint);
     const multiplier = EPSILON_0;
     direction = new THREE.Vector3(...direction).normalize()
     const rVec = new THREE.Vector3().subVectors(targPoint, position)
@@ -132,6 +148,8 @@ export function infiniteWireEField(position, chargeDensity, targPoint, direction
 }
 
 export function infinitePlaneEField(point, chargeDensity, targetPoint, normal) {
+    point = new THREE.Vector3(...point);
+    targetPoint = new THREE.Vector3(...targetPoint);
     const rVec = new THREE.Vector3().subVectors(targetPoint, point);
     const distance = rVec.dot(new THREE.Vector3(...normal).normalize());
 
@@ -157,7 +175,9 @@ export function infinitePlaneEField(point, chargeDensity, targetPoint, normal) {
 /**     SMART SURFACES   **/
 
 
-export function concentricSpheresField(spherePos, radiuses, materials, dielectrics, charges, targetPos){
+export function concentricSpheresEField(spherePos, radiuses, materials, dielectrics, charges, targetPos){
+    targetPos = new THREE.Vector3(...targetPos);
+    spherePos = new THREE.Vector3(...spherePos);
     const rVec = new THREE.Vector3().subVectors(targetPos, spherePos);
     const rVecLength = rVec.length();
     const rVecLengthSq = rVec.lengthSq();
@@ -203,7 +223,9 @@ export function concentricSpheresField(spherePos, radiuses, materials, dielectri
     return rVec.clone().normalize().multiplyScalar(field);
 }
 
-export function concentricInfiniteWiresField(spherePos, dir, radiuses, materials, dielectrics, charges, targetPos){
+export function concentricInfiniteWiresEField(spherePos, dir, radiuses, materials, dielectrics, charges, targetPos){
+    targetPos = new THREE.Vector3(...targetPos);
+    spherePos = new THREE.Vector3(...spherePos);
     const rVecF = new THREE.Vector3().subVectors(targetPos, spherePos);
     const direction = new THREE.Vector3(...dir).normalize()
     const axialComp = direction.clone().normalize().multiplyScalar(rVecF.dot(direction.clone().normalize()));

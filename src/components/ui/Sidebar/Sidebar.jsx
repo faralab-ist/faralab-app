@@ -43,6 +43,14 @@ export default function Sidebar({
   removeLastPlaneFromStackedPlanes,
   setSpacingForStackedPlanes,
   setChargeDensityForPlaneInStackedPlanes,
+  // path
+  addPointToPath,
+  removeLastPointFromPath,
+  setPointInPath,
+  changePathChargeCount,
+  changePathCharge,
+  changePathVelocity,
+
 }) {
   const [expandId, setExpandId] = useState(null);
   const sidebarRootRef = useRef(null)
@@ -123,8 +131,7 @@ export default function Sidebar({
     return 'surface';
   };
 
-  const pillObjects = (objects || []).filter(o => ['charge','testPointCharge', 'wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
-
+  const pillObjects = (objects || []).filter(o => ['path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
   const typeCounters = {};
   const subtypeCounters = {};
 
@@ -275,6 +282,14 @@ export default function Sidebar({
               setMaterialForLayerInConcentricInfiniteWire={setMaterialForLayerInChargedSphere}
               setDielectricForLayerInConcentricInfiniteWire={setDielectricForLayerInChargedSphere}
               setChargeForLayerInConcentricInfiniteWire={setChargeForLayerInChargedSphere}
+
+              // --- Path ---
+              addPointToPath={addPointToPath}
+              removeLastPointFromPath={removeLastPointFromPath}
+              setPointInPath={setPointInPath}
+              changePathChargeCount={changePathChargeCount}
+              changePathCharge={changePathCharge}
+              changePathVelocity={changePathVelocity}
             />
           </div>
         )}

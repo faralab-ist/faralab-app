@@ -1,7 +1,35 @@
 import * as THREE from 'three'
-
-import calculateFieldAtPoint from './calculateField'
 import { sampleGaussianSurface } from '../Surfaces/gaussianSurfaceSampler'
+import calculateFieldAtPoint from './calculateField'
+import calculateMagFieldAtPoint from './calculateMagField'
+
+export function showMagVectorField(
+    chargedObjects, gridSize = 10, step = 1, showOnlyPlane = false,
+    minThreshold, planeFilter = null) {
+  const fieldVectors = []
+  const nSteps = Math.floor(gridSize / step)
+
+  for (let ix = -nSteps; ix <= nSteps; ix++) {
+    const x = ix * step
+    for (let iy = -nSteps; iy <= nSteps; iy++) {
+      const y = iy * step
+      for (let iz = -nSteps; iz <= nSteps; iz++) {
+        const z = iz * step
+
+          if (planeFilter === 'xy' && z !== 0) continue 
+          if (planeFilter === 'yz' && x !== 0) continue 
+          if (planeFilter === 'xz' && y !== 0) continue
+
+        const targetPos = new THREE.Vector3(x, y, z)
+        const fieldAtPoint = calculateMagFieldAtPoint(chargedObjects, targetPos)
+        //console.log('fieldAtPoint=', fieldAtPoint);
+        if (fieldAtPoint.length() > minThreshold)
+          fieldVectors.push({ position: targetPos, field: fieldAtPoint })
+      }
+    }
+  }
+  return fieldVectors;
+}
 
 export default function showVectorField(
     chargedObjects, gridSize = 10, step = 1, showOnlyPlane = false,

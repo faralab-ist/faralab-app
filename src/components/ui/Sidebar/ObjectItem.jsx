@@ -6,6 +6,8 @@ import DimensionControls from "./DimensionControls";
 import StackedPlaneControls from "./StackedPlaneControls";
 import ConcentricSphereControls from "./ConcentricSphereControls";
 import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls";
+import PathControls from "./PathControls";
+import CoilControls from "./CoilControls";
 import RotationControls from "./RotationControls";
 import { TYPE_CONFIG, POS_MIN, POS_MAX, VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
@@ -19,7 +21,9 @@ export default function ObjectItem({
   removeObject,
   stackedPlaneActions,
   concentricActions,
-  concentricWireActions
+  concentricWireActions, 
+  pathActions,
+  coilActions,
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
 
@@ -267,8 +271,45 @@ export default function ObjectItem({
               </div>
             )}
 
-            {/* Plane simples */}
-            {obj.type === "plane" && (
+
+            {/* --- Renderização Condicional dos Campos Específicos --- */}
+
+            {obj.type === 'path' && (
+              <PathControls
+                  obj={obj}
+                  addPoint={pathActions?.addPoint}
+                  removeLastPoint={pathActions?.removeLastPoint}
+                  setPoint={pathActions?.setPoint}
+                  changeChargeCount={pathActions?.changeChargeCount}
+                  changeCharge={pathActions?.changeCharge}
+                  changeVelocity={pathActions?.changeVelocity}
+                  updateObject={updateObject}
+                  setErrorMsg={setErrorMsg}
+              />
+            )}
+
+            {obj.type === 'coil' && (
+              <>
+                <PathControls
+                    obj={obj}
+                    changeChargeCount={coilActions?.changeChargeCount}
+                    changeCharge={coilActions?.changeCharge}
+                    changeVelocity={coilActions?.changeVelocity}
+                    updateObject={updateObject}
+                    setErrorMsg={setErrorMsg}
+                />
+                <CoilControls
+                    obj={obj}
+                    changeRadius={coilActions?.changeRadius}
+                    changeSides={coilActions?.changeSides}
+                    updateObject={updateObject}
+                    setErrorMsg={setErrorMsg}
+                />
+              </>
+            )}
+
+            {/* A) Plano Normal */}
+            {obj.type === 'plane' && (
               <div className="detail-row">
                 <div className="detail-key">Superficial Density σ</div>
                 <div className="detail-value">
