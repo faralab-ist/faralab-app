@@ -252,7 +252,7 @@ export default function ObjectItem({
               />
             )}
 
-            {obj.type === 'coil' && (
+            {obj.type === 'coil' && obj.coilType !== 'solenoid' && (
               <PathControls
                   obj={obj}
                   changeChargeCount={coilActions?.changeChargeCount}
@@ -363,6 +363,170 @@ export default function ObjectItem({
                     />
                   </div>
                </div>
+            )}
+
+            {obj.type === 'coil' && obj.coilType === 'solenoid' && (
+               <>
+                 <div className="detail-row">
+                    <div className="detail-key">Length</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={obj.length}
+                        min={0.1} max={100}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { length: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Radius</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={obj.radius}
+                        min={0.1} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { radius: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Resolution</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={obj.resolution}
+                        min={0.1} max={300}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { resolution: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                  <div className="detail-row">
+                    <div className="detail-key">Strength</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={obj.multiplier}
+                        min={0.1} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { multiplier: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+               </>
+            )}
+
+            {obj.type === 'barMagnet' && (
+               <>
+                 <div className="detail-row">
+                    <div className="detail-key">Length</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={obj.length}
+                        min={0.1} max={100}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { length: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Radius</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={obj.radius}
+                        min={0.1} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { radius: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                  <div className="detail-row">
+                    <div className="detail-key">Strength</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={obj.charge}
+                        min={0.1} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { charge: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Resolution</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        step={1}
+                        value={obj.numOfCoils}
+                        min={1.0} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { numOfCoils: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 <div className="detail-row">
+                  <div className="detail-key">Frozen</div>
+                  <div className="detail-value">
+                    <button
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        updateObject(obj.id, { frozen: !obj.frozen });
+                      }}
+                      style={{ padding: "6px 8px" }}
+                    >
+                      {obj.frozen ? 'Unfreeze' : 'Freeze'}
+                    </button>
+                  </div>
+                </div>
+               </>
+            )}
+
+            {obj.type === 'faradayCoil' && (
+               <>
+                 <div className="detail-row">
+                    <div className="detail-key">Radius</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={obj.radius}
+                        min={0.01} max={10}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { radius: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                  <div className="detail-row">
+                    <div className="detail-key">Magnetic Flux</div>
+                    <div className="detail-value">{obj.magneticFlux}</div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Electromotive Force</div>
+                    <div className="detail-value">{obj.emf}</div>
+                 </div>
+                </>
             )}
 
             {/* Opção Infinite (Para Planes e Wire) */}

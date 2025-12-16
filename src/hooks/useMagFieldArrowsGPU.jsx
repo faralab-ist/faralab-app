@@ -30,6 +30,7 @@ export default function MagFieldArrowsGPU({
             useSlice,
             slicePlaneFlip,
         );
+        //console.log(objects);
         const chargeInfo = buildChargeTextures(objects);
         return { gridInfo: gridPositions, chargeInfo: chargeInfo};
     }, [objects, gridSize, step, planeFilter, slicePlane, slicePos, useSlice, slicePlaneFlip]);

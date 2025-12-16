@@ -130,7 +130,7 @@ export default function Sidebar({
     return 'surface';
   };
 
-  const pillObjects = (objects || []).filter(o => ['path', 'charge', 'wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
+  const pillObjects = (objects || []).filter(o => ['faradayCoil', 'barMagnet', 'path', 'charge', 'wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
 
   const typeCounters = {};
   const subtypeCounters = {};

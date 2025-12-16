@@ -153,6 +153,7 @@ export default function Path({
     const tangents = [];
     const nCharges = Math.max(0, Math.floor(chargeCount));
     const curveLength = catmullCurve.getLength();
+    //console.log(catmullCurve.points)
 
     const timePerLoop = curveLength / Math.max(0.1, Math.abs(velocity));
     const currLoopTime = clockRef.current ? clockRef.current.getElapsedTime() % timePerLoop : 0;
@@ -175,6 +176,7 @@ export default function Path({
 
   useFrame(() => {
     const pos = getChargePositions();
+    //console.log(pos)
     
     // If this is a child of a rotated parent (like a coil), apply parent's rotation
 
@@ -184,6 +186,7 @@ export default function Path({
     const currLoopTime = clockRef.current ? clockRef.current.getElapsedTime() % timePerLoop : 0;
     let currLoopt = currLoopTime / timePerLoop;
     if (isChild && parentGroupRef?.current) {
+      //console.log("aaaaa")
       const parentQuat = parentGroupRef.current.quaternion;
       
       // Transform charge positions and tangents by parent rotation

@@ -101,7 +101,7 @@ export default function SettingsButtons({
   // has b field if theres any path object
   const hasBField = useMemo(() => {
     if (!sceneObjects) return false;
-    return sceneObjects.some(o => o.type === 'path' || o.type === 'coil');
+    return sceneObjects.some(o => o.type === 'path' || o.type === 'coil' || o.type === 'barMagnet');
   }, [sceneObjects]);
   
   const exclusiveActiveType = !creativeMode && gaussianSurfaces.length === 1
@@ -111,7 +111,7 @@ export default function SettingsButtons({
   const anyGaussian = gaussianSurfaces.length > 0
 
   // disable Field View when there's nothing to show (no field sources and no gaussian surfaces)
-  const fieldButtonDisabled = !hasField
+  const fieldButtonDisabled = !(hasField || hasBField)
   const ensureFieldVisible = () => {
     if (!showField) onToggleField()
   }

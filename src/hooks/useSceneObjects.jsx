@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from 'react'
+import { velocity } from 'three/tsl';
 
 // ID realmente único
 const genUid = () =>
@@ -180,6 +181,21 @@ const objectFactories = {
     charges: [],
     createdAt: Date.now(),
   }),
+  solenoid: (index) => ({ // just a solenoid
+    id: `tmp-${index}`,
+    type: 'coil',
+    coilType: 'solenoid',
+    name: `Solenoid Coil ${index}`,
+    position: [0, 0, 0],
+    length: 3,
+    radius: 0.3,
+    direction: [0, 1, 0],     // normal vector (area direction)
+    rotation: [0, 0, 0],      // Euler angles for rotation
+    multiplier: 1,
+    resolution: 10,
+    charges: [],
+    createdAt: Date.now(),
+  }),
   polygonCoil: (index) => ({
     id: `tmp-${index}`,
     type: 'coil',
@@ -198,14 +214,48 @@ const objectFactories = {
     renderCharges: true,
     charges: [],
     createdAt: Date.now(),
-  })
+  }),
+  barMagnet: (index) => ({
+    id: `tmp-${index}`,
+    type: 'barMagnet',
+    name: `Bar Magnet ${index}`,
+    position: [0, 0, 0],
+    length: 3,
+    radius: 0.3,
+    numOfCoils: 10,
+    chargesPerCoil: 10,
+    pointsPerCoil: 20,
+    charge: 1,
+    velocity: 1,
+    charges: [],
+    direction: [0, 1, 0],     // normal vector (area direction)
+    rotation: [0, 0, 0],      // Euler angles for rotation
+    frozen: false,
+    createdAt: Date.now(),
+  }),
+  faradayCoil: (index) => ({
+    id: `tmp-${index}`,
+    type: 'faradayCoil',
+    name: `Faraday Coil ${index}`,
+    position: [0, 0, 0],
+    radius: 1,
+    tubeRadius: 0.01,
+    coilColor: '#6ea8ff',
+    direction: [0, 1, 0],     // normal vector (area direction)
+    rotation: [0, 0, 0],      // Euler angles for rotation
+    chargeCount: 5,
+    numOfPoints: 20,
+    magneticFlux: 0,
+    emf: 0,
+    createdAt: Date.now(),
+  }),
 }
 
 export default function useSceneObjects(initial = []) {
   const [sceneObjects, setSceneObjects] = useState(initial)
   const [counters, setCounters] = useState({
     charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0, path: 0, 
-    ringCoil: 0, polygonCoil: 0
+    ringCoil: 0, polygonCoil: 0, barMagnet:0, solenoid: 0,
   })
 
   const addPointToPath = useCallback((id) => {
@@ -278,8 +328,8 @@ export default function useSceneObjects(initial = []) {
     setSceneObjects(prev => {
       // For coils, count by coilType if specified in overrides
       let nextIndex
-      if (type === 'coil' || type === 'ringCoil' || type === 'polygonCoil') {
-        const coilType = overrides.coilType || (type === 'polygonCoil' ? 'polygon' : 'ring')
+      if (type === 'coil' || type === 'ringCoil' || type === 'polygonCoil' || type === 'solenoid') {
+        const coilType = overrides.coilType || (type === 'polygonCoil' ? 'polygon' : (type === 'solenoid' ? 'solenoid' : 'ring'))
         nextIndex = prev.filter(o => o.type === 'coil' && o.coilType === coilType).length + 1
       } else {
         nextIndex = prev.filter(o => o.type === type).length + 1
@@ -289,6 +339,7 @@ export default function useSceneObjects(initial = []) {
       let factoryType = type
       if (type === 'ringCoil') factoryType = 'ringCoil'
       else if (type === 'polygonCoil') factoryType = 'polygonCoil'
+      else if (type === 'solenoid') factoryType = 'solenoid'
       
       const base = objectFactories[factoryType](nextIndex)
 
@@ -488,6 +539,8 @@ const updateDirection = useCallback((id, direction) => {
     path: sceneObjects.filter(o => o.type === 'path').length,
     coil: sceneObjects.filter(o => o.type === 'coil').length,
     ringCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'ring').length,
+    solenoid: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'solenoid').length,
+    barMagnet: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'barMagnet').length,
     total: sceneObjects.length,
   }), [sceneObjects])
 
