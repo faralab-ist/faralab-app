@@ -1,5 +1,5 @@
 import React from 'react';
-import './FluxWindow.css';
+import './fluxWindow.css';
 
 export default function FluxWindow({ value = 0, visible = true }) {
   if (!visible) return null;

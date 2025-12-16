@@ -3,9 +3,9 @@ import ToolbarPopup from './ToolbarPopup/ToolbarPopup'
 import './Toolbar.css'
 import RecordingButtons from '../RecordingButtons/RecordingButtons'
 import TestCharge from '../../../assets/lowercase_q2.svg'
-import Slice from '../../../assets/Slice.svg'
-import Edit from '../../../assets/Edit.svg'
-import Clean from '../../../assets/Clean.svg'
+import Slice from '../../../assets/slice.svg'
+import Edit from '../../../assets/edit.svg'
+import Clean from '../../../assets/clean.svg'
 
 export default function Toolbar({
   creativeMode,
