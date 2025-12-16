@@ -68,12 +68,35 @@ function computeFieldAtPoint(objects, targetPos) {
         field.add(contrib)
       }
     } else if (Array.isArray(obj.charges) && obj.charges.length > 0) {
+      // For paths/coils, charges array contains positions [x,y,z] and charge magnitude is in obj.charge
+      // For other objects (wire, plane), charges array contains {position: [x,y,z], charge: number}
+      const isPathOrCoil = obj.type === 'path' || obj.type === 'coil'
+      
       for (const embedded of obj.charges) {
-        const embeddedPos = sourcePosition.clone().add(new THREE.Vector3(embedded.position?.[0] ?? 0, embedded.position?.[1] ?? 0, embedded.position?.[2] ?? 0))
+        let embeddedPos, chargeValue
+        
+        if (isPathOrCoil) {
+          // Path/coil: embedded is just [x, y, z] position array
+          embeddedPos = sourcePosition.clone().add(new THREE.Vector3(
+            embedded[0] ?? 0,
+            embedded[1] ?? 0,
+            embedded[2] ?? 0
+          ))
+          chargeValue = Number(obj.charge ?? 0)
+        } else {
+          // Wire/plane: embedded is {position: [x,y,z], charge: number}
+          embeddedPos = sourcePosition.clone().add(new THREE.Vector3(
+            embedded.position?.[0] ?? 0,
+            embedded.position?.[1] ?? 0,
+            embedded.position?.[2] ?? 0
+          ))
+          chargeValue = Number(embedded.charge ?? 0)
+        }
+        
         const rVec = new THREE.Vector3().subVectors(target, embeddedPos)
         const rSq = rVec.lengthSq()
         if (rSq < 1e-6) continue
-        const fieldMagnitude = multiplier * embedded.charge / rSq
+        const fieldMagnitude = multiplier * chargeValue / rSq
         field.addScaledVector(rVec.normalize(), fieldMagnitude)
       }
     }
@@ -119,14 +142,33 @@ function computeEnclosedDiscreteCharge(surface, objects) {
 
     if (Array.isArray(obj.charges) && obj.charges.length > 0) {
       const basePos = toVector3(obj.position || [0, 0, 0])
+      
+      // For paths/coils, charges array contains positions [x,y,z] and charge magnitude is in obj.charge
+      // For other objects (wire, plane), charges array contains {position: [x,y,z], charge: number}
+      const isPathOrCoil = obj.type === 'path' || obj.type === 'coil'
+      
       for (const embedded of obj.charges) {
-        const offset = new THREE.Vector3(
-          embedded.position?.[0] ?? 0,
-          embedded.position?.[1] ?? 0,
-          embedded.position?.[2] ?? 0
-        )
+        let offset, chargeValue
+        
+        if (isPathOrCoil) {
+          // Path/coil: embedded is just [x, y, z] position array
+          offset = new THREE.Vector3(
+            embedded[0] ?? 0,
+            embedded[1] ?? 0,
+            embedded[2] ?? 0
+          )
+          chargeValue = Number(obj.charge ?? 0)
+        } else {
+          // Wire/plane: embedded is {position: [x,y,z], charge: number}
+          offset = new THREE.Vector3(
+            embedded.position?.[0] ?? 0,
+            embedded.position?.[1] ?? 0,
+            embedded.position?.[2] ?? 0
+          )
+          chargeValue = Number(embedded.charge ?? 0)
+        }
+        
         const worldPos = basePos.clone().add(offset)
-        const chargeValue = Number(embedded.charge ?? 0)
         processCharge(worldPos, chargeValue)
       }
       continue
