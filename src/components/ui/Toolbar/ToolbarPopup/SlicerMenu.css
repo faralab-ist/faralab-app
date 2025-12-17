@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  gap: 10px;
+  gap: 1px;
   border: none;
   background: transparent;
   color: #dfeaf5;
@@ -83,7 +83,7 @@
   transition: all .16s ease;
 }
 
-/* Primary Slicing Button (Overrides Base Style) */
+/* Primary Slicing Button */
 .slice-row .slicing-btn {
   /* Layout: Full width, row orientation */
   flex: 0 0 100%;

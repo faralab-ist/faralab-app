@@ -10,7 +10,7 @@ const ANGLE_MAX = 360;
 
 export default function RotationControls({ obj, updateObject }) {
   if (!Array.isArray(obj?.rotation) || obj.rotation.length !== 3) return null;
-  if (obj.type === "concentricInfWires") return null;
+ // if (obj.type === "concentricInfWires") return null;
 
   const fromRadToDeg = (r) => (Number(r ?? 0) * 180) / Math.PI;
 

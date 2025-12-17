@@ -21,20 +21,21 @@ function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
 }
 
 export default function FieldArrows({ 
-    objects, 
-    showOnlyPlane = false, 
-    showOnlyGaussianField = false, 
-    fieldThreshold = 0.1, 
-    gridSize = 10, 
-    step = 1, 
-    minThreshold, 
-    scaleMultiplier,
-    planeFilter = null,
-    slicePlane,
-    slicePos,
-    useSlice,
-    slicePlaneFlip
-}) {
+     objects, 
+     showOnlyPlane = false, 
+     showOnlyGaussianField = false, 
+     fieldThreshold = 0.1, 
+     gridSize = 10, 
+     step = 1, 
+     minThreshold, 
+     scaleMultiplier,
+     planeFilter = null,
+     slicePlane,
+     slicePos,
+     useSlice,
+    slicePlaneFlip,
+    propagate = false // NEW: if false, disable delay propagation and sorting, show all arrows immediately
+ }) {
     
     const vectorsUnfiltered = useMemo( 
         () => showVectorField(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
@@ -43,8 +44,6 @@ export default function FieldArrows({
     const vectors = vectorsUnfiltered.filter(({position, field}) => 
         sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)
     );
-    
-    // No transition / propagation: show field instantly. No previousVectors handling.
 
     const MAX_L = useMemo(() => {
         let maxL = 0;
@@ -195,70 +194,142 @@ export default function FieldArrows({
     // Track if animation is complete
     const animationCompleteRef = useRef(false);
     
-    // Create stable key for vectors to prevent re-runs
+    // Create stable key for vectors to prevent re-runs - include plane directions for rotation detection
     const vectorsKey = useMemo(() => {
-        return JSON.stringify(vectors.map(v => [
+        const vectorsHash = JSON.stringify(vectors.map(v => [
             Math.round(v.position.x * 100) / 100,
             Math.round(v.position.y * 100) / 100,
             Math.round(v.position.z * 100) / 100,
             Math.round(v.field.length() * 100) / 100
         ]));
-    }, [vectors]);
-
-    // Setup geometry once when vectors change - ORDER BY DISTANCE TO OBJECTS
-    useEffect(() => {
-        const mesh = meshRef.current;
-        if (!mesh) {
-            return;
-        }
-
-        // Compute attributes fresh
-        const attrs = createInstancedAttributes(vectors);
-        const maxCount = attrs.count || 0;
-
-        if (maxCount === 0) {
-            console.warn('[FieldArrows] No instances to render');
-            mesh.count = 0;
-            return;
-        }
-
-        console.log('[FieldArrows] Setting up geometry with', maxCount, 'instances');
-
-        // Build distance list - special handling for planes
-        const vectorsWithDist = [];
         
-        for (let i = 0; i < maxCount; i++) {
-            const px = attrs.positions[i * 3];
-            const py = attrs.positions[i * 3 + 1];
-            const pz = attrs.positions[i * 3 + 2];
-            const pos = new THREE.Vector3(px, py, pz);
-            
-            // Calculate distance differently for planes
-            let minDist = Infinity;
-            
-            for (const obj of objects) {
-                const objPos = new THREE.Vector3(...(obj.position || [0, 0, 0]));
-                
-                if (obj.type === 'plane') {
-                    // For planes: distance is measured along the field direction (perpendicular to plane)
-                    const planeNormal = new THREE.Vector3(...(obj.direction || [0, 1, 0])).normalize();
-                    const toPoint = pos.clone().sub(objPos);
-                    // Distance along normal direction (field propagates perpendicular to plane)
-                    const distAlongNormal = Math.abs(toPoint.dot(planeNormal));
-                    if (distAlongNormal < minDist) minDist = distAlongNormal;
-                } else {
-                    // For point charges/wires/spheres: radial distance
-                    const d = pos.distanceTo(objPos);
-                    if (d < minDist) minDist = d;
-                }
+        // Include plane/wire directions, quaternions and charge_density to detect all rotations
+        const objectsHash = objects.map(o => {
+            if (o.type === 'plane') {
+                const dir = o.direction || [0, 1, 0];
+                const quat = o.quaternion || [];
+                return `${o.id}:${dir[0].toFixed(2)},${dir[1].toFixed(2)},${dir[2].toFixed(2)}:${quat.map(q => q.toFixed(2)).join(',')}:${(o.charge_density || 0).toFixed(3)}`;
             }
-            
-            if (!isFinite(minDist)) minDist = pos.length();
-            vectorsWithDist.push({ index: i, dist: minDist });
+            if (o.type === 'wire') {
+                const dir = o.direction || [0, 1, 0];
+                const pos = o.position || [0, 0, 0];
+                const quat = o.quaternion || [];
+                return `${o.id}:${pos[0].toFixed(2)},${pos[1].toFixed(2)},${pos[2].toFixed(2)}:${dir[0].toFixed(2)},${dir[1].toFixed(2)},${dir[2].toFixed(2)}:${quat.map(q => q.toFixed(2)).join(',')}:${(o.charge || 0).toFixed(3)}`;
+            }
+            const pos = o.position || [0, 0, 0];
+            return `${o.id}:${pos[0].toFixed(2)},${pos[1].toFixed(2)},${pos[2].toFixed(2)}:${(o.charge || 0).toFixed(3)}`;
+        }).join(';');
+        
+        return `${vectorsHash}__${objectsHash}`;
+    }, [vectors, objects]);
+
+    // Store distance rings for batch rendering
+    const distanceRingsRef = useRef([]);
+
+    // Setup geometry once when vectors change - GROUP BY DISTANCE RINGS
+    useEffect(() => {
+         const mesh = meshRef.current;
+         if (!mesh) {
+             return;
+         }
+ 
+         // Compute attributes fresh
+         const attrs = createInstancedAttributes(vectors);
+         const maxCount = attrs.count || 0;
+ 
+         if (maxCount === 0) {
+             console.warn('[FieldArrows] No instances to render');
+             mesh.count = 0;
+             return;
+         }
+ 
+        // If propagation disabled -> set geometry directly and show all instances immediately.
+        if (!propagate) {
+            const geom = arrowGeometry.clone();
+            geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(attrs.positions, 3));
+            geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(attrs.directions, 3));
+            geom.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(attrs.scales, 1));
+            geom.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(attrs.colors, 3));
+            // delays are not used when propagation disabled
+            geom.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(attrs.delays, 1));
+            mesh.geometry = geom;
+            mesh.frustumCulled = false;
+            mesh.count = maxCount;
+            animationCompleteRef.current = true;
+            // no animation state needed
+            return () => { geom.dispose(); };
         }
+
+         console.log('[FieldArrows] Setting up geometry with', maxCount, 'instances');
+ 
+         // Build distance list - special handling for planes
+         const vectorsWithDist = [];
+         
+         for (let i = 0; i < maxCount; i++) {
+             const px = attrs.positions[i * 3];
+             const py = attrs.positions[i * 3 + 1];
+             const pz = attrs.positions[i * 3 + 2];
+             const pos = new THREE.Vector3(px, py, pz);
+             
+             // Calculate distance differently for planes
+             let minDist = Infinity;
+             
+             for (const obj of objects) {
+                 const objPos = new THREE.Vector3(...(obj.position || [0, 0, 0]));
+                 
+                 if (obj.type === 'plane') {
+                     // For planes: distance is measured along the field direction (perpendicular to plane)
+                     const planeNormal = new THREE.Vector3(...(obj.direction || [0, 1, 0])).normalize();
+                     const toPoint = pos.clone().sub(objPos);
+                     // Distance along normal direction (field propagates perpendicular to plane)
+                     const distAlongNormal = Math.abs(toPoint.dot(planeNormal));
+                     if (distAlongNormal < minDist) minDist = distAlongNormal;
+                 } else {
+                     // For point charges/wires/spheres: radial distance
+                     const d = pos.distanceTo(objPos);
+                     if (d < minDist) minDist = d;
+                 }
+             }
+             
+             if (!isFinite(minDist)) minDist = pos.length();
+             vectorsWithDist.push({ index: i, dist: minDist });
+         }
 
         // SORT by distance (propagate from objects outward)
         vectorsWithDist.sort((a, b) => a.dist - b.dist);
+
+        // GROUP vectors into distance rings (buckets) - all vectors at similar distance appear together
+        const ringSize = step * 0.8; // tolerance for grouping by distance
+        const rings = [];
+        let currentRing = [];
+        let currentDist = vectorsWithDist[0]?.dist || 0;
+        
+        for (const v of vectorsWithDist) {
+            if (Math.abs(v.dist - currentDist) > ringSize) {
+                // Start new ring
+                if (currentRing.length > 0) {
+                    rings.push([...currentRing]);
+                }
+                currentRing = [v];
+                currentDist = v.dist;
+            } else {
+                // Add to current ring
+                currentRing.push(v);
+            }
+        }
+        if (currentRing.length > 0) {
+            rings.push(currentRing);
+        }
+
+        // Convert rings to cumulative counts
+        distanceRingsRef.current = [];
+        let cumulative = 0;
+        for (const ring of rings) {
+            cumulative += ring.length;
+            distanceRingsRef.current.push(cumulative);
+        }
+
+        console.log(`[FieldArrows] Created ${rings.length} distance rings for propagation`);
 
         // Setup geometry with SORTED attributes
         const geom = arrowGeometry.clone();
@@ -291,56 +362,66 @@ export default function FieldArrows({
 
         mesh.geometry = geom;
         mesh.frustumCulled = false;
-        mesh.count = 0; // start with nothing visible
-
-        // Reset animation state
-        startTimeRef.current = Date.now();
-        animationCompleteRef.current = false;
-
-        console.log('[FieldArrows] Geometry setup complete, starting animation from objects outward');
-
-        return () => {
-            geom.dispose();
-        };
-    }, [vectorsKey, arrowGeometry]);
-
-    // Get maxCount for useFrame
-    const attrs = useMemo(() => createInstancedAttributes(vectors), [vectors, createInstancedAttributes]);
-    const maxCount = attrs.count || 0;
-
-    // Animate instance count ONCE (no loop) - stop when complete
-    useFrame(() => {
+        mesh.count = 0; // start with nothing visible (propagation enabled)
+ 
+         // Reset animation state
+         startTimeRef.current = Date.now();
+         animationCompleteRef.current = false;
+ 
+         console.log('[FieldArrows] Geometry setup complete, starting animation from objects outward');
+ 
+         return () => {
+             geom.dispose();
+         };
+     }, [vectorsKey, arrowGeometry]);
+ 
+     // Get maxCount for useFrame
+     const attrs = useMemo(() => createInstancedAttributes(vectors), [vectors, createInstancedAttributes]);
+     const maxCount = attrs.count || 0;
+ 
+     // Animate instance count ONCE (no loop) - stop when complete
+     useFrame(() => {
+        // If propagation disabled, skip animation loop entirely
+        if (!propagate) return;
         const mesh = meshRef.current;
         if (!mesh || !mesh.material || maxCount === 0) return;
-
         // Skip if animation already complete
         if (animationCompleteRef.current) return;
 
-        const elapsed = (Date.now() - startTimeRef.current) / 1000; // seconds
-        const animDuration = (gridSize / step) * .07; // 50ms per ring
-
-        const progress = Math.min(elapsed / animDuration, 1.0);
-        const targetCount = Math.floor(progress * maxCount);
-        
-        if (progress < 1.0) {
-            // Animation in progress
-            if (mesh.count !== targetCount) {
-                mesh.count = targetCount;
-            }
-        } else {
-            // Animation complete - set final count and mark as done
-            if (mesh.count !== maxCount) {
-                mesh.count = maxCount;
-            }
+        const rings = distanceRingsRef.current;
+        if (!rings || rings.length === 0) {
+            // No rings defined, show all immediately
+            mesh.count = maxCount;
             animationCompleteRef.current = true;
-            console.log('[FieldArrows] Animation complete - showing all', maxCount, 'instances');
+            return;
         }
-    });
-
-    if (maxCount === 0) {
-        console.warn('[FieldArrows] Rendering nothing (maxCount=0)');
-        return null;
-    }
-
-    return <instancedMesh ref={meshRef} args={[arrowGeometry, material, maxCount]} />;
-}
+ 
+         const elapsed = (Date.now() - startTimeRef.current) / 1000; // seconds
+         const animDuration = rings.length * 0.1; // 30ms per ring
+ 
+         const progress = Math.min(elapsed / animDuration, 1.0);
+         const ringIndex = Math.floor(progress * rings.length);
+         
+         if (progress < 1.0) {
+             // Animation in progress - show complete rings only
+            const targetCount = ringIndex < rings.length ? rings[ringIndex] : maxCount;
+             if (mesh.count !== targetCount) {
+                 mesh.count = targetCount;
+             }
+         } else {
+             // Animation complete - set final count and mark as done
+             if (mesh.count !== maxCount) {
+                 mesh.count = maxCount;
+             }
+             animationCompleteRef.current = true;
+             console.log('[FieldArrows] Animation complete - showing all', maxCount, 'instances in', rings.length, 'rings');
+         }
+     });
+ 
+     if (maxCount === 0) {
+         console.warn('[FieldArrows] Rendering nothing (maxCount=0)');
+         return null;
+     }
+ 
+     return <instancedMesh ref={meshRef} args={[arrowGeometry, material, maxCount]} />;
+ }

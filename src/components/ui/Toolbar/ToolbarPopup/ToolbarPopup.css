@@ -17,11 +17,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* keep layout inside the popup compact */
-.toolbar-popup .slicing-panel { margin: 0; }
-
-
-
 /* handle for dragging */
 .toolbar-popup-handle {
   height: 18px;
@@ -87,15 +82,7 @@
 .toolbar-popup.minimized .slicing-panel { 
   display: block;                 /* keep panel visible */
 }
-/* show only the primary slice row when minimized */
-.toolbar-popup.minimized .slicing-panel > :not(.slice-row) {
-  display: none !important;
-}
-/* within the slice row, hide helper/flip buttons when minimized */
-.toolbar-popup.minimized .slice-row .helper-btn,
-.toolbar-popup.minimized .slice-row .flip-btn {
-  display: none !important;
-}
+
 
 /* controls (pin / minimize / close) placed at top-right inside the handle */
 .toolbar-popup-handle {
@@ -188,89 +175,6 @@
   gap: 10px;
   margin: 0;
   padding: 0;
-}
-
-/* top row: allow wrap so primary button can take full width and small buttons sit centered underneath */
-.slice-row {
-  width: 100%;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* primary slicing button spans full width but stays compact in height */
-.slice-row .slicing-btn {
-  flex: 0 0 100%;
-  max-width: 100%;
-  width: 100%;
-  height: 44px;
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-/* make sure icon + label inside primary button center and don't overflow */
-.slice-row .slicing-btn img {
-  width: 20px;
-  height: 20px;
-  flex: 0 0 auto;
-}
-.slice-row .slicing-btn .btn-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-
-
-/* plane buttons row adapts to width — 3 columns when space allows, wrap when narrow */
-.plane-buttons-group {
-  width: 100%;
-  display: flex;
-  gap: 8px;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-.plane-button {
-  flex: 1 1 calc(33% - 8px);
-  min-width: 64px;
-  max-width: 100%;
-  text-align: center;
-}
-
-/* sections fill the popup width */
-.efield-section {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-/* compact rows inside sections adapt to width */
-.efield-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-/* labels / controls share space; inputs shrink if needed */
-.efield-label {
-  flex: 1 1 160px;
-  min-width: 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* range slider takes remaining space and remains readable */
-.efield-range {
-  flex: 1 1 auto;
-  min-width: 120px;
-  max-width: 100%;
 }
 
 /* ensure slider value stays visible to the right */

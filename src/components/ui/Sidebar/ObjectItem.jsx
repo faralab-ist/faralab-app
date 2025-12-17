@@ -6,6 +6,8 @@ import DimensionControls from "./DimensionControls";
 import StackedPlaneControls from "./StackedPlaneControls";
 import ConcentricSphereControls from "./ConcentricSphereControls";
 import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls";
+import PathControls from "./PathControls";
+import CoilControls from "./CoilControls";
 import RotationControls from "./RotationControls";
 import { TYPE_CONFIG, POS_MIN, POS_MAX, VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
@@ -19,7 +21,9 @@ export default function ObjectItem({
   removeObject,
   stackedPlaneActions,
   concentricActions,
-  concentricWireActions
+  concentricWireActions, 
+  pathActions,
+  coilActions,
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
 
@@ -85,7 +89,7 @@ export default function ObjectItem({
         <div className="object-details">
           <div className="details-grid">
             {/* Position com InlineDecimalInput */}
-            {Array.isArray(obj.position) && (
+            {Array.isArray(obj.position)  && (
               <div className="detail-row">
                 <div className="detail-key">Position</div>
                 <div
@@ -98,7 +102,7 @@ export default function ObjectItem({
                       initialValue={obj.position[idx]}
                       min={POS_MIN}
                       max={POS_MAX}
-                      step={0.01}
+                      step={0.1}
                       onChange={(val) => {
                         const safe = clampWithError(val, POS_MIN, POS_MAX);
                         const newPos = [...obj.position];
@@ -144,7 +148,7 @@ export default function ObjectItem({
                             type: "stackedPlanes",
                             charge_densities: [obj.charge_density ?? 0],
                             spacing: obj.spacing ?? 1.0,
-                            name: "Stacked Planes"
+                            
                           });
                         } else {
                           updateObject(obj.id, {
@@ -153,7 +157,7 @@ export default function ObjectItem({
                               (obj.charge_densities &&
                                 obj.charge_densities[0]) ??
                               0,
-                            name: "Plane"
+                           
                           });
                         }
                       }}
@@ -267,8 +271,45 @@ export default function ObjectItem({
               </div>
             )}
 
-            {/* Plane simples */}
-            {obj.type === "plane" && (
+
+            {/* --- Renderização Condicional dos Campos Específicos --- */}
+
+            {obj.type === 'path' && (
+              <PathControls
+                  obj={obj}
+                  addPoint={pathActions?.addPoint}
+                  removeLastPoint={pathActions?.removeLastPoint}
+                  setPoint={pathActions?.setPoint}
+                  changeChargeCount={pathActions?.changeChargeCount}
+                  changeCharge={pathActions?.changeCharge}
+                  changeVelocity={pathActions?.changeVelocity}
+                  updateObject={updateObject}
+                  setErrorMsg={setErrorMsg}
+              />
+            )}
+
+            {obj.type === 'coil' && (
+              <>
+                <PathControls
+                    obj={obj}
+                    changeChargeCount={coilActions?.changeChargeCount}
+                    changeCharge={coilActions?.changeCharge}
+                    changeVelocity={coilActions?.changeVelocity}
+                    updateObject={updateObject}
+                    setErrorMsg={setErrorMsg}
+                />
+                <CoilControls
+                    obj={obj}
+                    changeRadius={coilActions?.changeRadius}
+                    changeSides={coilActions?.changeSides}
+                    updateObject={updateObject}
+                    setErrorMsg={setErrorMsg}
+                />
+              </>
+            )}
+
+            {/* A) Plano Normal */}
+            {obj.type === 'plane' && (
               <div className="detail-row">
                 <div className="detail-key">Superficial Density σ</div>
                 <div className="detail-value">
@@ -339,7 +380,7 @@ export default function ObjectItem({
             )}
 
             {/* Point charge */}
-            {obj.type === "charge" && (
+            {(obj.type === "charge") && (
               <div className="detail-row">
                 <div className="detail-key">Intensity C</div>
                 <div className="detail-value">

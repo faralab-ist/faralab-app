@@ -11,7 +11,9 @@ import PotButtons from './SubButtons/PotButtons'
 
 export default function SettingsButtons({
   showField,
+  showBField,
   onToggleField,
+  onToggleBField,
   showLines,        
   onToggleLines,    
   showEquipotentialSurface,
@@ -91,8 +93,15 @@ export default function SettingsButtons({
       const q = Number(o?.charge);
       return (Number.isFinite(q) && q !== 0) ||
       ((o.type === 'concentricSpheres' || o.type === 'concentricInfWires') && o.radiuses.length != 0) ||
-      (o.type === 'stackedPlanes' && o.charge_densities.length != 0);
+      (o.type === 'stackedPlanes' && o.charge_densities.length != 0) ||
+      (o.type === 'path' && Array.isArray(o.charges) && o.charges.length > 0);
     });
+  }, [sceneObjects]);
+
+  // has b field if theres any path object
+  const hasBField = useMemo(() => {
+    if (!sceneObjects) return false;
+    return sceneObjects.some(o => o.type === 'path' || o.type === 'coil');
   }, [sceneObjects]);
   
   const exclusiveActiveType = !creativeMode && gaussianSurfaces.length === 1
@@ -167,13 +176,13 @@ export default function SettingsButtons({
                   className={`fieldview-tab ${fieldTab === 'efield' ? 'active' : ''}`}
                   onClick={() => setFieldTab('efield')}
                 >
-                  E-Field
+                  Fields
                 </button>
                 <button
                   className={`fieldview-tab ${fieldTab === 'potential' ? 'active' : ''}`}
                   onClick={() => setFieldTab('potential')}
                 >
-                  Potential
+                  E-Potential
                 </button>
               </div>
 
@@ -183,11 +192,14 @@ export default function SettingsButtons({
                   <EfieldButtons
                     inline={true}                      // <--- render inline
                     hasField={hasField}
+                    hasBField={hasBField}
+                    showBField={showBField}
                     wavePropagationEnabled={wavePropagationEnabled}
                     setWavePropagationEnabled={setWavePropagationEnabled}
                     waveDuration={waveDuration}
                     setWaveDuration={setWaveDuration}
                     onToggleField={onToggleField}
+                    onToggleBField={onToggleBField}
                     onToggleLines={onToggleLines}
                     vectorMinTsl={vectorMinTsl}
                     setVectorMinTsl={setVectorMinTsl}

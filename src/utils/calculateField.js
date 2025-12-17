@@ -1,81 +1,113 @@
 import * as THREE from 'three';
 
 import { K_E } from "../physics/constants";
-import { efields } from '../physics';
+import * as efields from '../physics/efields';
 
-// gets an array of charges {position: Vector3, charge: number} and a target position Vector3
-// superposition principle
+const toVec3 = (v = [0, 0, 0]) => new THREE.Vector3(...v);
 
-export default function calculateFieldAtPoint(objects, targetPos) {
-  const multiplier = K_E;
-  let resultFieldAtPoint = new THREE.Vector3(0, 0, 0);
-  for (const obj of objects) {
-    const sourcePosition = new THREE.Vector3(...obj.position);
+const worldPos = (obj) => toVec3(obj.position || [0, 0, 0]);
 
-    const charge = obj.charge;
-    const chargeDensity = obj.charge_density;
+function getPathChargePositions(obj) {
+  const basePos = worldPos(obj);
+  const rels = Array.isArray(obj.charges) ? obj.charges : [];
+  return rels.map((rel) => basePos.clone().add(toVec3(rel)));
+}
 
-    if (obj.type === 'charge') {
-      const rVec = new THREE.Vector3().subVectors(targetPos, sourcePosition);
-      const rSq = rVec.lengthSq();
-      if (rSq < 1e-6) continue;
-      const fieldMagnitude = multiplier * charge / rSq;
-      resultFieldAtPoint.addScaledVector(rVec.normalize(), fieldMagnitude);
-    } else if (obj.infinite && (obj.type === 'plane' || obj.type === 'wire')) {
-      switch (obj.type) {
-        case 'wire':
-          const fieldFromWire =
-              efields.infiniteWireEField(sourcePosition, chargeDensity, targetPos, obj.direction);
-          resultFieldAtPoint.add(fieldFromWire);
-          break;
-        case 'plane':
-          const dist = new THREE.Vector3().subVectors(targetPos, sourcePosition).dot(new THREE.Vector3(...obj.direction).normalize());
-          if (Math.abs(dist) < 1e-6) {
-            resultFieldAtPoint = new THREE.Vector3(0, 0, 0);
-            return resultFieldAtPoint;
-          }
-          const fieldFromSheet =
-              efields.infinitePlaneEField(sourcePosition, chargeDensity, targetPos, obj.direction);
-          resultFieldAtPoint.add(fieldFromSheet);
-          break;
-      }
-    } else if (obj.type === 'plane') {
-      const fieldFromFinitePlane =
-          efields.finitePlaneEField(sourcePosition, obj.direction, obj.dimensions, chargeDensity, targetPos);
-      resultFieldAtPoint.add(fieldFromFinitePlane);
-    } else if (obj.type === 'wire') {
-      const fieldFromFiniteWire =
-          efields.finiteWireEField(sourcePosition, obj.direction, obj.height, obj.radius, chargeDensity, targetPos);
-      resultFieldAtPoint.add(fieldFromFiniteWire);
-    } else if (obj.type === 'chargedSphere'){
-      const fieldFromSphere = efields.chargedSphereEField(sourcePosition, obj.radius, chargeDensity, obj.isHollow, targetPos);
-      resultFieldAtPoint.add(fieldFromSphere);
-    } else if (obj.type === 'concentricSpheres') {
-      const fieldFromConcentricSpheres = efields.concentricSpheresField(sourcePosition, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, targetPos);
-      resultFieldAtPoint.add(fieldFromConcentricSpheres);
-    } else if (obj.type === 'concentricInfWires') {
-      const fieldFromConcentricWires = efields.concentricInfiniteWiresField(sourcePosition, obj.direction, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, targetPos);
-      resultFieldAtPoint.add(fieldFromConcentricWires);
-    } else if (obj.type === 'stackedPlanes') {
-      // if infinite use infinite plane field
-      // if not infinite use finite plane field
-      const numPlanes = Array.isArray(obj.charge_densities) ? obj.charge_densities.length : 0;
-      const spacing = obj.spacing || 1;
-      const directionVec = new THREE.Vector3(...obj.direction).normalize();
-      const centerOffset = (numPlanes - 1) * spacing / 2;
-      for (let i = 0; i < numPlanes; i++) {
-        const planePos = sourcePosition.clone().add(directionVec.clone().multiplyScalar((i * spacing) - centerOffset));
-        const chargeDensityForPlane = obj.charge_densities[i] || 0;
-        let fieldFromPlane;
-        if (obj.infinite) {
-          fieldFromPlane = efields.infinitePlaneField(planePos, chargeDensityForPlane, targetPos, obj.direction);
-        } else {
-          fieldFromPlane = efields.finitePlaneEField(planePos, obj.direction, obj.dimensions, chargeDensityForPlane, targetPos);
-        }
-        resultFieldAtPoint.add(fieldFromPlane);
+function getStackedPlanePositions(obj) {
+  const numPlanes = Array.isArray(obj.charge_densities) ? obj.charge_densities.length : 0;
+  if (numPlanes === 0) return [];
+  const spacing = Number(obj.spacing) || 1;
+  const dir = toVec3(obj.direction || [0, 1, 0]).normalize();
+  const centerOffset = (numPlanes - 1) * spacing / 2;
+  const base = worldPos(obj);
+  const positions = [];
+  for (let i = 0; i < numPlanes; i++) {
+    const offset = (i * spacing) - centerOffset;
+    positions.push(base.clone().add(dir.clone().multiplyScalar(offset)));
+  }
+  return positions;
+}
+
+const handlers = {
+  charge: (obj, targetPos, acc) => {
+    const chargePos = worldPos(obj);
+    acc.add(efields.pointChargeEField(chargePos.toArray(), obj.charge || 0, targetPos.toArray()));
+  },
+
+  path: (obj, targetPos, acc) => {
+    const positions = getPathChargePositions(obj);
+    const q = Number(obj.charge) || 0;
+    for (const pos of positions) {
+      acc.add(efields.pointChargeEField(pos.toArray(), q, targetPos.toArray()));
+    }
+  },
+
+  stackedPlanes: (obj, targetPos, acc) => {
+    const positions = getStackedPlanePositions(obj);
+    const densities = Array.isArray(obj.charge_densities) ? obj.charge_densities : [obj.charge_density || 0];
+    for (let i = 0; i < positions.length; i++) {
+      const planePos = positions[i];
+      const sigma = densities[i] || 0;
+      if (obj.infinite) {
+        acc.add(efields.infinitePlaneEField(planePos.toArray(), sigma, targetPos.toArray(), obj.direction));
+      } else {
+        acc.add(efields.finitePlaneEField(planePos.toArray(), obj.direction, obj.dimensions || [1, 1], sigma, targetPos.toArray()));
       }
     }
-  }
+  },
 
-  return resultFieldAtPoint;
+  plane: (obj, targetPos, acc) => {
+    const p = worldPos(obj);
+    const sigma = obj.charge_density || 0;
+    if (obj.infinite) {
+      acc.add(efields.infinitePlaneEField(p.toArray(), sigma, targetPos.toArray(), obj.direction));
+    } else {
+      acc.add(efields.finitePlaneEField(p.toArray(), obj.direction, obj.dimensions || [1, 1], sigma, targetPos.toArray()));
+    }
+  },
+
+  wire: (obj, targetPos, acc) => {
+    const p = worldPos(obj);
+    const lambda = obj.charge_density || 0;
+    if (obj.infinite) {
+      acc.add(efields.infiniteWireEField(p.toArray(), lambda, targetPos.toArray(), obj.direction));
+    } else {
+      acc.add(efields.finiteWireEField(p.toArray(), obj.direction, obj.height || 1, obj.radius || 0.1, lambda, targetPos.toArray()));
+    }
+  },
+
+  chargedSphere: (obj, targetPos, acc) => {
+    const p = worldPos(obj);
+    acc.add(efields.chargedSphereEField(p.toArray(), obj.radius || 0, obj.charge_density || 0, !!obj.isHollow, targetPos.toArray()));
+  },
+
+  concentricSpheres: (obj, targetPos, acc) => {
+    const p = worldPos(obj);
+    acc.add(efields.concentricSpheresEField(p.toArray(), obj.radiuses || [], obj.materials || [], obj.dielectrics || [], obj.charges || [], targetPos.toArray()));
+  },
+
+  concentricInfWires: (obj, targetPos, acc) => {
+    const p = worldPos(obj);
+    acc.add(efields.concentricInfiniteWiresEField(p.toArray(), obj.direction || [0, 1, 0], obj.radiuses || [], obj.materials || [], obj.dielectrics || [], obj.charges || [], targetPos.toArray()));
+  },
+};
+
+// Coil uses the same handler as path since it has charges
+handlers.coil = handlers.path;
+
+export default function calculateFieldAtPoint(objects = [], targetPosArr) {
+  const targetPos = toVec3(targetPosArr);
+  let result = new THREE.Vector3(0, 0, 0);
+
+  for (const obj of objects) {
+    if (!obj || !obj.type) continue;
+    const handler = handlers[obj.type];
+    if (typeof handler === 'function') {
+      handler(obj, targetPos, result);
+    } else {
+      // default 
+      continue;
+    }
+  }
+  return result;
 }

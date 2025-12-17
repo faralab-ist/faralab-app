@@ -5,7 +5,11 @@ const genUid = () =>
   (globalThis.crypto?.randomUUID?.() ?? `${Math.random().toString(36).slice(2)}_${Date.now()}`)
 
 // mantém as factories como tens (não precisas mexer nelas aqui)
-const generateIdFromName = (baseName, index) => `${baseName.split(' ')[0]} ${index}`
+const generateIdFromName = (baseName, index) => {
+  // Remove trailing number from base name if it exists, then append the new index
+  const nameWithoutNumber = baseName.replace(/\s+\d+$/, '')
+  return `${nameWithoutNumber} ${index}`
+}
 
 const objectFactories = {
   charge: (index) => ({
@@ -14,7 +18,16 @@ const objectFactories = {
     name: `Charge ${index}`,
     position: [0, 0, 0],
     charge: 1,
-    radius: 0.1,
+    radius: 0.06,
+    createdAt: Date.now(),
+  }),
+    testPointCharge: (index) => ({
+    id: `tmp-${index}`, // será sobrescrito
+    type: 'testPointCharge',
+    name: `Test Charge ${index}`,
+    position: [0, 0, 0],
+    charge: 0, // In reality its 1, but this way it doesn't affect the field
+    radius: 0.03,
     createdAt: Date.now(),
   }),
   wire: (index) => ({
@@ -148,20 +161,152 @@ const objectFactories = {
     rotation: [0,0,0],
     createdAt: Date.now(),
   }),
+  path: (index) => ({
+    id: `tmp-${index}`,
+    type: 'path',
+    name: `Path ${index}`,
+    points: [], // positions of each point of path
+    position: [0, 0, 0], //global position
+    charges: [], //position of each point charge
+    tangents: [],
+    chargeCount: 1, // number of point charges
+    charge: 1, // charge of each charge
+    velocity: 1, //speed of charges
+    isClosedPath: false,
+    createdAt: Date.now(),
+  }),
+  ringCoil: (index) => ({
+    id: `tmp-${index}`,
+    type: 'coil',
+    coilType: 'ring',
+    name: `Ring Coil ${index}`,
+    position: [0, 0, 0],
+    coilRadius: 1.5,
+    tubeRadius: 0.01,
+    coilColor: '#6ea8ff',
+    direction: [0, 1, 0],     // normal vector (area direction)
+    rotation: [0, 0, 0],      // Euler angles for rotation
+    chargeCount: 5,
+    charge: 1,
+    velocity: 1,
+    renderCharges: true,
+    charges: [],
+    createdAt: Date.now(),
+  }),
+  polygonCoil: (index) => ({
+    id: `tmp-${index}`,
+    type: 'coil',
+    coilType: 'polygon',
+    name: `Polygon Coil ${index}`,
+    position: [0, 0, 0],
+    coilRadius: 1.5,
+    tubeRadius: 0.01,
+    coilColor: '#6ea8ff',
+    direction: [0, 1, 0],     // normal vector (area direction)
+    rotation: [0, 0, 0],      // Euler angles for rotation
+    sides: 3,                 // default to square
+    chargeCount: 5,
+    charge: 1,
+    velocity: 1,
+    renderCharges: true,
+    charges: [],
+    createdAt: Date.now(),
+  })
 }
 
 export default function useSceneObjects(initial = []) {
   const [sceneObjects, setSceneObjects] = useState(initial)
   const [counters, setCounters] = useState({
-    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0,
+    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0, path: 0, 
+    ringCoil: 0, polygonCoil: 0
   })
+
+  const addPointToPath = useCallback((id) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newPoints = o.points ? [...o.points, [0,0,0]] : [[0,0,0]];
+        return { ...o, points: newPoints};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const removeLastPointFromPath = useCallback((id) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newPoints = o.points ? o.points.slice(0, -1) : [];
+        return { ...o, points: newPoints};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const setPointInPath = useCallback((id, pointIndex, point) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        const newPoints = o.points ? [...o.points] : [];
+        newPoints[pointIndex] = point;
+        return { ...o, points: newPoints};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const changePathChargeCount = useCallback((id, newCount) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        return { ...o, chargeCount: newCount};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const changePathCharge = useCallback((id, newCharge) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        return { ...o, charge: newCharge};
+      }
+      return o;
+    }
+    ))
+  }, []);
+
+  const changePathVelocity = useCallback((id, newVelocity) => {
+    setSceneObjects(prev => prev.map(o => {
+      if (o.id === id) {
+        return { ...o, velocity: newVelocity};
+      }
+      return o;
+    }
+    ))
+  }, []);
 
   const addObject = useCallback((type, overrides = {}) => {
     const id = genUid()
 
     setSceneObjects(prev => {
-      const nextIndex = prev.filter(o => o.type === type).length + 1
-      const base = objectFactories[type](nextIndex)
+      // Calculate nextIndex based on object type
+      let nextIndex
+      let factoryType = type
+      
+      if (type === 'coil' || type === 'ringCoil' || type === 'polygonCoil') {
+        // For coils, count by coilType
+        const coilType = overrides.coilType || (type === 'polygonCoil' ? 'polygon' : 'ring')
+        nextIndex = prev.filter(o => o.type === 'coil' && o.coilType === coilType).length + 1
+        factoryType = type === 'polygonCoil' ? 'polygonCoil' : type === 'ringCoil' ? 'ringCoil' : type
+      } else if (type === 'sphere' || type === 'cylinder' || type === 'cuboid') {
+        // For surfaces, count by surfaceType
+        nextIndex = prev.filter(o => o.type === 'surface' && o.surfaceType === type).length + 1
+      } else {
+        // For other types, count by type
+        nextIndex = prev.filter(o => o.type === type).length + 1
+      }
+      
+      const base = objectFactories[factoryType](nextIndex)
 
       const newObj = {
         ...base,
@@ -355,7 +500,13 @@ const updateDirection = useCallback((id, direction) => {
     wire: sceneObjects.filter(o => o.type === 'wire').length,
     plane: sceneObjects.filter(o => o.type === 'plane').length,
     chargedSphere: sceneObjects.filter(o => o.type === 'chargedSphere').length,
+    cylinder: sceneObjects.filter(o => o.type === 'surface' && o.surfaceType === 'cylinder').length,
+    sphere: sceneObjects.filter(o => o.type === 'surface' && o.surfaceType === 'sphere').length,
+    cuboid: sceneObjects.filter(o => o.type === 'surface' && o.surfaceType === 'cuboid').length,
     surface: sceneObjects.filter(o => o.type === 'surface').length,
+    path: sceneObjects.filter(o => o.type === 'path').length,
+    polygonCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'polygon').length,
+    ringCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'ring').length,
     total: sceneObjects.length,
   }), [sceneObjects])
 
@@ -380,6 +531,12 @@ const updateDirection = useCallback((id, direction) => {
     removeLastPlaneFromStackedPlanes,
     setSpacingForStackedPlanes,
     setChargeDensityForPlaneInStackedPlanes,
+    addPointToPath,
+    removeLastPointFromPath,
+    setPointInPath,
+    changePathChargeCount,
+    changePathCharge,
+    changePathVelocity,
     counts,
   }
 }

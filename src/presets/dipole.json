@@ -9,7 +9,7 @@
         "lineNumber": 24,
         "showField": true,
         "showOnlyGaussianField": true,
-        "showLines": true,
+        "showLines": false,
         "showEquipotentialSurface": false
         },
         "objects": [
