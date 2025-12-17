@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react'
 import SlicerMenu from './SlicerMenu'
 import TestChargeMenu from './TestChargeMenu'
-// import TestChargeMenu from './TestChargeMenu' 
+import EFieldMenu from './EFieldMenu'
+import GaussianMenu from './GaussianMenu'
 import './ToolbarPopup.css'
 import Pin from '../../../../assets/pin.svg'
 import Close from '../../../../assets/close_X.svg'
@@ -88,6 +89,10 @@ export default function ToolbarPopup({ id, onClose, popupProps = {} }) {
         return <SlicerMenu {...popupProps} minimized={minimized} />
       case 'TestCharge':
          return <TestChargeMenu {...popupProps} minimized={minimized} />
+      case 'EField':
+        return <EFieldMenu {...popupProps} minimized={minimized} />
+      case 'Gaussian':
+        return <GaussianMenu {...popupProps} minimized={minimized} />
       default:
         return <div style={{padding: 15}}>Unknown Tool: {id}</div>
     }

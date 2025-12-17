@@ -373,6 +373,34 @@ function LoadingOverlay() {
         slicePlane={slicePlane}
         slicePos={slicePos} setSlicePos={setSlicePos}
         slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
+        // EField Props
+        showField={showField}
+        onToggleField={toggleField}
+        showLines={showLines}
+        onToggleLines={toggleLines}
+        showEquipotentialSurface={showEquipotentialSurface}
+        onToggleEquipotentialSurface={toggleEquip}
+        vectorMinTsl={vectorMinTsl}
+        setVectorMinTsl={setVectorMinTsl}
+        vectorScale={vectorScale}
+        setVectorScale={setVectorScale}
+        vectorStep={vectorStep}
+        setVectorStep={setVectorStep}
+        lineMin={lineMin}
+        setLineMin={setLineMin}
+        lineNumber={lineNumber}
+        setLineNumber={setLineNumber}
+        activePlane={activePlane}
+        onPlaneSelect={handlePlaneSelect}
+        potentialTarget={equipotentialTarget}
+        setPotentialTarget={setEquipotentialTarget}
+        wavePropagationEnabled={wavePropagationEnabled}
+        setWavePropagationEnabled={setWavePropagationEnabled}
+        waveDuration={waveDuration}
+        setWaveDuration={setWaveDuration}
+        // Gaussian Props
+        showOnlyGaussianField={showOnlyGaussianField}
+        setOnlyGaussianField={setShowOnlyGaussianField}
        />
        
        </div>

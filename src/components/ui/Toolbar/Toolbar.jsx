@@ -5,6 +5,7 @@ import Slice from '../../../assets/slice.svg'
 import Edit from '../../../assets/edit.svg'
 import Clean from '../../../assets/clean.svg'
 import TestCharge from '../../../assets/lowercase_q2.svg'
+import EFieldIcon from '../../../assets/efield.svg'
 
 
 
@@ -23,7 +24,37 @@ export default function Toolbar({
   showSliceHelper, setShowSliceHelper,
   slicePlane, setSlicePlane,
   slicePos, setSlicePos,
-  slicePlaneFlip, setSlicePlaneFlip
+  slicePlaneFlip, setSlicePlaneFlip,
+
+  // EField Props (to be passed down to EField Popup)
+  showField,
+  onToggleField,
+  showLines,
+  onToggleLines,
+  showEquipotentialSurface,
+  onToggleEquipotentialSurface,
+  vectorMinTsl,
+  setVectorMinTsl,
+  vectorScale,
+  setVectorScale,
+  vectorStep,
+  setVectorStep,
+  lineMin,
+  setLineMin,
+  lineNumber,
+  setLineNumber,
+  activePlane,
+  onPlaneSelect,
+  potentialTarget,
+  setPotentialTarget,
+  wavePropagationEnabled,
+  setWavePropagationEnabled,
+  waveDuration,
+  setWaveDuration,
+
+  // Gaussian Props (to be passed down to Gaussian Popup)
+  showOnlyGaussianField,
+  setOnlyGaussianField
 }) {
   // State: An array of strings, e.g., ['Slice', 'TestCharge']
   const [activePopups, setActivePopups] = useState([])
@@ -52,12 +83,57 @@ export default function Toolbar({
     updatePosition,
     sceneObjects,
     counts,
+    showField,
+    onToggleField,
+    showLines,
+    onToggleLines,
+    showEquipotentialSurface,
+    onToggleEquipotentialSurface,
+    vectorMinTsl,
+    setVectorMinTsl,
+    vectorScale,
+    setVectorScale,
+    vectorStep,
+    setVectorStep,
+    lineMin,
+    setLineMin,
+    lineNumber,
+    setLineNumber,
+    activePlane,
+    onPlaneSelect,
+    potentialTarget,
+    setPotentialTarget,
+    wavePropagationEnabled,
+    setWavePropagationEnabled,
+    waveDuration,
+    setWaveDuration,
+    // Gaussian props
+    showOnlyGaussianField,
+    setOnlyGaussianField
   }
 
   return (
     <div className="top-toolbar">
       
       <div className="tb-group">
+
+        <button
+          className={`tb-btn ${activePopups.includes('EField') ? 'active' : ''}`}
+          onClick={(e) => handleClick('EField', e)}
+          title="Electric Field"
+          aria-pressed={activePopups.includes('EField')}
+        >
+          <img className="tb-icon" src={EFieldIcon} alt="" />
+        </button>
+
+        <button
+          className={`tb-btn ${activePopups.includes('Gaussian') ? 'active' : ''}`}
+          onClick={(e) => handleClick('Gaussian', e)}
+          title="Gaussian Surfaces"
+          aria-pressed={activePopups.includes('Gaussian')}
+        >
+          <span style={{ fontWeight: 800, fontSize: 12, lineHeight: 1 }}>G</span>
+        </button>
 
         <button
           className={`tb-btn ${activePopups.includes('TestCharge') ? 'active' : ''}`}

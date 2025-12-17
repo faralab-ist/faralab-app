@@ -1,0 +1,354 @@
+/* =========================================
+   1. Main Container & Panel Layout
+   (Baseado no antigo .settings-panel)
+   ========================================= */
+.efield-menu-container {
+  /* Dimensões fixas do layout antigo */
+  width: 280px;         
+  min-width: 280px;
+  max-width: 320px;
+  height: 490px;        
+  min-height: 420px;
+  max-height: 500px;
+
+  /* Estilo visual */
+  background: rgba(15,15,15,0.94);
+  border: 1px solid #2e2e2e;
+  padding: 14px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+  overflow: hidden; /* Mantém o tamanho fixo */
+  
+  /* Animação original */
+  animation: panelFade .18s ease-out;
+}
+
+@keyframes panelFade {
+  from { opacity: 0; transform: translateY(8px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Área de conteúdo com scroll (para caber no tamanho fixo) */
+.fieldview-content {
+  height: calc(100% - 48px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px; /* Evita scrollbar em cima do conteúdo */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* =========================================
+   2. Tabs (Estilo Simplificado Antigo)
+   ========================================= */
+.fieldview-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.fieldview-tab {
+  flex: 1;
+  padding: 6px 10px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: #ccc;
+  font-size: 13px;
+  text-align: center;
+  transition: all 0.2s;
+  border-radius: 6px;
+}
+
+.fieldview-tab:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.fieldview-tab.active {
+  font-weight: 700;
+  color: #fff;
+  text-decoration: underline;
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* =========================================
+   3. Sections (Cards Escuros)
+   ========================================= */
+.efield-section {
+  border: 1px solid #222;
+  padding: 10px 10px 12px;
+  border-radius: 10px;
+  background: #121212; /* Fundo sólido escuro antigo */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+  opacity: 0;
+  transform: translateY(-4px);
+  animation: fadeInUp .16s ease forwards;
+  box-shadow: none;
+}
+
+.efield-section.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(40%);
+  border-color: rgba(255,255,255,0.08);
+  background: rgba(30,30,30,0.02);
+}
+
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.efield-section-title {
+  font-size: 0.68rem;   
+  font-weight: 700;     
+  letter-spacing: .35px;
+  color: #c2d7ee;       
+  text-transform: uppercase;
+  opacity: .95;
+  margin: 0;
+}
+
+.separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.024);
+  margin: 4px 0;
+  border-top: 1px solid rgba(255,255,255,0.03);
+  flex-shrink: 0;
+}
+
+/* =========================================
+   4. Inputs & Rows
+   ========================================= */
+.efield-row.compact {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+}
+
+.efield-label {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.efield-row.compact .efield-label {
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.efield-label .label-text {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+  color: rgba(21, 156, 240, 0.9);
+}
+
+/* Estilo antigo do Input */
+.efield-label input {
+  width: 76px;
+  min-width: 64px;
+  height: 26px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+  line-height: 1.1;
+  background: #1a1c1f;
+  border: 1px solid #3a3f46;
+  color: #eef4ff;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color .15s, background .15s, color .15s;
+}
+
+.efield-row.compact .efield-label input[type="number"] {
+  width: 64px;
+  min-width: 56px;
+}
+
+.efield-label input:focus {
+  border-color: #4a6d94;
+  background: #20252a;
+  color: #ffffff;
+}
+
+.efield-label input:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+  background: rgba(255,255,255,0.03);
+  border-color: rgba(255,255,255,0.06);
+}
+
+/* =========================================
+   5. Toggle Buttons (Field & Potential)
+   ========================================= */
+.efield-toggle-btn,
+.pot-toggle-btn {
+  background: #1a1c1f;
+  border: 1px solid #3a3f46;
+  color: #eef4ff;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  min-width: 120px;
+  text-align: center;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, transform .06s;
+}
+
+.efield-toggle-btn:hover,
+.pot-toggle-btn:hover {
+  background: #202427;
+  border-color: #4a6d94;
+  transform: translateY(-1px);
+}
+
+.efield-toggle-btn.active,
+.pot-toggle-btn.active {
+  background: linear-gradient(180deg, rgba(74,109,148,0.10), rgba(74,109,148,0.04));
+  border-color: rgba(21, 102, 153, 0.9);
+  box-shadow: inset 0 -2px 6px rgba(74,109,148,0.04);
+}
+
+/* =========================================
+   6. Sliders (Custom Range)
+   ========================================= */
+.efield-range,
+.potential-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  background: transparent;
+  outline: none;
+  margin: 0;
+}
+
+/* Track Style */
+.efield-range::-webkit-slider-runnable-track,
+.potential-slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.03);
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+}
+
+/* Thumb Style */
+.efield-range::-webkit-slider-thumb,
+.potential-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e9eef7;
+  border: 2px solid rgba(0,0,0,0.25);
+  margin-top: -2.5px; /* Adjust center */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+  cursor: pointer;
+}
+
+.slider-value {
+  min-width: 36px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #d7e6f7;
+}
+
+/* =========================================
+   7. Plane Buttons (Bottom)
+   ========================================= */
+.fieldview-plane-bottom {
+  margin-top: auto; /* Empurra para o fundo se houver espaço */
+  padding-top: 4px;
+}
+
+.plane-buttons-container {
+  /* Estilo do container antigo */
+  border: 1px solid #2a2a2a;
+  padding: 10px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(18, 18, 18, 0.95), rgba(15, 15, 15, 0.98));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plane-buttons-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: .35px;
+  color: #c2d7ee;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.plane-buttons-group {
+  display: flex;
+  gap: 10px;
+}
+
+.plane-button {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(60, 60, 60, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.plane-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.8);
+}
+
+.plane-button.active {
+  background: linear-gradient(180deg, #156699, #0f4b75); /* Azul antigo */
+  border-color: rgba(21, 78, 153, 0.9);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(79,154,255,0.16);
+  transform: translateY(-1px);
+}
+
+.plane-button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  filter: grayscale(8%);
+  transform: none;
+  background: rgba(30,30,30,0.6);
+  border-color: rgba(255,255,255,0.12);
+}
+
+/* Checkbox */
+.efield-checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: #4f9aff; 
+  margin-left: 1px;
+  cursor: pointer;
+}
