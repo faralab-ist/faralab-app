@@ -136,7 +136,7 @@ export default function CreateButtons({
             <button onClick={() => loadPreset('dipole')}>Dipole</button>
             <button onClick={() => loadPreset('tripole')}>Tripole</button>
             <button onClick={() => loadPreset('infiniteWire')}>Wire</button>
-            <div className="spacer" />
+            <button onClick={() => loadPreset('currentLoop')}>Current Loop</button>
             <div className="spacer" />
             <button onClick={() => loadPreset('singlePlane')}>1 Plane</button>
             <button onClick={() => loadPreset('parallelPlanes')}>2 Planes</button>
@@ -164,6 +164,9 @@ export default function CreateButtons({
               <button onClick={() => addObject('wire', { position: [0,0,0]})}>Add Wire</button>
               <button onClick={() => addObject('plane', { position: [0,0,0] })}>Add Plane</button>
               <button onClick={() => addObject('chargedSphere', { position: [0,0,0] })}>Add Charged Sphere</button>
+              <button onClick={() => addObject('path', { position: [0,0,0] })}>Add Path</button>
+              <button onClick={() => addObject('ringCoil', { position: [0,0,0] }) }>Add Ring Coil</button>
+              <button onClick={() => addObject('polygonCoil', { position: [0,0,0]}) }>Add Polygon Coil</button>
               <button onClick={() => addObject('testPointCharge', { position: [0,0,0] })}>Add Test Charge</button>
 
            {/*    <button onClick={() => addObject('concentricSpheres', { position: [0,0,0] })}>Add Concentric Sphere System</button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ObjectItem from "./ObjectItem";
 import "./Sidebar.css"; // Certifica-te que copiaste o CSS para aqui
+import { add } from "three/tsl";
 
 export default function ObjectList({ 
   items = [], 
@@ -27,7 +28,14 @@ export default function ObjectList({
   setMaterialForLayerInConcentricInfiniteWire,
   setDielectricForLayerInConcentricInfiniteWire,
   setChargeForLayerInConcentricInfiniteWire,
-  ...rest
+  addPointToPath,
+  removeLastPointFromPath,
+  setPointInPath,
+  changePathChargeCount,
+  changePathCharge,
+  changePathVelocity,
+  changeRadius,
+  changeSides 
 }) {
   const [expandedMap, setExpandedMap] = useState({});
 
@@ -73,7 +81,7 @@ export default function ObjectList({
           expanded={!!expandedMap[obj.id]}
           hovered={hoveredId === obj.id}
           toggleExpand={toggleExpand}
-          setHoveredId={setHoveredId}
+          setHoveredId={setHoveredId} 
           updateObject={updateObject}
           removeObject={removeObject}
 
@@ -102,6 +110,25 @@ export default function ObjectList({
             setDielectric: setDielectricForLayerInConcentricInfiniteWire,
             setCharge: setChargeForLayerInConcentricInfiniteWire
           }}
+
+          // path
+          pathActions={{
+            addPoint: addPointToPath,
+            removeLastPoint: removeLastPointFromPath,
+            setPoint: setPointInPath,
+            changeChargeCount: changePathChargeCount,
+            changeCharge: changePathCharge,
+            changeVelocity: changePathVelocity
+          }}
+
+          coilActions={{
+            changeChargeCount: changePathChargeCount,
+            changeCharge: changePathCharge,
+            changeVelocity: changePathVelocity,
+            changeRadius: changeRadius,
+            changeSides: changeSides
+          }}
+            
         />
       ))}
     </ul>

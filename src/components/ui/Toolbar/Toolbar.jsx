@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import ToolbarPopup from './ToolbarPopup/ToolbarPopup'
 import './Toolbar.css'
+import RecordingButtons from '../RecordingButtons/RecordingButtons'
+import TestCharge from '../../../assets/lowercase_q2.svg'
 import Slice from '../../../assets/slice.svg'
 import Edit from '../../../assets/edit.svg'
 import Clean from '../../../assets/clean.svg'
-import TestCharge from '../../../assets/lowercase_q2.svg'
 import EFieldIcon from '../../../assets/efield.svg'
 
 
@@ -114,9 +115,11 @@ export default function Toolbar({
 
   return (
     <div className="top-toolbar">
-      
-      <div className="tb-group">
+        <RecordingButtons />
+        
 
+
+      <div className="tb-group">
         <button
           className={`tb-btn ${activePopups.includes('EField') ? 'active' : ''}`}
           onClick={(e) => handleClick('EField', e)}

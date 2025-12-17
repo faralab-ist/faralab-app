@@ -6,7 +6,10 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, TestCharge} from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, Path, TestCharge} from './components/models'
+
+  // Coil components
+  import { RingCoil, PolygonCoil } from './components/models/coils'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -15,17 +18,21 @@ import React, { useState, useEffect, useMemo } from 'react'
   import CreateButtons from './components/ui/CreateButtons'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
+  import Toolbar from './components/ui/Toolbar/Toolbar'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
-  import Toolbar from './components/ui/Toolbar/Toolbar' // already imported below in your file; keep as-is
+  import calculateFlux from './utils/calculateFlux'
+  import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
 
   // Hooks
   import {useSceneObjects, 
     FieldArrows,
+    MagFieldArrows,
     useCameraPreset,  
     FieldLines, useApplyPreset, 
     useSceneHover 
 } from "./hooks"
+import MagFieldArrowsGPU from './hooks/useMagFieldArrowsGPU'
 
 
 // Fullscreen loading overlay that fades away
@@ -150,6 +157,12 @@ function LoadingOverlay() {
       removeLastPlaneFromStackedPlanes,
       setSpacingForStackedPlanes,
       setChargeDensityForPlaneInStackedPlanes,
+      addPointToPath,
+      removeLastPointFromPath,
+      setPointInPath,
+      changePathChargeCount,
+      changePathCharge,
+      changePathVelocity,
       counts,
     } = useSceneObjects()
     
@@ -157,6 +170,7 @@ function LoadingOverlay() {
     const [isDragging, setIsDragging] = useState(false)
     const [sidebarOpen, setSidebarOpen] = useState(false) // <- novo estado para a sidebar
     const [showField, setShowField] = useState(false)
+    const [showMagField, setShowMagField] = useState(false) // mag field
     const [showLines, setShowLines] = useState(false)
     const [showOnlyGaussianField, setShowOnlyGaussianField] = useState(false)
     const [showEquipotentialSurface, setShowEquipotentialSurface] = useState(false)
@@ -174,6 +188,7 @@ function LoadingOverlay() {
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
     
     const [hoveredId, setHoveredId] = useState(null)
+    const [fluxResults, setFluxResults] = useState([]) // Store flux calculation results
     
     // slicing planes stuff
     const [slicePlane, setSlicePlane] = useState('xz') // 'xy', 'yz', 'xz'
@@ -182,7 +197,7 @@ function LoadingOverlay() {
     const [showSlicePlaneHelper, setShowSlicePlaneHelper] = useState(true)
     const [slicePlaneFlip, setSlicePlaneFlip] = useState(false)
       // Wave propagation settings for field arrows
-      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(true)
+      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(false)
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
 
@@ -263,6 +278,30 @@ function LoadingOverlay() {
         setShowOnlyGaussianField(false)
       }
     }, [counts.surface, showOnlyGaussianField])
+
+    useEffect(() => {
+      if (!showOnlyGaussianField) {
+        setFluxResults([])
+        return
+      }
+      const surfaces = sceneObjects?.filter(obj => obj?.type === 'surface') ?? []
+      if (!surfaces.length) {
+        setFluxResults([])
+        return
+      }
+
+      const results = calculateFlux(sceneObjects)
+      setFluxResults(results)
+      
+      if (results.length) {
+        console.log('[Flux] Gaussian surface results:')
+        results.forEach(result => {
+          const label = result.name ?? result.id
+          const value = Number.isFinite(result.flux) ? result.flux : 0
+          console.log(`  ${label}: ${value.toExponential(3)} N·m²/C`)
+        })
+      }
+    }, [showOnlyGaussianField, sceneObjects])
     const [camFns, setCamFns] = useState(null)
 
     const handlePlaneSelect = (plane) => {
@@ -327,7 +366,7 @@ function LoadingOverlay() {
       // map your local toggles to the hook’s expected keys
       showField, onToggleField: toggleField,
       showOnlyGaussianField, onToggleOnlyGaussianField: toggleOnlyGaussianField,
-      showLines, onToggleLines: toggleLines,
+      showLines, onToggleLines: toggleLines, showBField: showMagField, onToggleBField: () => setShowMagField(v => !v),
       showEquipotentialSurface, onToggleEquipotentialSurface: toggleEquip,
       // settings setters
       setVectorMinTsl, setVectorScale, setVectorStep, setLineMin, setLineNumber
@@ -465,6 +504,12 @@ function LoadingOverlay() {
           removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
           setSpacingForStackedPlanes={setSpacingForStackedPlanes}
           setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
+          addPointToPath={addPointToPath}
+          removeLastPointFromPath={removeLastPointFromPath}
+          setPointInPath={setPointInPath}
+          changePathChargeCount={changePathChargeCount}
+          changePathCharge={changePathCharge}
+          changePathVelocity={changePathVelocity}
         />
 
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
@@ -503,6 +548,16 @@ function LoadingOverlay() {
                 case 'concentricSpheres': ObjectComponent = ConcentricSpheres; break
                 case 'concentricInfWires': ObjectComponent = ConcentricInfiniteWires; break
                 case 'stackedPlanes': ObjectComponent = StackedPlanes; break
+                case 'path': ObjectComponent = Path; break
+                case 'coil':
+                  // Select coil component based on coilType
+                  switch(obj.coilType) {
+                    case 'ring': ObjectComponent = RingCoil; break
+                    case 'polygon': ObjectComponent = PolygonCoil; break
+                    default: ObjectComponent = RingCoil; break
+                  }
+                  break
+                case 'ringCoil': ObjectComponent = RingCoil; break // Legacy support
                 default: return null;
               } 
             }
@@ -511,7 +566,6 @@ function LoadingOverlay() {
               <ObjectComponent
                 key={obj.id}
                 {...obj}
-                fluxValue={0} // <--- Passa o valor do fluxo aqui quando calcularmos
                 creativeMode={creativeMode}           
                 selectedId={selectedId}
                 setSelectedId={handleSelect}
@@ -530,6 +584,12 @@ function LoadingOverlay() {
                 removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
                 setSpacingForStackedPlanes={setSpacingForStackedPlanes}
                 setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
+                addPointToPath={addPointToPath}
+                removeLastPointFromPath={removeLastPointFromPath}
+                setPointInPath={setPointInPath}
+                changePathChargeCount={changePathChargeCount}
+                changePathCharge={changePathCharge}
+                changePathVelocity={changePathVelocity}
                 slicePlane={slicePlane}
                 slicePos={slicePos}
                 useSlice={useSlice}
@@ -537,6 +597,9 @@ function LoadingOverlay() {
                 dragOwnerId={dragOwnerId}
                 isHovered={obj.id === hoveredId}
                 gridDimensions={obj.type === 'wire' || obj.type === 'plane' ? [20, 20] : undefined}
+                fluxValue={fluxResults.find(r => r.id === obj.id)?.flux ?? 0}
+                showOnlyGaussianField={showOnlyGaussianField}
+                sceneObjects={sceneObjects}
               />
             )
           })}
@@ -555,9 +618,27 @@ function LoadingOverlay() {
         slicePos={slicePos}
         useSlice={useSlice}
         slicePlaneFlip={slicePlaneFlip}
-        wavePropagationEnabled={wavePropagationEnabled}
+        propagate={wavePropagationEnabled && !sceneObjects.some(o => o.type === 'path')}
         waveDuration={waveDuration}
         />
+        )}
+
+        {showMagField && (
+          <MagFieldArrowsGPU
+            key={`mag-arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
+          }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showMagField}-${activePlane}`}
+          objects={sceneObjects}
+          fieldThreshold={vectorMinTsl}
+          scaleMultiplier={vectorScale}
+          step={1 / (Number(vectorStep))} 
+          planeFilter={activePlane}
+          slicePlane={slicePlane}
+          slicePos={slicePos}
+          useSlice={useSlice}
+          slicePlaneFlip={slicePlaneFlip}
+          propagate={false} // for now
+          waveDuration={waveDuration}
+          />
         )}
 
         {showLines && (
@@ -588,8 +669,10 @@ function LoadingOverlay() {
 
         <SettingsButtons //epa, ya its ugly, i know - yours truly, gabriel; All gud g
           showField={showField}
+          showBField={showMagField}
           showLines={showLines}
           onToggleField={toggleField}
+          onToggleBField={() => setShowMagField(v => !v)}
           onToggleLines={toggleLines} 
           showEquipotentialSurface={showEquipotentialSurface}
           onToggleEquipotentialSurface={() => setShowEquipotentialSurface(v => !v)}

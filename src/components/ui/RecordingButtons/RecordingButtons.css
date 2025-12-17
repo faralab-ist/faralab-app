@@ -1,0 +1,81 @@
+.recording-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.rec-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  color: #e6eef6;
+  border: 1px solid rgba(255,255,255,0.04);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 120ms ease;
+}
+
+.rec-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+}
+
+.rec-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rec-btn.recording {
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.2), rgba(185, 28, 28, 0.15));
+  border-color: rgba(220, 38, 38, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.rec-btn.processing {
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.15));
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.rec-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.rec-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.rec-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: blink 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+  }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
