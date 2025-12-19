@@ -369,7 +369,9 @@ function LoadingOverlay() {
       showLines, onToggleLines: toggleLines, showBField: showMagField, onToggleBField: () => setShowMagField(v => !v),
       showEquipotentialSurface, onToggleEquipotentialSurface: toggleEquip,
       // settings setters
-      setVectorMinTsl, setVectorScale, setVectorStep, setLineMin, setLineNumber
+      setVectorMinTsl, setVectorScale, setVectorStep, setLineMin, setLineNumber,
+      // slice setters so presets can control slicing
+      setSlicePlane, setSlicePos, setUseSlice, setSlicePlaneFlip, setShowSlicePlaneHelper
     })
 
     useEffect(() => {
