@@ -301,14 +301,41 @@ export default function MagFieldArrowsGPU({
             chargeInfo.posTex?.dispose?.();
             chargeInfo.tanTex?.dispose?.();
             chargeInfo.factorTex?.dispose?.();
+            instMaterial.uniforms.fieldTex.value = null;
+            computeMaterial.uniforms.gridTex.value = null;
+            computeMaterial.uniforms.chargePosTex.value = null;
+            computeMaterial.uniforms.tangentTex.value = null;
+            computeMaterial.uniforms.factorTex.value = null;
             renderTarget?.dispose?.();
         };
     }, [gridInfo.tex, chargeInfo, renderTarget]);
+
+    useEffect(() => {
+        return () => {
+            computeMaterial.dispose();
+            instMaterial.dispose();
+        };
+    }, [computeMaterial, instMaterial]);
+
+    useEffect(() => {
+        return () => {
+            arrowGeometry.dispose();
+        };
+    }, [arrowGeometry]);
+
+    useEffect(() => {
+        return () => {
+            computeScene.mesh.geometry.dispose();
+        };
+    }, [computeScene]);
+
 
 
     useEffect(() => {
         if (!instRef.current) return;
         const mesh = instRef.current;
+        if(mesh.geometry) mesh.geometry.dispose();
+        if(mesh.material) mesh.material.dispose();
         mesh.geometry = arrowGeometry;
         mesh.material = instMaterial;
         mesh.count = gridInfo.count;

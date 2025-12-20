@@ -484,18 +484,60 @@ export default function ObjectItem({
                     </div>
                  </div>
 
-                 <div className="detail-row">
-                  <div className="detail-key">Frozen</div>
-                  <div className="detail-value">
-                    <button
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        updateObject(obj.id, { frozen: !obj.frozen });
-                      }}
-                      style={{ padding: "6px 8px" }}
-                    >
-                      {obj.frozen ? 'Unfreeze' : 'Freeze'}
-                    </button>
+                 {/* two-column controls: Frozen / Animated / Frequency / Amplitude */}
+                 <div className="detail-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <div className="detail-key">Frozen</div>
+                    <div className="detail-value">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { frozen: !obj.frozen }); }}
+                        style={{ padding: "6px 8px" }}
+                      >
+                        {obj.frozen ? 'Unfreeze' : 'Freeze'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="detail-key">Animated</div>
+                    <div className="detail-value">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { animated: !obj.animated }); }}
+                        style={{ padding: "6px 8px" }}
+                      >
+                        {obj.animated ? 'Stop animation' : 'Start animation'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="detail-key">Freq (Hz)</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={Number.isFinite(obj.freq) ? obj.freq : (obj.freq === undefined ? 1 : 0)}
+                        step={0.1}
+                        min={0} max={100}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { freq: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="detail-key">Amplitude</div>
+                    <div className="detail-value">
+                      <NumberInput
+                        value={Number.isFinite(obj.amplitude) ? obj.amplitude : (obj.amplitude === undefined ? 0.1 : 0)}
+                        step={0.01}
+                        min={0} max={100}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { amplitude: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
                   </div>
                 </div>
                </>

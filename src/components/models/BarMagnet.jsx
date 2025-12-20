@@ -4,6 +4,7 @@ import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 
+//tecnicaly a solenoid / a bunch of spires
 export default function BarMagnet({
   id,
   position,
@@ -32,6 +33,9 @@ export default function BarMagnet({
     useSlice,
     slicePlaneFlip,
     frozen = false,
+    animated,
+    amplitude,
+    freq,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -46,6 +50,32 @@ export default function BarMagnet({
       clockRef.current.start();
     }
   }, []);
+
+  // animated motion state
+  const animBasePosRef = useRef([position[0], position[1], position[2]]); // center about which we oscillate
+  const isAnimatingRef = useRef(false);
+
+  useEffect(() => {
+    if (animated) {
+      let worldPos = null;
+      if (groupRef.current) {
+        groupRef.current.updateWorldMatrix(true, false);
+        const tmp = new THREE.Vector3().setFromMatrixPosition(groupRef.current.matrixWorld);
+        worldPos = [tmp.x, tmp.y, tmp.z];
+      } else {
+        worldPos = [position[0], position[1], position[2]];
+      }
+      animBasePosRef.current = worldPos;
+      isAnimatingRef.current = true;
+      updateObject?.(id, { frozen: true });
+      clockRef.current?.start();
+    } else {
+      if (isAnimatingRef.current) {
+        isAnimatingRef.current = false;
+        updateObject?.(id, { frozen: false });
+      }
+    }
+  }, [animated, id, updateObject]);
 
   // stop clock when frozen
   useEffect(() => {
@@ -213,7 +243,29 @@ export default function BarMagnet({
      return positions;
    };
 
-  useFrame(() => {
+  useFrame((state) => {
+    if (animated && isAnimatingRef.current && !isDraggingRef.current) {
+      const t = state.clock.getElapsedTime();
+      const w = 2 * Math.PI * freq;
+      const phase = 0;
+
+      const worldQuat = new THREE.Quaternion();
+      if (Array.isArray(quaternion) && quaternion.length === 4) {
+        worldQuat.set(quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
+      } else if (Array.isArray(rotation) && rotation.length >= 3) {
+        worldQuat.setFromEuler(new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ'));
+      } else if (Array.isArray(direction) && (direction[0] || direction[1] || direction[2])) {
+        const dirVec = new THREE.Vector3(direction[0], direction[1], direction[2]).normalize();
+        worldQuat.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dirVec);
+      }
+      const worldDir = new THREE.Vector3(0, 0, 1).applyQuaternion(worldQuat).normalize();
+
+      const disp = Math.sin(w * t + phase) * amplitude;
+      const base = animBasePosRef.current;
+      const newPos = new THREE.Vector3(base[0], base[1], base[2]).addScaledVector(worldDir, disp);
+      updatePosition?.(id, [newPos.x, newPos.y, newPos.z]);
+    }
+
     const pos = getChargePositions();
     updateObject?.(id, { charges: pos });
     setChargePositions(pos);
