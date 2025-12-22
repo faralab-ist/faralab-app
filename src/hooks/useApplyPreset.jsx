@@ -66,9 +66,14 @@ export default function useApplyPreset({
       }
 
       // Slice settings (optional)
+      // if no useSlice settings, default to false
       if (st.slicePlane !== undefined && setSlicePlane) setSlicePlane(st.slicePlane)
       if (st.slicePos !== undefined && setSlicePos) setSlicePos(st.slicePos)
-      if (st.useSlice !== undefined && setUseSlice) setUseSlice(!!st.useSlice)
+      if (st.useSlice !== undefined && setUseSlice) {
+        setUseSlice(!!st.useSlice)
+      } else if (setUseSlice) {
+        setUseSlice(false)
+      }
       if (st.slicePlaneFlip !== undefined && setSlicePlaneFlip) setSlicePlaneFlip(!!st.slicePlaneFlip)
       if (st.showSlicePlaneHelper !== undefined && setShowSlicePlaneHelper) setShowSlicePlaneHelper(!!st.showSlicePlaneHelper)
     }
