@@ -21,6 +21,7 @@ import React, { useState, useEffect, useMemo } from 'react'
   import Toolbar from './components/ui/Toolbar/Toolbar'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
+  import DockSidebar from './components/ui/DockSidebar/DockSidebar'
   import calculateFlux from './utils/calculateFlux'
   import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
 
@@ -200,7 +201,37 @@ function LoadingOverlay() {
       const [wavePropagationEnabled, setWavePropagationEnabled] = useState(false)
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
+    
+    // Docker sidebar state
+    const [dockedWindows, setDockedWindows] = useState({ TestCharge: false, Slice: false })
+    const [tabOrder, setTabOrder] = useState(['TestCharge', 'Slice']) // User-configurable tab order
+    const [ensureActiveCallback, setEnsureActiveCallback] = useState(null)
+    const [undockPositions, setUndockPositions] = useState({}) // Store positions for undocked windows
 
+    // Docker functions
+    const handleDock = (windowName) => {
+      setDockedWindows(prev => ({ ...prev, [windowName]: true }))
+      // Clear undock position when docking
+      setUndockPositions(prev => {
+        const next = { ...prev };
+        delete next[windowName];
+        return next;
+      });
+      // Window stays in activePopups in Toolbar so it can be toggled
+    }
+
+    const handleUndock = (windowName, position) => {
+      setDockedWindows(prev => ({ ...prev, [windowName]: false }))
+      // Store the position if provided
+      if (position) {
+        setUndockPositions(prev => ({ ...prev, [windowName]: position }));
+      }
+      // Ensure the window is added back to activePopups so it appears as floating
+      if (ensureActiveCallback) {
+        ensureActiveCallback(windowName);
+      }
+    }
+    
 
 
     const handleSelect = (id) => {
@@ -398,6 +429,8 @@ function LoadingOverlay() {
     {/* <LoadingOverlay /> */}
 
     <div id="app-root">
+    
+      
       <div className="toolbar-root">     {/* new same-container wrapper */}
      <Toolbar 
         addObject={addObject}
@@ -414,9 +447,39 @@ function LoadingOverlay() {
         slicePlane={slicePlane}
         slicePos={slicePos} setSlicePos={setSlicePos}
         slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
+        dockedWindows={dockedWindows}
+        onDock={handleDock}
+        onEnsureActive={(callback) => setEnsureActiveCallback(() => callback)}
+        undockPositions={undockPositions}
        />
        
        </div>
+
+        {/* Docker sidebar on the left */}
+      <DockSidebar
+        dockedWindows={dockedWindows}
+        onUndock={handleUndock}
+        tabOrder={tabOrder}
+        setTabOrder={setTabOrder}
+        testChargeProps={{
+          addObject,
+          updatePosition,
+          sceneObjects,
+          counts,
+        }}
+        slicerProps={{
+          useSlice,
+          setUseSlice,
+          showSliceHelper: showSlicePlaneHelper,
+          setShowSliceHelper: setShowSlicePlaneHelper,
+          slicePlane,
+          setSlicePlane,
+          slicePos,
+          setSlicePos,
+          slicePlaneFlip,
+          setSlicePlaneFlip,
+        }}
+      />
        <div id="canvas-container">
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
         <CreateButtons

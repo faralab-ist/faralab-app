@@ -22,14 +22,35 @@ export default function Toolbar({
   showSliceHelper, setShowSliceHelper,
   slicePlane, setSlicePlane,
   slicePos, setSlicePos,
-  slicePlaneFlip, setSlicePlaneFlip
+  slicePlaneFlip, setSlicePlaneFlip,
+  
+  // Docker props
+  dockedWindows,
+  onDock,
+  onEnsureActive, // Callback to ensure a window is in activePopups
+  undockPositions, // Positions for undocked windows
 }) {
   // State: An array of strings, e.g., ['Slice', 'TestCharge']
   const [activePopups, setActivePopups] = useState([])
 
+  // Expose function to add window to activePopups
+  React.useEffect(() => {
+    if (onEnsureActive) {
+      onEnsureActive((windowName) => {
+        setActivePopups(prev => {
+          if (!prev.includes(windowName)) {
+            return [...prev, windowName];
+          }
+          return prev;
+        });
+      });
+    }
+  }, [onEnsureActive]);
+
   // Toggle logic: Add if missing, remove if present
   const handleClick = (name, e) => {
     if (e) e.preventDefault()
+    
     setActivePopups((prev) =>
       prev.includes(name)
         ? prev.filter(item => item !== name)
@@ -61,19 +82,19 @@ export default function Toolbar({
 
       <div className="tb-group">
         <button
-          className={`tb-btn ${activePopups.includes('TestCharge') ? 'active' : ''}`}
+          className={`tb-btn ${activePopups.includes('TestCharge') || dockedWindows?.TestCharge ? 'active' : ''}`}
           onClick={(e) => handleClick('TestCharge', e)}
           title="TestCharge"
-          aria-pressed={activePopups.includes('TestCharge')}
+          aria-pressed={activePopups.includes('TestCharge') || dockedWindows?.TestCharge}
         >
           <img className="tb-icon" src={TestCharge} alt="" />
         </button>
 
         <button
-          className={`tb-btn ${activePopups.includes('Slice') ? 'active' : ''}`}
+          className={`tb-btn ${activePopups.includes('Slice') || dockedWindows?.Slice ? 'active' : ''}`}
           onClick={(e) => handleClick('Slice', e)}
           title="Slice"
-          aria-pressed={activePopups.includes('Slice')}
+          aria-pressed={activePopups.includes('Slice') || dockedWindows?.Slice}
         >
           <img className="tb-icon" src={Slice} alt="" />
         </button>
@@ -99,13 +120,18 @@ export default function Toolbar({
 
       {/* Render a Window for EVERY active tool in the list.
          The ToolbarPopup component handles the positioning and content.
+         Only render popups that are NOT docked.
       */}
-      {activePopups.map((popupId) => (
+      {activePopups
+        .filter(popupId => !dockedWindows?.[popupId])
+        .map((popupId) => (
         <ToolbarPopup
           key={popupId}
           id={popupId}
           onClose={() => handleClick(popupId)} // Passing the toggle function to close it
           popupProps={sharedPopupProps}
+          onDock={onDock}
+          undockPosition={undockPositions?.[popupId]}
         />
       ))}
 
