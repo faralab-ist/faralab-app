@@ -1,12 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import ToolbarPopup from './ToolbarPopup/ToolbarPopup'
+import CreativeObjectsMenu from './CreativeObjectsMenu'
+import PresetsMenu from './PresetsMenu'
 import './Toolbar.css'
 import RecordingButtons from '../RecordingButtons/RecordingButtons'
 import TestCharge from '../../../assets/lowercase_q2.svg'
 import Slice from '../../../assets/slice.svg'
 import Edit from '../../../assets/edit.svg'
 import Clean from '../../../assets/clean.svg'
-import EFieldIcon from '../../../assets/efield.svg'
+import FieldViewIcon from '../../../assets/field_view.svg'
+import PresetIcon from '../../../assets/preset.svg'
+import GaussianIcon from '../../../assets/gaussian_surface.svg'
 
 
 
@@ -55,10 +59,21 @@ export default function Toolbar({
 
   // Gaussian Props (to be passed down to Gaussian Popup)
   showOnlyGaussianField,
-  setOnlyGaussianField
+  setOnlyGaussianField,
+
+  // Presets Props
+  onApplyPreset,
+  camera,
+  settings
 }) {
   // State: An array of strings, e.g., ['Slice', 'TestCharge']
   const [activePopups, setActivePopups] = useState([])
+  // State for presets menu visibility
+  const [presetsMenuVisible, setPresetsMenuVisible] = useState(false)
+  
+  // Refs for click outside detection
+  const presetsBtnRef = useRef(null)
+  const presetsMenuRef = useRef(null)
 
   // Toggle logic: Add if missing, remove if present
   const handleClick = (name, e) => {
@@ -69,6 +84,36 @@ export default function Toolbar({
         : [...prev, name]
     )
   }
+
+  // Close presets menu when clicking outside
+  useEffect(() => {
+    if (!presetsMenuVisible) return
+
+    const handleClickOutside = (e) => {
+      // Don't close if clicking the button itself or inside the menu
+      if (
+        presetsBtnRef.current?.contains(e.target) ||
+        presetsMenuRef.current?.contains(e.target)
+      ) {
+        return
+      }
+      setPresetsMenuVisible(false)
+    }
+
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') {
+        setPresetsMenuVisible(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [presetsMenuVisible])
 
   const handleClearCanvas = () => { setSceneObjects?.([]) }
 
@@ -110,7 +155,9 @@ export default function Toolbar({
     setWaveDuration,
     // Gaussian props
     showOnlyGaussianField,
-    setOnlyGaussianField
+    setOnlyGaussianField,
+    creativeMode,
+    setSceneObjects
   }
 
   return (
@@ -123,10 +170,10 @@ export default function Toolbar({
         <button
           className={`tb-btn ${activePopups.includes('EField') ? 'active' : ''}`}
           onClick={(e) => handleClick('EField', e)}
-          title="Electric Field"
+          title="Field View"
           aria-pressed={activePopups.includes('EField')}
         >
-          <img className="tb-icon" src={EFieldIcon} alt="" />
+          <img className="tb-icon" src={FieldViewIcon} alt="" />
         </button>
 
         <button
@@ -135,7 +182,7 @@ export default function Toolbar({
           title="Gaussian Surfaces"
           aria-pressed={activePopups.includes('Gaussian')}
         >
-          <span style={{ fontWeight: 800, fontSize: 12, lineHeight: 1 }}>G</span>
+          <img className="tb-icon" src={GaussianIcon} alt="" />
         </button>
 
         <button
@@ -156,6 +203,18 @@ export default function Toolbar({
           <img className="tb-icon" src={Slice} alt="" />
         </button>
 
+        <div className="tb-divider"></div>
+
+        <button
+          ref={presetsBtnRef}
+          className={`tb-btn ${presetsMenuVisible ? 'active' : ''}`}
+          onClick={() => setPresetsMenuVisible(v => !v)}
+          title="Presets"
+          aria-pressed={presetsMenuVisible}
+        >
+          <img className="tb-icon" src={PresetIcon} alt="" />
+        </button>
+
         <button
           className={`tb-btn ${creativeMode ? 'active' : ''}`}
           onClick={() => setCreativeMode(v => !v)}
@@ -164,16 +223,15 @@ export default function Toolbar({
         >
           <img className="tb-icon" src={Edit} alt="" />
         </button>
-
-        <button
-          className={`tb-btn`}
-          onClick={() => handleClearCanvas()}
-          title="Clear canvas"
-        >
-          <img className="tb-icon" src={Clean} alt="" />
-        </button>
-
       </div>
+
+      <button
+        className={`tb-btn tb-btn-right`}
+        onClick={() => handleClearCanvas()}
+        title="Clear canvas"
+      >
+        <img className="tb-icon" src={Clean} alt="" />
+      </button>
 
       {/* Render a Window for EVERY active tool in the list.
          The ToolbarPopup component handles the positioning and content.
@@ -186,6 +244,23 @@ export default function Toolbar({
           popupProps={sharedPopupProps}
         />
       ))}
+
+      {/* Creative Objects Menu - appears below toolbar when creative mode is active */}
+      <CreativeObjectsMenu 
+        addObject={addObject}
+        isVisible={creativeMode}
+      />
+
+      {/* Presets Menu - appears below toolbar when P button is active */}
+      <div ref={presetsMenuRef}>
+        <PresetsMenu 
+          isVisible={presetsMenuVisible}
+          onApplyPreset={onApplyPreset}
+          sceneObjects={sceneObjects}
+          camera={camera}
+          settings={settings}
+        />
+      </div>
 
     </div>
   )

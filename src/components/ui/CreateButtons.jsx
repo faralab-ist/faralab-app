@@ -118,18 +118,18 @@ export default function CreateButtons({
 
   return (
     <>
-      {/* Presets (não deslocar) */}
-      <button
+      {/* Presets button - COMMENTED OUT (now using toolbar button P) */}
+      {/* <button
         ref={presetBtnRef}
         className="presets-btn"
         onClick={() => toggleGroup('presets')}
         aria-expanded={openGroup === 'presets'}
       >
         PRESETS
-      </button>
+      </button> */}
 
-      {/* Presets dropdown (não desloca) */}
-      {openGroup === 'presets' && (
+      {/* Presets dropdown - COMMENTED OUT (now using toolbar button P) */}
+      {/* {openGroup === 'presets' && (
         <div ref={panelRef} className="preset-dropdown tl" role="menu" aria-label="Presets">
           <div className="expanded-panel">
             <button onClick={() => loadPreset('monopole')}>Monopole</button>
@@ -151,11 +151,10 @@ export default function CreateButtons({
             </div>
           </div>
         </div>
-      )}
-
-      <div className="create-buttons-container">
-
-        {/* Field objects — NÃO deslocar */}
+      )} */}
+      
+      {/* Field objects menu - COMMENTED OUT (now using CreativeObjectsMenu in toolbar) */}
+      {/* <div className="create-buttons-container">
         {creativeMode && (
           <div className="field-objects">
             <h4>Field Objects</h4>
@@ -168,15 +167,10 @@ export default function CreateButtons({
               <button onClick={() => addObject('ringCoil', { position: [0,0,0] }) }>Add Ring Coil</button>
               <button onClick={() => addObject('polygonCoil', { position: [0,0,0]}) }>Add Polygon Coil</button>
               <button onClick={() => addObject('testPointCharge', { position: [0,0,0] })}>Add Test Charge</button>
-
-           {/*    <button onClick={() => addObject('concentricSpheres', { position: [0,0,0] })}>Add Concentric Sphere System</button>
-              <button onClick={() => addObject('concentricInfWires', { position: [0,0,0] })}>Add Concentric Infinite Wire System</button>
-              <button onClick={() => addObject('stackedPlanes', { position: [0,0,0] })}>Add Stacked Planes</button> */} 
             </div>
           </div>
         )}
-      </div>
-
+      </div> */}
       <ExportDialog
         isOpen={showExportDialog}
         onClose={() => setShowExportDialog(false)}

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback } from 'react'
 import './RecordingButtons.css'
+import VideoRecordIcon from '../../../assets/video_record.svg'
 
 export default function RecordingButtons() {
   const [isRecordingVideo, setIsRecordingVideo] = useState(false)
@@ -229,11 +230,11 @@ export default function RecordingButtons() {
         onClick={isRecordingVideo ? stopVideoRecording : startVideoRecording}
         title={isRecordingVideo ? 'Parar gravação de vídeo' : 'Gravar vídeo'}
       >
-        <span className="rec-icon">{isRecordingVideo ? '⏹' : '🎥'}</span>
-        <span className="rec-label">
-          {isRecordingVideo ? 'Parar' : 'Vídeo'}
-        </span>
-        {isRecordingVideo && <span className="rec-indicator" />}
+        {isRecordingVideo ? (
+          <span className="rec-stop-icon" />
+        ) : (
+          <img className="rec-icon-svg" src={VideoRecordIcon} alt="" />
+        )}
       </button>
 
       {/* Botão de GIF */}

@@ -440,6 +440,20 @@ function LoadingOverlay() {
         // Gaussian Props
         showOnlyGaussianField={showOnlyGaussianField}
         setOnlyGaussianField={setShowOnlyGaussianField}
+        // Presets Props
+        onApplyPreset={applyPreset}
+        camera={cameraState}
+        settings={{
+          vectorMinTsl,
+          vectorScale,
+          vectorStep,
+          lineMin,
+          lineNumber,
+          showField,
+          showLines,
+          showEquipotentialSurface,
+          showOnlyGaussianField
+        }}
        />
        
        </div>

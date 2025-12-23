@@ -156,11 +156,11 @@ export default function SettingsButtons({
     <>
       <div ref={rootRef} className="settings-buttons-root horizontal">
 
-        {/* FieldView button (replaces separate E-Field / Potential buttons) */}
-        <div className="settings-group">
+        {/* FieldView button - COMMENTED OUT (now using toolbar EField button) */}
+        {/* <div className="settings-group">
           <button
             className={`settings-main big ${open === 'fieldview' ? 'open' : ''} ${fieldButtonDisabled ? 'disabled' : ''}`}
-            onClick={() => { if (fieldButtonDisabled) return; toggle('fieldview'); /* keep last selected tab */ }}
+            onClick={() => { if (fieldButtonDisabled) return; toggle('fieldview'); }}
             disabled={fieldButtonDisabled}
             aria-disabled={fieldButtonDisabled}
             title={fieldButtonDisabled ? "There's no electric field in the scene" : 'Field View'}
@@ -169,8 +169,7 @@ export default function SettingsButtons({
           </button>
 
           {open === 'fieldview' && (
-            <div className="settings-panel up fieldview-panel">   {/* single container */}
-              {/* Tabs header */}
+            <div className="settings-panel up fieldview-panel">
               <div className="fieldview-tabs" style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
                 <button
                   className={`fieldview-tab ${fieldTab === 'efield' ? 'active' : ''}`}
@@ -186,11 +185,10 @@ export default function SettingsButtons({
                 </button>
               </div>
 
-              {/* Tab content — inline (no separate popover) */}
               <div className="fieldview-content" style={{ paddingBottom: 8 }}>
                 {fieldTab === 'efield' && (
                   <EfieldButtons
-                    inline={true}                      // <--- render inline
+                    inline={true}
                     hasField={hasField}
                     hasBField={hasBField}
                     showBField={showBField}
@@ -220,7 +218,7 @@ export default function SettingsButtons({
 
                 {fieldTab === 'potential' && (
                   <PotButtons
-                    inline={true}                      // <--- render inline
+                    inline={true}
                     onToggleEquipotentialSurface={onToggleEquipotentialSurface}
                     showEquipotentialSurface={showEquipotentialSurface}
                     potentialTarget={potentialTarget}
@@ -230,15 +228,15 @@ export default function SettingsButtons({
               </div>
               <div className="separator" />
 
-              {/* Plane buttons are constant at the bottom of the FieldView panel */}
               <div className="fieldview-plane-bottom" style={{ marginTop: 0 }}>
                 <PlaneButtons activePlane={activePlane} onPlaneSelect={onPlaneSelect} />
               </div>
             </div>
           )}
-        </div>
+        </div> */}
 
-        <div className="settings-group">
+        {/* Gaussian button - COMMENTED OUT (now using toolbar Gaussian button) */}
+        {/* <div className="settings-group">
           <button
             className={`settings-main big ${open === 'gaussian' ? 'open' : ''}`}
             onClick={() => toggle('gaussian')}
@@ -277,7 +275,6 @@ export default function SettingsButtons({
                 </button>
               </div>
 
-              {/* separator between Gaussian surface buttons and Flux control */}
               <div className="gaussian-sep" />
 
               <div className={`flux-button-row ${anyGaussian ? '' : 'disabled'}`}>
@@ -294,7 +291,7 @@ export default function SettingsButtons({
             </div>
             
           )}
-        </div>
+        </div> */}
       </div>
 
     </>

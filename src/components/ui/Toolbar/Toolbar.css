@@ -130,3 +130,9 @@
 .tb-spacer {
   flex: 0;
 }
+
+/* Button positioned on the right side of toolbar */
+.tb-btn-right {
+  margin-left: auto;
+  margin-right: 10px;
+}
