@@ -363,16 +363,16 @@ export default function ObjectItem({
             {/* Charged Sphere */}
             {obj.type === "chargedSphere" && (
               <div className="detail-row">
-                <div className="detail-key">Intensity C</div>
+                <div className="detail-key">Volume Density ρ</div>
                 <div className="detail-value">
                   <InlineDecimalInput
-                    initialValue={obj.charge ?? 0}
+                    initialValue={obj.charge_density ?? 0}
                     min={VAL_MIN}
                     max={VAL_MAX}
                     step={0.01}
                     onChange={(v) => {
                       const safe = clampWithError(v, VAL_MIN, VAL_MAX);
-                      updateObject(obj.id, { charge: safe });
+                      updateObject(obj.id, { charge_density: safe });
                     }}
                   />
                 </div>
@@ -412,6 +412,20 @@ export default function ObjectItem({
                       const safe = clampWithError(v, VAL_MIN, VAL_MAX);
                       updateObject(obj.id, { charge_density: safe });
                     }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Show Label toggle for objects with labels (not surfaces) */}
+            {(obj.type === "charge" || obj.type === "wire" || obj.type === "plane" || obj.type === "chargedSphere" || obj.type === "path" || obj.type === "testPointCharge" || obj.type === "coil") && (
+              <div className="detail-row">
+                <div className="detail-key">Show Label</div>
+                <div className="detail-value">
+                  <input
+                    type="checkbox"
+                    checked={obj.showLabel ?? true}
+                    onChange={(e) => updateObject(obj.id, { showLabel: e.target.checked })}
                   />
                 </div>
               </div>

@@ -1,11 +1,10 @@
 import React, { useMemo, useEffect } from 'react'
 import * as THREE from 'three'
-import { Html } from '@react-three/drei'
 import BaseCharge from './BaseCharge'
 import calculateFieldAtPoint from '../../../utils/calculateField'
-import './TestCharge.css'
+import Label from '../../ui/labels/Label'
 
-export default function TestCharge({ eFieldValue = 0, eFieldDirection = [0, 0, 0], position = [0, 0, 0], sceneObjects, updateObject, ...props }) {
+export default function TestCharge({position = [0, 0, 0], sceneObjects, updateObject, showLabel = true, ...props }) {
   
   // Fixed visuals for a test charge - subtle glow to prevent recording bloom
   const visuals = useMemo(() => ({
@@ -54,22 +53,18 @@ export default function TestCharge({ eFieldValue = 0, eFieldDirection = [0, 0, 0
         type="testPointCharge"
       />
       
-      {/* Floating Nametag */}
-      <Html
-        position={[position[0], position[1] + 0.5, position[2]]}
-        center
-        distanceFactor={8}
-        style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        <div className="test-charge-label">
-          <div className="test-charge-magnitude">
-            E = {efieldMagnitude.toExponential(2)} N/C
-          </div>
-          <div className="test-charge-direction">
-            dir: {`(${efieldDirection.map(v => v.toFixed(2)).join(', ')})`}
-          </div>
-        </div>
-      </Html>
+      {showLabel && (
+        <Label
+          position={position}
+          name="E-field Info"
+          value={[
+            `E = ${efieldMagnitude.toExponential(2)} N/C`,
+            `dir: (${efieldDirection.map(v => v.toFixed(2)).join(', ')})`
+          ]}
+          offsetY={0.5}
+          distanceFactor={8}
+        />
+      )}
     </group>
   )
 }

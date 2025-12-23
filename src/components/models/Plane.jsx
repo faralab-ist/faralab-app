@@ -2,6 +2,7 @@ import React, { useRef, useLayoutEffect, useEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
+import Label from '../ui/labels/Label'
 
 
 function Plane({ 
@@ -22,6 +23,7 @@ function Plane({
   rotation,
   quaternion,
   isHovered,
+  showLabel = true,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -133,6 +135,15 @@ function Plane({
       scale={0.86}
       lineWidth={2.5}
     >
+      {showLabel && (
+        <Label
+          position={position}
+          name="Surface Density"
+          value={`${charge_density.toExponential(2)} C/m²`}
+          offsetY={0.5}
+          distanceFactor={10}
+        />
+      )}
       <mesh
         ref={meshRef}
         rotation={baseEuler}               // lay plane flat

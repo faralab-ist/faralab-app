@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react'
 import * as THREE from 'three'
 import BaseCharge from './BaseCharge'
+import Label from '../../ui/labels/Label'
 
-export default function Charge({ charge, ...props }) {
+export default function Charge({ charge, position = [0, 0, 0], showLabel = true, ...props }) {
   const radius = props.radius
   const { glowColor, glowString, visualScale, visualOpacity } = useMemo(() => {
     const sign = charge >= 0 ? 1 : -1
@@ -21,14 +22,26 @@ export default function Charge({ charge, ...props }) {
   }, [charge, radius])
 
   return (
-    <BaseCharge
-      {...props}
-      baseColor={glowColor}
-      glowString={glowString}
-      visualScale={visualScale}
-      visualOpacity={visualOpacity}
-      hitboxRadius={Math.max(0.3, (radius || 0.2) * 1.5)}
-      type='charge'
-    />
+    <group>
+      <BaseCharge
+        {...props}
+        position={position}
+        baseColor={glowColor}
+        glowString={glowString}
+        visualScale={visualScale}
+        visualOpacity={visualOpacity}
+        hitboxRadius={Math.max(0.3, (radius || 0.2) * 1.5)}
+        type='charge'
+      />
+    {showLabel && (
+      <Label 
+        position={position}
+        name="Charge Intensity"
+        value={`Q = ${charge > 0 ? '+' : ''}${charge} C`}
+        offsetY={0.6}
+       
+      />
+    )}
+    </group>
   )
 }
