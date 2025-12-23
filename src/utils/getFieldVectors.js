@@ -53,7 +53,11 @@ export default function getFieldVectors3(chargedObjects, gridSize=10, step=1, on
       yVals.flatMap(y => 
         zVals.map(z => {
           const position = new THREE.Vector3(x, y, z)
-          return { position, field: calculateFieldAtPoint(chargedObjects, position) }
+          return { 
+            position, 
+            field: calculateFieldAtPoint(chargedObjects, position),
+            sourceObject: null // Grid vectors don't have a specific source
+          }
         })
       )
     ).filter(({field}) => field.length() > minThreshold)
@@ -154,8 +158,13 @@ export default function getFieldVectors3(chargedObjects, gridSize=10, step=1, on
     }
 
     for (const pointVector3 of gridVector3) {
-      const fieldAtPoint = calculateFieldAtPoint(chargedObjects, pointVector3)      
-      fieldVectors.push({ position: pointVector3, field: fieldAtPoint })
+      // Calculate field only from this specific object, not from all objects
+      const fieldAtPoint = calculateFieldAtPoint([obj], pointVector3)      
+      fieldVectors.push({ 
+        position: pointVector3, 
+        field: fieldAtPoint,
+        sourceObject: obj // Track which object generated this vector
+      })
     }
   }
 

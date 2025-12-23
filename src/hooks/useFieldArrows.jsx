@@ -65,7 +65,7 @@ export default function FieldArrows({
             
             // Cache object positions as Vector3
             objectPositionsRef.current = objects.map(obj => 
-                new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z)
+                new THREE.Vector3(...obj.position)
             );
             
             // Build position map for fast lookup
@@ -85,14 +85,23 @@ export default function FieldArrows({
     // Calculate max distance for propagation
     const maxDistance = useMemo(() => {
         let max = 0;
-        for (const {position} of vectors) {
-            // Find distance to nearest object
+        for (const {position, sourceObject} of vectors) {
+            // Find distance to source object (or nearest object if no source)
             let minDistToObject = Infinity;
-            for (const obj of objects) {
-                const objPos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
-                const dist = position.distanceTo(objPos);
-                if (dist < minDistToObject) minDistToObject = dist;
+            
+            if (sourceObject) {
+                // Use the specific source object position
+                const objPos = new THREE.Vector3(...sourceObject.position);
+                minDistToObject = position.distanceTo(objPos);
+            } else {
+                // Fallback: find nearest object (for grid vectors)
+                for (const obj of objects) {
+                    const objPos = new THREE.Vector3(...obj.position);
+                    const dist = position.distanceTo(objPos);
+                    if (dist < minDistToObject) minDistToObject = dist;
+                }
             }
+            
             if (minDistToObject > max) max = minDistToObject;
         }
         return max;
@@ -110,18 +119,26 @@ export default function FieldArrows({
         
         let updated = false;
         
-        // Update vectors inside current radius from any object
+        // Update vectors inside current radius from their source object
         for (const newVector of vectors) {
             const key = `${newVector.position.x.toFixed(2)},${newVector.position.y.toFixed(2)},${newVector.position.z.toFixed(2)}`;
             
             // Skip if already updated
             if (updatedKeysRef.current.has(key)) continue;
             
-            // Find distance to nearest object (cached positions)
+            // Find distance to source object (or nearest object if no source)
             let minDistToObject = Infinity;
-            for (const objPos of objectPositionsRef.current) {
-                const dist = newVector.position.distanceTo(objPos);
-                if (dist < minDistToObject) minDistToObject = dist;
+            
+            if (newVector.sourceObject) {
+                // Use the specific source object position
+                const objPos = new THREE.Vector3(...newVector.sourceObject.position);
+                minDistToObject = newVector.position.distanceTo(objPos);
+            } else {
+                // Fallback: find nearest object (for grid vectors)
+                for (const objPos of objectPositionsRef.current) {
+                    const dist = newVector.position.distanceTo(objPos);
+                    if (dist < minDistToObject) minDistToObject = dist;
+                }
             }
             
             // Update if inside radius
