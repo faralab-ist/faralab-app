@@ -19,16 +19,13 @@ export function showMagVectorField(chargedObjects, gridSize = 10, step = 1, show
 
         const targetPos = new THREE.Vector3(x, y, z)
         const fieldAtPoint = calculateMagFieldAtPoint(chargedObjects, targetPos)
-        if (fieldAtPoint.length() > minThreshold) {
-          fieldVectors.push({ position: targetPos, field: fieldAtPoint })
-        }
+        if (fieldAtPoint.length() > minThreshold) fieldVectors.push({ position: targetPos, field: fieldAtPoint })
       }
     }
   }
   return fieldVectors
 }
 
-// Helper: gera grid retangular 2D
 function makeRectGrid(width, height, count) {
   const aspect = Math.max(0.0001, width / height)
   const cols = Math.ceil(Math.sqrt(count * aspect))
@@ -38,22 +35,23 @@ function makeRectGrid(width, height, count) {
   for (let i = 0; i < rows; i++) {
     for (let j = 0; j < cols; j++) {
       if (points.length >= count) break
-      const x = (-width / 2) + (j + 0.5) * (width / cols)
-      const y = (-height / 2) + (i + 0.5) * (height / rows)
+      const x = -width / 2 + (j + 0.5) * (width / cols)
+      const y = -height / 2 + (i + 0.5) * (height / rows)
       points.push([x, y])
     }
   }
   return points
 }
 
-// Helper: distribui samples proporcionalmente por área
 function allocateSamplesByArea(areas, totalSamples) {
   const totalArea = areas.reduce((s, a) => s + a, 0) || 1
   const exact = areas.map((a) => (a / totalArea) * totalSamples)
   const counts = exact.map(Math.floor)
   let allocated = counts.reduce((s, v) => s + v, 0)
 
-  const rem = exact.map((v, i) => ({ frac: v - counts[i], i })).sort((a, b) => b.frac - a.frac)
+  const rem = exact
+    .map((v, i) => ({ frac: v - counts[i], i }))
+    .sort((a, b) => b.frac - a.frac)
   let ri = 0
   while (allocated < totalSamples && ri < rem.length) {
     counts[rem[ri++].i]++
@@ -62,36 +60,13 @@ function allocateSamplesByArea(areas, totalSamples) {
   return counts
 }
 
-function fibonacciSpherePoints(count, radius = 1) {
-  if (count <= 0) return []
-  if (count === 1) return [new THREE.Vector3(0, 0, 0)]
-  const points = []
-  const offset = 2 / count
-  const increment = Math.PI * (3 - Math.sqrt(5))
-  for (let i = 0; i < count; i++) {
-    const y = ((i * offset) - 1) + (offset / 2)
-    const r = Math.sqrt(Math.max(0, 1 - y * y))
-    const phi = i * increment
-    const x = Math.cos(phi) * r
-    const z = Math.sin(phi) * r
-    points.push(new THREE.Vector3(x * radius, y * radius, z * radius))
-  }
-  return points
-}
-
-/**
- * Default export to match existing imports:
- *   import getFieldVector3 from '../utils/getFieldVectors.js'
- */
 export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1, onlyGaussianField = false, minThreshold = 0, planeFilter = null) {
-  const fieldVectors = []
-  const objs = Array.isArray(chargedObjects) ? chargedObjects : []
   const threshold = minThreshold ?? 0
+  const objs = Array.isArray(chargedObjects) ? chargedObjects : []
 
   if (!onlyGaussianField) {
     const nSteps = Math.floor(gridSize / step)
     const range = (n) => Array.from({ length: 2 * n + 1 }, (_, i) => (i - n) * step)
-
     const xVals = planeFilter === 'yz' ? [0] : range(nSteps)
     const yVals = planeFilter === 'xz' ? [0] : range(nSteps)
     const zVals = planeFilter === 'xy' ? [0] : range(nSteps)
@@ -107,6 +82,8 @@ export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1,
       )
       .filter(({ field }) => field.length() > threshold)
   }
+
+  const fieldVectors = []
 
   for (const obj of objs) {
     if (!obj || obj.type !== 'surface') continue
@@ -131,7 +108,7 @@ export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1,
 
         if (lateralCount > 0) {
           const circumference = 2 * Math.PI * radius
-          const cols = Math.max(1, Math.ceil(Math.sqrt(lateralCount * circumference / Math.max(0.0001, length))))
+          const cols = Math.max(1, Math.ceil(Math.sqrt((lateralCount * circumference) / Math.max(0.0001, length))))
           const rows = Math.max(1, Math.ceil(lateralCount / cols))
           for (let ri = 0; ri < rows && gridVector3.length < sampleCount; ri++) {
             for (let ci = 0; ci < cols && gridVector3.length < sampleCount; ci++) {
@@ -174,7 +151,6 @@ export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1,
         ]
         const areas = faces.map((f) => f.uSize * f.vSize)
         const counts = allocateSamplesByArea(areas, sampleCount)
-
         faces.forEach((f, i) => {
           if (counts[i] <= 0) return
           const grid = makeRectGrid(f.uSize, f.vSize, counts[i])
@@ -202,4 +178,21 @@ export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1,
   }
 
   return fieldVectors
+}
+
+function fibonacciSpherePoints(count, radius = 1) {
+  if (count <= 0) return []
+  if (count === 1) return [new THREE.Vector3(0, 0, 0)]
+  const points = []
+  const offset = 2 / count
+  const increment = Math.PI * (3 - Math.sqrt(5))
+  for (let i = 0; i < count; i++) {
+    const y = i * offset - 1 + offset / 2
+    const r = Math.sqrt(Math.max(0, 1 - y * y))
+    const phi = i * increment
+    const x = Math.cos(phi) * r
+    const z = Math.sin(phi) * r
+    points.push(new THREE.Vector3(x * radius, y * radius, z * radius))
+  }
+  return points
 }
