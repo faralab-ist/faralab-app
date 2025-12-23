@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import ToolbarPopup from './ToolbarPopup/ToolbarPopup'
 import './Toolbar.css'
 import RecordingButtons from '../RecordingButtons/RecordingButtons'
@@ -6,6 +6,8 @@ import TestCharge from '../../../assets/lowercase_q2.svg'
 import Slice from '../../../assets/slice.svg'
 import Edit from '../../../assets/edit.svg'
 import Clean from '../../../assets/clean.svg'
+import FullscreenIcon from '../../../assets/fullscreen.svg'
+import ExitFullscreenIcon from '../../../assets/exit-fullscreen.svg'
 
 export default function Toolbar({
   creativeMode,
@@ -26,6 +28,17 @@ export default function Toolbar({
 }) {
   // State: An array of strings, e.g., ['Slice', 'TestCharge']
   const [activePopups, setActivePopups] = useState([])
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  // Track fullscreen state
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
 
   // Toggle logic: Add if missing, remove if present
   const handleClick = (name, e) => {
@@ -38,6 +51,16 @@ export default function Toolbar({
   }
 
   const handleClearCanvas = () => { setSceneObjects?.([]) }
+
+  const handleFullscreenToggle = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.error('Error attempting to enable fullscreen:', err)
+      })
+    } else {
+      document.exitFullscreen()
+    }
+  }
 
   // Bundle props to pass to popups
   // (The popup component decides which ones it needs based on its ID)
@@ -94,6 +117,16 @@ export default function Toolbar({
         >
           <img className="tb-icon" src={Clean} alt="" />
         </button>
+
+         {/* Maybe not needed, as fullscreen is browser-handled?
+         <button
+          className={`tb-btn ${isFullscreen ? 'active' : ''}`}
+          onClick={handleFullscreenToggle}
+          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          aria-pressed={isFullscreen}
+        >
+          <img className="tb-icon" src={isFullscreen ? ExitFullscreenIcon : FullscreenIcon} alt="" />
+        </button>*/}
 
       </div>
 

@@ -1,20 +1,20 @@
 .settings-buttons-root {
   position: fixed;
-  left: 20px;
-  bottom: 20px;
+  left: clamp(20px, 1.25rem, 26px);
+  bottom: clamp(20px, 1.25rem, 26px);
   display: flex;
   flex-direction: column-reverse; /* bottom-up stacking visual */
-  gap: 10px;
+  gap: clamp(10px, 0.625rem, 13px);
   z-index: 1200;
 }
 
 .settings-buttons-root.horizontal {
   position: fixed;
-  left: 20px;
-  bottom: 20px;
+  left: clamp(20px, 1.25rem, 26px);
+  bottom: clamp(20px, 1.25rem, 26px);
   display: flex;
   flex-direction: row;
-  gap: 14px;
+  gap: clamp(14px, 0.875rem, 18px);
   z-index: 1200;
 }
 
@@ -25,12 +25,12 @@
 .settings-main.big {
   color: #ffffff;
   border: 1px solid #3a3a3a;
-  padding: 8px 18px;
+  padding: clamp(8px, 0.5rem, 10px) clamp(18px, 1.125rem, 22px);
   border-radius: 9999px;
   cursor: pointer;
   font-size: 0.85rem;            /* match */
   letter-spacing: .5px;
-  min-width: 130px;
+  min-width: clamp(130px, 8.125rem, 160px);
   text-align: left;
   /*transition: background .18s, border-color .18s, color .18s; TODO changed*/
   transition: border-color .18s, color .18s;
@@ -68,17 +68,17 @@
 .gaussian-panel,
 .slicing-panel {
   position: absolute;
-  bottom: calc(100% + 10px);
+  bottom: calc(100% + clamp(10px, 0.625rem, 13px));
   left: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: clamp(10px, 0.625rem, 13px);
   background: rgba(15,15,15,0.94);
   border: 1px solid #2e2e2e;
-  padding: 14px;
-  border-radius: 12px;
-  width: 300px;                
-  backdrop-filter: blur(6px);
+  padding: clamp(14px, 0.875rem, 18px);
+  border-radius: clamp(12px, 0.75rem, 15px);
+  width: clamp(300px, 18.75rem, 370px);                
+  backdrop-filter: blur(clamp(6px, 0.375rem, 8px));
   animation: panelFade .18s ease-out;
 }
 
@@ -97,7 +97,7 @@
   background: #1a1a1a;
   color: white;
   border: 1px solid #333;
-  padding: 8px 12px;
+  padding: clamp(8px, 0.5rem, 10px) clamp(12px, 0.75rem, 15px);
   font-size: 0.9rem;            /* match */
   border-radius: 4px;
   text-align: left;
