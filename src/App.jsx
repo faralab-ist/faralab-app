@@ -442,6 +442,16 @@ function LoadingOverlay() {
             showOnlyGaussianField
           }}
         />
+        <div className="field-legend" aria-label="Field color legend">
+          <div className="legend-row">
+            <span className="legend-swatch legend-electric" />
+            <span className="legend-label">Eletric Field</span>
+          </div>
+          <div className="legend-row">
+            <span className="legend-swatch legend-magnetic" />
+            <span className="legend-label">Magnetic Field</span>
+          </div>
+        </div>
 
 
        {/* <ObjectPopup

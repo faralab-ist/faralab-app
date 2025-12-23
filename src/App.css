@@ -77,3 +77,42 @@ button {
 button:hover {
   background-color: #30c6ec;
 }
+
+.field-legend {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #f2f2f2;
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.legend-swatch {
+  width: 28px;
+  height: 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.legend-electric {
+  background: linear-gradient(90deg, #ffd24a 0%, #ff7a00 50%, #ff2d1a 100%);
+}
+
+.legend-magnetic {
+  background: linear-gradient(90deg, #05b2dd 0%, #157cb8 25%, #0859b6 50%, #2f22a3 75%, #4724c7 100%);
+}
