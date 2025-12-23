@@ -118,7 +118,7 @@ export default function CreateButtons({
 
   return (
     <>
-      {/* Presets (não deslocar) */}
+      {/* Presets (não deslocar) 
       <button
         ref={presetBtnRef}
         className="presets-btn"
@@ -127,7 +127,7 @@ export default function CreateButtons({
       >
         PRESETS
       </button>
-
+*/}
       {/* Presets dropdown (não desloca) */}
       {openGroup === 'presets' && (
         <div ref={panelRef} className="preset-dropdown tl" role="menu" aria-label="Presets">

@@ -56,7 +56,7 @@ export default function TestCharge({ eFieldValue = 0, eFieldDirection = [0, 0, 0
       
       {/* Floating Nametag */}
       <Html
-        position={[position[0], position[1] + 0.5, position[2]]}
+        position={[position[0]-0.05, position[1] + 0.25, position[2]]}
         center
         distanceFactor={8}
         style={{ pointerEvents: 'none', userSelect: 'none' }}

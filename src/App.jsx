@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
   import { Canvas, useThree } from '@react-three/fiber'
   import { OrbitControls } from '@react-three/drei'
   import './App.css'
@@ -233,6 +233,10 @@ function LoadingOverlay() {
     }
     
 
+    // Memoize onEnsureActive to prevent infinite loop in Toolbar's useEffect
+    const handleEnsureActive = useCallback((callback) => {
+      setEnsureActiveCallback(() => callback);
+    }, []);
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -449,7 +453,7 @@ function LoadingOverlay() {
         slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
         dockedWindows={dockedWindows}
         onDock={handleDock}
-        onEnsureActive={(callback) => setEnsureActiveCallback(() => callback)}
+        onEnsureActive={handleEnsureActive}
         undockPositions={undockPositions}
        />
        
@@ -646,7 +650,7 @@ function LoadingOverlay() {
             key={`arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
     }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
         objects={sceneObjects}
-        showOnlyGaussianField={showOnlyGaussianField}s
+        showOnlyGaussianField={showOnlyGaussianField}
         minThreshold={vectorMinTsl}
         scaleMultiplier={vectorScale}
         step={1 / (Number(vectorStep))} 

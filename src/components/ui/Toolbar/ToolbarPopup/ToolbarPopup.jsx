@@ -67,9 +67,10 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
       const isOverDock = ev.clientX < 320 && ev.clientY > 0
       setIsDragOverDock(isOverDock)
       
-      // Toggle drag-over class on docker sidebar
+      // Toggle drag-active and drag-over classes on docker sidebar
       const dockElement = document.querySelector('.dock-sidebar')
       if (dockElement) {
+        dockElement.classList.add('drag-active')
         if (isOverDock) {
           dockElement.classList.add('drag-over')
         } else {
@@ -88,10 +89,11 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
         onClose?.() // Close the floating popup
       }
       
-      // Clean up drag-over class
+      // Clean up drag classes
       const dockElement = document.querySelector('.dock-sidebar')
       if (dockElement) {
         dockElement.classList.remove('drag-over')
+        dockElement.classList.remove('drag-active')
       }
       setIsDragOverDock(false)
     }
@@ -115,6 +117,12 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
     dragRef.current.startY = ev.clientY
     dragRef.current.origX = pos.left
     dragRef.current.origY = pos.top
+    
+    // Add drag-active class when starting to drag
+    const dockElement = document.querySelector('.dock-sidebar')
+    if (dockElement) {
+      dockElement.classList.add('drag-active')
+    }
   }
 
   const renderContent = () => {

@@ -23,6 +23,7 @@ export default function DockSidebar({
 }) {
   const [draggedTab, setDraggedTab] = useState(null);
   const [dragOverTab, setDragOverTab] = useState(null);
+  const [dropPosition, setDropPosition] = useState(null); // 'before' or 'after'
   const [expandedWindows, setExpandedWindows] = useState({ TestCharge: true, Slice: true }); // Track which windows are expanded
   
   // Get list of docked window names in user-defined order
@@ -36,36 +37,65 @@ export default function DockSidebar({
     setExpandedWindows(prev => ({ ...prev, [windowName]: !prev[windowName] }));
   };
 
+  const shouldShowDropLine = (windowName, position) => {
+    if (!draggedTab || !dragOverTab) return false;
+    
+    // Don't show line if it's the same position where the item already is
+    const currentIdx = tabOrder.indexOf(draggedTab);
+    const targetIdx = tabOrder.indexOf(windowName);
+    
+    if (position === 'before' && currentIdx === targetIdx - 1) return false;
+    if (position === 'after' && currentIdx === targetIdx + 1) return false;
+    if (currentIdx === targetIdx) return false;
+    
+    return true;
+  };
+
   // Tab drag handlers for reordering and undocking
   const handleTabDragStart = (e, windowName) => {
     setDraggedTab(windowName);
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('windowName', windowName);
-    e.dataTransfer.setData('source', 'docker');
   };
 
   const handleTabDragOver = (e, windowName) => {
     e.preventDefault();
     if (draggedTab && draggedTab !== windowName) {
       setDragOverTab(windowName);
+      
+      // Calculate if we should drop before or after this item
+      const rect = e.currentTarget.getBoundingClientRect();
+      const midpoint = rect.top + rect.height / 2;
+      setDropPosition(e.clientY < midpoint ? 'before' : 'after');
     }
   };
 
-  const handleTabDrop = (e, targetName) => {
-    e.preventDefault();
-    if (!draggedTab || draggedTab === targetName) return;
+  const performReorder = () => {
+    if (!draggedTab || !dragOverTab || !dropPosition) return;
 
     const newOrder = [...tabOrder];
     const draggedIdx = newOrder.indexOf(draggedTab);
-    const targetIdx = newOrder.indexOf(targetName);
-
-    // Remove dragged item and insert at target position
     newOrder.splice(draggedIdx, 1);
-    newOrder.splice(targetIdx, 0, draggedTab);
-
+    
+    let insertIdx = newOrder.indexOf(dragOverTab);
+    if (dropPosition === 'after') {
+      insertIdx += 1;
+    }
+    
+    newOrder.splice(insertIdx, 0, draggedTab);
     setTabOrder(newOrder);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (draggedTab !== e.target.closest('.dock-window-header')?.textContent?.trim()) {
+      performReorder();
+    }
+    
     setDraggedTab(null);
     setDragOverTab(null);
+    setDropPosition(null);
   };
 
   const handleTabDragEnd = (e) => {
@@ -84,6 +114,12 @@ export default function DockSidebar({
     
     setDraggedTab(null);
     setDragOverTab(null);
+    setDropPosition(null);
+  };
+
+  const handleContentDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   // Render content for specific window
@@ -101,9 +137,18 @@ export default function DockSidebar({
   return (
     <div className={`dock-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       {/* Docked windows list */}
-      <div className="dock-content">
+      <div 
+        className="dock-content"
+        onDragOver={handleContentDragOver}
+        onDrop={handleDrop}
+      >
         {dockedWindowNames.map((windowName) => (
           <div key={windowName} className="dock-window-section">
+            {/* Drop line indicator above */}
+            {dragOverTab === windowName && dropPosition === 'before' && shouldShowDropLine(windowName, 'before') && (
+              <div className="drop-line" />
+            )}
+            
             {/* Window header - clicking toggles expansion */}
             <div
               className={`dock-window-header ${draggedTab === windowName ? 'dragging' : ''}`}
@@ -111,7 +156,7 @@ export default function DockSidebar({
               draggable
               onDragStart={(e) => handleTabDragStart(e, windowName)}
               onDragOver={(e) => handleTabDragOver(e, windowName)}
-              onDrop={(e) => handleTabDrop(e, windowName)}
+              onDrop={handleDrop}
               onDragEnd={handleTabDragEnd}
             >
               <span className="dock-window-expand">
@@ -135,6 +180,11 @@ export default function DockSidebar({
               <div className="dock-window-content">
                 {renderWindowContent(windowName)}
               </div>
+            )}
+            
+            {/* Drop line indicator below */}
+            {dragOverTab === windowName && dropPosition === 'after' && shouldShowDropLine(windowName, 'after') && (
+              <div className="drop-line" />
             )}
           </div>
         ))}
