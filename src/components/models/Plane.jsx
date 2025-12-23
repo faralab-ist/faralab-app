@@ -126,7 +126,7 @@ function Plane({
 
         // persist quaternion + Euler rotation (radians) so UI stays in sync
         const e = new THREE.Euler().setFromQuaternion(qGroup, 'XYZ')
-        updateObject?.(id, { planeWidth, planeHeight, quaternion: [qGroup.x, qGroup.y, qGroup.z, qGroup.w], rotation: [e.x, e.y, e.z] })
+        updateObject?.(id, { width, height, quaternion: [qGroup.x, qGroup.y, qGroup.z, qGroup.w], rotation: [e.x, e.y, e.z] })
       }}
       onDragEnd={() => {
         isDraggingRef.current = false
@@ -136,8 +136,7 @@ function Plane({
       lineWidth={2.5}
     >
       {showLabel && (
-        <Label
-          position={position}
+        <Label  
           name="Surface Density"
           value={`${charge_density.toExponential(2)} C/m²`}
           offsetY={0.5}

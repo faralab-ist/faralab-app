@@ -219,7 +219,8 @@ export default function Path({
         tangents.push([rotatedTangent.x, rotatedTangent.y, rotatedTangent.z]);
       }
   
-      updateObject?.(id, { charges: rotatedPositions, tangents: tangents });
+      // Store in local state instead of updating parent on every frame
+      setChargePositions(rotatedPositions);
     } else {
   
       // Original behavior for non-rotated paths
@@ -263,11 +264,10 @@ export default function Path({
     >
       {showLabel && (
         <Label
-          position={position}
-          name="Current"
+          
+          name="Electrical Current"
           value={`${electricCurrent.toExponential(2)} A`}
           offsetY={0.5}
-          distanceFactor={10}
         />
       )}
       <group ref={groupRef}>

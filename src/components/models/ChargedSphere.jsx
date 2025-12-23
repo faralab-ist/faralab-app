@@ -14,7 +14,6 @@ export default function Sphere({
   setIsDragging,
   updatePosition,
   updateDirection,
-  updateChargeDensity,
   radius,
   isHollow = false,
   slicePlane,
@@ -96,11 +95,9 @@ export default function Sphere({
     >
       {showLabel && (
         <Label
-          position={position}
           name="Volume Density"
           value={`${charge_density.toExponential(2)} C/m³`}
           offsetY={radius + 0.5}
-          distanceFactor={10}
         />
       )}
       <mesh

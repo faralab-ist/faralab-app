@@ -142,11 +142,9 @@ function Wire({
     >
     {showLabel && (
       <Label
-        position={position}
         name="Linear Density"
         value={`λ = ${charge_density.toExponential(2)} C/m`}
         offsetY={0.5}
-        distanceFactor={8}
       />
     )}
       <group ref={groupRef}>
