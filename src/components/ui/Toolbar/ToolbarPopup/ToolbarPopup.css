@@ -4,7 +4,7 @@
   position: absolute;
   top: calc(50% + 6px);   /* place right below the toolbar */
   left: 8px;               /* align to toolbar left */
-  z-index: 120;
+  z-index: 200;
   width: 300px;            /* fixed width decided in CSS */
   min-width: 240px;
   max-width: 90vw;
@@ -15,6 +15,13 @@
   box-shadow: 0 8px 30px rgba(0,0,0,0.55);
   color: #e6eef6;
   -webkit-font-smoothing: antialiased;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Visual feedback when dragging over dock area */
+.toolbar-popup.drag-to-dock {
+  border-color: rgba(21, 78, 153, 0.9);
+  box-shadow: 0 0 20px rgba(21, 78, 153, 0.5);
 }
 
 /* handle for dragging */

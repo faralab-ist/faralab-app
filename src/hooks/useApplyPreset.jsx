@@ -21,10 +21,17 @@ export default function useApplyPreset({
   // settings setters
   setVectorMinTsl,
   setVectorScale,
+  setVectorStep,
   setLineMin,
   setLineNumber,
   onToggleBField,
-  showBField
+  showBField,
+  // slice setters
+  setSlicePlane,
+  setSlicePos,
+  setUseSlice,
+  setSlicePlaneFlip,
+  setShowSlicePlaneHelper
 }) {
   return useCallback((nameOrPreset, { animate = true, isCustom = false } = {}) => {
     const onCamera = animate ? animateCameraPreset : setCameraPreset
@@ -35,6 +42,7 @@ export default function useApplyPreset({
       if (st.vectorScale  != null) setVectorScale?.(st.vectorScale)
       if (st.lineMin      != null) setLineMin?.(st.lineMin)
       if (st.lineNumber   != null) setLineNumber?.(st.lineNumber)
+      if (st.vectorStep   != null) setVectorStep?.(st.vectorStep)
 
       if (st.showField !== undefined && onToggleField) {
         visProvided.field = true
@@ -56,6 +64,18 @@ export default function useApplyPreset({
         visProvided.equip = true
         if (st.showEquipotentialSurface !== showEquipotentialSurface) onToggleEquipotentialSurface()
       }
+
+      // Slice settings (optional)
+      // if no useSlice settings, default to false
+      if (st.slicePlane !== undefined && setSlicePlane) setSlicePlane(st.slicePlane)
+      if (st.slicePos !== undefined && setSlicePos) setSlicePos(st.slicePos)
+      if (st.useSlice !== undefined && setUseSlice) {
+        setUseSlice(!!st.useSlice)
+      } else if (setUseSlice) {
+        setUseSlice(false)
+      }
+      if (st.slicePlaneFlip !== undefined && setSlicePlaneFlip) setSlicePlaneFlip(!!st.slicePlaneFlip)
+      if (st.showSlicePlaneHelper !== undefined && setShowSlicePlaneHelper) setShowSlicePlaneHelper(!!st.showSlicePlaneHelper)
     }
 
     // Handle custom preset (imported JSON) or preset name
@@ -101,6 +121,8 @@ export default function useApplyPreset({
     showOnlyGaussianField, onToggleOnlyGaussianField,
     showLines, onToggleLines,
     showEquipotentialSurface, onToggleEquipotentialSurface,
-    setVectorMinTsl, setVectorScale, setLineMin, setLineNumber
+    setVectorMinTsl, setVectorScale, setLineMin, setLineNumber,
+    // slice setters deps
+    setSlicePlane, setSlicePos, setUseSlice, setSlicePlaneFlip
   ])
 }
