@@ -57,6 +57,10 @@ export default function Toolbar({
   waveDuration,
   setWaveDuration,
 
+  // BField Props (to be passed down to EField Popup)
+  showBField,
+  onToggleBField,
+
   // Gaussian Props (to be passed down to Gaussian Popup)
   showOnlyGaussianField,
   setOnlyGaussianField,
@@ -174,6 +178,9 @@ export default function Toolbar({
     setWavePropagationEnabled,
     waveDuration,
     setWaveDuration,
+    // BField props
+    showBField,
+    onToggleBField,
     // Gaussian props
     showOnlyGaussianField,
     setOnlyGaussianField,

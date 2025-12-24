@@ -31,7 +31,9 @@ export default function EFieldMenu({
   setWavePropagationEnabled,
   waveDuration,
   setWaveDuration,
-  sceneObjects
+  sceneObjects,
+  showBField,
+  onToggleBField
 }) {
   // Tab state: 'efield' | 'potential'
   const [fieldTab, setFieldTab] = useState('efield')
@@ -51,6 +53,18 @@ export default function EFieldMenu({
         ((o.type === 'concentricSpheres' || o.type === 'concentricInfWires') && o.radiuses?.length !== 0) ||
         (o.type === 'stackedPlanes' && o.charge_densities?.length !== 0)
     })
+  }, [sceneObjects])
+
+  // Check if there's any magnetic field in the scene (path, coil, ringCoil, polygonCoil)
+  const hasBField = React.useMemo(() => {
+    if (!sceneObjects) return false
+    return sceneObjects.some(o => 
+      o.type === 'path' || 
+      o.type === 'coil' || 
+      o.type === 'ringCoil' || 
+      o.type === 'polygonCoil' ||
+      (o.type === 'coil' && (o.coilType === 'ring' || o.coilType === 'polygon'))
+    )
   }, [sceneObjects])
 
   if (minimized) {
@@ -81,6 +95,9 @@ export default function EFieldMenu({
           <EfieldButtons
             inline={true}
             hasField={hasField}
+            hasBField={hasBField}
+            showBField={showBField}
+            onToggleBField={onToggleBField}
             wavePropagationEnabled={wavePropagationEnabled}
             setWavePropagationEnabled={setWavePropagationEnabled}
             waveDuration={waveDuration}

@@ -476,6 +476,9 @@ function LoadingOverlay() {
         setWavePropagationEnabled={setWavePropagationEnabled}
         waveDuration={waveDuration}
         setWaveDuration={setWaveDuration}
+        // BField Props
+        showBField={showMagField}
+        onToggleBField={() => setShowMagField(v => !v)}
         // Gaussian Props
         showOnlyGaussianField={showOnlyGaussianField}
         setOnlyGaussianField={setShowOnlyGaussianField}
@@ -551,6 +554,8 @@ function LoadingOverlay() {
           waveDuration,
           setWaveDuration,
           sceneObjects,
+          showBField: showMagField,
+          onToggleBField: () => setShowMagField(v => !v),
         }}
         gaussianProps={{
           creativeMode,
