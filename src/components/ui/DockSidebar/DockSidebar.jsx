@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import './DockSidebar.css';
 import TestChargeMenu from '../Toolbar/ToolbarPopup/TestChargeMenu';
 import SlicerMenu from '../Toolbar/ToolbarPopup/SlicerMenu';
+import EFieldMenu from '../Toolbar/ToolbarPopup/EFieldMenu';
+import GaussianMenu from '../Toolbar/ToolbarPopup/GaussianMenu';
 
 /**
  * DockSidebar - Left sidebar "desk" where ToolbarPopup windows can be docked
@@ -12,6 +14,8 @@ import SlicerMenu from '../Toolbar/ToolbarPopup/SlicerMenu';
  * @param {Function} props.setTabOrder - Update tab order
  * @param {Object} props.testChargeProps - Props for TestChargeMenu
  * @param {Object} props.slicerProps - Props for SlicerMenu
+ * @param {Object} props.efieldProps - Props for EFieldMenu
+ * @param {Object} props.gaussianProps - Props for GaussianMenu
  */
 export default function DockSidebar({
   dockedWindows,
@@ -20,11 +24,18 @@ export default function DockSidebar({
   setTabOrder,
   testChargeProps,
   slicerProps,
+  efieldProps,
+  gaussianProps,
 }) {
   const [draggedTab, setDraggedTab] = useState(null);
   const [dragOverTab, setDragOverTab] = useState(null);
   const [dropPosition, setDropPosition] = useState(null); // 'before' or 'after'
-  const [expandedWindows, setExpandedWindows] = useState({ TestCharge: true, Slice: true }); // Track which windows are expanded
+  const [expandedWindows, setExpandedWindows] = useState({ 
+    TestCharge: true, 
+    Slice: true, 
+    EField: true, 
+    Gaussian: true 
+  }); // Track which windows are expanded
   
   // Get list of docked window names in user-defined order
   const dockedWindowNames = tabOrder.filter(name => dockedWindows[name]);
@@ -129,6 +140,10 @@ export default function DockSidebar({
         return <TestChargeMenu {...testChargeProps} />;
       case 'Slice':
         return <SlicerMenu {...slicerProps} />;
+      case 'EField':
+        return <EFieldMenu {...efieldProps} />;
+      case 'Gaussian':
+        return <GaussianMenu {...gaussianProps} />;
       default:
         return null;
     }
