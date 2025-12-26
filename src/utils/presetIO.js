@@ -22,12 +22,20 @@ export function exportPreset({ sceneObjects, camera, settings, name = 'custom-pr
     settings: {
       vectorMinTsl: settings.vectorMinTsl ?? 0.08,
       vectorScale: settings.vectorScale ?? 1.2,
+      vectorStep: settings.vectorStep ?? 1,
       lineMin: settings.lineMin ?? 0.12,
       lineNumber: settings.lineNumber ?? 28,
       showField: settings.showField ?? false,
+      showBField: settings.showBField ?? false,
       showLines: settings.showLines ?? false,
       showEquipotentialSurface: settings.showEquipotentialSurface ?? false,
-      showOnlyGaussianField: settings.showOnlyGaussianField ?? false
+      showOnlyGaussianField: settings.showOnlyGaussianField ?? false,
+      planeFilter: settings.planeFilter ?? null,
+      slicePlane: settings.slicePlane ?? null,
+      slicePos: settings.slicePos ?? 0,
+      useSlice: settings.useSlice ?? false,
+      slicePlaneFlip: settings.slicePlaneFlip ?? false,
+      showSlicePlaneHelper: settings.showSlicePlaneHelper ?? true
     },
     objects: sceneObjects.map(obj => {
       const baseProps = {
@@ -43,6 +51,16 @@ export function exportPreset({ sceneObjects, camera, settings, name = 'custom-pr
               ...baseProps,
               charge: obj.charge ?? 1,
               radius: obj.radius ?? 0.1
+            }
+          }
+
+        case 'testPointCharge':
+          return {
+            type: 'testPointCharge',
+            props: {
+              ...baseProps,
+              charge: obj.charge ?? 0,
+              radius: obj.radius ?? 0.03
             }
           }
         
@@ -109,30 +127,120 @@ export function exportPreset({ sceneObjects, camera, settings, name = 'custom-pr
               material: obj.material || 'Dielectric'
             }
           }
+
+        case 'stackedPlanes':
+          return {
+            type: 'stackedPlanes',
+            props: {
+              ...baseProps,
+              charge_densities: obj.charge_densities ?? [0.1],
+              spacing: obj.spacing ?? 1,
+              rotation: obj.rotation || [0, 0, 0],
+              direction: obj.direction || [0, 1, 0],
+              dimensions: obj.dimensions || [4, 4],
+              planeWidth: obj.planeWidth ?? 5,
+              planeHeight: obj.planeHeight ?? 5,
+              infinite: obj.infinite ?? false
+            }
+          }
+
+        case 'concentricSpheres':
+          return {
+            type: 'concentricSpheres',
+            props: {
+              ...baseProps,
+              radiuses: obj.radiuses ?? [],
+              materials: obj.materials ?? [],
+              dielectrics: obj.dielectrics ?? [],
+              charges: obj.charges ?? [],
+              direction: obj.direction || [0, 1, 0]
+            }
+          }
+
+        case 'concentricInfWires':
+          return {
+            type: 'concentricInfWires',
+            props: {
+              ...baseProps,
+              radiuses: obj.radiuses ?? [],
+              materials: obj.materials ?? [],
+              dielectrics: obj.dielectrics ?? [],
+              charges: obj.charges ?? [],
+              direction: obj.direction || [0, 1, 0],
+              rotation: obj.rotation || [0, 0, 0]
+            }
+          }
+
+        case 'path':
+          return {
+            type: 'path',
+            props: {
+              ...baseProps,
+              points: obj.points ?? [],
+              charges: obj.charges ?? [],
+              tangents: obj.tangents ?? [],
+              chargeCount: obj.chargeCount ?? 1,
+              charge: obj.charge ?? 1,
+              velocity: obj.velocity ?? 1,
+              isClosedPath: obj.isClosedPath ?? false
+            }
+          }
+
+        case 'coil':
+          return {
+            type: 'coil',
+            props: {
+              ...baseProps,
+              coilType: obj.coilType ?? 'ring',
+              coilRadius: obj.coilRadius ?? 1.5,
+              tubeRadius: obj.tubeRadius ?? 0.01,
+              coilColor: obj.coilColor ?? '#6ea8ff',
+              direction: obj.direction || [0, 1, 0],
+              rotation: obj.rotation || [0, 0, 0],
+              sides: obj.sides ?? 3,
+              chargeCount: obj.chargeCount ?? 5,
+              charge: obj.charge ?? 1,
+              velocity: obj.velocity ?? 1,
+              renderCharges: obj.renderCharges ?? true,
+              charges: obj.charges ?? []
+            }
+          }
         
         case 'surface':
+        case 'sphere':
+        case 'cylinder':
+        case 'cuboid': {
+          const surfaceType =
+            obj.surfaceType ??
+            obj.subtype ??
+            (obj.type === 'sphere' || obj.type === 'cylinder' || obj.type === 'cuboid' ? obj.type : undefined)
+
           return {
             type: 'surface',
-            surfaceType: obj.surfaceType,
+            surfaceType: surfaceType,
             props: {
               ...baseProps,
               charge_density: obj.charge_density ?? 0,
               opacity: obj.opacity ?? 0.5,
               deformable: obj.deformable ?? true,
               fixed: obj.fixed ?? true,
+              rotation: obj.rotation ?? [0, 0, 0],
+              quaternion: obj.quaternion,
+              sampleCount: obj.sampleCount ?? 64,
               // Surface-specific props
-              ...(obj.surfaceType === 'sphere' && { radius: obj.radius ?? 2 }),
-              ...(obj.surfaceType === 'cylinder' && { 
+              ...(surfaceType === 'sphere' && { radius: obj.radius ?? 2 }),
+              ...(surfaceType === 'cylinder' && { 
                 radius: obj.radius ?? 2, 
                 height: obj.height ?? 6 
               }),
-              ...(obj.surfaceType === 'cuboid' && { 
+              ...(surfaceType === 'cuboid' && { 
                 width: obj.width ?? 2, 
                 height: obj.height ?? 2, 
                 depth: obj.depth ?? 5 
               })
             }
           }
+        }
         
         default:
           return { type: obj.type, props: baseProps }

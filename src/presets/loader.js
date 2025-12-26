@@ -36,7 +36,14 @@ export function applyPresetByName(name, addObject, setSceneObjects, updatePositi
 
   for (const item of def.objects || []) {
     const props = resolve(item.props ?? {}, ctx)
-    const newId = addObject(item.type, props)
+    let resolvedType = item.type
+    if (item.type === 'coil') {
+      resolvedType = props?.coilType === 'polygon' ? 'polygonCoil' : 'ringCoil'
+    }
+    if (item.type === 'ringCoil' || item.type === 'polygonCoil') {
+      resolvedType = item.type
+    }
+    const newId = addObject(resolvedType, props)
     if (updatePosition && newId && props.position) {
       updatePosition(newId, props.position)
     }

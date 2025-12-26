@@ -439,9 +439,16 @@ function LoadingOverlay() {
             lineMin,
             lineNumber,
             showField,
+            showBField: showMagField,
             showLines,
             showEquipotentialSurface,
-            showOnlyGaussianField
+            showOnlyGaussianField,
+            planeFilter: activePlane,
+            slicePlane,
+            slicePos,
+            useSlice,
+            slicePlaneFlip,
+            showSlicePlaneHelper
           }}
         />
         <div className="field-legend" aria-label="Field color legend">

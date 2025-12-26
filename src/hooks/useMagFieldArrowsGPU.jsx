@@ -275,7 +275,7 @@ export default function MagFieldArrowsGPU({
                     transformed += g.xyz;
 
                     // Magnetic field: light blue (low) -> dark blue (high), fixed lightness
-                    float hue = 0.45 + normalized * 0.47;
+                    float hue = (0.45 + normalized * 0.47) > 0.73 ? 0.73 : (0.45 + normalized * 0.47);
                     vColor = hsl2rgb(hue, 1.0, 0.5);
 
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);

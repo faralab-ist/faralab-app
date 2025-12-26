@@ -2,7 +2,7 @@
     "tripole": {
         "context": {  "r": 0.06, "d": 3, "q": 1, "tq": 2 },
         "camera": {
-        "position": [0, 2.7, 7],
+        "position": [0, 0, 7],
         "target": [0, 0, 0]
         },
         "settings": {

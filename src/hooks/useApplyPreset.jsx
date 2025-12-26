@@ -106,10 +106,20 @@ export default function useApplyPreset({
       if (preset.objects) {
         preset.objects.forEach(({ type, props, surfaceType }) => {
           if (type === 'surface') {
-            addObject?.(surfaceType, props)
-          } else {
-            addObject?.(type, props)
+            const resolvedSurfaceType = surfaceType ?? props?.surfaceType ?? 'sphere'
+            addObject?.(resolvedSurfaceType, props)
+            return
           }
+          if (type === 'coil') {
+            const coilType = props?.coilType === 'polygon' ? 'polygonCoil' : 'ringCoil'
+            addObject?.(coilType, props)
+            return
+          }
+          if (type === 'ringCoil' || type === 'polygonCoil') {
+            addObject?.(type, props)
+            return
+          }
+          addObject?.(type, props)
         })
       }
     } else {
