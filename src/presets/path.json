@@ -9,10 +9,16 @@
         "showField": false,
         "showLines": false,
         "showEquipotentialSurface": false,
-        "showBField": true
+        "showBField": true,
+        "vectorMinTsl": 0.08,
+        "vectorScale": 1.2,
+        "vectorStep": 1,
+        "lineMin": 0.12,
+        "lineNumber": 28,
+        "planeFilter": null
         },
         "objects": [
-            { "type": "path", "props": { "position": [0, 0, 0], "points": [[-1,0,-1],[1,0,-1],[1,0,1],[-1,0,1]], "chargeCount": 10, "isClosedPath": true} }
+            { "type": "path", "props": { "position": [0, 0, 0], "points": [[-1,0,-1],[1,0,-1],[1,0,1],[-1,0,1]], "chargeCount": 14, "isClosedPath": true} }
         ]
     }
 }

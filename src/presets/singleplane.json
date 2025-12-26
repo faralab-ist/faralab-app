@@ -1,5 +1,16 @@
 {
     "singlePlane": {
+        "settings": {
+        "vectorMinTsl": 0.08,
+        "vectorScale": 1.2,
+        "vectorStep": 1,
+        "lineMin": 0.12,
+        "lineNumber": 28,
+        "showField": true,
+        "showLines": false,
+        "showEquipotentialSurface": false,
+        "planeFilter": null
+        },
         "context": {"size": 8, "sigma": 0.1 },
         "camera": {
         "position": [17, 3.6, 0],

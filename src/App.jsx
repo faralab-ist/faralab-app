@@ -370,6 +370,8 @@ function LoadingOverlay() {
       showEquipotentialSurface, onToggleEquipotentialSurface: toggleEquip,
       // settings setters
       setVectorMinTsl, setVectorScale, setVectorStep, setLineMin, setLineNumber,
+      // plane filter setter
+      setActivePlane,
       // slice setters so presets can control slicing
       setSlicePlane, setSlicePos, setUseSlice, setSlicePlaneFlip, setShowSlicePlaneHelper
     })

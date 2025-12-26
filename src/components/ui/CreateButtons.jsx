@@ -141,7 +141,7 @@ export default function CreateButtons({
             <button onClick={() => loadPreset('singlePlane')}>1 Plane</button>
             <button onClick={() => loadPreset('parallelPlanes')}>2 Planes</button>
             <div className="spacer" />
-            <button onClick={() => loadPreset('sphere')}>Sphere</button>
+            {/*<button onClick={() => loadPreset('sphere')}>Sphere</button>*/}
             <button onClick={() => loadPreset('sphericalCapacitor')}>Spherical Capacitor</button>
 
             <div className="preset-separator" aria-hidden="true" />

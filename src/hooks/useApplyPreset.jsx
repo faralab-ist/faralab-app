@@ -26,6 +26,8 @@ export default function useApplyPreset({
   setLineNumber,
   onToggleBField,
   showBField,
+  // plane filter setter
+  setActivePlane,
   // slice setters
   setSlicePlane,
   setSlicePos,
@@ -63,6 +65,10 @@ export default function useApplyPreset({
       if (st.showEquipotentialSurface !== undefined && onToggleEquipotentialSurface) {
         visProvided.equip = true
         if (st.showEquipotentialSurface !== showEquipotentialSurface) onToggleEquipotentialSurface()
+      }
+
+      if (st.planeFilter !== undefined && setActivePlane) {
+        setActivePlane(st.planeFilter)
       }
 
       // Slice settings (optional)
@@ -123,6 +129,7 @@ export default function useApplyPreset({
     showEquipotentialSurface, onToggleEquipotentialSurface,
     setVectorMinTsl, setVectorScale, setLineMin, setLineNumber,
     // slice setters deps
+    setActivePlane,
     setSlicePlane, setSlicePos, setUseSlice, setSlicePlaneFlip
   ])
 }

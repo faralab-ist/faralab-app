@@ -8,11 +8,13 @@
         "settings": {
         "vectorMinTsl": 0.08,
         "vectorScale": 1.2,
+        "vectorStep": 1.4,
         "lineMin": 0.12,
         "lineNumber": 28,
         "showField": true,
         "showLines": false,
-        "showEquipotentialSurface": false
+        "showEquipotentialSurface": false,
+        "planeFilter": "xy"
         },
         "objects": [
             { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },

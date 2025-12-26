@@ -5,12 +5,14 @@
         "settings": {
         "vectorMinTsl": 0.45,
         "vectorScale": 1.3,
+        "vectorStep": 1.4,
         "lineMin": 0.15,
         "lineNumber": 24,
         "showField": true,
         "showOnlyGaussianField": true,
-        "showLines": false,
-        "showEquipotentialSurface": false
+        "showLines": true,
+        "showEquipotentialSurface": false,
+        "planeFilter": null
         },
         "objects": [
             { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },

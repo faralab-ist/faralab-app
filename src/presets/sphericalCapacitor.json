@@ -28,7 +28,8 @@
       "showSlicePlaneHelper": false,
       "vectorStep": 1.4,
       "showEquipotentialSurface": false,
-      "showOnlyGaussianField": false
+      "showOnlyGaussianField": false,
+      "planeFilter": null
     },
     "objects": [
       {
@@ -47,7 +48,7 @@
           "charges": [
             5,
             0,
-            -5
+            5
           ],
           "dielectrics": [
             0,
