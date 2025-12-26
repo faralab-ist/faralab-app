@@ -1,24 +1,27 @@
 {
-    "currentLoop": {
-        "context": {"size": 8, "sigma": 0.1 },
-        "camera": {
-        "position": [0, 1, 5],
-        "target": [0, 0, 0]
-        },
-        "settings": {
-        "showField": false,
-        "showLines": false,
-        "showEquipotentialSurface": false,
-        "showBField": true,
-        "vectorMinTsl": 0.08,
-        "vectorScale": 1.2,
-        "vectorStep": 1,
-        "lineMin": 0.12,
-        "lineNumber": 28,
-        "planeFilter": null
-        },
-        "objects": [
-            { "type": "path", "props": { "position": [0, 0, 0], "points": [[-1,0,-1],[1,0,-1],[1,0,1],[-1,0,1]], "chargeCount": 14, "isClosedPath": true} }
-        ]
-    }
+  "currentLoop": {
+    "context": { "size": 8, "sigma": 0.1 },
+    "camera": { "position": [0, 1, 5], "target": [0, 0, 0] },
+    "settings": {
+      "vectorMinTsl": 0.08,
+      "vectorScale": 1.2,
+      "vectorStep": 1,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": false,
+      "showBField": true,
+      "showLines": false,
+      "showEquipotentialSurface": false,
+      "showOnlyGaussianField": false,
+      "planeFilter": null,
+      "useSlice": false,
+      "slicePlane": "xz",
+      "slicePos": -0.1,
+      "slicePlaneFlip": false,
+      "showSlicePlaneHelper": true
+    },
+    "objects": [
+      { "type": "path", "props": { "position": [0, 0, 0], "points": [[-1, 0, -1], [1, 0, -1], [1, 0, 1], [-1, 0, 1]], "chargeCount": 14, "isClosedPath": true } }
+    ]
+  }
 }

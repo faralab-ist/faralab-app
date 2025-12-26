@@ -1,24 +1,28 @@
 {
-    "infiniteWire": {
-        "context": { "lambda": 0.1, "r": 3, "h": 15 },
-        "camera": {
-        "position": [7, 4, 8],
-        "target": [0, 0, 0]
-        },
-        "settings": {
-        "vectorMinTsl": 0.08,
-        "vectorScale": 1.2,
-        "vectorStep": 1,
-        "lineMin": 0.12,
-        "lineNumber": 28,
-        "showField": true,
-        "showLines": false,
-        "showEquipotentialSurface": false,
-        "planeFilter": null
-        },
-        "objects": [
-            { "type": "wire", "props": { "position": [0, 0, 0], "charge_density": "$lambda", "infinite": false, "height": "$h" } },
-            { "type": "testPointCharge", "props": { "position": [4, 1, 2] } }
-        ]
+  "infiniteWire": {
+    "context": { "lambda": 0.1, "r": 3, "h": 15 },
+    "camera": { "position": [7, 4, 8], "target": [0, 0, 0] },
+    "settings": {
+      "vectorMinTsl": 0.08,
+      "vectorScale": 1.2,
+      "vectorStep": 1,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showBField": false,
+      "showLines": false,
+      "showEquipotentialSurface": false,
+      "showOnlyGaussianField": false,
+      "planeFilter": null,
+      "useSlice": false,
+      "slicePlane": "xz",
+      "slicePos": -0.1,
+      "slicePlaneFlip": false,
+      "showSlicePlaneHelper": true
+    },
+    "objects": [
+      { "type": "wire", "props": { "position": [0, 0, 0], "charge_density": "$lambda", "infinite": false, "height": "$h" } },
+      { "type": "testPointCharge", "props": { "position": [4, 1, 2] } }
+    ]
   }
 }

@@ -2,64 +2,36 @@
   "sphericalCapacitor": {
     "context": {},
     "camera": {
-      "position": [
-        6.5,
-        0.0,
-        0.0
-      ],
-      "target": [
-        0,
-        0,
-        0
-      ]
+      "position": [6.5, 0.0, 0.0],
+      "target": [0, 0, 0]
     },
     "settings": {
       "vectorMinTsl": 0.1,
       "vectorScale": 1,
-      
+      "vectorStep": 1.4,
       "lineMin": 0.1,
       "lineNumber": 20,
       "showField": true,
+      "showBField": false,
       "showLines": false,
+      "showEquipotentialSurface": false,
+      "showOnlyGaussianField": false,
+      "planeFilter": null,
       "useSlice": true,
       "slicePlane": "yz",
       "slicePos": 0.9,
       "slicePlaneFlip": true,
-      "showSlicePlaneHelper": false,
-      "vectorStep": 1.4,
-      "showEquipotentialSurface": false,
-      "showOnlyGaussianField": false,
-      "planeFilter": null
+      "showSlicePlaneHelper": false
     },
     "objects": [
       {
         "type": "concentricSpheres",
         "props": {
-          "position": [
-            0,
-            0,
-            0
-          ],
-          "radiuses": [
-            1.50,
-            3.60,
-            4.30
-          ],
-          "charges": [
-            5,
-            0,
-            5
-          ],
-          "dielectrics": [
-            0,
-            2,
-            1
-          ],
-          "materials": [
-            "conductor",
-            "dielectric",
-            "conductor"
-          ]
+          "position": [0, 0, 0],
+          "radiuses": [1.5, 3.6, 4.3],
+          "charges": [5, 0, 0],
+          "dielectrics": [0, 2, 1],
+          "materials": ["conductor", "dielectric", "conductor"]
         }
       }
     ]
