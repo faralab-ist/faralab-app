@@ -8,11 +8,13 @@
         "settings": {
         "vectorMinTsl": 0.08,
         "vectorScale": 1.2,
+        "vectorStep": 1,
         "lineMin": 0.12,
         "lineNumber": 28,
         "showField": true,
         "showLines": false,
-        "showEquipotentialSurface": false
+        "showEquipotentialSurface": false,
+        "planeFilter": null
         },
         "objects": [
             { "type": "plane", "props": { "position": [0, "$(distanceY + 0.01)", 0], "charge_density": 5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } },

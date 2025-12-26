@@ -8,11 +8,13 @@
         "settings": {
         "vectorMinTsl": 0.08,
         "vectorScale": 1.2,
+        "vectorStep": 1,
         "lineMin": 0.12,
         "lineNumber": 28,
         "showField": true,
         "showLines": false,
-        "showEquipotentialSurface": true
+        "showEquipotentialSurface": true,
+        "planeFilter": null
         },
         "objects": [
             { "type": "wire", "props": { "position": [0, 0, 0], "charge": "$lambda", "radius": "$r", "height": "$h"} }
