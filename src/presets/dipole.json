@@ -15,7 +15,7 @@
       "showOnlyGaussianField": true,
       "planeFilter": null,
       "useSlice": false,
-      "slicePlane": "xz",
+      "slicePlane": "xy",
       "slicePos": -0.1,
       "slicePlaneFlip": false,
       "showSlicePlaneHelper": true

@@ -1,7 +1,7 @@
 {
   "parallelPlanes": {
     "context": { "distanceY": 4, "size": 8 },
-    "camera": { "position": [17, 3.6, 0], "target": [0, 0, 0] },
+    "camera": { "position": [15.5, 3.6, 7], "target": [0, 0, 0] },
     "settings": {
       "vectorMinTsl": 0.08,
       "vectorScale": 1.2,
@@ -15,7 +15,7 @@
       "showOnlyGaussianField": false,
       "planeFilter": null,
       "useSlice": false,
-      "slicePlane": "xz",
+      "slicePlane": "xy",
       "slicePos": -0.1,
       "slicePlaneFlip": false,
       "showSlicePlaneHelper": true
