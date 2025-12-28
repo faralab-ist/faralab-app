@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
   import { Canvas, useThree } from '@react-three/fiber'
   import { OrbitControls } from '@react-three/drei'
   import './App.css'
@@ -21,6 +21,7 @@ import React, { useState, useEffect, useMemo } from 'react'
   import Toolbar from './components/ui/Toolbar/Toolbar'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
+  import DockSidebar from './components/ui/DockSidebar/DockSidebar'
   import calculateFlux from './utils/calculateFlux'
   import ObjectPopup from './components/ui/ObjectPopup/ObjectPopup'
 
@@ -200,8 +201,42 @@ function LoadingOverlay() {
       const [wavePropagationEnabled, setWavePropagationEnabled] = useState(false)
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
+    
+    // Docker sidebar state
+    const [dockedWindows, setDockedWindows] = useState({ TestCharge: false, Slice: false, EField: false, Gaussian: false })
+    const [tabOrder, setTabOrder] = useState(['EField', 'Gaussian', 'TestCharge', 'Slice']) // User-configurable tab order
+    const [ensureActiveCallback, setEnsureActiveCallback] = useState(null)
+    const [undockPositions, setUndockPositions] = useState({}) // Store positions for undocked windows
 
+    // Docker functions
+    const handleDock = (windowName) => {
+      setDockedWindows(prev => ({ ...prev, [windowName]: true }))
+      // Clear undock position when docking
+      setUndockPositions(prev => {
+        const next = { ...prev };
+        delete next[windowName];
+        return next;
+      });
+      // Window stays in activePopups in Toolbar so it can be toggled
+    }
 
+    const handleUndock = (windowName, position) => {
+      setDockedWindows(prev => ({ ...prev, [windowName]: false }))
+      // Store the position if provided
+      if (position) {
+        setUndockPositions(prev => ({ ...prev, [windowName]: position }));
+      }
+      // Ensure the window is added back to activePopups so it appears as floating
+      if (ensureActiveCallback) {
+        ensureActiveCallback(windowName);
+      }
+    }
+    
+
+    // Memoize onEnsureActive to prevent infinite loop in Toolbar's useEffect
+    const handleEnsureActive = useCallback((callback) => {
+      setEnsureActiveCallback(() => callback);
+    }, []);
 
     const handleSelect = (id) => {
       setSelectedId(id)
@@ -400,6 +435,8 @@ function LoadingOverlay() {
     {/* <LoadingOverlay /> */}
 
     <div id="app-root">
+    
+      
       <div className="toolbar-root">     {/* new same-container wrapper */}
      <Toolbar 
         addObject={addObject}
@@ -416,9 +453,123 @@ function LoadingOverlay() {
         slicePlane={slicePlane}
         slicePos={slicePos} setSlicePos={setSlicePos}
         slicePlaneFlip={slicePlaneFlip} setSlicePlaneFlip={setSlicePlaneFlip}
+        // EField Props
+        showField={showField}
+        onToggleField={toggleField}
+        showLines={showLines}
+        onToggleLines={toggleLines}
+        showEquipotentialSurface={showEquipotentialSurface}
+        onToggleEquipotentialSurface={toggleEquip}
+        vectorMinTsl={vectorMinTsl}
+        setVectorMinTsl={setVectorMinTsl}
+        vectorScale={vectorScale}
+        setVectorScale={setVectorScale}
+        vectorStep={vectorStep}
+        setVectorStep={setVectorStep}
+        lineMin={lineMin}
+        setLineMin={setLineMin}
+        lineNumber={lineNumber}
+        setLineNumber={setLineNumber}
+        activePlane={activePlane}
+        onPlaneSelect={handlePlaneSelect}
+        potentialTarget={equipotentialTarget}
+        setPotentialTarget={setEquipotentialTarget}
+        wavePropagationEnabled={wavePropagationEnabled}
+        setWavePropagationEnabled={setWavePropagationEnabled}
+        waveDuration={waveDuration}
+        setWaveDuration={setWaveDuration}
+        // BField Props
+        showBField={showMagField}
+        onToggleBField={() => setShowMagField(v => !v)}
+        // Gaussian Props
+        showOnlyGaussianField={showOnlyGaussianField}
+        setOnlyGaussianField={setShowOnlyGaussianField}
+        // Presets Props
+        onApplyPreset={applyPreset}
+        camera={cameraState}
+        settings={{
+          vectorMinTsl,
+          vectorScale,
+          vectorStep,
+          lineMin,
+          lineNumber,
+          showField,
+          showLines,
+          showEquipotentialSurface,
+          showOnlyGaussianField
+        }}
+        dockedWindows={dockedWindows}
+        onDock={handleDock}
+        onEnsureActive={handleEnsureActive}
+        undockPositions={undockPositions}
        />
        
        </div>
+
+        {/* Docker sidebar on the left */}
+      <DockSidebar
+        dockedWindows={dockedWindows}
+        onUndock={handleUndock}
+        tabOrder={tabOrder}
+        setTabOrder={setTabOrder}
+        testChargeProps={{
+          addObject,
+          updatePosition,
+          sceneObjects,
+          counts,
+        }}
+        slicerProps={{
+          useSlice,
+          setUseSlice,
+          showSliceHelper: showSlicePlaneHelper,
+          setShowSliceHelper: setShowSlicePlaneHelper,
+          slicePlane,
+          setSlicePlane,
+          slicePos,
+          setSlicePos,
+          slicePlaneFlip,
+          setSlicePlaneFlip,
+        }}
+        efieldProps={{
+          showField,
+          onToggleField: toggleField,
+          showLines,
+          onToggleLines: toggleLines,
+          showEquipotentialSurface,
+          onToggleEquipotentialSurface: toggleEquip,
+          vectorMinTsl,
+          setVectorMinTsl,
+          vectorScale,
+          setVectorScale,
+          vectorStep,
+          setVectorStep,
+          lineMin,
+          setLineMin,
+          lineNumber,
+          setLineNumber,
+          activePlane,
+          onPlaneSelect: handlePlaneSelect,
+          potentialTarget: equipotentialTarget,
+          setPotentialTarget: setEquipotentialTarget,
+          wavePropagationEnabled,
+          setWavePropagationEnabled,
+          waveDuration,
+          setWaveDuration,
+          sceneObjects,
+          showBField: showMagField,
+          onToggleBField: () => setShowMagField(v => !v),
+        }}
+        gaussianProps={{
+          creativeMode,
+          addObject,
+          sceneObjects,
+          setSceneObjects,
+          showOnlyGaussianField,
+          setOnlyGaussianField: setShowOnlyGaussianField,
+          showField,
+          onToggleField: toggleField,
+        }}
+      />
        <div id="canvas-container">
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
         <CreateButtons
@@ -548,7 +699,6 @@ function LoadingOverlay() {
                     case 'solenoid': ObjectComponent = Solenoid; break
                     case 'ring': ObjectComponent = RingCoil; break
                     case 'polygon': ObjectComponent = PolygonCoil; break
-                    case 'barMagnet': ObjectComponent = BarMagnet; break
                     default: ObjectComponent = RingCoil; break
                   }
                   break
@@ -609,7 +759,7 @@ function LoadingOverlay() {
             key={`arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
     }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
         objects={sceneObjects}
-        showOnlyGaussianField={showOnlyGaussianField}s
+        showOnlyGaussianField={showOnlyGaussianField}
         minThreshold={vectorMinTsl}
         scaleMultiplier={vectorScale}
         step={1 / (Number(vectorStep))} 

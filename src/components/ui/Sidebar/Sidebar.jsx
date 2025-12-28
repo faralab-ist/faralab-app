@@ -10,6 +10,9 @@ import CuboidIcon from "../../../assets/cuboid.svg";
 import CylinderIcon from "../../../assets/cylinder.svg";
 import PlaneIcon from "../../../assets/plane.svg";
 import ChargeSphereIcon from "../../../assets/charge_sphere.svg";
+import RingCoilIcon from "../../../assets/ring_coil.svg";
+import PolygonCoilIcon from "../../../assets/polygon_coil.svg";
+import PathIcon from "../../../assets/path1.svg";
 
 /**
  * Sidebar agora suporta 3 estados:
@@ -131,14 +134,20 @@ export default function Sidebar({
     return 'surface';
   };
 
-  const pillObjects = (objects || []).filter(o => 
-    ['faradayCoil','path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
+  
 
+  const pillObjects = (objects || []).filter(o => 
+    ['path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires', 'coil', 'barMagnet', 'faradayCoil'].includes(o.type));
   const typeCounters = {};
   const subtypeCounters = {};
 
   const minibarItems = pillObjects.map((o) => {
-    if (o.type === 'surface') {
+    if (o.type === 'coil') {
+      const coilType = o.coilType === 'ring' ? 'ringCoil' : o.coilType === 'polygon' ? 'polygonCoil' : 'ringCoil';
+      typeCounters[coilType] = (typeCounters[coilType] || 0) + 1;
+      const label = `${coilType === 'ringCoil' ? 'Ring Coil' : 'Polygon Coil'} ${typeCounters[coilType]}`;
+      return { id: o.id, type: coilType, subtype: null, label, name: o.name, obj: o };
+    } else if (o.type === 'surface') {
       const raw = detectSubtype(o);
       const subtype = raw || 'surface';
       subtypeCounters[subtype] = (subtypeCounters[subtype] || 0) + 1;
@@ -194,7 +203,7 @@ export default function Sidebar({
                   <button
                     key={item.id}
                     className={`${
-                      ['pos_charge','neg_charge','testPointCharge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires'].includes(item.type)
+                      ['pos_charge','neg_charge','testPointCharge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires', 'ringCoil', 'polygonCoil', 'path'].includes(item.type)
                         ? `${item.subtype || item.type}-icon-btn ${item.polarity || ''}`
                         : `pill ${item.subtype || item.type} minibar-pill`
                     } ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
@@ -234,6 +243,12 @@ export default function Sidebar({
                       <img src={CuboidIcon} alt="Cuboid" className="cuboid-icon" />
                     ) : item.subtype === 'cylinder' ? (
                       <img src={CylinderIcon} alt="Cylinder" className="cylinder-icon" />
+                    ) : item.type === 'ringCoil' ? (
+                      <img src={RingCoilIcon} alt="Ring Coil" className="ring-coil-icon" />
+                    ) : item.type === 'polygonCoil' ? (
+                      <img src={PolygonCoilIcon} alt="Polygon Coil" className="polygon-coil-icon" />
+                    ) : item.type === 'path' ? (
+                      <img src={PathIcon} alt="Path" className="path-icon" />
                     ) : (
                       <strong>{item.label}</strong>
                     )}

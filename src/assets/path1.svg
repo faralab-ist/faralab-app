@@ -1,0 +1,20 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Curved path (wire) -->
+  <path d="M3 12 Q 8 4, 12 12 T 21 12" stroke="currentColor" stroke-width="0.8" fill="none"/>
+  
+  <!-- 5 beads distributed along the path -->
+  <!-- Bead 1 (start) -->
+  <circle cx="3" cy="12" r="1.8" fill="currentColor"/>
+  
+  <!-- Bead 2 (first curve) -->
+  <circle cx="8" cy="7" r="1.8" fill="currentColor"/>
+  
+  <!-- Bead 3 (middle) -->
+  <circle cx="12" cy="12" r="1.8" fill="currentColor"/>
+  
+  <!-- Bead 4 (second curve) -->
+  <circle cx="16" cy="17" r="1.8" fill="currentColor"/>
+  
+  <!-- Bead 5 (end) -->
+  <circle cx="21" cy="12" r="1.8" fill="currentColor"/>
+</svg>

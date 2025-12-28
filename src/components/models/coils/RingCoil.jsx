@@ -40,6 +40,7 @@ export default function RingCoil({
   velocity = 1,
   renderCharges = true,
   charges = [],
+  showLabel = true,
 }) {
   // Compute the normal for a ring (perpendicular to its plane)
   // For a ring lying flat in XZ plane, normal points along Y
@@ -154,6 +155,7 @@ export default function RingCoil({
       computeNormal={computeRingNormal}
       getPathPoints={getCirclePoints}
       getSurfacePoints={getRingSurfacePoints}
+      showLabel={showLabel}
       coilGeometry={
         <mesh
           geometry={ringGeometry}

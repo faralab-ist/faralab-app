@@ -57,7 +57,8 @@ export default function BaseCoil({
   coilGeometry,             // JSX: the actual coil geometry (Ring, Polygon, etc.)
   computeNormal = () => [0, 0, 1], // function to compute normal in local space
   getPathPoints = () => [],        // function to generate path points for charges
-  getSurfacePoints = (resolution) => ({}), // function to generate grid of surface points with dA
+  showLabel = true,
+
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -199,6 +200,8 @@ export default function BaseCoil({
             parentRotation={rotation}
             parentQuaternion={quaternion}
             groupRef={groupRef}
+            showLabel={showLabel}
+
           />
         )}
 

@@ -10,7 +10,7 @@
 .slicing-panel {
   display: flex;
   flex-direction: column;
-  position: relative;
+  position: static;
   gap: 1px;
   border: none;
   background: transparent;
@@ -136,7 +136,7 @@
 /* Primary Button Label Overrides */
 .slice-row .slicing-btn .btn-label {
   font-size: 13px;
-  /* Removed redundant margins */
+
 }
 
 /* Flip Button Icon Animation */

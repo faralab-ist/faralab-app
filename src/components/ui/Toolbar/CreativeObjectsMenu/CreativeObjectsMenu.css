@@ -1,0 +1,101 @@
+.creative-objects-menu {
+  position: fixed;
+  top: 48px; /* Below the toolbar (34px height + padding) */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  animation: creativeMenuSlideIn 0.22s cubic-bezier(0.25, 0.8, 0.3, 1);
+  will-change: transform, opacity;
+  pointer-events: auto;
+}
+
+@keyframes creativeMenuSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.creative-menu-panel {
+  background: rgba(19, 19, 19, 0.92);
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 12px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  display: flex;
+  gap: 16px;
+}
+
+.creative-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.creative-menu-title {
+  color: #76baff;
+  margin: 0 0 4px 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.creative-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.creative-menu-item {
+  min-width: 110px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  background: transparent;
+  color: white;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.creative-menu-item:hover {
+  background: #2a2a2a;
+  border-color: #444;
+  transform: translateY(-1px);
+}
+
+.creative-menu-item:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .creative-objects-menu {
+    left: 10px;
+    right: 10px;
+    transform: none;
+    width: calc(100% - 20px);
+  }
+
+  .creative-menu-panel {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .creative-menu-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+}

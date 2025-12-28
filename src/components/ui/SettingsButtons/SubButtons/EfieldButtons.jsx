@@ -96,7 +96,7 @@ export default function EfieldButtons({
                 >
                     {showBField ? 'Hide B-Vectors' : 'Show B-Vectors'}
                 </button>
-                 {/* Plane selection buttons 
+                 Plane selection buttons 
                 <button
                     type="button"
                     className={`efield-toggle-btn ${showLines ? 'active' : ''} ${!hasField ? 'disabled' : ''}`}
@@ -106,7 +106,7 @@ export default function EfieldButtons({
                 >
                     {showLines ? 'Hide Lines' : 'Show Lines'}
                 </button>
-                */}
+                
             </div> 
             
             {/* only render Vectors section when active */}
@@ -159,7 +159,7 @@ export default function EfieldButtons({
              </div>
              
  
-            {/* only render Lines section when active */}
+             only render Lines section when active
             
             <div className={`efield-section ${!hasField ? 'disabled' : ''}`} role={ !hasField ? 'presentation' : undefined }>
                  <div className="efield-section-title">Lines</div>

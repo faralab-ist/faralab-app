@@ -20,6 +20,7 @@ const objectFactories = {
     position: [0, 0, 0],
     charge: 1,
     radius: 0.06,
+    showLabel: true,
     createdAt: Date.now(),
   }),
     testPointCharge: (index) => ({
@@ -29,6 +30,7 @@ const objectFactories = {
     position: [0, 0, 0],
     charge: 0, // In reality its 1, but this way it doesn't affect the field
     radius: 0.03,
+    showLabel: true,
     createdAt: Date.now(),
   }),
   wire: (index) => ({
@@ -45,6 +47,7 @@ const objectFactories = {
     radius: 0.03,
     infinite: false,
     material: 'Dielectric',
+    showLabel: true,
     createdAt: Date.now(),
   }),
   plane: (index) => ({
@@ -62,6 +65,7 @@ const objectFactories = {
     planeHeight: 5,
     infinite: false,
     material: 'Dielectric',
+    showLabel: true,
     createdAt: Date.now(),
   }),
   stackedPlanes: (index) => ({
@@ -91,6 +95,7 @@ const objectFactories = {
     radius: 1,
     isHollow: false,
     material: 'Dielectric',
+    showLabel: true,
     createdAt: Date.now(),
   }),
   concentricSpheres: (index) => ({
@@ -174,6 +179,7 @@ const objectFactories = {
     charge: 1, // charge of each charge
     velocity: 1, //speed of charges
     isClosedPath: false,
+    showLabel: true,
     createdAt: Date.now(),
   }),
   ringCoil: (index) => ({
@@ -192,6 +198,7 @@ const objectFactories = {
     velocity: 1,
     renderCharges: true,
     charges: [],
+    showLabel: true,
     createdAt: Date.now(),
   }),
   solenoid: (index) => ({ // just a solenoid
@@ -226,12 +233,12 @@ const objectFactories = {
     velocity: 1,
     renderCharges: true,
     charges: [],
+    showLabel: true,
     createdAt: Date.now(),
   }),
   barMagnet: (index) => ({
     id: `tmp-${index}`,
-    type: 'coil',
-    coilType: 'barMagnet',
+    type: 'barMagnet',
     name: `Bar Magnet ${index}`,
     position: [0, 0, 0],
     length: 3,
@@ -347,11 +354,11 @@ export default function useSceneObjects(initial = []) {
       let nextIndex
       let factoryType = type
       
-      if (type === 'coil' || type === 'ringCoil' || type === 'polygonCoil' || type === 'solenoid' || type === 'barMagnet') {
+      if (type === 'coil' || type === 'ringCoil' || type === 'polygonCoil' || type === 'solenoid') {
         // For coils, count by coilType
-        const coilType = overrides.coilType || (type === 'polygonCoil' ? 'polygon' : (type === 'solenoid' ? 'solenoid' : (type === 'barMagnet' ? 'barMagnet' : 'ring')))
+        const coilType = overrides.coilType || (type === 'polygonCoil' ? 'polygon' : (type === 'solenoid' ? 'solenoid' : 'ring'))
         nextIndex = prev.filter(o => o.type === 'coil' && o.coilType === coilType).length + 1
-        factoryType = type === 'polygonCoil' ? 'polygonCoil' : type === 'ringCoil' ? 'ringCoil' : type === 'solenoid' ? 'solenoid' : type === 'barMagnet' ? 'barMagnet' : type
+        factoryType = type === 'polygonCoil' ? 'polygonCoil' : type === 'ringCoil' ? 'ringCoil' : type === 'solenoid' ? 'solenoid' : type
       } else if (type === 'sphere' || type === 'cylinder' || type === 'cuboid') {
         // For surfaces, count by surfaceType
         nextIndex = prev.filter(o => o.type === 'surface' && o.surfaceType === type).length + 1
@@ -562,7 +569,7 @@ const updateDirection = useCallback((id, direction) => {
     polygonCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'polygon').length,
     ringCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'ring').length,
     solenoid: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'solenoid').length,
-    barMagnet: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'barMagnet').length,
+    barMagnet: sceneObjects.filter(o => o.type === 'barMagnet').length,
     total: sceneObjects.length,
   }), [sceneObjects])
 

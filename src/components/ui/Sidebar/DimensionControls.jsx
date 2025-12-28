@@ -20,6 +20,7 @@ export default function DimensionControls({ obj, updateObject }) {
   const update = (field, val) => updateObject(obj.id, { [field]: val });
 
   if (obj.type === 'coil') return null;
+  if (obj.type === 'barMagnet') return null;
   if (obj.type === 'faradayCoil') return null;
 
   // Plane
