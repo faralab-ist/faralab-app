@@ -228,7 +228,7 @@ export default function RecordingButtons() {
       <button
         className={`rec-btn ${isRecordingVideo ? 'recording' : ''}`}
         onClick={isRecordingVideo ? stopVideoRecording : startVideoRecording}
-        title={isRecordingVideo ? 'Parar gravação de vídeo' : 'Gravar vídeo'}
+        title={isRecordingVideo ? 'Stop recording' : 'Record video'}
       >
         {isRecordingVideo ? (
           <span className="rec-stop-icon" />

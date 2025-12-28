@@ -32,6 +32,9 @@ export default function ObjectItem({
   if (obj.type === "surface") {
     const resolved = TYPE_CONFIG.surface.resolve(obj);
     iconData = { ...resolved };
+  } else if (obj.type === "coil") {
+    const resolved = TYPE_CONFIG.coil.resolve(obj);
+    iconData = { ...resolved };
   } else if (TYPE_CONFIG[obj.type]) {
     const conf = TYPE_CONFIG[obj.type];
     iconData = {
