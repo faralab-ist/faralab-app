@@ -32,7 +32,7 @@ export default function BarMagnet({
     slicePos,
     useSlice,
     slicePlaneFlip,
-    frozen = false,
+    frozen = true,
     animated,
     amplitude,
     freq,
@@ -72,7 +72,8 @@ export default function BarMagnet({
     } else {
       if (isAnimatingRef.current) {
         isAnimatingRef.current = false;
-        updateObject?.(id, { frozen: false });
+        updateObject?.(id, { frozen: frozen });
+        clockRef.current?.stop();
       }
     }
   }, [animated, id, updateObject]);

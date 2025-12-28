@@ -230,7 +230,7 @@ const objectFactories = {
     charges: [],
     direction: [0, 1, 0],     // normal vector (area direction)
     rotation: [0, 0, 0],      // Euler angles for rotation
-    frozen: false,
+    frozen: true,
     animated: false,
     amplitude: 0.5,
     freq: 1,
