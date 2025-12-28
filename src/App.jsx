@@ -548,6 +548,7 @@ function LoadingOverlay() {
                     case 'solenoid': ObjectComponent = Solenoid; break
                     case 'ring': ObjectComponent = RingCoil; break
                     case 'polygon': ObjectComponent = PolygonCoil; break
+                    case 'barMagnet': ObjectComponent = BarMagnet; break
                     default: ObjectComponent = RingCoil; break
                   }
                   break

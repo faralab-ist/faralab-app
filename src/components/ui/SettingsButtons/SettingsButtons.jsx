@@ -101,7 +101,7 @@ export default function SettingsButtons({
   // has b field if theres any path object
   const hasBField = useMemo(() => {
     if (!sceneObjects) return false;
-    return sceneObjects.some(o => o.type === 'path' || o.type === 'coil' || o.type === 'barMagnet');
+    return sceneObjects.some(o => o.type === 'path' || o.type === 'coil');
   }, [sceneObjects]);
   
   const exclusiveActiveType = !creativeMode && gaussianSurfaces.length === 1

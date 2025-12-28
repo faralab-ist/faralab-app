@@ -5,7 +5,7 @@ export function calculateMagFieldAtPoint(objects, point){
     let result = new THREE.Vector3(0, 0, 0);
     const MU_04PI = MU_0_REAL / (4 * Math.PI);
     for(const obj of objects){
-        if(obj.type !== 'barMagnet' && obj.type !== 'coil' && obj.type !== 'path') continue;
+        if(obj.type !== 'coil' && obj.type !== 'path') continue;
         const basePos = new THREE.Vector3(...obj.position);
         const charges = obj.charges || [];
         const tangents = obj.tangents || [];

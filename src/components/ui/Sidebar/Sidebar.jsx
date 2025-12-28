@@ -131,7 +131,8 @@ export default function Sidebar({
     return 'surface';
   };
 
-  const pillObjects = (objects || []).filter(o => ['faradayCoil', 'barMagnet','path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
+  const pillObjects = (objects || []).filter(o => 
+    ['faradayCoil','path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
 
   const typeCounters = {};
   const subtypeCounters = {};

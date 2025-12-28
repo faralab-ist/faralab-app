@@ -288,7 +288,7 @@ export default function ObjectItem({
               />
             )}
 
-            {obj.type === 'coil' && obj.coilType !== 'solenoid' (
+            {obj.type === 'coil' && obj.coilType !== 'solenoid' && (
               <>
                 <PathControls
                     obj={obj}
@@ -448,8 +448,7 @@ export default function ObjectItem({
                 style={{ padding: "0 12px 8px" }}
               >
                 {errorMsg}
-                  </div>
-               </div>
+              </div>
             )}
 
             {obj.type === 'coil' && obj.coilType === 'solenoid' && (
@@ -457,7 +456,7 @@ export default function ObjectItem({
                  <div className="detail-row">
                     <div className="detail-key">Length</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         value={obj.length}
                         min={0.1} max={100}
                         style={{ width: 140 }}
@@ -471,7 +470,7 @@ export default function ObjectItem({
                  <div className="detail-row">
                     <div className="detail-key">Radius</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         value={obj.radius}
                         min={0.1} max={50}
                         style={{ width: 140 }}
@@ -485,7 +484,7 @@ export default function ObjectItem({
                  <div className="detail-row">
                     <div className="detail-key">Resolution</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         value={obj.resolution}
                         min={0.1} max={300}
                         style={{ width: 140 }}
@@ -499,7 +498,7 @@ export default function ObjectItem({
                   <div className="detail-row">
                     <div className="detail-key">Strength</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         value={obj.multiplier}
                         min={0.1} max={50}
                         style={{ width: 140 }}
@@ -512,12 +511,12 @@ export default function ObjectItem({
                </>
             )}
 
-            {obj.type === 'barMagnet' && (
+            {obj.type === 'coil' && obj.coilType === 'barMagnet' && (
                <>
                  <div className="detail-row">
                     <div className="detail-key">Length</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         value={obj.length}
                         min={0.1} max={100}
                         style={{ width: 140 }}
@@ -531,7 +530,7 @@ export default function ObjectItem({
                  <div className="detail-row">
                     <div className="detail-key">Radius</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         value={obj.radius}
                         min={0.1} max={50}
                         style={{ width: 140 }}
@@ -545,7 +544,7 @@ export default function ObjectItem({
                   <div className="detail-row">
                     <div className="detail-key">Strength</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         value={obj.charge}
                         min={0.1} max={50}
                         style={{ width: 140 }}
@@ -559,7 +558,7 @@ export default function ObjectItem({
                  <div className="detail-row">
                     <div className="detail-key">Resolution</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         step={1}
                         value={obj.numOfCoils}
                         min={1.0} max={50}
@@ -600,7 +599,7 @@ export default function ObjectItem({
                   <div>
                     <div className="detail-key">Freq (Hz)</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         value={Number.isFinite(obj.freq) ? obj.freq : (obj.freq === undefined ? 1 : 0)}
                         step={0.1}
                         min={0} max={100}
@@ -615,7 +614,7 @@ export default function ObjectItem({
                   <div>
                     <div className="detail-key">Amplitude</div>
                     <div className="detail-value">
-                      <NumberInput
+                      <InlineDecimalInput
                         value={Number.isFinite(obj.amplitude) ? obj.amplitude : (obj.amplitude === undefined ? 0.1 : 0)}
                         step={0.01}
                         min={0} max={100}
@@ -635,13 +634,11 @@ export default function ObjectItem({
                  <div className="detail-row">
                     <div className="detail-key">Radius</div>
                     <div className="detail-value">
-                      <NumberInput
-                        value={obj.radius}
+                      <InlineDecimalInput
+                        initialValue={obj.radius}
                         min={0.01} max={10}
-                        style={{ width: 140 }}
+                        step={0.01}
                         onChange={(v) => updateObject(obj.id, { radius: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
                       />
                     </div>
                  </div>
@@ -656,23 +653,6 @@ export default function ObjectItem({
                     <div className="detail-value">{obj.emf}</div>
                  </div>
                 </>
-            )}
-
-            {/* Opção Infinite (Para Planes e Wire) */}
-            {(isPlaneVariant || obj.type === 'wire') && (
-              <div className="detail-row">
-                 <div className="detail-key">Infinite</div>
-                 <div className="detail-value">
-                   <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
-                     <input 
-                       type="checkbox" 
-                       checked={obj.infinite || false}
-                       onChange={(e) => updateObject(obj.id, { infinite: e.target.checked })}
-                       onClick={(e) => e.stopPropagation()}
-                     />
-                   </label>
-                 </div>
-              </div>
             )}
 
             <div className="detail-row">
