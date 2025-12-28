@@ -6,7 +6,7 @@ import computeShaderSrc from '../../../shaders/equipotentialComputeFrag.glsl';
 import { EPSILON_0, K_E } from '../../../physics/constants';
 import { efields } from '../../../physics'
 
-const RESOLUTION = 64;
+const RESOLUTION = 100;
 const GRID_MIN = new THREE.Vector3(-10, -10, -10);
 const GRID_MAX = new THREE.Vector3(10, 10, 10);
 
@@ -100,8 +100,9 @@ export default function EquipotentialSurface({ objects, targetValue = 1.0, trans
         return () => computeScene.remove(computeMesh);
     }, [computeMaterial, computeScene]);
 
-    const visualMaterial = useMemo(() => 
-        new THREE.ShaderMaterial({
+    const visualMaterial = useMemo(() => {
+        const MAX_CHARGES = 100;
+        return new THREE.ShaderMaterial({
             uniforms: {
                 uPotentialVolume: { value: null },
                 cameraMatrixWorld : { value: new THREE.Matrix4() },
@@ -117,6 +118,11 @@ export default function EquipotentialSurface({ objects, targetValue = 1.0, trans
                 useSlice: { value: false },
                 slicePlane: { value: new THREE.Vector3(1, 0, 0) },
                 slicePos: { value: 0.0 },
+
+                chargeCount: { value: 0 },
+                chargePos: { value: new Array(MAX_CHARGES).fill(new THREE.Vector3()) },
+                chargeVal: { value: new Float32Array(MAX_CHARGES).fill(0) },
+                k_e : { value: K_E },
             },
             vertexShader: `
                 varying vec2 vUv;
@@ -131,6 +137,7 @@ export default function EquipotentialSurface({ objects, targetValue = 1.0, trans
             depthWrite: false,
             depthTest: true,
         })
+    }
     , [size.width, size.height, transparency]);
 
     useEffect(() => {
@@ -143,8 +150,8 @@ export default function EquipotentialSurface({ objects, targetValue = 1.0, trans
 
         objects.forEach((obj) => {
             if (obj.type === 'charge') {
-                computeMaterial.uniforms.chargePos.value[chargeIdx] = new THREE.Vector3(...obj.position);
-                computeMaterial.uniforms.chargeVal.value[chargeIdx] = obj.charge;
+                visualMaterial.uniforms.chargePos.value[chargeIdx] = new THREE.Vector3(...obj.position);
+                visualMaterial.uniforms.chargeVal.value[chargeIdx] = obj.charge;
                 chargeIdx++;
             } else if (obj.type === 'plane' && obj.infinite) {
                 computeMaterial.uniforms.planePositions.value[planeIdx] = new THREE.Vector3(...obj.position);
@@ -222,7 +229,8 @@ export default function EquipotentialSurface({ objects, targetValue = 1.0, trans
             }
         });
 
-        computeMaterial.uniforms.chargeCount.value = chargeIdx;
+        computeMaterial.uniforms.chargeCount.value = 0;
+        visualMaterial.uniforms.chargeCount.value = chargeIdx;
         computeMaterial.uniforms.planeCount.value = planeIdx;
         computeMaterial.uniforms.finPlaneCount.value = finPlaneIdx;
         computeMaterial.uniforms.wireCount.value = wireIdx;
@@ -234,7 +242,7 @@ export default function EquipotentialSurface({ objects, targetValue = 1.0, trans
         computeMaterial.uniforms.uGridRes.value = RESOLUTION;
 
         const size3D = RESOLUTION;
-        const data3D = new Float32Array(size3D * size3D * size3D * 4);
+        const data3D = new Float32Array(size3D * size3D * size3D);
 
         const oldRT = gl.getRenderTarget();
         const buffer = new Float32Array(RESOLUTION * RESOLUTION * 4);
@@ -257,7 +265,9 @@ export default function EquipotentialSurface({ objects, targetValue = 1.0, trans
         }
 
         gl.setRenderTarget(oldRT);
-
+        if (visualMaterial.uniforms.uPotentialVolume.value) {
+            visualMaterial.uniforms.uPotentialVolume.value.dispose();
+        }
         const texture3D = new THREE.Data3DTexture(data3D, size3D, size3D, size3D);
         texture3D.format = THREE.RedFormat;
         texture3D.type = THREE.FloatType;

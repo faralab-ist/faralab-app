@@ -6,10 +6,10 @@ import React, { useState, useEffect, useMemo } from 'react'
 
 
   // Core components
-  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, Path, TestCharge} from './components/models'
+  import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, Path, TestCharge, BarMagnet} from './components/models'
 
   // Coil components
-  import { RingCoil, PolygonCoil } from './components/models/coils'
+  import { RingCoil, PolygonCoil, Solenoid, FaradayCoil } from './components/models/coils'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -545,12 +545,17 @@ function LoadingOverlay() {
                 case 'coil':
                   // Select coil component based on coilType
                   switch(obj.coilType) {
+                    case 'solenoid': ObjectComponent = Solenoid; break
                     case 'ring': ObjectComponent = RingCoil; break
                     case 'polygon': ObjectComponent = PolygonCoil; break
                     default: ObjectComponent = RingCoil; break
                   }
                   break
                 case 'ringCoil': ObjectComponent = RingCoil; break // Legacy support
+                case 'polygonCoil': ObjectComponent = PolygonCoil; break // Legacy support
+                case 'solenoid': ObjectComponent = Solenoid; break // Legacy support
+                case 'barMagnet': ObjectComponent = BarMagnet; break
+                case 'faradayCoil': ObjectComponent = FaradayCoil; break
                 default: return null;
               } 
             }
@@ -559,6 +564,7 @@ function LoadingOverlay() {
               <ObjectComponent
                 key={obj.id}
                 {...obj}
+                objects={sceneObjects}
                 creativeMode={creativeMode}           
                 selectedId={selectedId}
                 setSelectedId={handleSelect}

@@ -130,7 +130,7 @@ export default function BaseCoil({
   // Generate path points using the provided function
   const pathPoints = useMemo(() => {
     return getPathPoints()
-  }, [getPathPoints])
+  }, [getPathPoints, position, rotation])
 
   // Handle dragging
   const handleDragStart = (axes) => {
@@ -154,6 +154,11 @@ export default function BaseCoil({
     e.stopPropagation()
     setSelectedId(id)
   }
+
+  //set objects velocity and charge
+  useEffect(() => {
+    updateObject?.(id, { velocity, charge })
+  }, [velocity, charge, id, updateObject])
 
   return (
     <PivotControls
