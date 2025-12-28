@@ -2,6 +2,7 @@ import React, { useRef, useLayoutEffect, useEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
+import Label from '../ui/labels/Label'
 
 
 function Plane({ 
@@ -22,6 +23,7 @@ function Plane({
   rotation,
   quaternion,
   isHovered,
+  showLabel = true,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -124,7 +126,7 @@ function Plane({
 
         // persist quaternion + Euler rotation (radians) so UI stays in sync
         const e = new THREE.Euler().setFromQuaternion(qGroup, 'XYZ')
-        updateObject?.(id, { planeWidth, planeHeight, quaternion: [qGroup.x, qGroup.y, qGroup.z, qGroup.w], rotation: [e.x, e.y, e.z] })
+        updateObject?.(id, { width, height, quaternion: [qGroup.x, qGroup.y, qGroup.z, qGroup.w], rotation: [e.x, e.y, e.z] })
       }}
       onDragEnd={() => {
         isDraggingRef.current = false
@@ -133,6 +135,14 @@ function Plane({
       scale={0.86}
       lineWidth={2.5}
     >
+      {showLabel && (
+        <Label  
+          name="Surface Density"
+          value={`${charge_density.toExponential(2)} C/m²`}
+          offsetY={0.5}
+          distanceFactor={10}
+        />
+      )}
       <mesh
         ref={meshRef}
         rotation={baseEuler}               // lay plane flat

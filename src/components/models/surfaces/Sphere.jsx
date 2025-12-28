@@ -4,8 +4,8 @@ import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
 import SphereShape from '../../../Surfaces/sphereShape'
 
-import { Html } from '@react-three/drei' // <--- 1. Importar Html
-import FluxWindow from '../../../components/ui/FluxWindow/fluxWindow' // <--- 2. Importar FluxWindow
+import { Html } from '@react-three/drei'
+import Label from '../../ui/labels/Label'
 
 function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
     if(!useSlice) return true;
@@ -125,30 +125,13 @@ export default function Sphere({
           />
         </mesh>
 {showOnlyGaussianField && (
-        <Html
-          // 1. Colocamos exatamente na superfície (radius), sem folga extra
-          position={[0, radius, 0]} 
-          
-          // 2. Removemos a prop 'center' (que causava o deslize visual)
-          
-          // 3. DistanceFactor mantém o tamanho consistente com o zoom
-          distanceFactor={10} 
-          
-          // 4. Z-index alto para não cortar dentro da esfera
-          zIndexRange={[100, 0]} 
-          
-          // 5. O segredo está no transform:
-          // -50% (X): Centraliza horizontalmente
-          // -100% (Y): Puxa a etiqueta para cima, fazendo a base tocar no ponto
-          style={{ 
-            transform: 'translate3d(-50%, -100%, 0)',
-            pointerEvents: 'none',
-            userSelect: 'none',
-            paddingBottom: '10px' // Dá um pequeno respiro visual sem perder a âncora
-          }} 
-        >
-          <FluxWindow value={fluxValue} visible={true} />
-        </Html>
+        <Label
+          position={[0, radius, 0]}
+          name="Flux"
+          value={`Φ = ${fluxValue.toExponential(2)} N⋅m²/C`}
+          offsetY={0}
+          distanceFactor={10}
+        />
 )}
 
         {isSelected && (
