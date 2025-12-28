@@ -11,6 +11,9 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Responsive base font size - scales for larger screens */
+  font-size: clamp(14px, 0.833vw, 20px); /* 16px at 1920px, scales up to 20px for 4K */
 }
 
 a {
