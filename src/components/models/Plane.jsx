@@ -140,7 +140,7 @@ function Plane({
           name="Surface Density"
           value={`${charge_density.toExponential(2)} C/m²`}
           offsetY={0.5}
-          distanceFactor={10}
+          distanceFactor={12}
         />
       )}
       <mesh
