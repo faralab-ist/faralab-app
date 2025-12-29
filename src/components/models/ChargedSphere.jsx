@@ -2,6 +2,7 @@ import React, { useRef, useLayoutEffect, useEffect, useMemo} from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
+import Label from '../ui/labels/Label'
 
 export default function Sphere({ 
   id, 
@@ -13,7 +14,6 @@ export default function Sphere({
   setIsDragging,
   updatePosition,
   updateDirection,
-  updateChargeDensity,
   radius,
   isHollow = false,
   slicePlane,
@@ -21,7 +21,8 @@ export default function Sphere({
   slicePos,
   useSlice,
   creativeMode,        
-  isHovered
+  isHovered,
+  showLabel = true
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -92,6 +93,13 @@ export default function Sphere({
       scale={0.86}
       lineWidth={2.5}
     >
+      {showLabel && (
+        <Label
+          name="Volume Density"
+          value={`${charge_density.toExponential(2)} C/m³`}
+          offsetY={radius + 0.5}
+        />
+      )}
       <mesh
         ref={meshRef}
         rotation={baseEuler}               // lay plane flat

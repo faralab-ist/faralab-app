@@ -15,8 +15,8 @@
   position: fixed;
   top: 0;
   right: 0;
-  width: 325px;
-  top: 20px;
+  width: clamp(325px, 20.3rem, 400px);
+  top: clamp(20px, 1.25rem, 26px);
   height: 100vh;
   background: #101010;
   color: #eaeaea;
@@ -41,12 +41,14 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 8px;
+  gap: clamp(8px, 0.5rem, 10px);
 }
 
 /*object list imgs*/
 .object-row img {
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  width: 20px;
+  height: 20px;
 }
 
 
@@ -54,7 +56,7 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 .object-row-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: clamp(4px, 0.25rem, 5px);
 }
 
 /*deixa as filas de cada objeto bonitinhas na sidebar maximizada ##### É USADO ######*/
@@ -62,10 +64,10 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: clamp(8px, 0.5rem, 10px);
+  padding: clamp(8px, 0.5rem, 10px) clamp(10px, 0.625rem, 12px);
   border: 1px solid #202020;
-  border-radius: 8px;
+  border-radius: clamp(8px, 0.5rem, 10px);
   background: #121212;
   cursor: pointer;  
 }
@@ -293,7 +295,13 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 .concentricSpheres-icon-btn,
 .sphere-icon-btn,
 .cuboid-icon-btn,
-.cylinder-icon-btn {
+.cylinder-icon-btn,
+.path-icon-btn,
+.ringCoil-icon-btn,
+.polygonCoil-icon-btn,
+.solenoid-icon-btn,
+.barMagnet-icon-btn,
+.faradayCoil-icon-btn {
   background: none;
   border: none;
   padding: 4px;
@@ -349,16 +357,13 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
 }
 
-/* Ícones de superfícies */
-.sphere-icon-btn .sphere-icon,
-.cuboid-icon-btn .cuboid-icon,
-.cylinder-icon-btn .cylinder-icon {
+/* Estilo compartilhado para todos os ícones do minibar */
+.sidebar-icon {
   width: 28px;
   height: 28px;
   filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
   transition: filter .12s, transform .08s;
 }
-
 
 /* No modo minimizado, o botão não ganha hover visual */
 .sidebar.minimized button:hover {
@@ -373,16 +378,6 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 .sidebar.minimized button.hovered img {
   transform: scale(1.1);
   filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);
-
-}
-
-
-/* Add styling for the icon inside */
-.testPointCharge-icon-btn .test-charge-icon {
-  width: 28px;
-  height: 28px;
-  filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
-  transition: filter .12s, transform .08s;
 }
 
 

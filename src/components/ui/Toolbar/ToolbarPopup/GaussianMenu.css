@@ -1,0 +1,156 @@
+/* Gaussian menu container */
+.gaussian-menu-container {
+  padding: 12px;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(180deg, rgba(18, 18, 18, 0.95), rgba(15, 15, 15, 0.98));
+  border-radius: 10px;
+  animation: fadeInUp .18s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Settings info text */
+.settings-info {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+/* Surface buttons row */
+.surface-buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.surface-icon-btn {
+  flex: 1 1 70px;
+  max-width: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: white;
+  padding: 10px 12px;
+  width: 78px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: background .15s, border-color .15s, color .15s, transform .05s;
+}
+
+.surface-icon-btn:hover:not(:disabled) {
+  background: #2a2a2a;
+  border-color: #444;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.surface-icon-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.surface-icon-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.surface-icon-btn.active {
+  background: rgba(46,116,255,0.15);
+  border-color: rgba(46,116,255,0.55);
+  color: #c6e1ff;
+  box-shadow: inset 0 -2px 6px rgba(46, 116, 255, 0.1);
+}
+
+.surface-icon-btn img {
+  width: 28px;
+  height: 28px;
+  display: block;
+  opacity: .9;
+}
+
+/* Separator line between Gaussian controls and Flux button */
+.gaussian-sep {
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.08) 20%, 
+    rgba(255, 255, 255, 0.08) 80%, 
+    transparent
+  );
+  margin: 10px 0 6px 0;
+}
+
+/* Compact flux button row */
+.flux-button-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* When no Gaussian surfaces exist, dim the entire row */
+.flux-button-row.disabled {
+  opacity: .35;
+}
+
+/* Compact icon-style Flux button */
+.flux-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 155px;
+  height: 40px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: white;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: background .12s, border-color .12s, transform .05s;
+}
+
+.flux-icon-btn img {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.flux-icon-btn:hover:not(:disabled) {
+  background: #2a2a2a;
+  border-color: #444;
+  transform: translateY(-1px);
+}
+
+.flux-icon-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.flux-icon-btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+.flux-icon-btn.active {
+  background: rgba(46,116,255,0.15);
+  border-color: rgba(46,116,255,0.55);
+  color: #c6e1ff;
+  box-shadow: inset 0 -2px 6px rgba(46, 116, 255, 0.1);
+}

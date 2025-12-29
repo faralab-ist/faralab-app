@@ -118,66 +118,7 @@ export default function CreateButtons({
 
   return (
     <>
-      {/* Presets (não deslocar) */}
-      <button
-        ref={presetBtnRef}
-        className="presets-btn"
-        onClick={() => toggleGroup('presets')}
-        aria-expanded={openGroup === 'presets'}
-      >
-        PRESETS
-      </button>
-
-      {/* Presets dropdown (não desloca) */}
-      {openGroup === 'presets' && (
-        <div ref={panelRef} className="preset-dropdown tl" role="menu" aria-label="Presets">
-          <div className="expanded-panel">
-            <button onClick={() => loadPreset('monopole')}>Monopole</button>
-            <button onClick={() => loadPreset('dipole')}>Dipole</button>
-            <button onClick={() => loadPreset('tripole')}>Tripole</button>
-            <button onClick={() => loadPreset('infiniteWire')}>Wire</button>
-            <button onClick={() => loadPreset('currentLoop')}>Current Loop</button>
-            <div className="spacer" />
-            <button onClick={() => loadPreset('singlePlane')}>1 Plane</button>
-            <button onClick={() => loadPreset('parallelPlanes')}>2 Planes</button>
-            <div className="spacer" />
-            <button onClick={() => loadPreset('sphere')}>Sphere</button>
-            <button onClick={() => loadPreset('sphericalCapacitor')}>Spherical Capacitor</button>
-
-            <div className="preset-separator" aria-hidden="true" />
-
-            <div className="preset-actions">
-              <button onClick={handleImport} >Import Preset</button>
-              <button onClick={handleExport}>Export Preset</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="create-buttons-container">
-
-        {/* Field objects — NÃO deslocar */}
-        {creativeMode && (
-          <div className="field-objects">
-            <h4>Field Objects</h4>
-            <div className="buttons-group">
-              <button onClick={() => addObject('charge', { position: [0,0,0], charge: 1 })}>Add Charge</button>
-              <button onClick={() => addObject('wire', { position: [0,0,0]})}>Add Wire</button>
-              <button onClick={() => addObject('plane', { position: [0,0,0] })}>Add Plane</button>
-              <button onClick={() => addObject('chargedSphere', { position: [0,0,0] })}>Add Charged Sphere</button>
-              <button onClick={() => addObject('path', { position: [0,0,0] })}>Add Path</button>
-              <button onClick={() => addObject('ringCoil', { position: [0,0,0] }) }>Add Ring Coil</button>
-              <button onClick={() => addObject('polygonCoil', { position: [0,0,0]}) }>Add Polygon Coil</button>
-              <button onClick={() => addObject('testPointCharge', { position: [0,0,0] })}>Add Test Charge</button>
-
-           {/*    <button onClick={() => addObject('concentricSpheres', { position: [0,0,0] })}>Add Concentric Sphere System</button>
-              <button onClick={() => addObject('concentricInfWires', { position: [0,0,0] })}>Add Concentric Infinite Wire System</button>
-              <button onClick={() => addObject('stackedPlanes', { position: [0,0,0] })}>Add Stacked Planes</button> */} 
-            </div>
-          </div>
-        )}
-      </div>
-
+      {/* Export Dialog */}
       <ExportDialog
         isOpen={showExportDialog}
         onClose={() => setShowExportDialog(false)}

@@ -44,7 +44,8 @@ export default function PolygonCoil({
   charges = [],
   
   // Scene objects for E-field calculation
-  sceneObjects = [],
+
+  showLabel = true,
 }) {
   // Compute the normal for a polygon (perpendicular to its plane)
   // For a polygon lying flat in XZ plane, normal points along Y
@@ -209,6 +210,7 @@ export default function PolygonCoil({
       isClosedPath={true}
       computeNormal={computePolygonNormal}
       getPathPoints={getPolygonPoints}
+        showLabel = {showLabel}
       coilGeometry={
         <mesh geometry={polygonGeometry}>
           <meshStandardMaterial color={coilColor} emissive={coilColor} />

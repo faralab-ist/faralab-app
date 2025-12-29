@@ -7,6 +7,12 @@ import CylinderIcon from "../../../assets/cylinder.svg";
 import PlaneIcon from "../../../assets/plane.svg";
 import ChargeSphereIcon from "../../../assets/charge_sphere.svg";
 import LowercaseQIcon from "../../../assets/lowercase_q2.svg";
+import RingCoilIcon from "../../../assets/ring_coil.svg";
+import PolygonCoilIcon from "../../../assets/polygon_coil.svg";
+import PathIcon from "../../../assets/path1.svg";
+import BarMagnetIcon from "../../../assets/bar_magnet.svg";
+import SolenoidIcon from "../../../assets/solenoid.svg";
+import FaradayCoilIcon from "../../../assets/faraday_coil.svg";
 
 export const POS_MIN = -10, POS_MAX = 10;
 export const VAL_MIN = -5, VAL_MAX = 5;
@@ -24,11 +30,25 @@ export const TYPE_CONFIG = {
     alt: 'Test Charge'
   },
   wire: { icon: WireIcon, alt: "Wire" },
+  path: { icon: PathIcon, alt: "Path" },
   concentricInfWires: { icon: WireIcon, alt: "Concentric Wires" },
   plane: { icon: PlaneIcon, alt: "Plane" },
   stackedPlanes: { icon: PlaneIcon, alt: "Stacked Planes" },
   chargedSphere: { icon: ChargeSphereIcon, alt: "Charged Sphere" },
   concentricSpheres: { icon: ChargeSphereIcon, alt: "Concentric Spheres" },
+  ringCoil: { icon: RingCoilIcon, alt: "Ring Coil" },
+  polygonCoil: { icon: PolygonCoilIcon, alt: "Polygon Coil" },
+  barMagnet: { icon: BarMagnetIcon, alt: "Bar Magnet" },
+  solenoid: { icon: SolenoidIcon, alt: "Solenoid" },
+  faradayCoil: { icon: FaradayCoilIcon, alt: "Faraday Coil" },
+  coil: {
+    resolve: (obj) => {
+      if (obj.coilType === 'ring') return { icon: RingCoilIcon, alt: "Ring Coil", subtype: 'ringCoil' };
+      if (obj.coilType === 'polygon') return { icon: PolygonCoilIcon, alt: "Polygon Coil", subtype: 'polygonCoil' };
+      if (obj.coilType === 'solenoid') return { icon: SolenoidIcon, alt: "Solenoid", subtype: 'solenoid' };
+      return { icon: RingCoilIcon, alt: "Ring Coil", subtype: 'ringCoil' };
+    }
+  },
   surface: {
     // Função para decidir qual ícone mostrar baseado nas propriedades
     resolve: (obj) => {

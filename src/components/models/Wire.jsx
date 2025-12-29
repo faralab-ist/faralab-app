@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useLayoutEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
+import Label from '../ui/labels/Label'
 
 function Wire({
   id,
@@ -23,6 +24,7 @@ function Wire({
   creativeMode,
   rotation,
   isHovered,
+  showLabel = true,
 }) {
   const isSelected = id === selectedId
   
@@ -138,6 +140,13 @@ function Wire({
       scale={0.86}
       lineWidth={2.5}
     >
+    {showLabel && (
+      <Label
+        name="Linear Density"
+        value={`λ = ${charge_density.toExponential(2)} C/m`}
+        offsetY={0.5}
+      />
+    )}
       <group ref={groupRef}>
         <mesh
           userData={{

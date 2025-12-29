@@ -18,6 +18,11 @@ export default function DimensionControls({ obj, updateObject }) {
   if (obj.type === 'charge' || obj.type === 'testPointCharge') return null;
 
   const update = (field, val) => updateObject(obj.id, { [field]: val });
+
+  if (obj.type === 'coil') return null;
+  if (obj.type === 'barMagnet') return null;
+  if (obj.type === 'faradayCoil') return null;
+
   // Plane
   if (obj.type === 'plane' || obj.type === 'stackedPlanes') {
     if (obj.infinite) return null;

@@ -5,7 +5,7 @@ import NormalArrow from './NormalArrow'
 import CylinderShape from '../../../Surfaces/cylinderShape'
 
 import { Html } from '@react-three/drei'
-import FluxWindow from '../../../components/ui/FluxWindow/fluxWindow'
+import Label from '../../ui/labels/Label'
 
 function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip){
     if(!useSlice) return true;
@@ -171,19 +171,13 @@ export default function Cylinder({
           />
         </mesh>
 {showOnlyGaussianField && (
-        <Html
-          position={[0, (height / 2) + 0.7, 0]} // Topo do cilindro
+        <Label
+          position={[0, (height / 2) + 0.7, 0]}
+          name="Flux"
+          value={`${fluxValue.toExponential(2)} N⋅m²/C`}
+          offsetY={0}
           distanceFactor={10}
-          zIndexRange={[100, 0]}
-          style={{ 
-            transform: 'translate3d(-50%, -100%, 0)', // Ancora pela base
-            pointerEvents: 'none',
-            userSelect: 'none',
-            paddingBottom: '10px'
-          }}
-        >
-          <FluxWindow value={fluxValue} visible={true} />
-        </Html>
+        />
 )}
 
         {isSelected && (

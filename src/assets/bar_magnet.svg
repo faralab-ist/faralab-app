@@ -1,0 +1,13 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bar magnet body -->
+  <rect x="5" y="8" width="14" height="8" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  
+  <!-- Divider line in middle -->
+  <line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="1.5"/>
+  
+  <!-- N label (left side) -->
+  <text x="8.5" y="13.5" font-family="Arial, sans-serif" font-size="5" font-weight="bold" fill="currentColor" text-anchor="middle">N</text>
+  
+  <!-- S label (right side) -->
+  <text x="15.5" y="13.5" font-family="Arial, sans-serif" font-size="5" font-weight="bold" fill="currentColor" text-anchor="middle">S</text>
+</svg>

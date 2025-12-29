@@ -3,6 +3,7 @@ import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
+import Label from '../ui/labels/Label'
 
 export default function Path({
   id,
@@ -26,6 +27,7 @@ export default function Path({
   parentRotation,
   parentQuaternion,
   groupRef: parentGroupRef,
+  showLabel = true,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -147,12 +149,25 @@ export default function Path({
     return new THREE.LineBasicMaterial({ color: 'gray' });
   }, []);
 
+  // Calculate electric current: I = Q/t = (total charge) × (frequency)
+  // Current = charge × chargeCount × (velocity / path_length)
+  // NÃO SE ISTO TA BEM XD 
+  const electricCurrent = useMemo(() => {
+    if (!catmullCurve || velocity === 0) return 0;
+    const curveLength = catmullCurve.getLength();
+    if (curveLength === 0) return 0;
+    // I = (charge per particle) × (number of particles) × (loops per second)
+    // loops per second = velocity / curveLength
+    return Math.abs(charge * chargeCount * velocity / curveLength);
+  }, [charge, chargeCount, velocity, catmullCurve]);
+
   const getChargePositions = () => {
     if (points?.length < 2) return [];
     const positions = [];
     const tangents = [];
     const nCharges = Math.max(0, Math.floor(chargeCount));
     const curveLength = catmullCurve.getLength();
+    //console.log(catmullCurve.points)
 
     const timePerLoop = curveLength / Math.max(0.1, Math.abs(velocity));
     const currLoopTime = clockRef.current ? clockRef.current.getElapsedTime() % timePerLoop : 0;
@@ -175,6 +190,7 @@ export default function Path({
 
   useFrame(() => {
     const pos = getChargePositions();
+    //console.log(pos)
     
     // If this is a child of a rotated parent (like a coil), apply parent's rotation
 
@@ -184,6 +200,7 @@ export default function Path({
     const currLoopTime = clockRef.current ? clockRef.current.getElapsedTime() % timePerLoop : 0;
     let currLoopt = currLoopTime / timePerLoop;
     if (isChild && parentGroupRef?.current) {
+      //console.log("aaaaa")
       const parentQuat = parentGroupRef.current.quaternion;
       
       // Transform charge positions and tangents by parent rotation
@@ -204,10 +221,11 @@ export default function Path({
         const rotatedTangent = tangent.clone().applyQuaternion(parentQuat);
         tangents.push([rotatedTangent.x, rotatedTangent.y, rotatedTangent.z]);
       }
-      //console.log("Applying parent rotation to path charges");
-      updateObject?.(id, { charges: rotatedPositions, tangents: tangents });
+  
+      // Store in local state instead of updating parent on every frame
+      setChargePositions(rotatedPositions);
     } else {
-      //console.log("Not applying parent rotation");
+  
       // Original behavior for non-rotated paths
       const tangents = [];
       const nCharges = pos.length;
@@ -247,6 +265,14 @@ export default function Path({
       scale={0.86}
       lineWidth={2.5}
     >
+      {showLabel && (
+        <Label
+          
+          name="Electrical Current"
+          value={`${electricCurrent.toExponential(2)} A`}
+          offsetY={0.5}
+        />
+      )}
       <group ref={groupRef}>
         {/* debug points for path */}
         {renderPoints && points?.map((pt, i) => {

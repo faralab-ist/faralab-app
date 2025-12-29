@@ -10,6 +10,12 @@ import CuboidIcon from "../../../assets/cuboid.svg";
 import CylinderIcon from "../../../assets/cylinder.svg";
 import PlaneIcon from "../../../assets/plane.svg";
 import ChargeSphereIcon from "../../../assets/charge_sphere.svg";
+import RingCoilIcon from "../../../assets/ring_coil.svg";
+import PolygonCoilIcon from "../../../assets/polygon_coil.svg";
+import PathIcon from "../../../assets/path1.svg";
+import BarMagnetIcon from "../../../assets/bar_magnet.svg";
+import SolenoidIcon from "../../../assets/solenoid.svg";
+import FaradayCoilIcon from "../../../assets/faraday_coil.svg";
 
 /**
  * Sidebar agora suporta 3 estados:
@@ -131,12 +137,20 @@ export default function Sidebar({
     return 'surface';
   };
 
-  const pillObjects = (objects || []).filter(o => ['path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
+  
+
+  const pillObjects = (objects || []).filter(o => 
+    ['path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires', 'coil', 'barMagnet', 'faradayCoil'].includes(o.type));
   const typeCounters = {};
   const subtypeCounters = {};
 
   const minibarItems = pillObjects.map((o) => {
-    if (o.type === 'surface') {
+    if (o.type === 'coil') {
+      const coilType = o.coilType === 'ring' ? 'ringCoil' : o.coilType === 'polygon' ? 'polygonCoil' : o.coilType === 'solenoid' ? 'solenoid' : 'ringCoil';
+      typeCounters[coilType] = (typeCounters[coilType] || 0) + 1;
+      const label = `${coilType === 'ringCoil' ? 'Ring Coil' : coilType === 'polygonCoil' ? 'Polygon Coil' : 'Solenoid'} ${typeCounters[coilType]}`;
+      return { id: o.id, type: coilType, subtype: null, label, name: o.name, obj: o };
+    } else if (o.type === 'surface') {
       const raw = detectSubtype(o);
       const subtype = raw || 'surface';
       subtypeCounters[subtype] = (subtypeCounters[subtype] || 0) + 1;
@@ -192,7 +206,7 @@ export default function Sidebar({
                   <button
                     key={item.id}
                     className={`${
-                      ['pos_charge','neg_charge','testPointCharge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires'].includes(item.type)
+                      ['pos_charge','neg_charge','testPointCharge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires', 'ringCoil', 'polygonCoil', 'solenoid', 'barMagnet', 'faradayCoil', 'path'].includes(item.type)
                         ? `${item.subtype || item.type}-icon-btn ${item.polarity || ''}`
                         : `pill ${item.subtype || item.type} minibar-pill`
                     } ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
@@ -209,29 +223,41 @@ export default function Sidebar({
                     aria-label={item.name || item.label} 
                   >
                     {item.type === 'pos_charge' ? (
-                      <img src={PosChargeIcon} alt="Positive Charge" className="charge-icon" />
+                      <img src={PosChargeIcon} alt="Positive Charge" className="sidebar-icon" />
                     ) : item.type === 'neg_charge' ? (
-                      <img src={NegChargeIcon} alt="Negative Charge" className="charge-icon" />
+                      <img src={NegChargeIcon} alt="Negative Charge" className="sidebar-icon" />
                     ) : item.type === 'testPointCharge' ? (
-                      <img src={LowercaseQIcon} alt="Test Charge" className="test-charge-icon" />
+                      <img src={LowercaseQIcon} alt="Test Charge" className="sidebar-icon" />
                     ) : item.type === 'wire' ? (
-                      <img src={WireIcon} alt="Wire" className="wire-icon" />
+                      <img src={WireIcon} alt="Wire" className="sidebar-icon" />
                     ) : item.type === 'concentricInfWires' ? (
-                      <img src={WireIcon} alt="Concentric Wires" className="wire-icon" />  
+                      <img src={WireIcon} alt="Concentric Wires" className="sidebar-icon" />  
                     ) : item.type === 'plane' ? (
-                      <img src={PlaneIcon} alt="Plane" className="plane-icon" />
+                      <img src={PlaneIcon} alt="Plane" className="sidebar-icon" />
                     ) : item.type === 'stackedPlanes' ? (
-                      <img src={PlaneIcon} alt="StackedPlanes" className="plane-icon" />  
+                      <img src={PlaneIcon} alt="StackedPlanes" className="sidebar-icon" />  
                     ) : item.type === 'charged_sphere' ? (
-                      <img src={ChargeSphereIcon} alt="Charged Sphere" className="charged_sphere-icon" />
+                      <img src={ChargeSphereIcon} alt="Charged Sphere" className="sidebar-icon" />
                     ) : item.type === 'concentricSpheres' ? (
-                      <img src={ChargeSphereIcon} alt="Concentric Spheres" className="charged_sphere-icon" />  
+                      <img src={ChargeSphereIcon} alt="Concentric Spheres" className="sidebar-icon" />  
                     ) : item.subtype === 'sphere' ? (
-                      <img src={SphereIcon} alt="Sphere" className="sphere-icon" />
+                      <img src={SphereIcon} alt="Sphere" className="sidebar-icon" />
                     ) : item.subtype === 'cuboid' ? (
-                      <img src={CuboidIcon} alt="Cuboid" className="cuboid-icon" />
+                      <img src={CuboidIcon} alt="Cuboid" className="sidebar-icon" />
                     ) : item.subtype === 'cylinder' ? (
-                      <img src={CylinderIcon} alt="Cylinder" className="cylinder-icon" />
+                      <img src={CylinderIcon} alt="Cylinder" className="sidebar-icon" />
+                    ) : item.type === 'ringCoil' ? (
+                      <img src={RingCoilIcon} alt="Ring Coil" className="sidebar-icon" />
+                    ) : item.type === 'polygonCoil' ? (
+                      <img src={PolygonCoilIcon} alt="Polygon Coil" className="sidebar-icon" />
+                    ) : item.type === 'solenoid' ? (
+                      <img src={SolenoidIcon} alt="Solenoid" className="sidebar-icon" />
+                    ) : item.type === 'barMagnet' ? (
+                      <img src={BarMagnetIcon} alt="Bar Magnet" className="sidebar-icon" />
+                    ) : item.type === 'faradayCoil' ? (
+                      <img src={FaradayCoilIcon} alt="Faraday Coil" className="sidebar-icon" />
+                    ) : item.type === 'path' ? (
+                      <img src={PathIcon} alt="Path" className="sidebar-icon" />
                     ) : (
                       <strong>{item.label}</strong>
                     )}

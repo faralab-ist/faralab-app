@@ -1,20 +1,28 @@
 {
-    "dipole": {
-        "context": { "r": 0.1, "d": 3, "q": 1 },
-        "camera": { "position": [0, 1.3, 6], "target": [0, 0, 0] },
-        "settings": {
-        "vectorMinTsl": 0.45,
-        "vectorScale": 1.3,
-        "lineMin": 0.15,
-        "lineNumber": 24,
-        "showField": true,
-        "showOnlyGaussianField": true,
-        "showLines": false,
-        "showEquipotentialSurface": false
-        },
-        "objects": [
-            { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },
-            { "type": "charge", "props": { "position": ["$d", 0, 0], "charge": "$(-q)", "radius": "$r" } }
-        ]
-    }
+  "dipole": {
+    "context": { "r": 0.1, "d": 3, "q": 1 },
+    "camera": { "position": [0, 1.3, 6], "target": [0, 0, 0] },
+    "settings": {
+      "vectorMinTsl": 0.45,
+      "vectorScale": 1.3,
+      "vectorStep": 1.4,
+      "lineMin": 0.15,
+      "lineNumber": 24,
+      "showField": true,
+      "showBField": false,
+      "showLines": true,
+      "showEquipotentialSurface": false,
+      "showOnlyGaussianField": true,
+      "planeFilter": null,
+      "useSlice": false,
+      "slicePlane": "xy",
+      "slicePos": -0.1,
+      "slicePlaneFlip": false,
+      "showSlicePlaneHelper": true
+    },
+    "objects": [
+      { "type": "charge", "props": { "position": ["$(-d)", 0, 0], "charge": "$q", "radius": "$r" } },
+      { "type": "charge", "props": { "position": ["$d", 0, 0], "charge": "$(-q)", "radius": "$r" } }
+    ]
+  }
 }

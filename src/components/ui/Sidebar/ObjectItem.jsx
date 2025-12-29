@@ -32,6 +32,9 @@ export default function ObjectItem({
   if (obj.type === "surface") {
     const resolved = TYPE_CONFIG.surface.resolve(obj);
     iconData = { ...resolved };
+  } else if (obj.type === "coil") {
+    const resolved = TYPE_CONFIG.coil.resolve(obj);
+    iconData = { ...resolved };
   } else if (TYPE_CONFIG[obj.type]) {
     const conf = TYPE_CONFIG[obj.type];
     iconData = {
@@ -288,7 +291,7 @@ export default function ObjectItem({
               />
             )}
 
-            {obj.type === 'coil' && (
+            {obj.type === 'coil' && obj.coilType !== 'solenoid' && (
               <>
                 <PathControls
                     obj={obj}
@@ -363,16 +366,16 @@ export default function ObjectItem({
             {/* Charged Sphere */}
             {obj.type === "chargedSphere" && (
               <div className="detail-row">
-                <div className="detail-key">Intensity C</div>
+                <div className="detail-key">Volume Density ρ</div>
                 <div className="detail-value">
                   <InlineDecimalInput
-                    initialValue={obj.charge ?? 0}
+                    initialValue={obj.charge_density ?? 0}
                     min={VAL_MIN}
                     max={VAL_MAX}
                     step={0.01}
                     onChange={(v) => {
                       const safe = clampWithError(v, VAL_MIN, VAL_MAX);
-                      updateObject(obj.id, { charge: safe });
+                      updateObject(obj.id, { charge_density: safe });
                     }}
                   />
                 </div>
@@ -417,6 +420,20 @@ export default function ObjectItem({
               </div>
             )}
 
+            {/* Show Label toggle for objects with labels (not surfaces) */}
+            {(obj.type === "charge" || obj.type === "wire" || obj.type === "plane" || obj.type === "chargedSphere" || obj.type === "path" || obj.type === "testPointCharge" || obj.type === "coil") && (
+              <div className="detail-row">
+                <div className="detail-key">Show Label</div>
+                <div className="detail-value">
+                  <input
+                    type="checkbox"
+                    checked={obj.showLabel ?? true}
+                    onChange={(e) => updateObject(obj.id, { showLabel: e.target.checked })}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Infinite toggle */}
             {(isPlaneVariant || obj.type === "wire") && (
               <div className="detail-row">
@@ -449,6 +466,210 @@ export default function ObjectItem({
               >
                 {errorMsg}
               </div>
+            )}
+
+            {obj.type === 'coil' && obj.coilType === 'solenoid' && (
+               <>
+                 <div className="detail-row">
+                    <div className="detail-key">Length</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        value={obj.length}
+                        min={0.1} max={100}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { length: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Radius</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        value={obj.radius}
+                        min={0.1} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { radius: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Resolution</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        value={obj.resolution}
+                        min={0.1} max={300}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { resolution: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                  <div className="detail-row">
+                    <div className="detail-key">Strength</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        value={obj.multiplier}
+                        min={0.1} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { multiplier: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+               </>
+            )}
+
+            {obj.type === 'barMagnet' && (
+               <>
+                 <div className="detail-row">
+                    <div className="detail-key">Length</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        value={obj.length}
+                        min={0.1} max={100}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { length: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Radius</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        value={obj.radius}
+                        min={0.1} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { radius: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                  <div className="detail-row">
+                    <div className="detail-key">Strength</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        value={obj.charge}
+                        min={0.1} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { charge: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Resolution</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        step={1}
+                        value={obj.numOfCoils}
+                        min={1.0} max={50}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { numOfCoils: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 {/* two-column controls: Frozen / Animated / Frequency / Amplitude */}
+                 <div className="detail-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <div className="detail-key">Frozen</div>
+                    <div className="detail-value">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { frozen: !obj.frozen }); }}
+                        style={{ padding: "6px 8px" }}
+                      >
+                        {obj.frozen ? 'Unfreeze' : 'Freeze'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="detail-key">Animated</div>
+                    <div className="detail-value">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { animated: !obj.animated }); }}
+                        style={{ padding: "6px 8px" }}
+                      >
+                        {obj.animated ? 'Stop animation' : 'Start animation'}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="detail-key">Freq (Hz)</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        value={Number.isFinite(obj.freq) ? obj.freq : (obj.freq === undefined ? 1 : 0)}
+                        step={0.1}
+                        min={0} max={100}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { freq: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="detail-key">Amplitude</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        value={Number.isFinite(obj.amplitude) ? obj.amplitude : (obj.amplitude === undefined ? 0.1 : 0)}
+                        step={0.01}
+                        min={0} max={100}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { amplitude: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                  </div>
+                </div>
+               </>
+            )}
+
+            {obj.type === 'faradayCoil' && (
+               <>
+                 <div className="detail-row">
+                    <div className="detail-key">Radius</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        initialValue={obj.radius}
+                        min={0.01} max={10}
+                        step={0.01}
+                        onChange={(v) => updateObject(obj.id, { radius: v })}
+                      />
+                    </div>
+                 </div>
+
+                  <div className="detail-row">
+                    <div className="detail-key">Magnetic Flux</div>
+                    <div className="detail-value">{obj.magneticFlux}</div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Electromotive Force</div>
+                    <div className="detail-value">{obj.emf}</div>
+                 </div>
+                </>
             )}
 
             <div className="detail-row">

@@ -200,14 +200,17 @@ vec3 getGridPos(vec2 uv){
     float xIndex = uv.x * float(uGridRes);
     float yIndex = uv.y * float(uGridRes);
 
+    // why these offsets?
+    // it is not me who knows
     vec3 normalizedPos = vec3(
-        (xIndex + 0.5) / float(uGridRes),
-        (yIndex + 0.5) / float(uGridRes),
+        (xIndex + 0.0) / float(uGridRes),
+        (yIndex + 0.0) / float(uGridRes),
         (zIndex + 0.5) / float(uGridRes)
     );
 
     return mix(uGridMin, uGridMax, normalizedPos);
 }
+
 
 void main() {
     vec3 gridPos = getGridPos(vUv);

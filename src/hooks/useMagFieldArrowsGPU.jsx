@@ -30,6 +30,7 @@ export default function MagFieldArrowsGPU({
             useSlice,
             slicePlaneFlip,
         );
+        //console.log(objects);
         const chargeInfo = buildChargeTextures(objects);
         return { gridInfo: gridPositions, chargeInfo: chargeInfo};
     }, [objects, gridSize, step, planeFilter, slicePlane, slicePos, useSlice, slicePlaneFlip]);
@@ -274,7 +275,8 @@ export default function MagFieldArrowsGPU({
                     vec4 g = texture(gridTex, gUV);
                     transformed += g.xyz;
 
-                    float hue = (1.0 - normalized) * 0.66; 
+                    // Magnetic field: light blue (low) -> dark blue (high), fixed lightness
+                    float hue = (0.45 + normalized * 0.47) > 0.73 ? 0.73 : (0.45 + normalized * 0.47);
                     vColor = hsl2rgb(hue, 1.0, 0.5);
 
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(transformed, 1.0);
@@ -300,14 +302,41 @@ export default function MagFieldArrowsGPU({
             chargeInfo.posTex?.dispose?.();
             chargeInfo.tanTex?.dispose?.();
             chargeInfo.factorTex?.dispose?.();
+            instMaterial.uniforms.fieldTex.value = null;
+            computeMaterial.uniforms.gridTex.value = null;
+            computeMaterial.uniforms.chargePosTex.value = null;
+            computeMaterial.uniforms.tangentTex.value = null;
+            computeMaterial.uniforms.factorTex.value = null;
             renderTarget?.dispose?.();
         };
     }, [gridInfo.tex, chargeInfo, renderTarget]);
+
+    useEffect(() => {
+        return () => {
+            computeMaterial.dispose();
+            instMaterial.dispose();
+        };
+    }, [computeMaterial, instMaterial]);
+
+    useEffect(() => {
+        return () => {
+            arrowGeometry.dispose();
+        };
+    }, [arrowGeometry]);
+
+    useEffect(() => {
+        return () => {
+            computeScene.mesh.geometry.dispose();
+        };
+    }, [computeScene]);
+
 
 
     useEffect(() => {
         if (!instRef.current) return;
         const mesh = instRef.current;
+        if(mesh.geometry) mesh.geometry.dispose();
+        if(mesh.material) mesh.material.dispose();
         mesh.geometry = arrowGeometry;
         mesh.material = instMaterial;
         mesh.count = gridInfo.count;

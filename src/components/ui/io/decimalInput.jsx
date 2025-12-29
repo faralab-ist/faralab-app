@@ -69,7 +69,18 @@ export function InlineDecimalInput({
     if (!el) return;
 
     let txt = el.textContent || "";
-    txt = txt.replace(/,/g, ".").replace(/[^\d.]/g, "");
+    
+    // Preserve minus sign at the start
+    const hasMinusAtStart = txt.startsWith("-");
+    txt = txt.replace(/,/g, ".").replace(/[^\d.-]/g, "");
+    
+    // Ensure only one minus sign at the start
+    if (hasMinusAtStart && !txt.startsWith("-")) {
+      txt = "-" + txt.replace(/-/g, "");
+    } else {
+      txt = txt.replace(/-/g, "");
+      if (hasMinusAtStart) txt = "-" + txt;
+    }
 
     const first = txt.indexOf(".");
     if (first !== -1) {
@@ -96,9 +107,16 @@ export function InlineDecimalInput({
     stopSpin();
 
     let txt = el.textContent || "";
-    txt = txt.replace(/,/g, ".").replace(/[^\d.]/g, "");
+    
+    // Preserve minus sign at the start
+    const hasMinusAtStart = txt.startsWith("-");
+    txt = txt.replace(/,/g, ".").replace(/[^\d.-]/g, "");
+    
+    // Remove all minus signs and re-add at start if needed
+    txt = txt.replace(/-/g, "");
+    if (hasMinusAtStart) txt = "-" + txt;
 
-    if (txt === "" || txt === ".") {
+    if (txt === "" || txt === "." || txt === "-" || txt === "-.") {
       writeValue(0);
       return;
     }
@@ -106,12 +124,13 @@ export function InlineDecimalInput({
     const first = txt.indexOf(".");
     if (first === -1) {
       let intPart = txt || "0";
+      if (intPart === "-") intPart = "-0";
       el.textContent = intPart + ".00";
     } else {
       let pre = txt.slice(0, first);
       let pos = txt.slice(first + 1);
 
-      if (pre === "") pre = "0";
+      if (pre === "" || pre === "-") pre = pre + "0";
       pos = pos.slice(0, 2).padEnd(2, "0");
 
       el.textContent = pre + "." + pos;
@@ -172,6 +191,14 @@ export function InlineDecimalInput({
     const pos = range.startOffset;
 
     if (e.key === "." || e.key === ",") return;
+    
+    // Allow minus sign only at the start
+    if (e.key === "-") {
+      if (pos !== 0) {
+        e.preventDefault();
+      }
+      return;
+    }
 
     if (e.key.length === 1 && /[0-9]/.test(e.key)) {
       const dot = text.indexOf(".");

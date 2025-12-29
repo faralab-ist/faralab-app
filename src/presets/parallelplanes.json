@@ -1,22 +1,28 @@
 {
-    "parallelPlanes": {
-        "context": { "distanceY": 4, "size": 8 },
-        "camera": {
-        "position": [17, 3.6, 0],
-        "target": [0, 0, 0]
-        },
-        "settings": {
-        "vectorMinTsl": 0.08,
-        "vectorScale": 1.2,
-        "lineMin": 0.12,
-        "lineNumber": 28,
-        "showField": true,
-        "showLines": false,
-        "showEquipotentialSurface": false
-        },
-        "objects": [
-            { "type": "plane", "props": { "position": [0, "$(distanceY + 0.01)", 0], "charge_density": 5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } },
-            { "type": "plane", "props": { "position": [0, 0, 0], "charge_density": -5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } }
-        ]
-    }
+  "parallelPlanes": {
+    "context": { "distanceY": 4, "size": 8 },
+    "camera": { "position": [15.5, 3.6, 7], "target": [0, 0, 0] },
+    "settings": {
+      "vectorMinTsl": 0.08,
+      "vectorScale": 1.2,
+      "vectorStep": 1,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showBField": false,
+      "showLines": false,
+      "showEquipotentialSurface": false,
+      "showOnlyGaussianField": false,
+      "planeFilter": null,
+      "useSlice": false,
+      "slicePlane": "xy",
+      "slicePos": -0.1,
+      "slicePlaneFlip": false,
+      "showSlicePlaneHelper": true
+    },
+    "objects": [
+      { "type": "plane", "props": { "position": [0, "$(distanceY + 0.01)", 0], "charge_density": 5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } },
+      { "type": "plane", "props": { "position": [0, 0, 0], "charge_density": -5, "infinite": true, "dimensions": ["$size", "$size", 0.1] } }
+    ]
+  }
 }
