@@ -62,6 +62,12 @@ export default function FaradayCoil({
     return tex;
   }, []);
 
+  useEffect(() => {
+    return () => {
+      glowTexture.dispose();
+    };
+  }, [glowTexture]);
+
   const coilGeom = useMemo(() => {
     return new THREE.TorusGeometry(
       Math.max(0.001, radius),

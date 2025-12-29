@@ -20,8 +20,8 @@ export default function MagFieldArrowsGPU({
 
     const logMax = Math.log(1 + 1000); // temp hardcoded val
 
-    const {gridInfo, chargeInfo} = useMemo(() => {
-        const gridPositions = buildGridPositions(
+    const gridInfo = useMemo(() => {
+        return buildGridPositions(
             gridSize, 
             step, 
             planeFilter,
@@ -30,10 +30,11 @@ export default function MagFieldArrowsGPU({
             useSlice,
             slicePlaneFlip,
         );
-        //console.log(objects);
-        const chargeInfo = buildChargeTextures(objects);
-        return { gridInfo: gridPositions, chargeInfo: chargeInfo};
-    }, [objects, gridSize, step, planeFilter, slicePlane, slicePos, useSlice, slicePlaneFlip]);
+    }, [gridSize, step, planeFilter, slicePlane, slicePos, useSlice, slicePlaneFlip]);
+
+    const chargeInfo = useMemo(() => {
+        return buildChargeTextures(objects);
+    }, [objects]);
 
     const renderTargetWidth = gridInfo.size;
     const renderTargetHeight = gridInfo.size;
@@ -57,13 +58,13 @@ export default function MagFieldArrowsGPU({
             uniforms: {
                 gridTex: { value: gridInfo.tex },
                 gridTexSize: { value: gridInfo.size },
-                chargePosTex: { value: chargeInfo.posTex },
-                chargePosSize: { value: chargeInfo.posSize },
-                tangentTex: { value: chargeInfo.tanTex },
-                tangentSize: { value: chargeInfo.tanSize },
-                factorTex: { value: chargeInfo.factorTex },
-                factorSize: { value: chargeInfo.factorSize },
-                chargeCount: { value: chargeInfo.count },
+                chargePosTex: { value: null },
+                chargePosSize: { value: 0 },
+                tangentTex: { value: null },
+                tangentSize: { value: 0 },
+                factorTex: { value: null },
+                factorSize: { value: 0 },
+                chargeCount: { value: 0 },
                 texSize: { value: renderTargetWidth },
             },
             vertexShader: `
@@ -158,7 +159,7 @@ export default function MagFieldArrowsGPU({
             depthTest: false,
         });
         return mat;
-    }, [chargeInfo, gridInfo.tex, renderTargetWidth]);
+    }, [gridInfo.tex, renderTargetWidth, gridInfo.count]);
 
     const computeScene = useMemo(() => {
         const scene = new THREE.Scene();
@@ -299,17 +300,23 @@ export default function MagFieldArrowsGPU({
     useEffect(() => {
         return () => {
             gridInfo.tex?.dispose?.();
+        };
+    }, [gridInfo]);
+
+    useEffect(() => {
+        return () => {
             chargeInfo.posTex?.dispose?.();
             chargeInfo.tanTex?.dispose?.();
             chargeInfo.factorTex?.dispose?.();
+        };
+    }, [chargeInfo]);
+
+    useEffect(() => {
+        return () => {
             instMaterial.uniforms.fieldTex.value = null;
-            computeMaterial.uniforms.gridTex.value = null;
-            computeMaterial.uniforms.chargePosTex.value = null;
-            computeMaterial.uniforms.tangentTex.value = null;
-            computeMaterial.uniforms.factorTex.value = null;
             renderTarget?.dispose?.();
         };
-    }, [gridInfo.tex, chargeInfo, renderTarget]);
+    }, [renderTarget, instMaterial]);
 
     useEffect(() => {
         return () => {
@@ -330,13 +337,10 @@ export default function MagFieldArrowsGPU({
         };
     }, [computeScene]);
 
-
-
     useEffect(() => {
         if (!instRef.current) return;
         const mesh = instRef.current;
-        if(mesh.geometry) mesh.geometry.dispose();
-        if(mesh.material) mesh.material.dispose();
+
         mesh.geometry = arrowGeometry;
         mesh.material = instMaterial;
         mesh.count = gridInfo.count;
