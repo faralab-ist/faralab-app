@@ -1,0 +1,64 @@
+{
+  "induction": {
+    "context": {},
+    "camera": {
+      "position": [
+        5,
+        1,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ]
+    },
+    "settings": {
+      "vectorMinTsl": 0.1,
+      "vectorScale": 1,
+      "vectorStep": 1,
+      "lineMin": 0.1,
+      "lineNumber": 20,
+      "showField": false,
+      "showBField": true,
+      "showLines": false,
+      "showEquipotentialSurface": false,
+      "showOnlyGaussianField": false,
+      "planeFilter": null,
+      "slicePlane": null,
+      "slicePos": 0,
+      "useSlice": false,
+      "slicePlaneFlip": false,
+      "showSlicePlaneHelper": true
+    },
+    "objects": [
+      {
+        "type": "barMagnet",
+        "props": {
+          "position": [
+            0,
+            0,
+            -2
+          ],
+          "length": 3,
+          "radius": 0.3,
+          "charge": 1,
+          "animated": true,
+          "amplitude": 1.5,
+          "freq": 0.25
+        }
+      },
+      {
+        "type": "faradayCoil",
+        "props": {
+          "position": [
+            0,
+            0,
+            1.5
+          ],
+          "radius": 2
+        }
+      }
+    ]
+  }
+}

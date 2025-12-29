@@ -36,6 +36,8 @@ export default function MagFieldArrowsGPU({
         return buildChargeTextures(objects);
     }, [objects]);
 
+    //console.log(chargeInfo);
+
     const renderTargetWidth = gridInfo.size;
     const renderTargetHeight = gridInfo.size;
     const renderTarget = useMemo(() => {

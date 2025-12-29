@@ -6,6 +6,7 @@ export function InlineDecimalInput({
   min = 0,
   max = Number.POSITIVE_INFINITY,
   onChange,
+  value,
 }) {
   const spanRef = useRef(null);
   const spinRef = useRef(null);
@@ -246,8 +247,9 @@ export function InlineDecimalInput({
   };
 
   useEffect(() => {
-    writeValue(initialValue);
-  }, [initialValue]);
+    const v = value !== undefined ? value : initialValue;
+    writeValue(v);
+  }, [value, initialValue]);
 
   useEffect(() => {
     return () => stopSpin();

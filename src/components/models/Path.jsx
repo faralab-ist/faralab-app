@@ -35,7 +35,6 @@ export default function Path({
   const groupRef = useRef()
   const isDraggingRef = useRef(false)
   const glowRef = useRef()
-
   const clockRef = useRef(null);
   useEffect(() => {
     if (!clockRef.current) {
@@ -190,6 +189,7 @@ export default function Path({
 
   useFrame(() => {
     const pos = getChargePositions();
+    //console.log("Charge positions:", pos);
     //console.log(pos)
     
     // If this is a child of a rotated parent (like a coil), apply parent's rotation
@@ -224,6 +224,7 @@ export default function Path({
   
       // Store in local state instead of updating parent on every frame
       setChargePositions(rotatedPositions);
+      updateObject?.(id, { charges: rotatedPositions, tangents: tangents });
     } else {
   
       // Original behavior for non-rotated paths
@@ -237,8 +238,9 @@ export default function Path({
         tangents.push([tangent.x, tangent.y, tangent.z]);
       }
       updateObject?.(id, { charges: pos, tangents: tangents });
+      setChargePositions(pos);
     }
-    setChargePositions(pos);
+    //console.log(chargePositions);
   });
 
   return (

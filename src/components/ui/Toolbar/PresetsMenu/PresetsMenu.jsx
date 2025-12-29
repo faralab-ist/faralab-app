@@ -48,16 +48,22 @@ const PRESETS = [
     category: 'plane'
   },
   {
-    id: 'sphere',
-    label: 'Sphere',
-    name: 'sphere',
+    id: 'sphericalCapacitor',
+    label: 'Spherical Capacitor',
+    name: 'sphericalCapacitor',
     category: 'geometry'
   },
-  {
+  /*{
     id: 'cylinder',
     label: 'Cylinder',
     name: 'cylinder',
     category: 'geometry'
+  },*/
+  {
+    id: 'induction',
+    label: 'Induction',
+    name: 'induction',
+    category: 'magnetic'
   }
 ]
 

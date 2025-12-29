@@ -1,6 +1,6 @@
 {
   "currentLoop": {
-    "context": { "size": 8, "sigma": 0.1 },
+    "context": {},
     "camera": { "position": [0, 1, 5], "target": [0, 0, 0] },
     "settings": {
       "vectorMinTsl": 0.08,
@@ -21,7 +21,14 @@
       "showSlicePlaneHelper": true
     },
     "objects": [
-      { "type": "path", "props": { "position": [0, 0, 0], "points": [[-1, 0, -1], [1, 0, -1], [1, 0, 1], [-1, 0, 1]], "chargeCount": 14, "isClosedPath": true } }
+      { "type": "ringCoil", 
+      "props": { 
+        "position": [0, 0, 0], 
+        "chargeCount": 20,
+        "velocity": 2,
+        "coilRadius": 1.5
+        } 
+      }
     ]
   }
 }

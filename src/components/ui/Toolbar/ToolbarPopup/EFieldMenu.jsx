@@ -63,7 +63,8 @@ export default function EFieldMenu({
       o.type === 'coil' || 
       o.type === 'ringCoil' || 
       o.type === 'polygonCoil' ||
-      (o.type === 'coil' && (o.coilType === 'ring' || o.coilType === 'polygon'))
+      (o.type === 'coil' && (o.coilType === 'ring' || o.coilType === 'polygon')) ||
+      o.type === 'barMagnet'
     )
   }, [sceneObjects])
 
