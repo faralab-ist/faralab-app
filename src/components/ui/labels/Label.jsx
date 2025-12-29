@@ -32,7 +32,7 @@ export default function Label({
     <Html
       position={labelPosition}
       distanceFactor={distanceFactor}
-      zIndexRange={[100, 0]}
+      zIndexRange={[0, 100]}
       style={{ 
         transform: 'translate3d(-50%, -100%, 0)',
         pointerEvents: 'none',

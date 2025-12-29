@@ -132,9 +132,6 @@ export default function EFieldMenu({
         )}
       </div>
 
-      {/* Separator */}
-      <div className="separator" />
-
       {/* Plane buttons at the bottom */}
       <div className="fieldview-plane-bottom">
         <PlaneButtons activePlane={activePlane} onPlaneSelect={onPlaneSelect} />

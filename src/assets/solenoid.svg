@@ -1,0 +1,10 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Solenoid coil represented as stacked loops -->
+  <ellipse cx="12" cy="7" rx="8" ry="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <ellipse cx="12" cy="12" rx="8" ry="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  <ellipse cx="12" cy="17" rx="8" ry="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+  
+  <!-- Vertical lines connecting the coils -->
+  <line x1="4" y1="7" x2="4" y2="17" stroke="currentColor" stroke-width="1.5"/>
+  <line x1="20" y1="7" x2="20" y2="17" stroke="currentColor" stroke-width="1.5"/>
+</svg>

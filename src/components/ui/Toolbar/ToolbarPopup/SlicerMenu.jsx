@@ -1,10 +1,8 @@
 import React, { use } from 'react'
 import './SlicerMenu.css'
-import '../../SettingsButtons/SubButtons/PotButtons.css'
 import Flip from '../../../../assets/flip.svg'
 import Slice1 from '../../../../assets/slice.svg'
 import Helper from '../../../../assets/helper.svg'
-import '../../SettingsButtons/SubButtons/PlaneButtons.css'
 
 export default function SlicerMenu({
   useSlice,

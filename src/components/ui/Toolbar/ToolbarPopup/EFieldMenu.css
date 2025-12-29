@@ -1,9 +1,9 @@
 /* =========================================
-   1. Main Container & Panel Layout
-   (Baseado no antigo .settings-panel)
+   Layout & Containers
    ========================================= */
+
+/* Main Container */
 .efield-menu-container {
-  /* Dimensões fixas do layout antigo */
   width: 280px;         
   min-width: 280px;
   max-width: 320px;
@@ -11,9 +11,8 @@
   min-height: 420px;
   max-height: 500px;
 
-  /* Estilo visual */
-  background: rgba(15,15,15,0.94);
-  border: 1px solid #2e2e2e;
+
+ 
   padding: 14px;
   border-radius: 12px;
   backdrop-filter: blur(6px);
@@ -22,9 +21,8 @@
   flex-direction: column;
   gap: 10px;
   box-sizing: border-box;
-  overflow: hidden; /* Mantém o tamanho fixo */
+  overflow: hidden;
   
-  /* Animação original */
   animation: panelFade .18s ease-out;
 }
 
@@ -33,70 +31,66 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Área de conteúdo com scroll (para caber no tamanho fixo) */
+/* Content Area */
 .fieldview-content {
   height: calc(100% - 48px);
   overflow-y: auto;
   overflow-x: hidden;
-  padding-right: 6px; /* Evita scrollbar em cima do conteúdo */
+  padding-right: 6px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 /* =========================================
-   2. Tabs (Estilo Simplificado Antigo)
+   Tabs (Simplified Style)
    ========================================= */
 .fieldview-tabs {
   display: flex;
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   flex-shrink: 0;
 }
 
 .fieldview-tab {
   flex: 1;
-  padding: 6px 10px;
+  padding: 8px 12px;
   background: transparent;
-  border: 0;
-  cursor: pointer;
-  color: #ccc;
-  font-size: 13px;
-  text-align: center;
-  transition: all 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 6px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.16s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) inset;
 }
 
 .fieldview-tab:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .fieldview-tab.active {
   font-weight: 700;
   color: #fff;
-  text-decoration: underline;
-  background: transparent;
-  box-shadow: none;
-  border: none;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-color: rgba(21, 78, 153, 0.9);
+  box-shadow: 0 8px 28px rgba(79, 154, 255, 0.16), 0 2px 6px rgba(0, 0, 0, 0.5) inset;
 }
 
 /* =========================================
-   3. Sections (Cards Escuros)
+   Unified Section Look
    ========================================= */
 .efield-section {
-  border: 1px solid #222;
-  padding: 10px 10px 12px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
   border-radius: 10px;
-  background: #121212; /* Fundo sólido escuro antigo */
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-  opacity: 0;
-  transform: translateY(-4px);
-  animation: fadeInUp .16s ease forwards;
-  box-shadow: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) inset;
+  overflow: hidden;
 }
 
 .efield-section.disabled {
@@ -104,41 +98,24 @@
   cursor: not-allowed;
   pointer-events: none;
   filter: grayscale(40%);
-  border-color: rgba(255,255,255,0.08);
-  background: rgba(30,30,30,0.02);
-}
-
-@keyframes fadeInUp {
-  to { opacity: 1; transform: translateY(0); }
 }
 
 .efield-section-title {
-  font-size: 0.68rem;   
-  font-weight: 700;     
-  letter-spacing: .35px;
-  color: #c2d7ee;       
-  text-transform: uppercase;
-  opacity: .95;
-  margin: 0;
-}
-
-.separator {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.024);
-  margin: 4px 0;
-  border-top: 1px solid rgba(255,255,255,0.03);
-  flex-shrink: 0;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: .6px;
 }
 
 /* =========================================
-   4. Inputs & Rows
+   Inputs & Rows
    ========================================= */
 .efield-row.compact {
   display: flex;
-  gap: 8px;
   align-items: center;
-  justify-content: flex-start;
-  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .efield-label {
@@ -198,157 +175,109 @@
 }
 
 /* =========================================
-   5. Toggle Buttons (Field & Potential)
+   Toggle Buttons (Matching SlicerMenu Style)
    ========================================= */
 .efield-toggle-btn,
 .pot-toggle-btn {
-  background: #1a1c1f;
-  border: 1px solid #3a3f46;
-  color: #eef4ff;
-  padding: 8px 10px;
-  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  
+  height: 44px;
+  min-height: 40px;
+  padding: 8px 12px;
+  gap: 10px;
+  
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0.00));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55), inset 0 2px 6px rgba(0, 0, 0, 0.35);
+  
+  color: #dfeaf5;
   font-weight: 700;
-  font-size: 0.78rem;
-  min-width: 120px;
+  font-size: 13px;
   text-align: center;
   cursor: pointer;
-  transition: background .12s, border-color .12s, transform .06s;
+  transition: all .16s ease;
+  z-index: 2;
 }
 
 .efield-toggle-btn:hover,
 .pot-toggle-btn:hover {
-  background: #202427;
-  border-color: #4a6d94;
-  transform: translateY(-1px);
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.07);
+  color: #fff;
 }
 
 .efield-toggle-btn.active,
 .pot-toggle-btn.active {
-  background: linear-gradient(180deg, rgba(74,109,148,0.10), rgba(74,109,148,0.04));
-  border-color: rgba(21, 102, 153, 0.9);
-  box-shadow: inset 0 -2px 6px rgba(74,109,148,0.04);
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  border-color: rgba(21, 78, 153, 0.9);
+  box-shadow: 0 8px 28px rgba(79, 154, 255, 0.16), 0 2px 6px rgba(0, 0, 0, 0.5) inset;
+  color: #fff;
+}
+
+.efield-toggle-btn.active:hover,
+.pot-toggle-btn.active:hover {
+  background: #1191ed;
+  border-color: rgba(100, 180, 255, 1);
+  box-shadow: 0 0 25px rgba(70, 129, 255, 0.959);
+  transform: scale(1.02) translateY(-1px);
 }
 
 /* =========================================
-   6. Sliders (Custom Range)
+   Sliders (Custom Range)
    ========================================= */
 .efield-range,
 .potential-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 8px;
+  height: 10px;
+  margin-right: 10px;
   background: transparent;
-  outline: none;
-  margin: 0;
+  cursor: pointer;
 }
 
 /* Track Style */
 .efield-range::-webkit-slider-runnable-track,
 .potential-slider::-webkit-slider-runnable-track {
   height: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.03);
-  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
 }
 
 /* Thumb Style */
 .efield-range::-webkit-slider-thumb,
 .potential-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
+  margin-top: -4px;
+  border: 2px solid rgba(0, 0, 0, 0.25);
   border-radius: 50%;
   background: #e9eef7;
-  border: 2px solid rgba(0,0,0,0.25);
-  margin-top: -2.5px; /* Adjust center */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.45);
-  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.efield-range:disabled,
+.potential-slider:disabled {
+  opacity: .6;
+  cursor: not-allowed;
 }
 
 .slider-value {
-  min-width: 36px;
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #d7e6f7;
+  min-width: 44px;
+  font-weight: 600;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* =========================================
-   7. Plane Buttons (Bottom)
+   NOTE: Plane button styles are in PlaneButtons.css
+   The PlaneButtons component imports its own CSS file.
+   To modify plane button appearance, edit:
+   src/components/ui/SettingsButtons/SubButtons/PlaneButtons.css
    ========================================= */
-.fieldview-plane-bottom {
-  margin-top: auto; /* Empurra para o fundo se houver espaço */
-  padding-top: 4px;
-}
-
-.plane-buttons-container {
-  /* Estilo do container antigo */
-  border: 1px solid #2a2a2a;
-  padding: 10px;
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(18, 18, 18, 0.95), rgba(15, 15, 15, 0.98));
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.plane-buttons-title {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: .35px;
-  color: #c2d7ee;
-  text-transform: uppercase;
-  margin: 0;
-}
-
-.plane-buttons-group {
-  display: flex;
-  gap: 10px;
-}
-
-.plane-button {
-  flex: 1;
-  padding: 8px 12px;
-  background: rgba(60, 60, 60, 0.6);
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  border-radius: 6px;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(8px);
-}
-
-.plane-button:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255,255,255,0.8);
-}
-
-.plane-button.active {
-  background: linear-gradient(180deg, #156699, #0f4b75); /* Azul antigo */
-  border-color: rgba(21, 78, 153, 0.9);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(79,154,255,0.16);
-  transform: translateY(-1px);
-}
-
-.plane-button:disabled {
-  opacity: 0.48;
-  cursor: not-allowed;
-  filter: grayscale(8%);
-  transform: none;
-  background: rgba(30,30,30,0.6);
-  border-color: rgba(255,255,255,0.12);
-}
-
-/* Checkbox */
-.efield-checkbox {
-  width: 14px;
-  height: 14px;
-  accent-color: #4f9aff; 
-  margin-left: 1px;
-  cursor: pointer;
-}
