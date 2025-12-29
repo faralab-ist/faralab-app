@@ -16,6 +16,8 @@
   color: #e6eef6;
   -webkit-font-smoothing: antialiased;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 /* Visual feedback when dragging over dock area */

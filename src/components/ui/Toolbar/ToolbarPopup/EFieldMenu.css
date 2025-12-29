@@ -7,13 +7,9 @@
   width: 280px;         
   min-width: 280px;
   max-width: 320px;
-  height: 490px;        
-  min-height: 420px;
-  max-height: 500px;
-
-
- 
-  padding: 14px;
+  max-height: calc(100vh - 120px);  /* Adapt to viewport height */
+  
+  padding: 6px;
   border-radius: 12px;
   backdrop-filter: blur(6px);
   
@@ -40,6 +36,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-height: 0;  /* Allow flex shrinking */
 }
 
 /* =========================================
