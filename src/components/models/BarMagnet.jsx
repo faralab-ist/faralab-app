@@ -43,6 +43,18 @@ export default function BarMagnet({
   const groupRef = useRef()
   const isDraggingRef = useRef(false)
 
+  // --- small: reusable temporaries to avoid allocations every frame ---
+  const tmpVec = useRef(new THREE.Vector3())
+  const tmpTangent = useRef(new THREE.Vector3())
+  const tmpQuat = useRef(new THREE.Quaternion())
+  const tmpEuler = useRef(new THREE.Euler())
+  const tmpNormalMat = useRef(new THREE.Matrix3())
+  const Z_VEC = useRef(new THREE.Vector3(0, 0, 1))
+
+  const positionsRef = useRef([])    // array of [x,y,z] (reused)
+  const tangentsRef = useRef([])     // array of [x,y,z] (reused)
+  const lastSetPositionsRef = useRef(null) // to compare before calling setState
+
   const clockRef = useRef(null);
   useEffect(() => {
     if (!clockRef.current) {
@@ -52,7 +64,7 @@ export default function BarMagnet({
   }, []);
 
   // animated motion state
-  const animBasePosRef = useRef([position[0], position[1], position[2]]); // center about which we oscillate
+  const animBasePosRef = useRef([position[0], position[1], position[2]]);
   const isAnimatingRef = useRef(false);
 
   useEffect(() => {
@@ -188,61 +200,108 @@ export default function BarMagnet({
     }, [direction, quaternion, rotation, updateDirection, id])
 
   const getChargePositions = () => {
-    if(catmullCurves.length === 0) return [];
-    const positions = [];
-    const tangents = [];
-    // compute world transform (quaternion + position) to convert local curve points -> world
-    const worldQuat = new THREE.Quaternion();
+    const outPos = positionsRef.current
+    const outTan = tangentsRef.current
+    if (catmullCurves.length === 0) {
+      outPos.length = 0
+      outTan.length = 0
+      updateObject?.(id, { tangents: outTan })
+      return outPos
+    }
+
+    if (!groupRef.current) {
+      outPos.length = 0
+      outTan.length = 0
+      updateObject?.(id, { tangents: outTan })
+      return outPos
+    }
+
+    groupRef.current.updateWorldMatrix(true, false)
+    const worldMatrix = groupRef.current.matrixWorld
+    tmpNormalMat.current.getNormalMatrix(worldMatrix)
+
     if (Array.isArray(quaternion) && quaternion.length === 4) {
-      worldQuat.set(quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
+      tmpQuat.current.set(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
     } else if (Array.isArray(rotation) && rotation.length >= 3) {
-      worldQuat.setFromEuler(new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ'));
+      tmpEuler.current.set(rotation[0], rotation[1], rotation[2], 'XYZ')
+      tmpQuat.current.setFromEuler(tmpEuler.current)
     } else if (Array.isArray(direction) && (direction[0] || direction[1] || direction[2])) {
-      const dir = new THREE.Vector3(direction[0], direction[1], direction[2]).normalize();
-      worldQuat.setFromUnitVectors(new THREE.Vector3(0, 0, 1), dir);
-    } // else keep identity
-    const offset = new THREE.Vector3(position[0] ?? 0, position[1] ?? 0, position[2] ?? 0);
+      tmpVec.current.set(direction[0], direction[1], direction[2]).normalize()
+      tmpQuat.current.setFromUnitVectors(Z_VEC.current, tmpVec.current)
+    } else {
+      tmpQuat.current.identity()
+    }
 
-    catmullCurves.forEach((catmullCurve, index) => {
-        const nCharges = Math.max(0, Math.floor(chargesPerCoil));
+    const elapsed = clockRef.current ? clockRef.current.getElapsedTime() : 0
 
-        if (catmullCurve.points.length === 0) return;
-        if (radius <= 0) return;
-        if (length <= 0) return;
-        const curveLength = catmullCurve.getLength();
+    outPos.length = 0
+    outTan.length = 0
 
-        const timePerLoop = curveLength / Math.max(0.1, Math.abs(velocity));
-        const currLoopTime = clockRef.current ? clockRef.current.getElapsedTime() % timePerLoop : 0;
-        let currLoopt = currLoopTime / timePerLoop;
-        for (let i = 0; i < nCharges; i++) {
-            if (velocity === 0) {
-                currLoopt = 0;
-            }
-            let myt = (i / nCharges + currLoopt) % 1;
-            myt = velocity >= 0 ? myt : (1 - myt);
-            const pos = catmullCurve.getPointAt(myt);
-            const tangent = catmullCurve.getTangentAt(myt);
-            groupRef.current.updateWorldMatrix(true, false);
+    for (let c = 0; c < catmullCurves.length; c++) {
+      const catmullCurve = catmullCurves[c]
+      const nCharges = Math.max(0, Math.floor(chargesPerCoil || 0));
+      if (nCharges === 0) continue
+      if (catmullCurve.points.length === 0) continue;
+      if (radius <= 0) continue;
+      if (length <= 0) continue;
 
-            pos.applyMatrix4(groupRef.current.matrixWorld);
+      const curveLength = catmullCurve.getLength();
+      const timePerLoop = curveLength / Math.max(0.1, Math.abs(velocity));
+      const currLoopTime = clockRef.current ? clockRef.current.getElapsedTime() % timePerLoop : 0;
+      let currLoopt = currLoopTime / timePerLoop;
 
-            const normalMatrix = new THREE.Matrix3().getNormalMatrix(
-            groupRef.current.matrixWorld
-            );
-            tangent.applyMatrix3(normalMatrix).normalize();
+      for (let i = 0; i < nCharges; i++) {
+        if (velocity === 0) currLoopt = 0;
+        let myt = (i / nCharges + currLoopt) % 1;
+        myt = velocity >= 0 ? myt : (1 - myt);
 
-            const relX = pos.x - (position[0] ?? 0);
-            const relY = pos.y - (position[1] ?? 0);
-            const relZ = pos.z - (position[2] ?? 0);
-            positions.push([relX, relY, relZ]);
+        catmullCurve.getPointAt(myt, tmpVec.current)
+        catmullCurve.getTangentAt(myt, tmpTangent.current)
 
-            tangents.push([tangent.x, tangent.y, tangent.z]);
+        tmpVec.current.applyMatrix4(worldMatrix)
+        tmpTangent.current.applyMatrix3(tmpNormalMat.current).normalize()
+
+        const idx = outPos.length
+        if (outPos[idx]) {
+          outPos[idx][0] = tmpVec.current.x - (position[0] ?? 0)
+          outPos[idx][1] = tmpVec.current.y - (position[1] ?? 0)
+          outPos[idx][2] = tmpVec.current.z - (position[2] ?? 0)
+        } else {
+          outPos[idx] = [tmpVec.current.x - (position[0] ?? 0),
+                         tmpVec.current.y - (position[1] ?? 0),
+                         tmpVec.current.z - (position[2] ?? 0)]
         }
-    });
-     updateObject?.(id, { tangents: tangents });
- 
-     return positions;
-   };
+
+        if (outTan[idx]) {
+          outTan[idx][0] = tmpTangent.current.x
+          outTan[idx][1] = tmpTangent.current.y
+          outTan[idx][2] = tmpTangent.current.z
+        } else {
+          outTan[idx] = [tmpTangent.current.x, tmpTangent.current.y, tmpTangent.current.z]
+        }
+
+        outPos.length = idx + 1
+        outTan.length = idx + 1
+      }
+    }
+
+    updateObject?.(id, { tangents: outTan })
+    return outPos
+  };
+
+  const positionsEqual = (a, b) => {
+    if (a === b) return true
+    if (!a || !b) return false
+    if (a.length !== b.length) return false
+    for (let i = 0; i < a.length; i++) {
+      const ai = a[i], bi = b[i]
+      if (!ai || !bi) return false
+      if (ai.length !== 3 || bi.length !== 3) return false
+      // small epsilon to avoid float jitter triggering state updates
+      if (Math.abs(ai[0] - bi[0]) > 1e-6 || Math.abs(ai[1] - bi[1]) > 1e-6 || Math.abs(ai[2] - bi[2]) > 1e-6) return false
+    }
+    return true
+  }
 
   useFrame((state) => {
     if (animated && isAnimatingRef.current && !isDraggingRef.current) {
@@ -267,9 +326,15 @@ export default function BarMagnet({
       updatePosition?.(id, [newPos.x, newPos.y, newPos.z]);
     }
 
-    const pos = getChargePositions();
-    updateObject?.(id, { charges: pos });
-    setChargePositions(pos);
+    const pos = getChargePositions()
+
+    updateObject?.(id, { charges: pos })
+
+    const last = lastSetPositionsRef.current
+    if (!positionsEqual(last, pos)) {
+      setChargePositions(pos)
+      lastSetPositionsRef.current = pos.slice()
+    }
   });
 
   return (
@@ -309,14 +374,11 @@ export default function BarMagnet({
             <meshStandardMaterial color={'#ff4d4d'} metalness={0.6} roughness={0.35} clippingPlanes={clippingPlanes}/>
           </mesh>
         </group>
-        {/* debug: render each computed curve as a line */}
         {showDebug && catmullCurves.map((curve, idx) => {
-          // build geometry from sampled points (memoize inside render is fine for debug)
           const pts = curve.getPoints(Math.max(32, pointsPerCoil * 4));
           const geom = new THREE.BufferGeometry().setFromPoints(pts);
           const mat = new THREE.LineBasicMaterial({ color: idx === 0 ? 'orange' : 'white' });
           const line = new THREE.Line(geom, mat);
-          // render the THREE.Line as a primitive
           return <primitive key={`curve-${idx}`} object={line} />;
         })}
       </group>
