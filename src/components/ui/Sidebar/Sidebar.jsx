@@ -42,6 +42,9 @@ export default function Sidebar({
   removeLastPlaneFromStackedPlanes,
   setSpacingForStackedPlanes,
   setChargeDensityForPlaneInStackedPlanes,
+  // --- Oscillation ---
+  toggleOscillation,
+  oscillatingObjects,
 }) {
   const [expandId, setExpandId] = useState(null);
   const sidebarRootRef = useRef(null)
@@ -272,6 +275,10 @@ export default function Sidebar({
               setMaterialForLayerInConcentricInfiniteWire={setMaterialForLayerInChargedSphere}
               setDielectricForLayerInConcentricInfiniteWire={setDielectricForLayerInChargedSphere}
               setChargeForLayerInConcentricInfiniteWire={setChargeForLayerInChargedSphere}
+              
+              // --- Oscillation ---
+              toggleOscillation={toggleOscillation}
+              oscillatingObjects={oscillatingObjects}
             />
           </div>
         )}

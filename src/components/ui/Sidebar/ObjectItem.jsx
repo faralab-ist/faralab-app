@@ -19,7 +19,9 @@ export default function ObjectItem({
   removeObject,
   stackedPlaneActions,
   concentricActions,
-  concentricWireActions
+  concentricWireActions,
+  toggleOscillation,
+  isOscillating
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
 
@@ -107,6 +109,29 @@ export default function ObjectItem({
                       }}
                     />
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Oscillation Button */}
+            {obj.type === 'charge' && toggleOscillation && (
+              <div className="detail-row">
+                <div className="detail-key">Oscillate</div>
+                <div className="detail-value">
+                  <button
+                    onClick={() => toggleOscillation(obj.id)}
+                    style={{
+                      padding: '4px 12px',
+                      backgroundColor: isOscillating ? '#ff4444' : '#4444ff',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    {isOscillating ? 'Stop' : 'Start'}
+                  </button>
                 </div>
               </div>
             )}

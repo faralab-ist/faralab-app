@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import getFieldVector3 from '../utils/getFieldVectors.js';
+import calculateFieldAtPoint from '../utils/calculateField.js';
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -90,14 +91,30 @@ export default function FieldArrows({
             let minDistToObject = Infinity;
             
             if (sourceObject) {
-                // Use the specific source object position
-                const objPos = new THREE.Vector3(...sourceObject.position);
-                minDistToObject = position.distanceTo(objPos);
+                // For Gaussian surfaces, use a tiny fixed delay so all points appear together
+                minDistToObject = 0.01;
             } else {
-                // Fallback: find nearest object (for grid vectors)
+                // For grid vectors: calculate distance based on object type
                 for (const obj of objects) {
                     const objPos = new THREE.Vector3(...obj.position);
-                    const dist = position.distanceTo(objPos);
+                    let dist;
+                    
+                    if (obj.type === 'plane' || obj.type === 'stackedPlanes') {
+                        // For planes: perpendicular distance to plane
+                        const normal = new THREE.Vector3(...obj.direction).normalize();
+                        const toPoint = new THREE.Vector3().subVectors(position, objPos);
+                        dist = Math.abs(toPoint.dot(normal));
+                    } else if (obj.type === 'wire' || obj.type === 'concentricInfWires') {
+                        // For wires: radial distance from axis
+                        const axis = new THREE.Vector3(...obj.direction).normalize();
+                        const toPoint = new THREE.Vector3().subVectors(position, objPos);
+                        const radialVec = toPoint.clone().projectOnPlane(axis);
+                        dist = radialVec.length();
+                    } else {
+                        // For point charges, spheres, etc: spherical distance
+                        dist = position.distanceTo(objPos);
+                    }
+                    
                     if (dist < minDistToObject) minDistToObject = dist;
                 }
             }
@@ -113,13 +130,47 @@ export default function FieldArrows({
         
         setPropagationRadius(prev => {
             const newRadius = prev + propagationSpeed * delta;
-            // Stop growing after max distance to prevent infinite growth
+            // For Gaussian surfaces, we just need a small delay then show all at once
+            // For grid vectors, grow normally
             return newRadius > maxDistance ? maxDistance : newRadius;
         });
         
         let updated = false;
         
-        // Update vectors inside current radius from their source object
+        // First, check ALL existing vectors by recalculating their fields and remove those that don't meet threshold anymore
+        for (let i = vectorsFilteredRef.current.length - 1; i >= 0; i--) {
+            const existingVector = vectorsFilteredRef.current[i];
+            if (!existingVector) continue;
+            
+            const key = `${existingVector.position.x.toFixed(2)},${existingVector.position.y.toFixed(2)},${existingVector.position.z.toFixed(2)}`;
+            
+            // Recalculate field for this position with current objects
+            let recalculatedField;
+            if (existingVector.sourceObject) {
+                // For Gaussian surface vectors, calculate from source object only
+                recalculatedField = calculateFieldAtPoint([existingVector.sourceObject], existingVector.position);
+            } else {
+                // For grid vectors, calculate from all objects
+                recalculatedField = calculateFieldAtPoint(objects, existingVector.position);
+            }
+            
+            // Remove if doesn't meet threshold anymore (but don't update the field yet - let propagation do it)
+            if (recalculatedField.length() <= fieldThreshold) {
+                vectorsFilteredRef.current.splice(i, 1);
+                updated = true;
+            }
+        }
+        
+        // Rebuild map after removing invalid vectors
+        if (updated) {
+            vectorMapRef.current.clear();
+            vectorsFilteredRef.current.forEach((v, i) => {
+                const key = `${v.position.x.toFixed(2)},${v.position.y.toFixed(2)},${v.position.z.toFixed(2)}`;
+                vectorMapRef.current.set(key, i);
+            });
+        }
+        
+        // Then update vectors inside current radius from their source object
         for (const newVector of vectors) {
             const key = `${newVector.position.x.toFixed(2)},${newVector.position.y.toFixed(2)},${newVector.position.z.toFixed(2)}`;
             
@@ -130,19 +181,38 @@ export default function FieldArrows({
             let minDistToObject = Infinity;
             
             if (newVector.sourceObject) {
-                // Use the specific source object position
-                const objPos = new THREE.Vector3(...newVector.sourceObject.position);
-                minDistToObject = newVector.position.distanceTo(objPos);
+                // For Gaussian surfaces, use a tiny fixed delay so all points appear together
+                // This gives a small initial delay but then shows the whole surface at once
+                minDistToObject = 0.01;
             } else {
-                // Fallback: find nearest object (for grid vectors)
-                for (const objPos of objectPositionsRef.current) {
-                    const dist = newVector.position.distanceTo(objPos);
+                // For grid vectors: calculate distance based on nearest object's type
+                for (let i = 0; i < objectPositionsRef.current.length; i++) {
+                    const objPos = objectPositionsRef.current[i];
+                    const obj = objects[i];
+                    let dist;
+                    
+                    if (obj.type === 'plane' || obj.type === 'stackedPlanes') {
+                        // For planes: perpendicular distance to plane
+                        const normal = new THREE.Vector3(...obj.direction).normalize();
+                        const toPoint = new THREE.Vector3().subVectors(newVector.position, objPos);
+                        dist = Math.abs(toPoint.dot(normal));
+                    } else if (obj.type === 'wire' || obj.type === 'concentricInfWires') {
+                        // For wires: radial distance from axis
+                        const axis = new THREE.Vector3(...obj.direction).normalize();
+                        const toPoint = new THREE.Vector3().subVectors(newVector.position, objPos);
+                        const radialVec = toPoint.clone().projectOnPlane(axis);
+                        dist = radialVec.length();
+                    } else {
+                        // For point charges, spheres, etc: spherical distance
+                        dist = newVector.position.distanceTo(objPos);
+                    }
+                    
                     if (dist < minDistToObject) minDistToObject = dist;
                 }
             }
             
-            // Update if inside radius
-            if (minDistToObject <= propagationRadius) {
+            // Update if inside radius AND meets threshold
+            if (minDistToObject <= propagationRadius && newVector.field.length() > fieldThreshold) {
                 const index = vectorMapRef.current.get(key);
                 
                 if (index !== undefined) {

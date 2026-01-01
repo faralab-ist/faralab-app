@@ -27,6 +27,8 @@ export default function ObjectList({
   setMaterialForLayerInConcentricInfiniteWire,
   setDielectricForLayerInConcentricInfiniteWire,
   setChargeForLayerInConcentricInfiniteWire,
+  toggleOscillation,
+  oscillatingObjects,
   ...rest
 }) {
   const [expandedMap, setExpandedMap] = useState({});
@@ -102,6 +104,9 @@ export default function ObjectList({
             setDielectric: setDielectricForLayerInConcentricInfiniteWire,
             setCharge: setChargeForLayerInConcentricInfiniteWire
           }}
+          
+          toggleOscillation={toggleOscillation}
+          isOscillating={oscillatingObjects?.has(obj.id)}
         />
       ))}
     </ul>
