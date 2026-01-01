@@ -6,7 +6,6 @@ import vertexShaderSource from '../shaders/arrowVertex.glsl'
 import fragmentShaderSource from '../shaders/arrowFragment.glsl'
 import getFieldVector3 from '../utils/getFieldVectors.js'
 
-// returns true if point is 'after' the plane
 function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip) {
   if (!useSlice) return true
   switch (slicePlane) {
@@ -23,7 +22,7 @@ function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip) {
 
 export default function FieldArrows({
   objects,
-  showOnlyPlane = false, // kept for API compatibility (unused)
+  showOnlyPlane = false,
   showOnlyGaussianField = false,
   fieldThreshold = 0.1,
   gridSize = 10,
@@ -116,8 +115,8 @@ export default function FieldArrows({
         if (mag <= fieldThreshold) continue
         const logMag = Math.log1p(mag)
         const normalized = logMax > 0 ? Math.min(Math.max(logMag / logMax, 0), 1) : 0
-        const hue = (0.18 - normalized * 0.4) < 0 ? 0 : (0.18 - normalized * 0.4)
-        const color = new THREE.Color().setHSL(hue, 1, 0.5)
+        const hue = 0.18 - normalized * 0.4
+        const color = new THREE.Color().setHSL(hue < 0 ? 0 : hue, 1, 0.5)
         const dir = field.clone().normalize()
 
         positions[i * 3] = position.x
@@ -141,8 +140,7 @@ export default function FieldArrows({
           if (d < minDistToObject) minDistToObject = d
         }
         if (!isFinite(minDistToObject)) minDistToObject = position.length()
-        const dist = minDistToObject
-        delays[i] = maxDist > 0 ? dist / maxDist : 0
+        delays[i] = maxDist > 0 ? minDistToObject / maxDist : 0
 
         i++
       }
@@ -158,15 +156,16 @@ export default function FieldArrows({
   const animationCompleteRef = useRef(false)
   const distanceRingsRef = useRef([])
 
-  const material = useMemo(() => {
-    const m = new THREE.ShaderMaterial({
-      vertexShader: vertexShaderSource,
-      fragmentShader: fragmentShaderSource,
-      vertexColors: true,
-      transparent: true,
-    })
-    return m
-  }, [])
+  const material = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        vertexShader: vertexShaderSource,
+        fragmentShader: fragmentShaderSource,
+        vertexColors: true,
+        transparent: true,
+      }),
+    []
+  )
   materialRef.current = material
 
   const vectorsKey = useMemo(() => {
@@ -223,9 +222,7 @@ export default function FieldArrows({
       mesh.frustumCulled = false
       mesh.count = maxCount
       animationCompleteRef.current = true
-      return () => {
-        geom.dispose()
-      }
+      return () => geom.dispose()
     }
 
     const vectorsWithDist = []
@@ -261,18 +258,14 @@ export default function FieldArrows({
 
     for (const v of vectorsWithDist) {
       if (Math.abs(v.dist - currentDist) > ringSize) {
-        if (currentRing.length > 0) {
-          rings.push([...currentRing])
-        }
+        if (currentRing.length > 0) rings.push([...currentRing])
         currentRing = [v]
         currentDist = v.dist
       } else {
         currentRing.push(v)
       }
     }
-    if (currentRing.length > 0) {
-      rings.push(currentRing)
-    }
+    if (currentRing.length > 0) rings.push(currentRing)
 
     distanceRingsRef.current = []
     let cumulative = 0
@@ -316,9 +309,7 @@ export default function FieldArrows({
     startTimeRef.current = Date.now()
     animationCompleteRef.current = false
 
-    return () => {
-      geom.dispose()
-    }
+    return () => geom.dispose()
   }, [vectorsKey, arrowGeometry, vectors, objects, createInstancedAttributes, propagate, step])
 
   const attrs = useMemo(() => createInstancedAttributes(vectors), [vectors, createInstancedAttributes])
@@ -345,20 +336,14 @@ export default function FieldArrows({
 
     if (progress < 1.0) {
       const targetCount = ringIndex < rings.length ? rings[ringIndex] : maxCount
-      if (mesh.count !== targetCount) {
-        mesh.count = targetCount
-      }
+      if (mesh.count !== targetCount) mesh.count = targetCount
     } else {
-      if (mesh.count !== maxCount) {
-        mesh.count = maxCount
-      }
+      if (mesh.count !== maxCount) mesh.count = maxCount
       animationCompleteRef.current = true
     }
   })
 
-  if (maxCount === 0) {
-    return null
-  }
+  if (maxCount === 0) return null
 
   return <instancedMesh ref={meshRef} args={[arrowGeometry, material, maxCount]} />
 }
