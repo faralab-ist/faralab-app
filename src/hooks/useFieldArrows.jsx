@@ -1,37 +1,29 @@
-import * as THREE from 'three';
-import getFieldVector3 from '../utils/getFieldVectors.js';
-import calculateFieldAtPoint from '../utils/calculateField.js';
-import { useMemo, useState, useEffect, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import * as THREE from 'three'
+import getFieldVector3 from '../utils/getFieldVectors.js'
+import { useMemo, useEffect, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 
-// returns true if point passes the slice rule
 function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip) {
-  if (!useSlice) return true;
-
-  // slicePlaneFlip means "invert which side is visible"
+  if (!useSlice) return true
   switch (slicePlane) {
-    case 'xy': {
-      const pass = point.z > slicePos;
-      return slicePlaneFlip ? !pass : pass;
-    }
-    case 'yz': {
-      const pass = point.x > slicePos;
-      return slicePlaneFlip ? !pass : pass;
-    }
-    case 'xz': {
-      const pass = point.y > slicePos;
-      return slicePlaneFlip ? !pass : pass;
-    }
-    default:
-      return true;
+    case 'xy': return slicePlaneFlip ? point.z <= slicePos : point.z > slicePos
+    case 'yz': return slicePlaneFlip ? point.x <= slicePos : point.x > slicePos
+    case 'xz': return slicePlaneFlip ? point.y <= slicePos : point.y > slicePos
+    default: return true
   }
+}
+
+function vecKey(v3) {
+  // chave estável (evita float noise se step for fracionário)
+  const q = (n) => Math.round(n * 1000) / 1000
+  return `${q(v3.x)},${q(v3.y)},${q(v3.z)}`
 }
 
 export default function FieldArrows({
   objects,
-  fieldVersion = 0, // 🔥 MUST increment on any field-affecting change
-  showOnlyPlane = false, // (currently unused in this component)
+  fieldVersion,
+  fieldChangeType = 'full',
   showOnlyGaussianField = false,
   fieldThreshold = 0.1,
   gridSize = 10,
@@ -43,260 +35,211 @@ export default function FieldArrows({
   slicePos = 0,
   useSlice = false,
   slicePlaneFlip = false,
-  propagationSpeed = 10, // units per second
+  propagationSpeed = 10,
   enablePropagation = true
 }) {
-  const [updateTrigger, setUpdateTrigger] = useState(0);
+  const meshRef = useRef(null)
 
-  const vectorsFilteredRef = useRef([]);
-  const vectorMapRef = useRef(new Map());
-  const objectPositionsRef = useRef([]);
-  const updatedKeysRef = useRef(new Set());
+  // estado do instancing
+  const vectorsFilteredRef = useRef([])      // idx -> vector data
+  const vectorMapRef = useRef(new Map())     // key -> idx
+  const updatedKeysRef = useRef(new Set())   // keys atualizadas neste frame
+  const propagationRadiusRef = useRef(0)
+  const maxDistanceRef = useRef(0)
+  const currentKeysRef = useRef(new Set())   // keys válidas após thresholds/slice
 
-  const propagationRadiusRef = useRef(0);
-  const maxDistanceRef = useRef(0);
-
-  // Force recompute even if caller mutates objects in-place: include fieldVersion
   const vectorsUnfiltered = useMemo(
     () => getFieldVector3(objects, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter),
     [objects, fieldVersion, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter]
-  );
+  )
 
   const vectors = useMemo(() => {
-    return vectorsUnfiltered.filter(({ position }) =>
-      sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)
-    );
-  }, [vectorsUnfiltered, slicePlane, slicePos, useSlice, slicePlaneFlip]);
-
-  // Calculate max distance for propagation (recomputed when vectors/objects change)
-  const maxDistance = useMemo(() => {
-    let max = 0;
-
-    for (const { position, sourceObject } of vectors) {
-      let minDistToObject = Infinity;
-
-      if (sourceObject) {
-        // Gaussian surfaces: we want a tiny delay then show together
-        minDistToObject = 0.01;
-      } else {
-        for (const obj of (objects || [])) {
-          if (!obj || !Array.isArray(obj.position)) continue;
-
-          const objPos = new THREE.Vector3(...obj.position);
-          let dist;
-
-          if (obj.type === 'plane' || obj.type === 'stackedPlanes') {
-            const normal = new THREE.Vector3(...obj.direction).normalize();
-            const toPoint = new THREE.Vector3().subVectors(position, objPos);
-            dist = Math.abs(toPoint.dot(normal));
-          } else if (obj.type === 'wire' || obj.type === 'concentricInfWires') {
-            const axis = new THREE.Vector3(...obj.direction).normalize();
-            const toPoint = new THREE.Vector3().subVectors(position, objPos);
-            const radialVec = toPoint.clone().projectOnPlane(axis);
-            dist = radialVec.length();
-          } else {
-            dist = position.distanceTo(objPos);
+    return vectorsUnfiltered
+      .filter(v => v.field.length() > fieldThreshold)
+      .filter(v => sliceByPlane(v.position, slicePlane, slicePos, useSlice, slicePlaneFlip))
+      .map(v => {
+        let minDist = 0.01
+        if (!v.sourceObject) {
+          minDist = Infinity
+          for (const obj of objects) {
+            if (!obj?.position) continue
+            const d = v.position.distanceTo(new THREE.Vector3(...obj.position))
+            if (d < minDist) minDist = d
           }
-
-          if (dist < minDistToObject) minDistToObject = dist;
         }
-      }
+        return { ...v, minDist }
+      })
+  }, [vectorsUnfiltered, objects, fieldThreshold, slicePlane, slicePos, useSlice, slicePlaneFlip])
 
-      if (minDistToObject > max) max = minDistToObject;
-    }
+  const maxDistance = useMemo(
+    () => vectors.reduce((m, v) => Math.max(m, v.minDist), 0),
+    [vectors]
+  )
 
-    return max;
-  }, [vectors, objects]);
-
-  // Hard reset propagation when fieldVersion changes (preset, add charge, edit values, etc.)
-  useEffect(() => {
-    if (!enablePropagation) {
-        vectorsFilteredRef.current = vectors;
-        setUpdateTrigger(t => t + 1);
-        return;
-    }
-
-    // 🔥 DO NOT CLEAR EXISTING VECTORS
-    // We freeze the current field and let propagation update it
-
-    // Rebuild position map from existing vectors
-    vectorMapRef.current.clear();
-    vectorsFilteredRef.current.forEach((v, i) => {
-        const key = `${v.position.x.toFixed(2)},${v.position.y.toFixed(2)},${v.position.z.toFixed(2)}`;
-        vectorMapRef.current.set(key, i);
-    });
-
-    // Reset propagation state ONLY
-    updatedKeysRef.current.clear();
-    propagationRadiusRef.current = 0;
-
-    // Cache object positions for distance tests
-    objectPositionsRef.current = (objects || [])
-        .filter(o => o && Array.isArray(o.position))
-        .map(o => new THREE.Vector3(...o.position));
-
-    maxDistanceRef.current = maxDistance;
-
-    // Force rerender so old field remains visible immediately
-    setUpdateTrigger(t => t + 1);
-
-  }, [fieldVersion, enablePropagation, vectors, objects, maxDistance]);
-
-
-  // Shared arrow geometry
   const arrowGeometry = useMemo(() => {
-    const shaft = new THREE.CylinderGeometry(0.04, 0.04, 0.7, 6);
-    const head = new THREE.ConeGeometry(0.12, 0.25, 8);
-    head.translate(0, 0.475, 0);
-    return BufferGeometryUtils.mergeGeometries([shaft, head]);
-  }, []);
+    const shaft = new THREE.CylinderGeometry(0.04, 0.04, 0.7, 6)
+    const head = new THREE.ConeGeometry(0.12, 0.25, 8)
+    head.translate(0, 0.475, 0)
+    return BufferGeometryUtils.mergeGeometries([shaft, head])
+  }, [])
 
-  // Propagation update
-  useFrame((state, delta) => {
-    if (!enablePropagation) return;
+  const material = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        roughness: 0.4,
+        metalness: 0.1,
+        vertexColors: true
+      }),
+    []
+  )
 
-    const maxD = maxDistanceRef.current || 0;
-    if (maxD <= 0) return;
+  const ensureMeshCapacity = (minCapacity) => {
+    if (!meshRef.current) {
+      const mesh = new THREE.InstancedMesh(arrowGeometry, material, Math.max(1, minCapacity))
+      mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
 
-    // advance radius (ref, no React state spam)
-    propagationRadiusRef.current = Math.min(
-      maxD,
-      propagationRadiusRef.current + propagationSpeed * delta
-    );
+      // 🔥 garante cor por instância (senão fica tudo preto)
+      mesh.instanceColor = new THREE.InstancedBufferAttribute(
+        new Float32Array(Math.max(1, minCapacity) * 3),
+        3
+      )
+      mesh.instanceColor.setUsage(THREE.DynamicDrawUsage)
 
-    const propagationRadius = propagationRadiusRef.current;
-    let updated = false;
-
-    // 1) Remove vectors that no longer meet threshold (based on current objects)
-    for (let i = vectorsFilteredRef.current.length - 1; i >= 0; i--) {
-      const existingVector = vectorsFilteredRef.current[i];
-      if (!existingVector) continue;
-
-      const key = `${existingVector.position.x.toFixed(2)},${existingVector.position.y.toFixed(2)},${existingVector.position.z.toFixed(2)}`;
-
-      // Recalculate field for this position with current objects
-      const recalculatedField = existingVector.sourceObject
-        ? calculateFieldAtPoint([existingVector.sourceObject], existingVector.position)
-        : calculateFieldAtPoint(objects, existingVector.position);
-
-      if (recalculatedField.length() <= fieldThreshold) {
-        vectorsFilteredRef.current.splice(i, 1);
-        vectorMapRef.current.delete(key);
-        updatedKeysRef.current.delete(key);
-        updated = true;
-      }
+      mesh.count = 0
+      meshRef.current = mesh
+      return
     }
 
-    // 2) Add/update vectors inside current radius
-    for (const newVector of vectors) {
-      const key = `${newVector.position.x.toFixed(2)},${newVector.position.y.toFixed(2)},${newVector.position.z.toFixed(2)}`;
-      if (updatedKeysRef.current.has(key)) continue;
+    const mesh = meshRef.current
+    const currentCapacity = mesh.instanceMatrix?.count ?? 0
+    if (minCapacity <= currentCapacity) return
 
-      // Skip weak vectors early
-      if (newVector.field.length() <= fieldThreshold) continue;
+    const newCapacity = minCapacity
+    const newMesh = new THREE.InstancedMesh(arrowGeometry, material, newCapacity)
+    newMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage)
+    newMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(newCapacity * 3), 3)
+    newMesh.instanceColor.setUsage(THREE.DynamicDrawUsage)
 
-      // Find distance to nearest object based on object type
-      let minDistToObject = Infinity;
+    // copia instâncias atuais
+    const tmpM = new THREE.Matrix4()
+    const tmpC = new THREE.Color()
+    for (let i = 0; i < mesh.count; i++) {
+      mesh.getMatrixAt(i, tmpM)
+      newMesh.setMatrixAt(i, tmpM)
+      if (mesh.instanceColor) {
+        mesh.getColorAt(i, tmpC)
+        newMesh.setColorAt(i, tmpC)
+      }
+    }
+    newMesh.count = mesh.count
 
-      if (newVector.sourceObject) {
-        minDistToObject = 0.01;
+    mesh.dispose?.()
+    meshRef.current = newMesh
+  }
+
+  useEffect(() => {
+    ensureMeshCapacity(vectors.length)
+
+    if (fieldChangeType === 'full') {
+      vectorsFilteredRef.current = []
+      vectorMapRef.current.clear()
+    }
+
+    currentKeysRef.current = new Set(vectors.map(v => vecKey(v.position)))
+
+    propagationRadiusRef.current = 0
+    maxDistanceRef.current = maxDistance
+  }, [fieldVersion, fieldChangeType, vectors, maxDistance])
+
+  useFrame((_, delta) => {
+    const mesh = meshRef.current
+    if (!mesh) return
+
+    if (!enablePropagation) {
+      propagationRadiusRef.current = Infinity
+    } else {
+      propagationRadiusRef.current = Math.min(
+        maxDistanceRef.current,
+        propagationRadiusRef.current + propagationSpeed * delta
+      )
+    }
+
+    const matrix = new THREE.Matrix4()
+    const quat = new THREE.Quaternion()
+    const yAxis = new THREE.Vector3(0, 1, 0)
+    const color = new THREE.Color()
+
+    // remove só o que NÃO existe mais (threshold/slice mudou, carga moveu, etc.)
+    const removeKey = (key) => {
+      const idx = vectorMapRef.current.get(key)
+      if (idx === undefined) return
+      const lastIdx = mesh.count - 1
+      if (lastIdx < 0) return
+
+      if (idx !== lastIdx) {
+        const tmpM = new THREE.Matrix4()
+        const tmpC = new THREE.Color()
+        mesh.getMatrixAt(lastIdx, tmpM)
+        mesh.setMatrixAt(idx, tmpM)
+        if (mesh.instanceColor) {
+          mesh.getColorAt(lastIdx, tmpC)
+          mesh.setColorAt(idx, tmpC)
+        }
+
+        const lastV = vectorsFilteredRef.current[lastIdx]
+        vectorsFilteredRef.current[idx] = lastV
+        const lastKey = vecKey(lastV.position)
+        vectorMapRef.current.set(lastKey, idx)
+      }
+
+      vectorsFilteredRef.current.pop()
+      vectorMapRef.current.delete(key)
+      mesh.count = Math.max(0, mesh.count - 1)
+    }
+
+    for (const [key] of vectorMapRef.current) {
+      if (!currentKeysRef.current.has(key)) removeKey(key)
+    }
+
+    // adiciona/atualiza instâncias alcançadas pela propagação
+    for (const v of vectors) {
+      if (enablePropagation && v.minDist > propagationRadiusRef.current) continue
+
+      const key = vecKey(v.position)
+      let idx = vectorMapRef.current.get(key)
+
+      if (idx === undefined) {
+        idx = mesh.count
+        ensureMeshCapacity(idx + 1)
+        if (meshRef.current !== mesh) return // mesh trocou -> pega no próximo frame
+
+        mesh.count++
+        vectorsFilteredRef.current.push(v)
+        vectorMapRef.current.set(key, idx)
       } else {
-        for (let i = 0; i < objectPositionsRef.current.length; i++) {
-          const objPos = objectPositionsRef.current[i];
-          const obj = objects[i];
-          if (!obj) continue;
-
-          let dist;
-
-          if (obj.type === 'plane' || obj.type === 'stackedPlanes') {
-            const normal = new THREE.Vector3(...obj.direction).normalize();
-            const toPoint = new THREE.Vector3().subVectors(newVector.position, objPos);
-            dist = Math.abs(toPoint.dot(normal));
-          } else if (obj.type === 'wire' || obj.type === 'concentricInfWires') {
-            const axis = new THREE.Vector3(...obj.direction).normalize();
-            const toPoint = new THREE.Vector3().subVectors(newVector.position, objPos);
-            const radialVec = toPoint.clone().projectOnPlane(axis);
-            dist = radialVec.length();
-          } else {
-            dist = newVector.position.distanceTo(objPos);
-          }
-
-          if (dist < minDistToObject) minDistToObject = dist;
-        }
+        vectorsFilteredRef.current[idx] = v
       }
 
-      if (minDistToObject <= propagationRadius) {
-        const index = vectorMapRef.current.get(key);
+      const mag = v.field.length()
+      const safeMag = Math.min(Math.max(mag, 1e-9), 1e6)
 
-        if (index !== undefined) {
-          vectorsFilteredRef.current[index] = newVector;
-        } else {
-          vectorsFilteredRef.current.push(newVector);
-          vectorMapRef.current.set(key, vectorsFilteredRef.current.length - 1);
-        }
+      // azul(fraco) -> vermelho(forte)
+      const t = Math.min(Math.log10(1 + safeMag) / 3, 1)
+      color.setRGB(t, 0.2, 1 - t)
 
-        updatedKeysRef.current.add(key);
-        updated = true;
-      }
+      quat.setFromUnitVectors(yAxis, v.field.clone().normalize())
+
+      const scaleY = (1 - Math.exp(-safeMag)) * scaleMultiplier
+      matrix.compose(v.position, quat, new THREE.Vector3(1, scaleY, 1))
+
+      mesh.setMatrixAt(idx, matrix)
+      mesh.setColorAt(idx, color)
     }
 
-    if (updated) setUpdateTrigger(t => t + 1);
-  });
+    mesh.instanceMatrix.needsUpdate = true
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+  })
 
-  const instancedMesh = useMemo(() => {
-    const vectorsToRender = enablePropagation ? vectorsFilteredRef.current : vectors;
-
-    // Filter valid vectors
-    const validVectors = vectorsToRender.filter(v => v.field.length() > fieldThreshold);
-    if (validVectors.length === 0) return null;
-
-    // Find max magnitude for normalization
-    let maxMag = 0;
-    for (const { field } of validVectors) {
-      const mag = field.length();
-      if (mag > maxMag) maxMag = mag;
-    }
-    const logMax = maxMag > 0 ? Math.log1p(maxMag) : 1;
-
-    const mesh = new THREE.InstancedMesh(
-      arrowGeometry,
-      new THREE.MeshStandardMaterial({ roughness: 0.5, metalness: 0.1 }),
-      validVectors.length
-    );
-
-    const matrix = new THREE.Matrix4();
-    const quaternion = new THREE.Quaternion();
-    const yAxis = new THREE.Vector3(0, 1, 0);
-
-    validVectors.forEach(({ position, field }, i) => {
-      const mag = field.length();
-      const logMag = Math.log1p(mag);
-
-      // Color: red (strong) to blue (weak)
-      const normalized = logMax > 0 ? logMag / logMax : 0;
-      const hue = (1 - normalized) * 0.66;
-      const color = new THREE.Color().setHSL(hue, 1, 0.5);
-
-      // Scale based on magnitude
-      const scale = (1 - Math.exp(-logMag)) * scaleMultiplier;
-
-      // Rotation: align Y-axis with field direction
-      const dir = field.clone().normalize();
-      quaternion.setFromUnitVectors(yAxis, dir);
-
-      // Build matrix
-      matrix.compose(position, quaternion, new THREE.Vector3(1, scale, 1));
-
-      mesh.setMatrixAt(i, matrix);
-      mesh.setColorAt(i, color);
-    });
-
-    mesh.instanceMatrix.needsUpdate = true;
-    mesh.instanceColor.needsUpdate = true;
-
-    return mesh;
-  }, [vectors, enablePropagation, fieldThreshold, scaleMultiplier, updateTrigger, arrowGeometry]);
-
-  if (!instancedMesh) return null;
-  return <primitive object={instancedMesh} />;
+  if (!meshRef.current) return null
+  return <primitive object={meshRef.current} />
 }

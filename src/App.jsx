@@ -161,6 +161,28 @@ function LoadingOverlay() {
       setFieldChangeType('full')     // 🔁
       setFieldVersion(v => v + 1)
     }
+
+    const notifyFieldChange = (type = 'incremental') => {
+      setFieldChangeType(type)
+      setFieldVersion(v => v + 1)
+    }
+
+    const updatePositionWithField = (...args) => {
+      updatePosition(...args)
+      notifyFieldChange('incremental')
+    }
+
+    const updateChargeDensityWithField = (...args) => {
+      updateChargeDensity(...args)
+      notifyFieldChange('incremental')
+    }
+
+    const updateDirectionWithField = (...args) => {
+      updateDirection(...args)
+      notifyFieldChange('incremental')
+    }   
+
+
     
     const [selectedId, setSelectedId] = useState(null)
     const [isDragging, setIsDragging] = useState(false)
@@ -329,7 +351,7 @@ function LoadingOverlay() {
     const applyPreset = useApplyPreset({
       addObject,
       setSceneObjects,
-      updatePosition,
+      updatePositionWithField,
       // camera fns come from camFns
       animateCameraPreset: camFns?.animateCameraPreset,
       setCameraPreset: camFns?.setCameraPreset,
@@ -397,6 +419,11 @@ function LoadingOverlay() {
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
         <CreateButtons
           addObject={addObject}
+
+          // 🔥 PASSAR PARA O BOTÃO
+          setFieldChangeType={setFieldChangeType}
+          setFieldVersion={setFieldVersion}
+
           setSceneObjects={setSceneObjects}
           sceneObjects={sceneObjects}
           counts={counts}
@@ -418,6 +445,7 @@ function LoadingOverlay() {
             showOnlyGaussianField
           }}
         />
+
 
 
        {/* <ObjectPopup
@@ -460,8 +488,8 @@ function LoadingOverlay() {
           <CameraFnsMount onReady={setCamFns} />
           <CameraStateCapture onCameraUpdate={setCameraState} />
           <SceneHoverBridge onChange={setHoveredId} />
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[2, 2, 5]} />
+          <ambientLight intensity={1.2} />
+          <directionalLight position={[5, 5, 5]} intensity={1.5} />
           <OrbitControls enabled={!isDragging} />
           <WhiteAxes args={[20]} />
           <group position={[0,-0.001,0]}>
@@ -503,9 +531,9 @@ function LoadingOverlay() {
                 selectedId={selectedId}
                 setSelectedId={handleSelect}
                 setIsDragging={handleDragging}
-                updatePosition={updatePosition}
-                updateChargeDensity={updateChargeDensity}
-                updateDirection={updateDirection}
+                updatePosition={updatePositionWithField}
+                updateChargeDensity={updateChargeDensityWithField}
+                updateDirection={updateDirectionWithField}
                 updateObject={updateObject}
                 removeObject={removeObject}
                 addRadiusToChargedSphere={addRadiusToChargedSphere}
@@ -538,6 +566,7 @@ function LoadingOverlay() {
 
             showOnlyGaussianField={showOnlyGaussianField}
             minThreshold={vectorMinTsl}
+            fieldThreshold={vectorMinTsl}
             scaleMultiplier={vectorScale}
             step={1 / Number(vectorStep)}
             planeFilter={activePlane}
@@ -545,7 +574,7 @@ function LoadingOverlay() {
             slicePos={slicePos}
             useSlice={useSlice}
             slicePlaneFlip={slicePlaneFlip}
-            propagationSpeed={waveDuration}
+            waveDuration={waveDuration}
             enablePropagation={wavePropagationEnabled}
           />
         )}
