@@ -10,11 +10,11 @@ function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip) {
   if (!useSlice) return true
   switch (slicePlane) {
     case 'xy':
-      return slicePlaneFlip ^ point.z > slicePos
+      return slicePlaneFlip ? point.z <= slicePos : point.z > slicePos
     case 'yz':
-      return slicePlaneFlip ^ point.x > slicePos
+      return slicePlaneFlip ? point.x <= slicePos : point.x > slicePos
     case 'xz':
-      return slicePlaneFlip ^ point.y > slicePos
+      return slicePlaneFlip ? point.y <= slicePos : point.y > slicePos
     default:
       return true
   }
@@ -22,6 +22,8 @@ function sliceByPlane(point, slicePlane, slicePos, useSlice, slicePlaneFlip) {
 
 export default function FieldArrows({
   objects,
+  fieldVersion = 0,
+  fieldChangeType, // accepted for compatibility
   showOnlyPlane = false,
   showOnlyGaussianField = false,
   fieldThreshold = 0.1,
@@ -35,14 +37,20 @@ export default function FieldArrows({
   useSlice,
   slicePlaneFlip,
   propagate = false,
+  enablePropagation,
+  propagationSpeed = 0.1,
+  waveDuration,
 }) {
+  const propagationEnabled = enablePropagation ?? propagate
+  const ringDuration = Math.max(0.01, waveDuration ?? propagationSpeed ?? 0.1)
+
   const vectorsUnfiltered = useMemo(
     () => getFieldVector3(objects, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter),
-    [objects, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter]
+    [objects, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter, fieldVersion]
   )
 
   const vectors = useMemo(
-    () => vectorsUnfiltered.filter(({ position, field }) => sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)),
+    () => vectorsUnfiltered.filter(({ position }) => sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)),
     [vectorsUnfiltered, slicePlane, slicePos, useSlice, slicePlaneFlip]
   )
 
@@ -196,8 +204,8 @@ export default function FieldArrows({
       })
       .join(';')
 
-    return `${vectorsHash}__${objectsHash}`
-  }, [vectors, objects])
+    return `${vectorsHash}__${objectsHash}__${fieldVersion}`
+  }, [vectors, objects, fieldVersion])
 
   useEffect(() => {
     const mesh = meshRef.current
@@ -211,7 +219,7 @@ export default function FieldArrows({
       return
     }
 
-    if (!propagate) {
+    if (!propagationEnabled) {
       const geom = arrowGeometry.clone()
       geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(attrs.positions, 3))
       geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(attrs.directions, 3))
@@ -310,13 +318,13 @@ export default function FieldArrows({
     animationCompleteRef.current = false
 
     return () => geom.dispose()
-  }, [vectorsKey, arrowGeometry, vectors, objects, createInstancedAttributes, propagate, step])
+  }, [vectorsKey, arrowGeometry, vectors, objects, createInstancedAttributes, propagationEnabled, step])
 
   const attrs = useMemo(() => createInstancedAttributes(vectors), [vectors, createInstancedAttributes])
   const maxCount = attrs.count || 0
 
   useFrame(() => {
-    if (!propagate) return
+    if (!propagationEnabled) return
     const mesh = meshRef.current
     if (!mesh || !mesh.material || maxCount === 0) return
     if (animationCompleteRef.current) return
@@ -329,7 +337,7 @@ export default function FieldArrows({
     }
 
     const elapsed = (Date.now() - startTimeRef.current) / 1000
-    const animDuration = rings.length * 0.1
+    const animDuration = Math.max(rings.length * ringDuration, 0.001)
 
     const progress = Math.min(elapsed / animDuration, 1.0)
     const ringIndex = Math.floor(progress * rings.length)

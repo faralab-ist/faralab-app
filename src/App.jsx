@@ -166,6 +166,15 @@ function LoadingOverlay() {
       changePathVelocity,
       counts,
     } = useSceneObjects()
+
+    const [fieldVersion, setFieldVersion] = useState(0)
+    const [fieldChangeType, setFieldChangeType] = useState('full')
+
+    const applyPresetWithFieldReset = (...args) => {
+      applyPreset(...args)
+      setFieldChangeType('full')     // 🔁
+      setFieldVersion(v => v + 1)
+    }
     
     const [selectedId, setSelectedId] = useState(null)
     const [isDragging, setIsDragging] = useState(false)
@@ -581,7 +590,7 @@ function LoadingOverlay() {
           setCreativeMode={setCreativeMode}
           sidebarOpen={sidebarOpen}
           sidebarMinimized={isSidebarMinimized}
-          onApplyPreset={applyPreset}
+          onApplyPreset={applyPresetWithFieldReset}
           camera={cameraState}
           settings={{
             vectorMinTsl,
@@ -756,21 +765,22 @@ function LoadingOverlay() {
 
         {showField && (
           <FieldArrows
-            key={`arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
-    }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
-        objects={sceneObjects}
-        showOnlyGaussianField={showOnlyGaussianField}
-        minThreshold={vectorMinTsl}
-        scaleMultiplier={vectorScale}
-        step={1 / (Number(vectorStep))} 
-        planeFilter={activePlane}
-        slicePlane={slicePlane}
-        slicePos={slicePos}
-        useSlice={useSlice}
-        slicePlaneFlip={slicePlaneFlip}
-        propagate={wavePropagationEnabled && !sceneObjects.some(o => o.type === 'path')}
-        waveDuration={waveDuration}
-        />
+            objects={sceneObjects}
+            fieldVersion={fieldVersion}
+            fieldChangeType={fieldChangeType}
+
+            showOnlyGaussianField={showOnlyGaussianField}
+            minThreshold={vectorMinTsl}
+            scaleMultiplier={vectorScale}
+            step={1 / Number(vectorStep)}
+            planeFilter={activePlane}
+            slicePlane={slicePlane}
+            slicePos={slicePos}
+            useSlice={useSlice}
+            slicePlaneFlip={slicePlaneFlip}
+            propagationSpeed={waveDuration}
+            enablePropagation={wavePropagationEnabled && !sceneObjects.some((o) => o.type === 'path')}
+          />
         )}
 
         {showMagField && (

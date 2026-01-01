@@ -153,13 +153,16 @@ export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1,
         const counts = allocateSamplesByArea(areas, sampleCount)
         faces.forEach((f, i) => {
           if (counts[i] <= 0) return
+
           const grid = makeRectGrid(f.uSize, f.vSize, counts[i])
           for (const [uu, vv] of grid) {
             if (gridVector3.length >= sampleCount) break
+
             const p = new THREE.Vector3()
             p[f.u] = uu
             p[f.v] = vv
             p[f.wAxis] = f.wPos
+
             gridVector3.push(p.add(objPos.clone()))
           }
         })
@@ -183,9 +186,11 @@ export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1,
 function fibonacciSpherePoints(count, radius = 1) {
   if (count <= 0) return []
   if (count === 1) return [new THREE.Vector3(0, 0, 0)]
+
   const points = []
   const offset = 2 / count
   const increment = Math.PI * (3 - Math.sqrt(5))
+
   for (let i = 0; i < count; i++) {
     const y = i * offset - 1 + offset / 2
     const r = Math.sqrt(Math.max(0, 1 - y * y))
