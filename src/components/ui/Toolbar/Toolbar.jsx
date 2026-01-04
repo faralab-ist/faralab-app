@@ -218,6 +218,29 @@ export default function Toolbar({
 
 
       <div className="tb-group">
+        {/* Criação */}
+        <button
+          ref={presetsBtnRef}
+          className={`tb-btn tb-btn-preset ${presetsMenuVisible ? 'active' : ''}`}
+          onClick={() => setPresetsMenuVisible(v => !v)}
+          title="Presets"
+          aria-pressed={presetsMenuVisible}
+        >
+          <img className="tb-icon" src={PresetIcon} alt="" />
+        </button>
+
+        <button
+          className={`tb-btn ${creativeMode ? 'active' : ''}`}
+          onClick={() => setCreativeMode(v => !v)}
+          title="Enable manual object creation"
+          aria-pressed={creativeMode}
+        >
+          <img className="tb-icon" src={Edit} alt="" />
+        </button>
+
+        <div className="tb-divider"></div>
+
+        {/* Campo */}
         <button
           className={`tb-btn ${activePopups.includes('EField') || dockedWindows?.EField ? 'active' : ''}`}
           onClick={(e) => handleClick('EField', e)}
@@ -236,6 +259,9 @@ export default function Toolbar({
           <img className="tb-icon" src={GaussianIcon} alt="" />
         </button>
 
+        <div className="tb-divider"></div>
+
+        {/* Ferramentas */}
         <button
           className={`tb-btn ${activePopups.includes('TestCharge') || dockedWindows?.TestCharge ? 'active' : ''}`}
           onClick={(e) => handleClick('TestCharge', e)}
@@ -254,31 +280,15 @@ export default function Toolbar({
           <img className="tb-icon" src={Slice} alt="" />
         </button>
 
-        <div className="tb-divider"></div>
-
-        <button
-          ref={presetsBtnRef}
-          className={`tb-btn ${presetsMenuVisible ? 'active' : ''}`}
-          onClick={() => setPresetsMenuVisible(v => !v)}
-          title="Presets"
-          aria-pressed={presetsMenuVisible}
-        >
-          <img className="tb-icon" src={PresetIcon} alt="" />
-        </button>
-
-        <button
-          className={`tb-btn ${creativeMode ? 'active' : ''}`}
-          onClick={() => setCreativeMode(v => !v)}
-          title="Enable manual object creation"
-          aria-pressed={creativeMode}
-        >
-          <img className="tb-icon" src={Edit} alt="" />
-        </button>
-
-        
-         
-
       </div>
+
+      <button
+        className={`tb-btn tb-btn-right`}
+        onClick={() => handleClearCanvas()}
+        title="Clear canvas"
+      >
+        <img className="tb-icon" src={Clean} alt="" />
+      </button>
 
       <button
           className={`tb-btn tb-btn-right ${isFullscreen ? 'active' : ''}`}
@@ -288,14 +298,6 @@ export default function Toolbar({
         >
           <img className="tb-icon" src={isFullscreen ? ExitFullscreenIcon : FullscreenIcon} alt="" />
         </button>
-
-      <button
-        className={`tb-btn tb-btn-right`}
-        onClick={() => handleClearCanvas()}
-        title="Clear canvas"
-      >
-        <img className="tb-icon" src={Clean} alt="" />
-      </button>
 
       {/* Render a Window for EVERY active tool in the list.
          The ToolbarPopup component handles the positioning and content.

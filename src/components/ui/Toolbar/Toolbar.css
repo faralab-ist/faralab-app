@@ -36,7 +36,7 @@
   width: 1px;
   height: 18px;
   background: rgba(255,255,255,0.06);
-  margin: 0 10px;
+  margin: 0 clamp(16px, 1rem, 20px);
   border-radius: 1px;
   align-self: center;
   pointer-events: none;
@@ -119,8 +119,8 @@
 }
 
 .tb-icon {
-  width: clamp(16px, 1rem, 20px);
-  height: clamp(16px, 1rem, 20px);
+  width: clamp(17px, 1rem, 20px);
+  height: clamp(17px, 1rem, 20px);
   display: block;
   pointer-events: none;
   filter: invert(1) brightness(1.2);
@@ -134,5 +134,18 @@
 /* Button positioned on the right side of toolbar */
 .tb-btn-right {
   margin-left: auto;
-  margin-right: 10px;
 }
+
+.tb-btn-right:not(:last-child) {
+  margin-right: clamp(6px, 0.375rem, 8px);
+}
+
+.tb-btn-right:last-child {
+  margin-right: clamp(10px, 0.625rem, 14px);
+}
+
+/* Special highlight for presets button - purple tint */
+.tb-btn-preset .tb-icon {
+  filter: invert(63%) sepia(61%) saturate(3550%) hue-rotate(250deg) brightness(96%) contrast(100%);
+}
+

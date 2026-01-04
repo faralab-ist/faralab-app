@@ -33,7 +33,28 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
   display: flex;
   gap: 16px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.3, 1);
 }
+
+.creative-menu-panel.collapsed {
+  padding: 4px 6px;
+}
+
+.creative-menu-toggle-button {
+  background: transparent;
+  color: #76baff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
 
 .creative-menu-section {
   display: flex;
