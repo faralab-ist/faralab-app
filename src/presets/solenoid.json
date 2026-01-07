@@ -1,0 +1,27 @@
+{
+  "solenoid": {
+    "context": { "r": 0.1, "q": 1 },
+    "camera": { "position": [6, 2.5, 2.5], "target": [0, 0, 0] },
+    "settings": {
+      "vectorMinTsl": 0.08,
+      "vectorScale": 1.2,
+      "vectorStep": 1,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showBField": false,
+      "showLines": false,
+      "showEquipotentialSurface": false,
+      "showOnlyGaussianField": false,
+      "planeFilter": null,
+      "useSlice": false,
+      "slicePlane": "xy",
+      "slicePos": -0.1,
+      "slicePlaneFlip": false,
+      "showSlicePlaneHelper": true
+    },
+    "objects": [
+      { "type": "solenoid", "props": { "position": [0, 0, 0], "charge": "$q", "radius": "$r" } }   
+ ]
+  }
+}

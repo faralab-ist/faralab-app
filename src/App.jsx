@@ -605,7 +605,7 @@ function LoadingOverlay() {
         <div className="field-legend" aria-label="Field color legend">
           <div className="legend-row">
             <span className="legend-swatch legend-electric" />
-            <span className="legend-label">Eletric Field</span>
+            <span className="legend-label">Electric Field</span>
           </div>
           <div className="legend-row">
             <span className="legend-swatch legend-magnetic" />

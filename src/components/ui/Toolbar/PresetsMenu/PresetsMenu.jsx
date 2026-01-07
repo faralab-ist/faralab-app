@@ -58,18 +58,24 @@ const PRESETS = [
     label: 'Cylinder',
     name: 'cylinder',
     category: 'geometry'
-  },*/
+    },*/
   {
     id: 'induction',
     label: 'Induction',
     name: 'induction',
     category: 'magnetic'
+  },
+  {
+    id: 'solenoid',
+    label: 'Solenoid',
+    name: 'solenoid',
+    category: 'magnetic'
   }
 ]
-
-const PresetsMenu = ({ 
-  isVisible, 
-  onApplyPreset,
+  
+  const PresetsMenu = ({ 
+    isVisible, 
+    onApplyPreset,
   sceneObjects,
   camera,
   settings
