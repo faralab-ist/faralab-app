@@ -1,15 +1,16 @@
 import React from "react";
-import NumberInput from "./NumberInput";
+import { InlineDecimalInput } from "../io/decimalInput";
 import { DIM_MIN, DIM_MAX } from "./utils";
 
 // Componente auxiliar definido FORA para evitar re-criação e perda de foco
 const DimInput = ({ value, onChange }) => (
-  <NumberInput 
+  <InlineDecimalInput 
     value={value} 
     onChange={onChange} 
     min={DIM_MIN} 
     max={DIM_MAX}
-    style={{ width: 72 }} 
+    step={0.1}
+    inputStyle={{ width: 72 }} 
     
   />
 );

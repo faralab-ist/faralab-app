@@ -1,5 +1,5 @@
 import React from "react";
-import NumberInput from "./NumberInput";
+import { InlineDecimalInput } from "../io/decimalInput";
 import { DIM_MIN, DIM_MAX } from "./utils";
 
 /**
@@ -46,14 +46,14 @@ export default function CoilControls({
         <div className="detail-row">
           <div className="detail-key">Coil Radius</div>
           <div className="detail-value">
-            <NumberInput
+            <InlineDecimalInput
               value={radius}
               min={DIM_MIN}
               max={DIM_MAX}
               step={0.1}
               onChange={onSetRadius}
               onError={setErrorMsg}
-              style={{ width: 120 }}
+              inputStyle={{ width: 120 }}
             />
           </div>
         </div>
@@ -64,14 +64,14 @@ export default function CoilControls({
         <div className="detail-row">
           <div className="detail-key">Number of Sides</div>
           <div className="detail-value">
-            <NumberInput
+            <InlineDecimalInput
               value={sides}
               min={3}
               max={12}
               step={1}
               onChange={onSetSides}
               onError={setErrorMsg}
-              style={{ width: 120 }}
+              inputStyle={{ width: 120 }}
             />
           </div>
         </div>

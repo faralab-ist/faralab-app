@@ -7,14 +7,23 @@ export function InlineDecimalInput({
   max = Number.POSITIVE_INFINITY,
   onChange,
   value,
+  className,
+  decimals = 2,
+  onCommit,
+  normalizeOnCommit,
+  onError,
+  errorMsg,
+  style,
+  inputStyle,
 }) {
   const spanRef = useRef(null);
   const spinRef = useRef(null);
+  const safeDecimals = Number.isFinite(decimals) ? Math.max(0, decimals) : 2;
 
   function format(v) {
     if (isNaN(v)) v = 0;
     v = Math.min(max, Math.max(min, v));
-    return v.toFixed(2);
+    return v.toFixed(safeDecimals);
   }
 
   function readValue() {
@@ -84,10 +93,12 @@ export function InlineDecimalInput({
     }
 
     const first = txt.indexOf(".");
-    if (first !== -1) {
+    if (safeDecimals === 0) {
+      txt = txt.replace(/\./g, "");
+    } else if (first !== -1) {
       const before = txt.slice(0, first + 1);
       let after = txt.slice(first + 1).replace(/\./g, "");
-      after = after.slice(0, 2);
+      after = after.slice(0, safeDecimals);
       txt = before + after;
     }
 
@@ -119,27 +130,27 @@ export function InlineDecimalInput({
 
     if (txt === "" || txt === "." || txt === "-" || txt === "-.") {
       writeValue(0);
+      onChange?.(0);
+      onCommit?.(0);
+      onError?.(null);
       return;
     }
 
-    const first = txt.indexOf(".");
-    if (first === -1) {
-      let intPart = txt || "0";
-      if (intPart === "-") intPart = "-0";
-      el.textContent = intPart + ".00";
-    } else {
-      let pre = txt.slice(0, first);
-      let pos = txt.slice(first + 1);
+    let v = parseFloat(txt);
+    if (!Number.isFinite(v)) v = 0;
+    if (typeof normalizeOnCommit === "function") v = normalizeOnCommit(v);
 
-      if (pre === "" || pre === "-") pre = pre + "0";
-      pos = pos.slice(0, 2).padEnd(2, "0");
+    const beforeClamp = v;
+    if (min !== undefined) v = Math.max(min, v);
+    if (max !== undefined) v = Math.min(max, v);
 
-      el.textContent = pre + "." + pos;
-    }
+    if (min !== undefined && beforeClamp < min) onError?.(errorMsg || `Min: ${min}`);
+    else if (max !== undefined && beforeClamp > max) onError?.(errorMsg || `Max: ${max}`);
+    else onError?.(null);
 
-    const v = readValue();
     writeValue(v);
-    if (onChange) onChange(v);
+    onChange?.(v);
+    onCommit?.(v);
     window.getSelection().removeAllRanges();
   }
 
@@ -191,7 +202,10 @@ export function InlineDecimalInput({
     const range = sel.getRangeAt(0);
     const pos = range.startOffset;
 
-    if (e.key === "." || e.key === ",") return;
+    if (e.key === "." || e.key === ",") {
+      if (safeDecimals === 0) e.preventDefault();
+      return;
+    }
     
     // Allow minus sign only at the start
     if (e.key === "-") {
@@ -205,7 +219,7 @@ export function InlineDecimalInput({
       const dot = text.indexOf(".");
       if (dot !== -1 && pos > dot) {
         const decimals = text.slice(dot + 1);
-        if (decimals.length >= 2) {
+        if (decimals.length >= safeDecimals) {
           e.preventDefault();
           return;
         }
@@ -256,7 +270,10 @@ export function InlineDecimalInput({
   }, []);
 
   return (
-    <div className="inline-decimal-wrapper">
+    <div
+      className={`inline-decimal-wrapper${className ? ` ${className}` : ""}`}
+      style={style}
+    >
       <span
         ref={spanRef}
         id="inline-decimal"
@@ -268,7 +285,7 @@ export function InlineDecimalInput({
         onKeyUp={handleKeyUp}
         onInput={handleInput}
         onBlur={handleBlur}
-        style={{ paddingRight: 22 }}
+        style={{ paddingRight: 22, display: "inline-block", ...inputStyle }}
       />
       <div className="inline-decimal-arrows">
         <div

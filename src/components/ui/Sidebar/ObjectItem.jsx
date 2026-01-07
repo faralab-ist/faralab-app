@@ -97,7 +97,7 @@ export default function ObjectItem({
                 <div className="detail-key">Position</div>
                 <div
                   className="detail-value"
-                  style={{ display: "flex", gap: 6 }}
+                  style={{ display: "flex", gap: 27 }}
                 >
                   {[0, 1, 2].map((idx) => (
                     <InlineDecimalInput

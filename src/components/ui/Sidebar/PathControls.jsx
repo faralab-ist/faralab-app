@@ -1,5 +1,5 @@
 import React from "react";
-import NumberInput from "./NumberInput";
+import { InlineDecimalInput } from "../io/decimalInput";
 import { VAL_MIN, VAL_MAX, DIM_MIN, ERROR_MSG, DIM_MAX } from "./utils";
 
 export default function PathControls({
@@ -65,11 +65,11 @@ export default function PathControls({
       <div className="detail-row" style={{ flexDirection: "column", gap: 8 }}>
         <div className="detail-key">Velocity (m/s)</div>
         <div style={{ display: "flex", gap: 8 }}>
-          <NumberInput
+          <InlineDecimalInput
             value={velocity}
             step={0.01}
             onChange={(v) => onSetVelocity(v)}
-            style={{ width: 120 }}
+            inputStyle={{ width: 120 }}
           />
         </div>
       </div>
@@ -77,12 +77,12 @@ export default function PathControls({
       <div className="detail-row" style={{ marginTop: 6 }}>
         <div className="detail-key">Charge count</div>
         <div className="detail-value">
-          <NumberInput
+          <InlineDecimalInput
             value={chargeCount}
             min={0}
             step={1}
             onChange={(v) => onSetChargeCount(v)}
-            style={{ width: 120 }}
+            inputStyle={{ width: 120 }}
           />
         </div>
       </div>
@@ -90,12 +90,12 @@ export default function PathControls({
       <div className="detail-row" style={{ flexDirection: "column", gap: 8, marginTop: 6 }}>
         <div className="detail-key">Charge (global)</div>
         <div style={{ display: "flex", gap: 8 }}>
-          <NumberInput
+          <InlineDecimalInput
             value={globalCharge}
             step={0.1}
             onChange={(v) => onSetCharge(v)}
             onError={setErrorMsg}
-            style={{ width: 120 }}
+            inputStyle={{ width: 120 }}
           />
         </div>
       </div>
@@ -127,23 +127,23 @@ export default function PathControls({
         {points.map((pt, idx) => (
           <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <div style={{ width: 36, fontSize: 12, opacity: 0.8 }}>#{idx + 1}</div>
-            <NumberInput
+            <InlineDecimalInput
               value={(pt && pt[0]) ?? 0}
               step={0.1}
               onChange={(v) => onSetPoint(idx, 0, v)}
-              style={{ width: 80 }}
+              inputStyle={{ width: 80 }}
             />
-            <NumberInput
+            <InlineDecimalInput
               value={(pt && pt[1]) ?? 0}
               step={0.1}
               onChange={(v) => onSetPoint(idx, 1, v)}
-              style={{ width: 80 }}
+              inputStyle={{ width: 80 }}
             />
-            <NumberInput
+            <InlineDecimalInput
               value={(pt && pt[2]) ?? 0}
               step={0.1}
               onChange={(v) => onSetPoint(idx, 2, v)}
-              style={{ width: 80 }}
+              inputStyle={{ width: 80 }}
             />
           </div>
         ))}
