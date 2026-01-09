@@ -235,6 +235,38 @@
 }
 
 /* =========================================
+   E-Vectors & B-Vectors Color Identification
+   ========================================= */
+
+/* E-Vectors button with Electric Field gradient (yellow → orange → red) */
+.efield-toggle-btn:nth-child(1).active {
+  background: linear-gradient(90deg, #ffd24a 0%, #ff7a00 50%, #ff2d1a 100%);
+  border-color: rgba(255, 114, 0, 0.8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) inset;
+}
+
+.efield-toggle-btn:nth-child(1).active:hover {
+  background: linear-gradient(90deg, #ffe066 0%, #ff8b1a 50%, #ff3f2d 100%);
+  border-color: rgba(255, 150, 50, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) inset;
+  transform: scale(1.02) translateY(-1px);
+}
+
+/* B-Vectors button with Magnetic Field gradient (blue → purple) */
+.efield-toggle-btn:nth-child(2).active {
+  background: linear-gradient(90deg, #05b2dd 0%, #157cb8 25%, #0859b6 50%, #2f22a3 75%, #4724c7 100%);
+  border-color: rgba(21, 124, 184, 0.8);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) inset;
+}
+
+.efield-toggle-btn:nth-child(2).active:hover {
+  background: linear-gradient(90deg, #1ac2ed 0%, #2a8cc8 25%, #1969c6 50%, #3f32b3 75%, #5734d7 100%);
+  border-color: rgba(50, 150, 220, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) inset;
+  transform: scale(1.02) translateY(-1px);
+}
+
+/* =========================================
    Sliders (Custom Range)
    ========================================= */
 .efield-range,

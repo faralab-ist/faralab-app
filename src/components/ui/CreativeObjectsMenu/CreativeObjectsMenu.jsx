@@ -82,11 +82,9 @@ const CREATIVE_OBJECTS = [
   }
 ]
 
-export default function CreativeObjectsMenu({ addObject, isVisible }) {
+export default function CreativeObjectsMenu({ addObject }) {
   const [isExpanded, setIsExpanded] = useState(false)
   
-  if (!isVisible) return null
-
   const handleAddObject = (obj) => {
     addObject?.(obj.type, obj.defaultProps)
   }

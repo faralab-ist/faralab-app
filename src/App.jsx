@@ -19,6 +19,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   import Toolbar from './components/ui/Toolbar/Toolbar'
+import CreativeObjectsMenu from './components/ui/CreativeObjectsMenu'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
   import DockSidebar from './components/ui/DockSidebar/DockSidebar'
@@ -180,7 +181,7 @@ function LoadingOverlay() {
     const [isPanelMinimized, setIsPanelMinimized] = useState(false)
     const [isSidebarMinimized, setIsSidebarMinimized] = useState(false)
 
-    const [creativeMode, setCreativeMode] = useState(false)  // stays here (single source)
+    const [pivotControlsEnabled, setPivotControlsEnabled] = useState(true)  // Control for object movement
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
     const [vectorStep, setVectorStep] = useState(1) 
@@ -443,9 +444,9 @@ function LoadingOverlay() {
         updatePosition={updatePosition}
         sceneObjects={sceneObjects}
         counts={counts}
-        creativeMode={creativeMode}
-        setCreativeMode={setCreativeMode} 
-        setSceneObjects={setSceneObjects} 
+        setSceneObjects={setSceneObjects}
+        pivotControlsEnabled={pivotControlsEnabled}
+        onTogglePivotControls={() => setPivotControlsEnabled(v => !v)} 
         useSlice={useSlice} setUseSlice={setUseSlice}
         showSliceHelper={showSlicePlaneHelper} 
         setShowSliceHelper={setShowSlicePlaneHelper}
@@ -560,7 +561,6 @@ function LoadingOverlay() {
           onToggleBField: () => setShowMagField(v => !v),
         }}
         gaussianProps={{
-          creativeMode,
           addObject,
           sceneObjects,
           setSceneObjects,
@@ -577,8 +577,6 @@ function LoadingOverlay() {
           setSceneObjects={setSceneObjects}
           sceneObjects={sceneObjects}
           counts={counts}
-          creativeMode={creativeMode}
-          setCreativeMode={setCreativeMode}
           sidebarOpen={sidebarOpen}
           sidebarMinimized={isSidebarMinimized}
           onApplyPreset={applyPreset}
@@ -602,17 +600,6 @@ function LoadingOverlay() {
             showSlicePlaneHelper
           }}
         />
-        <div className="field-legend" aria-label="Field color legend">
-          <div className="legend-row">
-            <span className="legend-swatch legend-electric" />
-            <span className="legend-label">Eletric Field</span>
-          </div>
-          <div className="legend-row">
-            <span className="legend-swatch legend-magnetic" />
-            <span className="legend-label">Magnetic Field</span>
-          </div>
-        </div>
-
 
        {/* <ObjectPopup
           selectedObject={sceneObjects.find(o => o.id === selectedId)}
@@ -716,7 +703,7 @@ function LoadingOverlay() {
                 key={obj.id}
                 {...obj}
                 objects={sceneObjects}
-                creativeMode={creativeMode}           
+                creativeMode={pivotControlsEnabled}           
                 selectedId={selectedId}
                 setSelectedId={handleSelect}
                 setIsDragging={handleDragging}
@@ -833,7 +820,6 @@ function LoadingOverlay() {
           setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
           setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
           setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
-          creativeMode={creativeMode}
           addObject={addObject}
           sceneObjects={sceneObjects}
           setSceneObjects={setSceneObjects}
@@ -858,6 +844,11 @@ function LoadingOverlay() {
           setWavePropagationEnabled={setWavePropagationEnabled}
           waveDuration={waveDuration}
           setWaveDuration={setWaveDuration}
+        />
+
+        {/* Creative Objects Menu - always visible in bottom left */}
+        <CreativeObjectsMenu 
+          addObject={addObject}
         />
       </div>
     </div>

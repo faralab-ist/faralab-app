@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import ToolbarPopup from './ToolbarPopup/ToolbarPopup'
-import CreativeObjectsMenu from './CreativeObjectsMenu'
 import PresetsMenu from './PresetsMenu'
 import './Toolbar.css'
 import RecordingButtons from '../RecordingButtons/RecordingButtons'
@@ -15,16 +14,20 @@ import GaussianIcon from '../../../assets/gaussian_surface.svg'
 
 import FullscreenIcon from '../../../assets/fullscreen.svg'
 import ExitFullscreenIcon from '../../../assets/exit-fullscreen.svg'
+import LockIcon from '../../../assets/lock.svg'
+import UnlockIcon from '../../../assets/unlock.svg'
 
 export default function Toolbar({
-  creativeMode,
-  setCreativeMode,
   setSceneObjects,
 
   addObject,
   updatePosition,
   sceneObjects,
   counts,
+  
+  // PivotControls control
+  pivotControlsEnabled,
+  onTogglePivotControls,
   
   // Slicing Props (to be passed down to Slicer Popup)
   useSlice, setUseSlice,
@@ -207,7 +210,6 @@ export default function Toolbar({
     // Gaussian props
     showOnlyGaussianField,
     setOnlyGaussianField,
-    creativeMode,
     setSceneObjects
   }
 
@@ -227,15 +229,6 @@ export default function Toolbar({
           aria-pressed={presetsMenuVisible}
         >
           <img className="tb-icon" src={PresetIcon} alt="" />
-        </button>
-
-        <button
-          className={`tb-btn ${creativeMode ? 'active' : ''}`}
-          onClick={() => setCreativeMode(v => !v)}
-          title="Enable manual object creation"
-          aria-pressed={creativeMode}
-        >
-          <img className="tb-icon" src={Edit} alt="" />
         </button>
 
         <div className="tb-divider"></div>
@@ -283,6 +276,15 @@ export default function Toolbar({
       </div>
 
       <button
+        className={`tb-btn tb-btn-right ${!pivotControlsEnabled ? 'locked' : ''}`}
+        onClick={onTogglePivotControls}
+        title={pivotControlsEnabled ? "Unlock Objects (Allow Movement)" : "Lock Objects (Disable Movement)"}
+        aria-pressed={!pivotControlsEnabled}
+      >
+        <img className="tb-icon" src={pivotControlsEnabled ? UnlockIcon : LockIcon} alt="" />
+      </button>
+
+      <button
         className={`tb-btn tb-btn-right`}
         onClick={() => handleClearCanvas()}
         title="Clear canvas"
@@ -315,12 +317,6 @@ export default function Toolbar({
           undockPosition={undockPositions?.[popupId]}
         />
       ))}
-
-      {/* Creative Objects Menu - appears below toolbar when creative mode is active */}
-      <CreativeObjectsMenu 
-        addObject={addObject}
-        isVisible={creativeMode}
-      />
 
       {/* Presets Menu - appears below toolbar when P button is active */}
       <div ref={presetsMenuRef}>
