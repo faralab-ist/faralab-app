@@ -13,10 +13,10 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 32px;
 
-  z-index: 1;
+  z-index: 20;
   transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1), background 0.45s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(14, 14, 14, 0.184);
   overflow: hidden;
 }
 

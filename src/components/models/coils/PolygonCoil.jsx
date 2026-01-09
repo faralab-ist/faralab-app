@@ -14,6 +14,7 @@ import calculateFieldAtPoint from '../../../utils/calculateField'
  */
 export default function PolygonCoil({
   id,
+  name,
   position = [0, 0, 0],
   selectedId,
   setSelectedId,
@@ -187,6 +188,7 @@ export default function PolygonCoil({
     <BaseCoil
       getSurfacePoints={getPolygonSurfacePoints}
       id={id}
+      name={name}
       position={position}
       selectedId={selectedId}
       setSelectedId={setSelectedId}

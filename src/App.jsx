@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
   import { Canvas, useThree } from '@react-three/fiber'
   import { OrbitControls } from '@react-three/drei'
   import './App.css'
@@ -130,12 +130,21 @@ function LoadingOverlay() {
   return <primitive object={axes} />
 }
 
+
   // small bridge used inside <Canvas /> to forward hover -> App state
   function SceneHoverBridge({ onChange }) {
     // useSceneHover runs inside the fiber renderer (uses useThree)
-    useSceneHover((id) => {
-      onChange?.(id ?? null)
-    })
+    const lastIdRef = useRef(null)
+    
+    const handleHover = useCallback((id) => {
+      const newId = id ?? null
+      if (lastIdRef.current !== newId) {
+        lastIdRef.current = newId
+        onChange?.(newId)
+      }
+    }, [onChange])
+    
+    useSceneHover(handleHover)
     return null
   }
 
@@ -209,6 +218,9 @@ function LoadingOverlay() {
     const [ensureActiveCallback, setEnsureActiveCallback] = useState(null)
     const [undockPositions, setUndockPositions] = useState({}) // Store positions for undocked windows
 
+    const onHoverChange = useCallback((id) => {
+      setHoveredId(id)
+    }, [])
     // Docker functions
     const handleDock = (windowName) => {
       setDockedWindows(prev => ({ ...prev, [windowName]: true }))
@@ -646,7 +658,7 @@ function LoadingOverlay() {
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
           <CameraFnsMount onReady={setCamFns} />
           <CameraStateCapture onCameraUpdate={setCameraState} />
-          <SceneHoverBridge onChange={setHoveredId} />
+          <SceneHoverBridge onChange={onHoverChange} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[2, 2, 5]} />
           <OrbitControls enabled={!isDragging} />

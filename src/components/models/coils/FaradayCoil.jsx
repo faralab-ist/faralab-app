@@ -4,9 +4,11 @@ import useCameraSnap from '../../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { calculateMagFluxThroughCircularLoop } from '../../../physics/magFieldCpu'
+import Label from '../../ui/labels/Label'
 
 export default function FaradayCoil({
   objects,
+  name,
   id,
   position,
   selectedId,
@@ -22,6 +24,8 @@ export default function FaradayCoil({
   updateObject,
   tubeRadius = 0.05,
   chargeCount = 12,
+  showLabel = true,
+  magneticFlux
 }) {
   const radialSamples = 10;
   const angularSamples = 10;
@@ -211,7 +215,18 @@ export default function FaradayCoil({
       lineWidth={2.5}
     >
       <group ref={groupRef}>
-        
+        {showLabel && (
+                    <Label
+      
+          objectName={name}
+          value={[
+          `B-Flux = ${magneticFlux.toExponential(2)} Wb`,
+          `ε = ${emfValue.toExponential(2)} µV`
+        ]}
+          offsetY={radius + 0.5}
+          distanceFactor={8}
+          />
+        )}
         <mesh 
           geometry={coilGeom} 
           material={wireMaterial} 

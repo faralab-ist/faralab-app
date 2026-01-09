@@ -36,10 +36,9 @@ export default function Charge({ charge, position = [0, 0, 0], showLabel = true,
     {showLabel && (
       <Label 
         position={position}
-        name="Charge Intensity"
+        objectName={props.name}
         value={`Q = ${charge > 0 ? '+' : ''}${charge} C`}
         offsetY={0.6}
-       
       />
     )}
     </group>

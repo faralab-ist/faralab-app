@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from 'react'
+import React, { useRef, useEffect, useMemo, useLayoutEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
@@ -26,6 +26,7 @@ export default function Cuboid({
   height = 2,
   depth = 2,
   opacity = 0.5,
+  name,
   selectedId,
   setSelectedId,
   setIsDragging,
@@ -51,14 +52,26 @@ export default function Cuboid({
   const isSelected = id === selectedId
   const meshRef = useRef()
   const pivotRef = useRef()
-  const rootRef = useRef()                 // 👈 move this group, not the mesh
+  const rootRef = useRef()                 
+  const isDraggingRef = useRef(false)
   const center = useMemo(() => [0, 0, 0], [])
-  const clickArmed = useRef(false) // 👈 adia a seleção para o pointerup
+  const clickArmed = useRef(false) 
 
-  // ⚙️ Mantém o objeto sincronizado com a posição global
-  useEffect(() => {
-    if (rootRef.current) rootRef.current.position.set(...position)   // 👈 move the group
-  }, [position])
+  // Sync PivotControls matrix from state and keep child group at origin
+  useLayoutEffect(() => {
+    if (isDraggingRef.current || !pivotRef.current) return
+    const pos = new THREE.Vector3(...position)
+    const mat = new THREE.Matrix4().setPosition(pos)
+    let rotQuat = new THREE.Quaternion()
+    if (Array.isArray(quaternion) && quaternion.length === 4) {
+      rotQuat.set(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+    } else if (Array.isArray(rotation) && rotation.length >= 3) {
+      const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
+      rotQuat.setFromEuler(e)
+    }
+    mat.multiply(new THREE.Matrix4().makeRotationFromQuaternion(rotQuat))
+    if (pivotRef.current.matrix) pivotRef.current.matrix.copy(mat)
+  }, [position, rotation, quaternion])
 
   // apply quaternion / rotation (skip while dragging)
   useEffect(() => {
@@ -103,16 +116,17 @@ export default function Cuboid({
   return (
     <PivotControls
       ref={pivotRef}
+      scale={0.86}
+      lineWidth={2.5}
       anchor={center}
       visible={isSelected}
       enabled={!fixed && (!isDragging || dragOwnerId === id) && creativeMode}
       disableScaling={true}
       depthTest={false}
-      onDragStart={() => setIsDragging(true)}
+      onDragStart={() => { isDraggingRef.current = true; setIsDragging(true) }}
       onDrag={(matrix) => {
         const newPos = new THREE.Vector3().setFromMatrixPosition(matrix)
         updatePosition(id, [newPos.x, newPos.y, newPos.z])
-        if (rootRef.current) rootRef.current.position.copy(newPos)   // 👈 move the group during the drag
         // persist rotation/quaternion from the pivot's world transform so the sidebar stays in sync
         const p = new THREE.Vector3()
         const q = new THREE.Quaternion()
@@ -121,13 +135,13 @@ export default function Cuboid({
         const e = new THREE.Euler().setFromQuaternion(q, 'XYZ')
         updateObject?.(id, { quaternion: [q.x, q.y, q.z, q.w], rotation: [e.x, e.y, e.z] })
       }}
-      onDragEnd={() => setIsDragging(false)}
+      onDragEnd={() => { isDraggingRef.current = false; setIsDragging(false) }}
     >
-      <group ref={rootRef} position={position}>
+      <group ref={rootRef} position={[0, 0, 0]}>
         <mesh
           ref={meshRef}
           userData={{ id, type: 'surface' }}
-          position={[0, 0, 0]}                                       // 👈 fica local no grupo
+          position={[0, 0, 0]}                                      
           onPointerDown={(e) => {
             if (e.button !== undefined && e.button !== 0) return
             // se outro objeto já está em drag, ignore
@@ -168,7 +182,7 @@ export default function Cuboid({
     {showOnlyGaussianField && (
         <Label
           position={[0, (height / 2) + 0.5, 0]}
-          name="Flux"
+          objectName={name}
           value={`${fluxValue.toExponential(2)} N⋅m²/C`}
           offsetY={0}
           distanceFactor={10}

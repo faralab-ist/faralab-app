@@ -133,7 +133,7 @@ const objectFactories = {
     opacity: 0.5,
     charges: [],
     deformable: true,
-    fixed: true,
+    fixed: false,
     createdAt: Date.now(),
   }),
   cylinder: (index) => ({
@@ -148,7 +148,7 @@ const objectFactories = {
     rotation: [0,0,0],
     charges: [],
     deformable: true,
-    fixed: true,
+    fixed: false,
     createdAt: Date.now(),
   }),
   cuboid: (index) => ({
@@ -163,7 +163,7 @@ const objectFactories = {
     opacity: 0.5,
     charges: [],
     deformable: true,
-    fixed: true,
+    fixed: false,
     rotation: [0,0,0],
     createdAt: Date.now(),
   }),

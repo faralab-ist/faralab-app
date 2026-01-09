@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from 'react'
+import React, { useRef, useMemo, useLayoutEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
@@ -25,6 +25,7 @@ export default function Cylinder({
   radius = 3,
   height = 5,
   opacity = 0.5,
+  name,
   selectedId,
   setSelectedId,
   setIsDragging,
@@ -49,48 +50,29 @@ export default function Cylinder({
   const isSelected = id === selectedId
   const meshRef = useRef()
   const pivotRef = useRef()
-  const rootRef = useRef() // 👈 move this group, not just the mesh
+  const rootRef = useRef() // 👈 child group stays at origin; pivot drives world transform
+  const isDraggingRef = useRef(false)
   const center = useMemo(() => [0, 0, 0], [])
   const clickArmed = useRef(false)
   const shape = useMemo(() => new CylinderShape({ radius, height }), [radius, height])
   const normals = useMemo(() => shape.getRepresentativeNormals(), [shape])
   const arrowLen = useMemo(() => Math.max(0.1, Math.min(radius, height) * 0.4), [radius, height])
 
-  // 👇 sync world position via root group so gizmo + arrows follow
-  useEffect(() => {
-    if (rootRef.current) rootRef.current.position.set(...position)
-  }, [position])
-
-  // apply quaternion / rotation to the root group and keep direction in sync
-  useEffect(() => {
-    if (!rootRef.current) return
-    // don't override while dragging
-    if (dragOwnerId !== null && dragOwnerId !== id) return
-    // prefer quaternion
+  // Sync PivotControls matrix from state; keep child at origin to avoid double transforms
+  useLayoutEffect(() => {
+    if (isDraggingRef.current || !pivotRef.current) return
+    const pos = new THREE.Vector3(...position)
+    const mat = new THREE.Matrix4().setPosition(pos)
+    let rotQuat = new THREE.Quaternion()
     if (Array.isArray(quaternion) && quaternion.length === 4) {
-      const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
-      rootRef.current.quaternion.copy(q)
-      // sync direction (use local Y as cylinder neutral axis)
-      if (typeof updateDirection === 'function') {
-        const dirWorld = new THREE.Vector3(0, 1, 0).applyQuaternion(q).normalize()
-        updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
-      }
-      return
-    }
-    // fallback to Euler rotation (radians)
-    if (Array.isArray(rotation) && rotation.length >= 3) {
+      rotQuat.set(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+    } else if (Array.isArray(rotation) && rotation.length >= 3) {
       const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
-      rootRef.current.rotation.copy(e)
-      if (typeof updateDirection === 'function') {
-        const dirWorld = new THREE.Vector3(0, 1, 0).applyEuler(e).normalize()
-        updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
-      }
-      return
+      rotQuat.setFromEuler(e)
     }
-    // otherwise reset
-    rootRef.current.rotation.set(0, 0, 0)
-    rootRef.current.quaternion.identity()
-  }, [rotation, quaternion, updateDirection, id, dragOwnerId])
+    mat.multiply(new THREE.Matrix4().makeRotationFromQuaternion(rotQuat))
+    if (pivotRef.current.matrix) pivotRef.current.matrix.copy(mat)
+  }, [position, rotation, quaternion])
 
   const clippingPlanes = useMemo(() => {
     if (!useSlice) return [];
@@ -107,16 +89,17 @@ export default function Cylinder({
   return (
     <PivotControls
       ref={pivotRef}
+      scale={0.86}
+      lineWidth={2.5}
       enabled={!fixed && (dragOwnerId === null || dragOwnerId === id) && creativeMode}
       anchor={center}
       visible={isSelected}
       disableScaling={true}
       depthTest={false}
-      onDragStart={() => setIsDragging(true)}
+      onDragStart={() => { isDraggingRef.current = true; setIsDragging(true) }}
       onDrag={(matrix) => {
         const newPos = new THREE.Vector3().setFromMatrixPosition(matrix)
         updatePosition(id, [newPos.x, newPos.y, newPos.z])
-        if (rootRef.current) rootRef.current.position.copy(newPos)
         // persist quaternion + Euler rotation (radians) so UI stays in sync
         const p = new THREE.Vector3()
         const q = new THREE.Quaternion()
@@ -130,9 +113,9 @@ export default function Cylinder({
           updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
         }
       }}
-      onDragEnd={() => setIsDragging(false)}
+      onDragEnd={() => { isDraggingRef.current = false; setIsDragging(false) }}
     >
-      <group ref={rootRef} position={position}>
+      <group ref={rootRef} position={[0, 0, 0]}>
         <mesh
           ref={meshRef}
           userData={{ id, type: 'surface' }}
@@ -173,7 +156,7 @@ export default function Cylinder({
 {showOnlyGaussianField && (
         <Label
           position={[0, (height / 2) + 0.7, 0]}
-          name="Flux"
+          objectName={name}
           value={`${fluxValue.toExponential(2)} N⋅m²/C`}
           offsetY={0}
           distanceFactor={10}

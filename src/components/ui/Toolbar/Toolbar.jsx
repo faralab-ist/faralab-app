@@ -276,9 +276,9 @@ export default function Toolbar({
       </div>
 
       <button
-        className={`tb-btn tb-btn-right ${!pivotControlsEnabled ? 'locked' : ''}`}
+        className={`tb-btn tb-btn-right ${!pivotControlsEnabled ? '' : 'locked'}`}
         onClick={onTogglePivotControls}
-        title={pivotControlsEnabled ? "Unlock Objects (Allow Movement)" : "Lock Objects (Disable Movement)"}
+        title={pivotControlsEnabled ? "Lock Objects (Remove Movement Controls)" : "Unlock Objects (Allow Movement Controls)"}
         aria-pressed={!pivotControlsEnabled}
       >
         <img className="tb-icon" src={pivotControlsEnabled ? UnlockIcon : LockIcon} alt="" />

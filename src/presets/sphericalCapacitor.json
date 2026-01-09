@@ -2,7 +2,7 @@
   "sphericalCapacitor": {
     "context": {},
     "camera": {
-      "position": [0.0, 0.5, 6.5],
+      "position": [0.0, 0.5, 9.5],
       "target": [0, 0, 0]
     },
     "settings": {

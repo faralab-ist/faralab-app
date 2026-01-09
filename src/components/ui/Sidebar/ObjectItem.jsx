@@ -421,7 +421,7 @@ export default function ObjectItem({
             )}
 
             {/* Show Label toggle for objects with labels (not surfaces) */}
-            {(obj.type === "charge" || obj.type === "wire" || obj.type === "plane" || obj.type === "chargedSphere" || obj.type === "path" || obj.type === "testPointCharge" || obj.type === "coil") && (
+            {obj.type != 'surface' && (
               <div className="detail-row">
                 <div className="detail-key">Show Label</div>
                 <div className="detail-value">
