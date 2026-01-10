@@ -59,6 +59,8 @@ export default function BaseCoil({
   getPathPoints = () => [],        // function to generate path points for charges
   showLabel = true,
 
+  glowMultiplier,
+
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -201,7 +203,7 @@ export default function BaseCoil({
             parentQuaternion={quaternion}
             groupRef={groupRef}
             showLabel={showLabel}
-
+            glowMultiplier={glowMultiplier}
           />
         )}
 

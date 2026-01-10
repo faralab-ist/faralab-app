@@ -67,6 +67,13 @@ const CREATIVE_OBJECTS = [
     category: 'magnetic'
   },
   {
+    id: 'testCoil',
+    label: 'Test Coil',
+    type: 'testCoil',
+    defaultProps: { position: [0, 0, 0] },
+    category: 'test'
+  },
+  {
     id: 'barMagnet',
     label: 'Bar Magnet',
     type: 'barMagnet',

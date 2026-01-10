@@ -273,6 +273,22 @@ const objectFactories = {
     emf: 0,
     createdAt: Date.now(),
   }),
+  testCoil: (index) => ({
+    id: `tmp-${index}`,
+    type: 'testCoil',
+    name: `Test Coil ${index}`,
+    position: [0, 0, 0],
+    radius: 1,
+    tubeRadius: 0.01,
+    coilColor: '#6ea8ff',
+    direction: [0, 1, 0],     // normal vector (area direction)
+    rotation: [0, 0, 0],      // Euler angles for rotation
+    numOfPoints: 20,
+    magneticFlux: 0,
+    emf: 0,
+    electricFlux: 0,
+    createdAt: Date.now(),
+  }),
 }
 
 export default function useSceneObjects(initial = []) {

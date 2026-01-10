@@ -140,7 +140,7 @@ export default function Sidebar({
   
 
   const pillObjects = (objects || []).filter(o => 
-    ['path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires', 'coil', 'barMagnet', 'faradayCoil'].includes(o.type));
+    ['testCoil', 'path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires', 'coil', 'barMagnet', 'faradayCoil'].includes(o.type));
   const typeCounters = {};
   const subtypeCounters = {};
 
