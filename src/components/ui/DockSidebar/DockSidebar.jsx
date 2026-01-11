@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import './DockSidebar.css';
 import TestChargeMenu from '../Toolbar/ToolbarPopup/TestChargeMenu';
 import SlicerMenu from '../Toolbar/ToolbarPopup/SlicerMenu';
@@ -10,36 +10,70 @@ import FieldViewIcon from '../../../assets/field_view.svg';
 import GaussianIcon from '../../../assets/gaussian_surface.svg';
 
 /**
+ * Tool Registry - Add new tools here without modifying component logic
+ */
+const TOOL_REGISTRY = {
+  TestCharge: { 
+    component: TestChargeMenu, 
+    icon: TestChargeIcon,
+    label: 'Test Charge'
+  },
+  Slice: { 
+    component: SlicerMenu, 
+    icon: SliceIcon,
+    label: 'Slicer'
+  },
+  EField: { 
+    component: EFieldMenu, 
+    icon: FieldViewIcon,
+    label: 'Field View'
+  },
+  Gaussian: { 
+    component: GaussianMenu, 
+    icon: GaussianIcon,
+    label: 'Gaussian'
+  }
+};
+
+/**
  * DockSidebar - Dynamic Island-style floating dock on the left
  * @param {Object} props
  * @param {Object} props.dockedWindows - { TestCharge: true, Slice: false, ... }
  * @param {Function} props.onUndock - Callback to undock a window back to floating
  * @param {Array} props.tabOrder - Order of tabs for user organization
  * @param {Function} props.setTabOrder - Update tab order
- * @param {Object} props.testChargeProps - Props for TestChargeMenu
- * @param {Object} props.slicerProps - Props for SlicerMenu
- * @param {Object} props.efieldProps - Props for EFieldMenu
- * @param {Object} props.gaussianProps - Props for GaussianMenu
+ * @param {Object} props.windowProps - Props for all windows { TestCharge: {...}, Slice: {...}, ... }
  */
 export default function DockSidebar({
   dockedWindows,
   onUndock,
   tabOrder,
   setTabOrder,
+  windowProps = {},
+  // Legacy props (deprecated - use windowProps instead)
   testChargeProps,
   slicerProps,
   efieldProps,
   gaussianProps,
 }) {
+  // Merge legacy props with windowProps for backward compatibility
+  const mergedWindowProps = useMemo(() => ({
+    TestCharge: windowProps.TestCharge || testChargeProps,
+    Slice: windowProps.Slice || slicerProps,
+    EField: windowProps.EField || efieldProps,
+    Gaussian: windowProps.Gaussian || gaussianProps,
+    ...windowProps
+  }), [windowProps, testChargeProps, slicerProps, efieldProps, gaussianProps]);
+
   const [draggedTab, setDraggedTab] = useState(null);
   const [dragOverTab, setDragOverTab] = useState(null);
   const [dropPosition, setDropPosition] = useState(null); // 'before' or 'after'
-  const [expandedWindows, setExpandedWindows] = useState({ 
-    TestCharge: true, 
-    Slice: true, 
-    EField: true, 
-    Gaussian: true 
-  }); // Track which windows are expanded
+  
+  // Initialize expanded state based on docked windows
+  const [expandedWindows, setExpandedWindows] = useState(() => 
+    Object.keys(TOOL_REGISTRY).reduce((acc, key) => ({ ...acc, [key]: true }), {})
+  );
+  
   const [isHovered, setIsHovered] = useState(false); // Track hover state for island expansion
   
   // Get list of docked window names in user-defined order
@@ -47,14 +81,6 @@ export default function DockSidebar({
 
   // If no windows docked, show collapsed state (minimal island)
   const isCollapsed = dockedWindowNames.length === 0;
-  
-  // Window icons mapping
-  const windowIcons = {
-    TestCharge: TestChargeIcon,
-    Slice: SliceIcon,
-    EField: FieldViewIcon,
-    Gaussian: GaussianIcon
-  };
 
   // Toggle expanded state for a window
   const toggleExpanded = (windowName) => {
@@ -79,6 +105,8 @@ export default function DockSidebar({
   const handleTabDragStart = (e, windowName) => {
     setDraggedTab(windowName);
     e.dataTransfer.effectAllowed = 'move';
+    // Store the window name in dataTransfer for safer comparison
+    e.dataTransfer.setData('text/plain', windowName);
   };
 
   const handleTabDragOver = (e, windowName) => {
@@ -109,11 +137,12 @@ export default function DockSidebar({
     setTabOrder(newOrder);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e, targetName) => {
     e.preventDefault();
     e.stopPropagation();
     
-    if (draggedTab !== e.target.closest('.dock-window-header')?.textContent?.trim()) {
+    // Use state comparison instead of DOM text comparison
+    if (draggedTab && draggedTab !== targetName) {
       performReorder();
     }
     
@@ -122,14 +151,11 @@ export default function DockSidebar({
     setDropPosition(null);
   };
 
-  const handleTabDragEnd = (e) => {
-    // If dragged outside docker area, undock it
-    const dockerRect = e.currentTarget.closest('.dock-sidebar').getBoundingClientRect();
-    const isOutsideDock = 
-      e.clientX > dockerRect.right || 
-      e.clientX < dockerRect.left ||
-      e.clientY > dockerRect.bottom ||
-      e.clientY < dockerRect.top;
+  const handleTabDragEnd = (e, windowName) => {
+    // Check if dragged outside by comparing mouse position to viewport bounds
+    // More reliable than getBoundingClientRect during animations
+    const threshold = 100; // pixels from left edge
+    const isOutsideDock = e.clientX > threshold;
     
     if (isOutsideDock && draggedTab) {
       // Pass the position where the drag ended, clamped to keep window visible
@@ -137,9 +163,9 @@ export default function DockSidebar({
         left: Math.max(20, e.clientX - 150),
         top: Math.max(20, e.clientY - 20)
       };
-      setExpandedWindows(prev => ({ ...prev, [draggedTab]: false }));
+      setExpandedWindows(prev => ({ ...prev, [windowName]: false }));
       setIsHovered(false);
-      onUndock(draggedTab, position);
+      onUndock(windowName, position);
     }
     
     setDraggedTab(null);
@@ -152,20 +178,15 @@ export default function DockSidebar({
     e.stopPropagation();
   };
 
-  // Render content for specific window
+  // Render content for specific window using registry
   const renderWindowContent = (windowName) => {
-    switch (windowName) {
-      case 'TestCharge':
-        return <TestChargeMenu {...testChargeProps} />;
-      case 'Slice':
-        return <SlicerMenu {...slicerProps} />;
-      case 'EField':
-        return <EFieldMenu {...efieldProps} />;
-      case 'Gaussian':
-        return <GaussianMenu {...gaussianProps} />;
-      default:
-        return null;
-    }
+    const tool = TOOL_REGISTRY[windowName];
+    if (!tool) return null;
+    
+    const ToolComponent = tool.component;
+    const props = mergedWindowProps[windowName] || {};
+    
+    return <ToolComponent {...props} />;
   };
 
   return (
@@ -177,15 +198,20 @@ export default function DockSidebar({
       {/* Icon badges container (visible when NOT expanded) */}
       {!isHovered && !isCollapsed && (
         <div className="dock-island-badges">
-          {dockedWindowNames.map((windowName) => (
-            <div
-              key={windowName}
-              className="dock-badge"
-              title={windowName}
-            >
-              <img src={windowIcons[windowName]} alt={windowName} className="dock-badge-icon" />
-            </div>
-          ))}
+          {dockedWindowNames.map((windowName) => {
+            const tool = TOOL_REGISTRY[windowName];
+            if (!tool) return null;
+            
+            return (
+              <div
+                key={windowName}
+                className="dock-badge"
+                title={tool.label}
+              >
+                <img src={tool.icon} alt={tool.label} className="dock-badge-icon" />
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -201,55 +227,60 @@ export default function DockSidebar({
         <div 
           className="dock-content"
           onDragOver={handleContentDragOver}
-          onDrop={handleDrop}
+          onDrop={(e) => handleDrop(e, null)}
         >
-        {dockedWindowNames.map((windowName) => (
-          <div key={windowName} className="dock-window-section">
-            {/* Drop line indicator above */}
-            {dragOverTab === windowName && dropPosition === 'before' && shouldShowDropLine(windowName, 'before') && (
-              <div className="drop-line" />
-            )}
-            
-            {/* Window header - clicking toggles expansion */}
-            <div
-              className={`dock-window-header ${draggedTab === windowName ? 'dragging' : ''}`}
-              onClick={() => toggleExpanded(windowName)}
-              draggable
-              onDragStart={(e) => handleTabDragStart(e, windowName)}
-              onDragOver={(e) => handleTabDragOver(e, windowName)}
-              onDrop={handleDrop}
-              onDragEnd={handleTabDragEnd}
-            >
-              <span className="dock-window-expand">
-                {expandedWindows[windowName] ? "▾" : "▸"}
-              </span>
-              <span className="dock-window-title">{windowName}</span>
-              <button
-                className="dock-window-undock"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setExpandedWindows(prev => ({ ...prev, [windowName]: false }));
-                  onUndock(windowName);
-                }}
-                title="Pop out"
+        {dockedWindowNames.map((windowName) => {
+          const tool = TOOL_REGISTRY[windowName];
+          if (!tool) return null;
+          
+          return (
+            <div key={windowName} className="dock-window-section">
+              {/* Drop line indicator above */}
+              {dragOverTab === windowName && dropPosition === 'before' && shouldShowDropLine(windowName, 'before') && (
+                <div className="drop-line" />
+              )}
+              
+              {/* Window header - clicking toggles expansion */}
+              <div
+                className={`dock-window-header ${draggedTab === windowName ? 'dragging' : ''}`}
+                onClick={() => toggleExpanded(windowName)}
+                draggable
+                onDragStart={(e) => handleTabDragStart(e, windowName)}
+                onDragOver={(e) => handleTabDragOver(e, windowName)}
+                onDrop={(e) => handleDrop(e, windowName)}
+                onDragEnd={(e) => handleTabDragEnd(e, windowName)}
               >
-                ⇱
-              </button>
-            </div>
-            
-            {/* Window content */}
-            {expandedWindows[windowName] && (
-              <div className="dock-window-content">
-                {renderWindowContent(windowName)}
+                <span className="dock-window-expand">
+                  {expandedWindows[windowName] ? "▾" : "▸"}
+                </span>
+                <span className="dock-window-title">{tool.label}</span>
+                <button
+                  className="dock-window-undock"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedWindows(prev => ({ ...prev, [windowName]: false }));
+                    onUndock(windowName);
+                  }}
+                  title="Pop out"
+                >
+                  ⇱
+                </button>
               </div>
-            )}
-            
-            {/* Drop line indicator below */}
-            {dragOverTab === windowName && dropPosition === 'after' && shouldShowDropLine(windowName, 'after') && (
-              <div className="drop-line" />
-            )}
-          </div>
-        ))}
+              
+              {/* Window content */}
+              {expandedWindows[windowName] && (
+                <div className="dock-window-content">
+                  {renderWindowContent(windowName)}
+                </div>
+              )}
+              
+              {/* Drop line indicator below */}
+              {dragOverTab === windowName && dropPosition === 'after' && shouldShowDropLine(windowName, 'after') && (
+                <div className="drop-line" />
+              )}
+            </div>
+          );
+        })}
         </div>
       )}
 
