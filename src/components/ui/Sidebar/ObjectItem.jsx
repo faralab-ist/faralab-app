@@ -6,8 +6,6 @@ import DimensionControls from "./DimensionControls";
 import StackedPlaneControls from "./StackedPlaneControls";
 import ConcentricSphereControls from "./ConcentricSphereControls";
 import ConcentricInfiniteWireControls from "./ConcentricInfiniteWireControls";
-import PathControls from "./PathControls";
-import CoilControls from "./CoilControls";
 import RotationControls from "./RotationControls";
 import { TYPE_CONFIG, POS_MIN, POS_MAX, VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
@@ -21,10 +19,9 @@ export default function ObjectItem({
   removeObject,
   stackedPlaneActions,
   concentricActions,
-  concentricWireActions, 
-  pathActions,
-  coilActions,
-  showFlux
+  concentricWireActions,
+  toggleOscillation,
+  isOscillating
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
 
@@ -32,9 +29,6 @@ export default function ObjectItem({
   let iconData = { icon: null, alt: "", subtype: obj.type };
   if (obj.type === "surface") {
     const resolved = TYPE_CONFIG.surface.resolve(obj);
-    iconData = { ...resolved };
-  } else if (obj.type === "coil") {
-    const resolved = TYPE_CONFIG.coil.resolve(obj);
     iconData = { ...resolved };
   } else if (TYPE_CONFIG[obj.type]) {
     const conf = TYPE_CONFIG[obj.type];
@@ -70,8 +64,8 @@ export default function ObjectItem({
     }
     setErrorMsg(null);
     return v;
-  }; 
-  //console.log('showFlux in ObjectItem:', showFlux);
+  };
+
   return (
     <li className="object-row-wrapper" data-objid={obj.id}>
       <div
@@ -93,7 +87,7 @@ export default function ObjectItem({
         <div className="object-details">
           <div className="details-grid">
             {/* Position com InlineDecimalInput */}
-            {Array.isArray(obj.position)  && (
+            {Array.isArray(obj.position) && (
               <div className="detail-row">
                 <div className="detail-key">Position</div>
                 <div
@@ -106,7 +100,7 @@ export default function ObjectItem({
                       initialValue={obj.position[idx]}
                       min={POS_MIN}
                       max={POS_MAX}
-                      step={0.1}
+                      step={0.01}
                       onChange={(val) => {
                         const safe = clampWithError(val, POS_MIN, POS_MAX);
                         const newPos = [...obj.position];
@@ -115,6 +109,29 @@ export default function ObjectItem({
                       }}
                     />
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Oscillation Button */}
+            {obj.type === 'charge' && toggleOscillation && (
+              <div className="detail-row">
+                <div className="detail-key">Oscillate</div>
+                <div className="detail-value">
+                  <button
+                    onClick={() => toggleOscillation(obj.id)}
+                    style={{
+                      padding: '4px 12px',
+                      backgroundColor: isOscillating ? '#ff4444' : '#4444ff',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    {isOscillating ? 'Stop' : 'Start'}
+                  </button>
                 </div>
               </div>
             )}
@@ -152,7 +169,7 @@ export default function ObjectItem({
                             type: "stackedPlanes",
                             charge_densities: [obj.charge_density ?? 0],
                             spacing: obj.spacing ?? 1.0,
-                            
+                            name: "Stacked Planes"
                           });
                         } else {
                           updateObject(obj.id, {
@@ -161,7 +178,7 @@ export default function ObjectItem({
                               (obj.charge_densities &&
                                 obj.charge_densities[0]) ??
                               0,
-                           
+                            name: "Plane"
                           });
                         }
                       }}
@@ -275,45 +292,8 @@ export default function ObjectItem({
               </div>
             )}
 
-
-            {/* --- Renderização Condicional dos Campos Específicos --- */}
-
-            {obj.type === 'path' && (
-              <PathControls
-                  obj={obj}
-                  addPoint={pathActions?.addPoint}
-                  removeLastPoint={pathActions?.removeLastPoint}
-                  setPoint={pathActions?.setPoint}
-                  changeChargeCount={pathActions?.changeChargeCount}
-                  changeCharge={pathActions?.changeCharge}
-                  changeVelocity={pathActions?.changeVelocity}
-                  updateObject={updateObject}
-                  setErrorMsg={setErrorMsg}
-              />
-            )}
-
-            {obj.type === 'coil' && obj.coilType !== 'solenoid' && (
-              <>
-                <PathControls
-                    obj={obj}
-                    changeChargeCount={coilActions?.changeChargeCount}
-                    changeCharge={coilActions?.changeCharge}
-                    changeVelocity={coilActions?.changeVelocity}
-                    updateObject={updateObject}
-                    setErrorMsg={setErrorMsg}
-                />
-                <CoilControls
-                    obj={obj}
-                    changeRadius={coilActions?.changeRadius}
-                    changeSides={coilActions?.changeSides}
-                    updateObject={updateObject}
-                    setErrorMsg={setErrorMsg}
-                />
-              </>
-            )}
-
-            {/* A) Plano Normal */}
-            {obj.type === 'plane' && (
+            {/* Plane simples */}
+            {obj.type === "plane" && (
               <div className="detail-row">
                 <div className="detail-key">Superficial Density σ</div>
                 <div className="detail-value">
@@ -367,16 +347,16 @@ export default function ObjectItem({
             {/* Charged Sphere */}
             {obj.type === "chargedSphere" && (
               <div className="detail-row">
-                <div className="detail-key">Volume Density ρ</div>
+                <div className="detail-key">Intensity C</div>
                 <div className="detail-value">
                   <InlineDecimalInput
-                    initialValue={obj.charge_density ?? 0}
+                    initialValue={obj.charge ?? 0}
                     min={VAL_MIN}
                     max={VAL_MAX}
                     step={0.01}
                     onChange={(v) => {
                       const safe = clampWithError(v, VAL_MIN, VAL_MAX);
-                      updateObject(obj.id, { charge_density: safe });
+                      updateObject(obj.id, { charge: safe });
                     }}
                   />
                 </div>
@@ -384,7 +364,7 @@ export default function ObjectItem({
             )}
 
             {/* Point charge */}
-            {(obj.type === "charge") && (
+            {obj.type === "charge" && (
               <div className="detail-row">
                 <div className="detail-key">Intensity C</div>
                 <div className="detail-value">
@@ -416,20 +396,6 @@ export default function ObjectItem({
                       const safe = clampWithError(v, VAL_MIN, VAL_MAX);
                       updateObject(obj.id, { charge_density: safe });
                     }}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Show Label toggle for objects with labels */}
-            {((obj.type === 'surface' && showFlux) || obj.type !== 'surface') && (
-              <div className="detail-row">
-                <div className="detail-key">Show Label</div>
-                <div className="detail-value">
-                  <input
-                    type="checkbox"
-                    checked={obj.showLabel ?? true}
-                    onChange={(e) => updateObject(obj.id, { showLabel: e.target.checked })}
                   />
                 </div>
               </div>
@@ -467,242 +433,6 @@ export default function ObjectItem({
               >
                 {errorMsg}
               </div>
-            )}
-
-            {obj.type === 'coil' && obj.coilType === 'solenoid' && (
-               <>
-                 <div className="detail-row">
-                    <div className="detail-key">Length</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={obj.length}
-                        min={0.1} max={100}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { length: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                 </div>
-
-                 <div className="detail-row">
-                    <div className="detail-key">Radius</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={obj.radius}
-                        min={0.1} max={50}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { radius: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                 </div>
-
-                 <div className="detail-row">
-                    <div className="detail-key">Resolution</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        step={1}
-                        value={obj.resolution}
-                        min={0.1} max={300}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { resolution: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                 </div>
-
-                  <div className="detail-row">
-                    <div className="detail-key">Strength</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={obj.multiplier}
-                        min={0.1} max={50}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { multiplier: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                 </div>
-               </>
-            )}
-
-            {obj.type === 'barMagnet' && (
-               <>
-                 <div className="detail-row">
-                    <div className="detail-key">Length</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={obj.length}
-                        min={0.1} max={100}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { length: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                 </div>
-
-                 <div className="detail-row">
-                    <div className="detail-key">Radius</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={obj.radius}
-                        min={0.1} max={50}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { radius: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                 </div>
-
-                  <div className="detail-row">
-                    <div className="detail-key">Strength</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={obj.charge}
-                        min={0.1} max={50}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { charge: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                 </div>
-
-                 <div className="detail-row">
-                    <div className="detail-key">Resolution</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        step={1}
-                        value={obj.numOfCoils}
-                        min={1.0} max={50}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { numOfCoils: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                 </div>
-
-                 {/* two-column controls: Frozen / Animated / Frequency / Amplitude */}
-                 <div className="detail-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <div>
-                    <div className="detail-key">Frozen</div>
-                    <div className="detail-value">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { frozen: !obj.frozen }); }}
-                        style={{ padding: "6px 8px" }}
-                      >
-                        {obj.frozen ? 'Unfreeze' : 'Freeze'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="detail-key">Animated</div>
-                    <div className="detail-value">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { animated: !obj.animated }); }}
-                        style={{ padding: "6px 8px" }}
-                      >
-                        {obj.animated ? 'Stop animation' : 'Start animation'}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="detail-key">Freq (Hz)</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={Number.isFinite(obj.freq) ? obj.freq : (obj.freq === undefined ? 1 : 0)}
-                        step={0.1}
-                        min={0} max={100}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { freq: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="detail-key">Amplitude</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={Number.isFinite(obj.amplitude) ? obj.amplitude : (obj.amplitude === undefined ? 0.1 : 0)}
-                        step={0.01}
-                        min={0} max={100}
-                        style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { amplitude: v })}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                  </div>
-                </div>
-               </>
-            )}
-
-            {obj.type === 'faradayCoil' && (
-               <>
-                 <div className="detail-row">
-                    <div className="detail-key">Radius</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        initialValue={obj.radius}
-                        min={0.01} max={10}
-                        step={0.01}
-                        onChange={(v) => updateObject(obj.id, { radius: v })}
-                      />
-                    </div>
-                 </div>
-
-                  <div className="detail-row">
-                    <div className="detail-key">Magnetic Flux</div>
-                    <div className="detail-value">{obj.magneticFlux}</div>
-                 </div>
-
-                 <div className="detail-row">
-                    <div className="detail-key">Electromotive Force</div>
-                    <div className="detail-value">{obj.emf}</div>
-                 </div>
-                </>
-            )}
-
-            {obj.type === 'testCoil' && (
-               <>
-                 <div className="detail-row">
-                    <div className="detail-key">Radius</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        initialValue={obj.radius}
-                        min={0.01} max={10}
-                        step={0.01}
-                        onChange={(v) => updateObject(obj.id, { radius: v })}
-                      />
-                    </div>
-                 </div>
-
-                  <div className="detail-row">
-                    <div className="detail-key">Magnetic Flux</div>
-                    <div className="detail-value">{obj.magneticFlux}</div>
-                 </div>
-
-                 <div className="detail-row">
-                    <div className="detail-key">Electromotive Force</div>
-                    <div className="detail-value">{obj.emf}</div>
-                 </div>
-
-                 <div className="detail-row">
-                    <div className="detail-key">Electric Flux</div>
-                    <div className="detail-value">{obj.electricFlux}</div>
-                 </div>
-                </>
             )}
 
             <div className="detail-row">

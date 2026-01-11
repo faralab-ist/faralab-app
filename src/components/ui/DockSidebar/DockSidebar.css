@@ -2,24 +2,15 @@
   position: fixed;
   left: 0;
   top: 34px;
-  bottom: 0px;
+  bottom: 0;
   width: 320px;
   background: #101010;
   border-right: 1px solid #2a2a2a;
   display: flex;
   flex-direction: column;
   z-index: 1;
-  
-  transition: width 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-}
-
-.dock-sidebar.minimized {
-  width: 60px;
-}
-
-.dock-sidebar.minimized .dock-content {
-  display: none;
 }
 
 .dock-sidebar.collapsed {
@@ -27,10 +18,7 @@
   opacity: 0;
   pointer-events: none;
   border: none;
-}
-
-.dock-sidebar.minimized.collapsed {
-  transform: translateX(-100%);
+  background: transparent;
 }
 
 .dock-sidebar.collapsed .dock-content {
@@ -39,7 +27,6 @@
 
 /* Show outline when dragging (even if collapsed) */
 .dock-sidebar.collapsed.drag-active {
-
   transform: translateX(0);
   opacity: 1;
   pointer-events: all;
@@ -153,102 +140,13 @@
   background: rgba(21, 78, 153, 0.2);
 }
 
-/* Header bar with minimize button */
-.dock-header-bar {
-  padding: 8px;
-  border-bottom: 1px solid #2a2a2a;
-  display: flex;
-  justify-content: center;
-}
-
-.dock-minimize-btn {
-  background: transparent;
-  border: 1px solid #2a2a2a;
-  color: #bbb;
-  cursor: pointer;
-  font-size: 14px;
-  padding: 6px 10px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  line-height: 1;
-  outline: none;
-}
-
-.dock-minimize-btn:hover {
-  background: rgba(21, 78, 153, 0.2);
-  border-color: rgba(21, 78, 153, 0.9);
-  color: rgba(21, 78, 153, 1);
-
-}
-
-.dock-minimize-btn:active {
-  transform: scale(0.95);
-}
-
-.dock-minimize-btn:focus {
-  outline: none;
-}
-
-/* Minimized icon bar */
-.dock-icon-bar {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px;
-  overflow-y: auto;
-  background: #101010;
-  align-items: center;
-}
-
-.dock-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #202020;
-  border-radius: 6px;
-  background: #121212;
-  cursor: pointer;
-  user-select: none;
-  transition: all 0.15s ease;
-  font-size: 20px;
-  color: #bbb;
-}
-
-.dock-icon img {
-  width: 24px;
-  height: 24px;
-  filter: invert(1) brightness(0.73);
-  transition: filter 0.2s ease;
-
-}
-
-.dock-icon:hover {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-color: rgba(21, 78, 153, 0.9);
-  transform: translateY(-2px);
-  color: rgba(21, 78, 153, 1);
-}
-
-
-.dock-icon:active {
-  transform: translateY(0);
-  box-shadow: 0 3px 8px rgba(0,0,0,0.35);
-}
-
-.dock-icon[draggable="true"]:active {
-  cursor: grabbing;
-  opacity: 0.5;
-}
-
 /* Window content */
 .dock-window-content {
   margin-top: 4px;
   
   border: 1px solid #222;
   border-radius: 6px;
+
   font-size: 12px;
   line-height: 1.4;
 }
@@ -262,52 +160,32 @@
   justify-content: center;
   background: transparent;
   border: 2px solid rgba(21, 78, 153, 0.9);
-  color: transparent; /* text hidden by default */
+  color: rgba(21, 78, 153, 1);
   font-size: 18px;
   font-weight: 600;
   pointer-events: none;
   z-index: 1000;
-  transition: width 0.3s ease, inset 0.3s ease, opacity 0.3s ease, color 0.3s ease;
+  transition: inset 0.2s ease, opacity 0.2s ease;
 }
 
-/* Drag active: match dock size when not collapsed (expanded or minimized) */
-.dock-sidebar.drag-active:not(.collapsed) .dock-drop-indicator {
+/* Narrower indicator when dragging anywhere (but not if collapsed) */
+.dock-sidebar.drag-active.collapsed .dock-drop-indicator {
   display: flex;
-  inset: 0;
+  inset: 0 200px 0 0;
   opacity: 0.5;
   color: transparent;
 }
 
-/* Drag active: narrow indicator when dock is empty (collapsed) */
-.dock-sidebar.collapsed.drag-active .dock-drop-indicator {
-  display: flex;
-  inset: 0;
-  width: 60px; /* narrow strip when empty */
-  right: auto; /* anchor to left side */
-  opacity: 0.5;
-  color: transparent;
-}
-
-/* Drag over: full width for collapsed */
-.dock-sidebar.drag-over.collapsed .dock-drop-indicator {
-  display: flex;
-  width: 320px;
-  inset: 0;
-  opacity: 1;
-  color: rgba(21, 78, 153, 1);
-}
-
-/* Drag over: match dock width for expanded/minimized */
-.dock-sidebar.drag-over:not(.collapsed) .dock-drop-indicator {
+/* 2. Estado principal: Hover direto (Largura total) */
+/* Juntamos os dois seletores aqui com uma vírgula */
+.dock-sidebar.drag-over.collapsed .dock-drop-indicator,
+.dock-sidebar.drag-over .dock-drop-indicator {
   display: flex;
   inset: 0;
   opacity: 1;
   color: rgba(21, 78, 153, 1);
-}
-
-.dock-content::-webkit-scrollbar-track {
+}dock-content::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.2);
-  
 }
 
 .dock-content::-webkit-scrollbar-thumb {

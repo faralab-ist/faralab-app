@@ -4,11 +4,6 @@ import TestChargeMenu from '../Toolbar/ToolbarPopup/TestChargeMenu';
 import SlicerMenu from '../Toolbar/ToolbarPopup/SlicerMenu';
 import EFieldMenu from '../Toolbar/ToolbarPopup/EFieldMenu';
 import GaussianMenu from '../Toolbar/ToolbarPopup/GaussianMenu';
-import minimizeIcon from '../../../assets/minimize.svg';
-import efieldIcon from '../../../assets/field_view.svg';
-import sliceIcon from '../../../assets/slice.svg';
-import gaussian_icon from '../../../assets/gaussian_surface.svg';
-import test_charge_icon from '../../../assets/lowercase_q2.svg';
 
 /**
  * DockSidebar - Left sidebar "desk" where ToolbarPopup windows can be docked
@@ -19,6 +14,8 @@ import test_charge_icon from '../../../assets/lowercase_q2.svg';
  * @param {Function} props.setTabOrder - Update tab order
  * @param {Object} props.testChargeProps - Props for TestChargeMenu
  * @param {Object} props.slicerProps - Props for SlicerMenu
+ * @param {Object} props.efieldProps - Props for EFieldMenu
+ * @param {Object} props.gaussianProps - Props for GaussianMenu
  */
 export default function DockSidebar({
   dockedWindows,
@@ -28,40 +25,23 @@ export default function DockSidebar({
   testChargeProps,
   slicerProps,
   efieldProps,
-  gaussianProps
+  gaussianProps,
 }) {
   const [draggedTab, setDraggedTab] = useState(null);
   const [dragOverTab, setDragOverTab] = useState(null);
   const [dropPosition, setDropPosition] = useState(null); // 'before' or 'after'
-const [expandedWindows, setExpandedWindows] = useState({ 
+  const [expandedWindows, setExpandedWindows] = useState({ 
     TestCharge: true, 
     Slice: true, 
     EField: true, 
     Gaussian: true 
-  });
-   const [isMinimized, setIsMinimized] = useState(false); // Track minimize state
+  }); // Track which windows are expanded
   
   // Get list of docked window names in user-defined order
   const dockedWindowNames = tabOrder.filter(name => dockedWindows[name]);
 
   // If no windows docked, show collapsed state
   const isCollapsed = dockedWindowNames.length === 0;
-
-  // Map window names to icons
-  const getWindowIcon = (windowName) => {
-    switch (windowName) {
-      case 'Gaussian':
-        return gaussian_icon;
-      case 'TestCharge':
-        return test_charge_icon
-      case 'Slice':
-        return sliceIcon;
-      case 'EField':
-        return efieldIcon;
-      default:
-        return null;
-    }
-  };
 
   // Toggle expanded state for a window
   const toggleExpanded = (windowName) => {
@@ -170,20 +150,7 @@ const [expandedWindows, setExpandedWindows] = useState({
   };
 
   return (
-    <div className={`dock-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMinimized ? 'minimized' : ''}`}>
-      {/* Minimize button */}
-      {!isCollapsed && (
-        <div className="dock-header-bar">
-          <button
-            className="dock-minimize-btn"
-            onClick={() => setIsMinimized(!isMinimized)}
-            title={isMinimized ? 'Expand' : 'Minimize'}
-          >
-            {isMinimized ? '▶' : '◀'}
-          </button>
-        </div>
-      )}
-
+    <div className={`dock-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       {/* Docked windows list */}
       <div 
         className="dock-content"
@@ -240,32 +207,8 @@ const [expandedWindows, setExpandedWindows] = useState({
 
       {/* Drop zone indicator (shown when dragging) */}
       <div className="dock-drop-indicator">
-        
+        Drop here to dock
       </div>
-
-      {/* Minimized icon bar */}
-      {isMinimized && !isCollapsed && (
-        <div className="dock-icon-bar">
-          {dockedWindowNames.map((windowName) => (
-            <div
-              key={`icon-${windowName}`}
-              className="dock-icon"
-              onClick={() => {
-                setIsMinimized(false);
-                setExpandedWindows(prev => ({ ...prev, [windowName]: true }));
-              }}
-              title={windowName}
-              draggable
-              onDragStart={(e) => handleTabDragStart(e, windowName)}
-              onDragOver={(e) => handleTabDragOver(e, windowName)}
-              onDrop={handleDrop}
-              onDragEnd={handleTabDragEnd}
-            >
-              <img src={getWindowIcon(windowName)} alt={windowName} />
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

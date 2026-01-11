@@ -1,7 +1,8 @@
 .creative-objects-menu {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
+  top: 48px; /* Below the toolbar (34px height + padding) */
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 999;
   animation: creativeMenuSlideIn 0.22s cubic-bezier(0.25, 0.8, 0.3, 1);
   will-change: transform, opacity;
@@ -11,15 +12,15 @@
 @keyframes creativeMenuSlideIn {
   0% {
     opacity: 0;
-    transform: translateX(-10px) scale(0.96);
+    transform: translateX(-50%) translateY(-10px) scale(0.96);
   }
   60% {
     opacity: 1;
-    transform: translateX(0) scale(1.01);
+    transform: translateX(-50%) translateY(0) scale(1.01);
   }
   100% {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(-50%) translateY(0) scale(1);
   }
 }
 
@@ -29,35 +30,10 @@
   border-radius: 10px;
   padding: 12px;
   backdrop-filter: blur(6px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
   display: flex;
-  flex-direction: row;
   gap: 16px;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.3, 1);
 }
-
-.creative-menu-panel.collapsed {
-  padding: 4px 6px;
-}
-
-.creative-menu-toggle-button {
-  background: transparent;
-  color: #76baff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.creative-menu-toggle-button:hover {
-  background: #2a2a2a;
-}
-
-
-
 
 .creative-menu-section {
   display: flex;
@@ -77,10 +53,8 @@
 
 .creative-menu-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(110px, 1fr));
-  grid-template-rows: repeat(3, auto);
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
   gap: 8px;
-  grid-auto-flow: column;
 }
 
 .creative-menu-item {
@@ -111,15 +85,16 @@
 @media (max-width: 768px) {
   .creative-objects-menu {
     left: 10px;
-    bottom: 10px;
+    right: 10px;
+    transform: none;
+    width: calc(100% - 20px);
   }
 
+  .creative-menu-panel {
     flex-direction: column;
+    gap: 12px;
   }
 
-  .creative-menu-grid {
-    grid-template-columns: repeat(2, minmax(100px, 1fr));
-    grid-auto-flow: row
   .creative-menu-grid {
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   }

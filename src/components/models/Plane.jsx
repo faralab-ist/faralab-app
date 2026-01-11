@@ -11,7 +11,6 @@ function Plane({
   charge_density,
   infinite,
   material,
-  name,
   selectedId, 
   setSelectedId, 
   setIsDragging,
@@ -138,8 +137,8 @@ function Plane({
     >
       {showLabel && (
         <Label  
-          objectName={name}
-          value={`σ = ${charge_density.toExponential(2)} C/m²`}
+          name="Surface Density"
+          value={`${charge_density.toExponential(2)} C/m²`}
           offsetY={0.5}
           distanceFactor={12}
         />

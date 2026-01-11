@@ -3,19 +3,12 @@ import ObjectList from "./ObjectList";
 import "./Sidebar.css";
 import PosChargeIcon from "../../../assets/pos_charge.svg";
 import NegChargeIcon from "../../../assets/neg_charge.svg";
-import LowercaseQIcon from "../../../assets/lowercase_q2.svg"
 import WireIcon from "../../../assets/wire.svg";
 import SphereIcon from "../../../assets/sphere.svg";
 import CuboidIcon from "../../../assets/cuboid.svg";
 import CylinderIcon from "../../../assets/cylinder.svg";
 import PlaneIcon from "../../../assets/plane.svg";
 import ChargeSphereIcon from "../../../assets/charge_sphere.svg";
-import RingCoilIcon from "../../../assets/ring_coil.svg";
-import PolygonCoilIcon from "../../../assets/polygon_coil.svg";
-import PathIcon from "../../../assets/path1.svg";
-import BarMagnetIcon from "../../../assets/bar_magnet.svg";
-import SolenoidIcon from "../../../assets/solenoid.svg";
-import FaradayCoilIcon from "../../../assets/faraday_coil.svg";
 
 /**
  * Sidebar agora suporta 3 estados:
@@ -49,15 +42,9 @@ export default function Sidebar({
   removeLastPlaneFromStackedPlanes,
   setSpacingForStackedPlanes,
   setChargeDensityForPlaneInStackedPlanes,
-  // path
-  addPointToPath,
-  removeLastPointFromPath,
-  setPointInPath,
-  changePathChargeCount,
-  changePathCharge,
-  changePathVelocity,
-  showFlux,
-
+  // --- Oscillation ---
+  toggleOscillation,
+  oscillatingObjects,
 }) {
   const [expandId, setExpandId] = useState(null);
   const sidebarRootRef = useRef(null)
@@ -138,20 +125,13 @@ export default function Sidebar({
     return 'surface';
   };
 
-  
+  const pillObjects = (objects || []).filter(o => ['charge', 'wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires'].includes(o.type));
 
-  const pillObjects = (objects || []).filter(o => 
-    ['testCoil', 'path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires', 'coil', 'barMagnet', 'faradayCoil'].includes(o.type));
   const typeCounters = {};
   const subtypeCounters = {};
 
   const minibarItems = pillObjects.map((o) => {
-    if (o.type === 'coil') {
-      const coilType = o.coilType === 'ring' ? 'ringCoil' : o.coilType === 'polygon' ? 'polygonCoil' : o.coilType === 'solenoid' ? 'solenoid' : 'ringCoil';
-      typeCounters[coilType] = (typeCounters[coilType] || 0) + 1;
-      const label = `${coilType === 'ringCoil' ? 'Ring Coil' : coilType === 'polygonCoil' ? 'Polygon Coil' : 'Solenoid'} ${typeCounters[coilType]}`;
-      return { id: o.id, type: coilType, subtype: null, label, name: o.name, obj: o };
-    } else if (o.type === 'surface') {
+    if (o.type === 'surface') {
       const raw = detectSubtype(o);
       const subtype = raw || 'surface';
       subtypeCounters[subtype] = (subtypeCounters[subtype] || 0) + 1;
@@ -207,7 +187,7 @@ export default function Sidebar({
                   <button
                     key={item.id}
                     className={`${
-                      ['pos_charge','neg_charge','testPointCharge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires', 'ringCoil', 'polygonCoil', 'solenoid', 'barMagnet', 'faradayCoil', 'path'].includes(item.type)
+                      ['pos_charge','neg_charge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires'].includes(item.type)
                         ? `${item.subtype || item.type}-icon-btn ${item.polarity || ''}`
                         : `pill ${item.subtype || item.type} minibar-pill`
                     } ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
@@ -224,41 +204,27 @@ export default function Sidebar({
                     aria-label={item.name || item.label} 
                   >
                     {item.type === 'pos_charge' ? (
-                      <img src={PosChargeIcon} alt="Positive Charge" className="sidebar-icon" />
+                      <img src={PosChargeIcon} alt="Positive Charge" className="charge-icon" />
                     ) : item.type === 'neg_charge' ? (
-                      <img src={NegChargeIcon} alt="Negative Charge" className="sidebar-icon" />
-                    ) : item.type === 'testPointCharge' ? (
-                      <img src={LowercaseQIcon} alt="Test Charge" className="sidebar-icon" />
+                      <img src={NegChargeIcon} alt="Negative Charge" className="charge-icon" />
                     ) : item.type === 'wire' ? (
-                      <img src={WireIcon} alt="Wire" className="sidebar-icon" />
+                      <img src={WireIcon} alt="Wire" className="wire-icon" />
                     ) : item.type === 'concentricInfWires' ? (
-                      <img src={WireIcon} alt="Concentric Wires" className="sidebar-icon" />  
+                      <img src={WireIcon} alt="Concentric Wires" className="wire-icon" />  
                     ) : item.type === 'plane' ? (
-                      <img src={PlaneIcon} alt="Plane" className="sidebar-icon" />
+                      <img src={PlaneIcon} alt="Plane" className="plane-icon" />
                     ) : item.type === 'stackedPlanes' ? (
-                      <img src={PlaneIcon} alt="StackedPlanes" className="sidebar-icon" />  
+                      <img src={PlaneIcon} alt="StackedPlanes" className="plane-icon" />  
                     ) : item.type === 'charged_sphere' ? (
-                      <img src={ChargeSphereIcon} alt="Charged Sphere" className="sidebar-icon" />
+                      <img src={ChargeSphereIcon} alt="Charged Sphere" className="charged_sphere-icon" />
                     ) : item.type === 'concentricSpheres' ? (
-                      <img src={ChargeSphereIcon} alt="Concentric Spheres" className="sidebar-icon" />  
+                      <img src={ChargeSphereIcon} alt="Concentric Spheres" className="charged_sphere-icon" />  
                     ) : item.subtype === 'sphere' ? (
-                      <img src={SphereIcon} alt="Sphere" className="sidebar-icon" />
+                      <img src={SphereIcon} alt="Sphere" className="sphere-icon" />
                     ) : item.subtype === 'cuboid' ? (
-                      <img src={CuboidIcon} alt="Cuboid" className="sidebar-icon" />
+                      <img src={CuboidIcon} alt="Cuboid" className="cuboid-icon" />
                     ) : item.subtype === 'cylinder' ? (
-                      <img src={CylinderIcon} alt="Cylinder" className="sidebar-icon" />
-                    ) : item.type === 'ringCoil' ? (
-                      <img src={RingCoilIcon} alt="Ring Coil" className="sidebar-icon" />
-                    ) : item.type === 'polygonCoil' ? (
-                      <img src={PolygonCoilIcon} alt="Polygon Coil" className="sidebar-icon" />
-                    ) : item.type === 'solenoid' ? (
-                      <img src={SolenoidIcon} alt="Solenoid" className="sidebar-icon" />
-                    ) : item.type === 'barMagnet' ? (
-                      <img src={BarMagnetIcon} alt="Bar Magnet" className="sidebar-icon" />
-                    ) : item.type === 'faradayCoil' ? (
-                      <img src={FaradayCoilIcon} alt="Faraday Coil" className="sidebar-icon" />
-                    ) : item.type === 'path' ? (
-                      <img src={PathIcon} alt="Path" className="sidebar-icon" />
+                      <img src={CylinderIcon} alt="Cylinder" className="cylinder-icon" />
                     ) : (
                       <strong>{item.label}</strong>
                     )}
@@ -278,7 +244,6 @@ export default function Sidebar({
 
             <ObjectList
               items={objects}
-              showFlux={showFlux}
               updateObject={updateObject}
               removeObject={removeObject}
               expandId={expandId}
@@ -303,21 +268,17 @@ export default function Sidebar({
               setSpacingForStackedPlanes={setSpacingForStackedPlanes}
               setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
 
-              // --- Fios ---
+              // --- Fios (ADICIONADO AQUI) ---
               addRadiusToConcentricInfiniteWire={addRadiusToChargedSphere}
               removeLastRadiusFromConcentricInfiniteWire={removeLastRadiusFromChargedSphere}
               setRadiusToConcentricInfiniteWire={setRadiusToChargedSphere}
               setMaterialForLayerInConcentricInfiniteWire={setMaterialForLayerInChargedSphere}
               setDielectricForLayerInConcentricInfiniteWire={setDielectricForLayerInChargedSphere}
               setChargeForLayerInConcentricInfiniteWire={setChargeForLayerInChargedSphere}
-
-              // --- Path ---
-              addPointToPath={addPointToPath}
-              removeLastPointFromPath={removeLastPointFromPath}
-              setPointInPath={setPointInPath}
-              changePathChargeCount={changePathChargeCount}
-              changePathCharge={changePathCharge}
-              changePathVelocity={changePathVelocity}
+              
+              // --- Oscillation ---
+              toggleOscillation={toggleOscillation}
+              oscillatingObjects={oscillatingObjects}
             />
           </div>
         )}

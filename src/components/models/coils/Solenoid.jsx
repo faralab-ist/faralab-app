@@ -1,12 +1,10 @@
 import React, { useMemo, useCallback } from 'react'
 import * as THREE from 'three'
 import BaseCoil from './BaseCoil'
-import { color } from 'three/tsl'
 
 // just a big solenoid
 export default function Solenoid({
   id,
-  name,
   position = [0, 0, 0],
   selectedId,
   setSelectedId,
@@ -29,7 +27,6 @@ export default function Solenoid({
   
   // Path props (charges)
   charges = [],
-  showLabel = true,
 }) {
   const computeSolenoidNormal = useCallback(() => {
     // Local normal is +Z (for solenoid along Z axis)
@@ -65,8 +62,6 @@ export default function Solenoid({
   return (
     <BaseCoil
       id={id}
-      showLabel={showLabel}
-      name={name}
       position={position}
       selectedId={selectedId}
       setSelectedId={setSelectedId}
@@ -85,19 +80,13 @@ export default function Solenoid({
       chargeCount={resolution}
       charge={multiplier * 0.1}
       velocity={1}
-      renderCharges={true}
+      renderCharges={false}
       charges={charges}
-      glowMultiplier={0.6}
       isClosedPath={false}
       computeNormal={computeSolenoidNormal}
       getPathPoints={getSolenoidPoints}
-      showLabel={showLabel}
       coilGeometry={
         null
-      }
-      hitboxGeometry={
-        
-        <cylinderGeometry args={[radius * 2, radius * 2, length * 1.1, 16]} />
       }
     />
   )

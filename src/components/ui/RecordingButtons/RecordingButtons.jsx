@@ -223,17 +223,17 @@ export default function RecordingButtons() {
   }, [])
 
   return (
-    <>
+    <div className="recording-buttons">
       {/* Botão de Vídeo */}
       <button
-        className={`tb-btn ${isRecordingVideo ? 'recording' : ''}`}
+        className={`rec-btn ${isRecordingVideo ? 'recording' : ''}`}
         onClick={isRecordingVideo ? stopVideoRecording : startVideoRecording}
         title={isRecordingVideo ? 'Stop recording' : 'Record video'}
       >
         {isRecordingVideo ? (
           <span className="rec-stop-icon" />
         ) : (
-          <img className="tb-icon" src={VideoRecordIcon} alt="" />
+          <img className="rec-icon-svg" src={VideoRecordIcon} alt="" />
         )}
       </button>
 
@@ -260,6 +260,6 @@ export default function RecordingButtons() {
         {isRecordingGif && <span className="rec-indicator" />}
       </button>
       */}
-    </>
+    </div>
   )
 }

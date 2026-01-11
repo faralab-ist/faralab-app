@@ -8,6 +8,7 @@ import './GaussianMenu.css'
 
 export default function GaussianMenu({
   minimized,
+  creativeMode,
   addObject,
   sceneObjects,
   setSceneObjects,
@@ -30,7 +31,7 @@ export default function GaussianMenu({
     [sceneObjects]
   )
 
-  const exclusiveActiveType = gaussianSurfaces.length === 1
+  const exclusiveActiveType = !creativeMode && gaussianSurfaces.length === 1
     ? surfaceTypeOf(gaussianSurfaces[0])
     : null
 
@@ -46,21 +47,32 @@ export default function GaussianMenu({
   }
 
   const handleSurfaceButton = (type) => {
-    // Always add surface directly
+    if (creativeMode) {
+      addSurface(type)
+      return
+    }
+    // exclusive replace: if same single, do nothing
+    if (gaussianSurfaces.length === 1 && surfaceTypeOf(gaussianSurfaces[0]) === type) {
+      ensureFieldVisible()
+      setSceneObjects?.(prev => prev.filter(o => !isGaussian(o)))
+      return
+    }
+    // clear then add
+    setSceneObjects?.(prev => prev.filter(o => !isGaussian(o)))
     addSurface(type)
   }
 
   return (
     <div className="gaussian-menu-container">
       <div className="settings-info">
-        Create Gaussian surfaces for flux calculations.
+        {creativeMode ? 'Create multiple Gaussian surfaces.' : 'Create one surface at a time.'}
       </div>
       
       <div className="surface-buttons-row">
         <button
           className={`surface-icon-btn ${exclusiveActiveType === 'sphere' ? 'active' : ''}`}
           onClick={() => handleSurfaceButton('sphere')}
-          title="Create Sphere"
+          title={creativeMode ? 'Create Sphere' : 'Use Sphere'}
         >
           <img src={sphereIcon} alt="" />
           <span>Sphere</span>
@@ -68,7 +80,7 @@ export default function GaussianMenu({
         <button
           className={`surface-icon-btn ${exclusiveActiveType === 'cylinder' ? 'active' : ''}`}
           onClick={() => handleSurfaceButton('cylinder')}
-          title="Create Cylinder"
+          title={creativeMode ? 'Create Cylinder' : 'Use Cylinder'}
         >
           <img src={cylinderIcon} alt="" />
           <span>Cylinder</span>
@@ -76,7 +88,7 @@ export default function GaussianMenu({
         <button
           className={`surface-icon-btn ${exclusiveActiveType === 'cuboid' ? 'active' : ''}`}
           onClick={() => handleSurfaceButton('cuboid')}
-          title="Create Cuboid"
+          title={creativeMode ? 'Create Cuboid' : 'Use Cuboid'}
         >
           <img src={cuboidIcon} alt="" />
           <span>Cuboid</span>

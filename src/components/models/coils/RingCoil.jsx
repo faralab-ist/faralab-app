@@ -13,7 +13,6 @@ import BaseCoil from './BaseCoil'
  */
 export default function RingCoil({
   id,
-  name,
   position = [0, 0, 0],
   selectedId,
   setSelectedId,
@@ -132,7 +131,6 @@ export default function RingCoil({
   return (
     <BaseCoil
       id={id}
-      name = {name}
       position={position}
       selectedId={selectedId}
       setSelectedId={setSelectedId}

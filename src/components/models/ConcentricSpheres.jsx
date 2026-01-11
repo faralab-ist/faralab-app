@@ -3,7 +3,6 @@ import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import { efields } from '../../physics'
 import * as THREE from 'three'
-import Label from '../ui/labels/Label'
 export default function ConcentricSpheres({ 
     id, 
     position, 
@@ -21,8 +20,6 @@ export default function ConcentricSpheres({
     materials,
     dielectrics,
     charges,
-    name,
-    showLabel = true
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -53,7 +50,6 @@ export default function ConcentricSpheres({
   }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
   
   return (
-   
     <PivotControls
       ref={pivotRef}
       anchor={[0, 0, 0]}
@@ -110,14 +106,6 @@ export default function ConcentricSpheres({
           clippingPlanes={clippingPlanes}
         />
       </mesh>)}
-       {showLabel && (
-            <Label
-              objectName={name}
-              value={chargePerSphereSurfaceArr.map((charge, i) => `E-Field${i + 1} = ${charge.toExponential(2)} C`)}
-              offsetY={radiuses[radiuses.length - 1] + 0.5}
-              distanceFactor={10 * radiuses.length}
-            />
-          )}
     </PivotControls>
   )
 }

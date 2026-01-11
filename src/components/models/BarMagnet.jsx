@@ -1,6 +1,5 @@
 import React, { useRef, useLayoutEffect, useMemo, useEffect, useState } from 'react'
 import { PivotControls } from '@react-three/drei'
-import Label from '../ui/labels/Label'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
@@ -8,7 +7,6 @@ import { useFrame } from '@react-three/fiber'
 //tecnicaly a solenoid / a bunch of spires
 export default function BarMagnet({
   id,
-  name,
   position,
   selectedId,
   setSelectedId,
@@ -38,16 +36,12 @@ export default function BarMagnet({
     animated,
     amplitude,
     freq,
-    dragOwnerId = null,
-    showLabel = true,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
   const pivotRef = useRef()
   const groupRef = useRef()
-  const meshRef = useRef()
   const isDraggingRef = useRef(false)
-  const clickArmed = useRef(false)
 
   // --- small: reusable temporaries to avoid allocations every frame ---
   const tmpVec = useRef(new THREE.Vector3())
@@ -367,50 +361,7 @@ export default function BarMagnet({
       scale={0.86}
       lineWidth={2.5}
     >
-      
       <group ref={groupRef}>
-         {showLabel && (
-                <Label
-
-                  objectName={name}
-                  value={[
-                    `A = ${amplitude.toExponential(2)}`,
-                    `Freq: ${freq.toExponential(2)} Hz`,
-                  ]}
-                  offsetY={0.5 + radius}
-                  distanceFactor={8}
-                />
-              )}
-        {/* Invisible hitbox for selection */}
-        <mesh
-          ref={meshRef}
-          position={[0, 0, 0]}
-          onPointerDown={(e) => {
-            if (e.button !== undefined && e.button !== 0) return
-            if (dragOwnerId !== null && dragOwnerId !== id) return
-            clickArmed.current = true
-          }}
-          onPointerUp={(e) => {
-            if (!clickArmed.current) return
-            clickArmed.current = false
-            if (dragOwnerId !== null && dragOwnerId !== id) return
-            e.stopPropagation()
-            setSelectedId(id)
-          }}
-          raycast={(raycaster, intersects) => {
-            if (!meshRef.current) return
-            if (dragOwnerId !== null && dragOwnerId !== id) return
-            const hitsBefore = intersects.length
-            THREE.Mesh.prototype.raycast.call(meshRef.current, raycaster, intersects)
-            if (intersects.length > hitsBefore + 1) {
-              intersects.splice(hitsBefore, 1)
-            }
-          }}
-        >
-          <boxGeometry args={[radius * 2.2, radius * 2.2, length * 1.1]} />
-          <meshBasicMaterial visible={false} />
-        </mesh>
-        
         <group>
           {/* negative side (blue) - left half */}
           <mesh position={[0, 0, -(length/4)]} castShadow receiveShadow>
@@ -431,7 +382,6 @@ export default function BarMagnet({
           return <primitive key={`curve-${idx}`} object={line} />;
         })}
       </group>
-      
     </PivotControls>
   )
 }
