@@ -503,6 +503,7 @@ export default function ObjectItem({
                     <div className="detail-key">Resolution</div>
                     <div className="detail-value">
                       <InlineDecimalInput
+                        step={1}
                         value={obj.resolution}
                         min={0.1} max={300}
                         style={{ width: 140 }}
@@ -669,6 +670,37 @@ export default function ObjectItem({
                  <div className="detail-row">
                     <div className="detail-key">Electromotive Force</div>
                     <div className="detail-value">{obj.emf}</div>
+                 </div>
+                </>
+            )}
+
+            {obj.type === 'testCoil' && (
+               <>
+                 <div className="detail-row">
+                    <div className="detail-key">Radius</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        initialValue={obj.radius}
+                        min={0.01} max={10}
+                        step={0.01}
+                        onChange={(v) => updateObject(obj.id, { radius: v })}
+                      />
+                    </div>
+                 </div>
+
+                  <div className="detail-row">
+                    <div className="detail-key">Magnetic Flux</div>
+                    <div className="detail-value">{obj.magneticFlux}</div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Electromotive Force</div>
+                    <div className="detail-value">{obj.emf}</div>
+                 </div>
+
+                 <div className="detail-row">
+                    <div className="detail-key">Electric Flux</div>
+                    <div className="detail-value">{obj.electricFlux}</div>
                  </div>
                 </>
             )}

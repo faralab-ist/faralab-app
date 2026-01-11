@@ -22,6 +22,7 @@ export default function DimensionControls({ obj, updateObject }) {
   if (obj.type === 'coil') return null;
   if (obj.type === 'barMagnet') return null;
   if (obj.type === 'faradayCoil') return null;
+  if (obj.type === 'testCoil') return null;
 
   // Plane
   if (obj.type === 'plane' || obj.type === 'stackedPlanes') {

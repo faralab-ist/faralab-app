@@ -38,6 +38,13 @@ const CREATIVE_OBJECTS = [
     defaultProps: { position: [0, 0, 0] },
     category: 'magnetic'
   },
+   {
+    id: 'testCoil',
+    label: 'Test Coil',
+    type: 'testCoil',
+    defaultProps: { position: [0, 0, 0] },
+    category: 'test'
+  },
   {
     id: 'ringCoil',
     label: 'Ring Coil',

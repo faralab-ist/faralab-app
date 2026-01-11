@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
   import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, Path, TestCharge, BarMagnet} from './components/models'
 
   // Coil components
-  import { RingCoil, PolygonCoil, Solenoid, FaradayCoil } from './components/models/coils'
+  import { RingCoil, PolygonCoil, Solenoid, FaradayCoil, TestCoil } from './components/models/coils'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -706,6 +706,7 @@ function LoadingOverlay() {
                 case 'solenoid': ObjectComponent = Solenoid; break // Legacy support
                 case 'barMagnet': ObjectComponent = BarMagnet; break
                 case 'faradayCoil': ObjectComponent = FaradayCoil; break
+                case 'testCoil': ObjectComponent = TestCoil; break
                 default: return null;
               } 
             }

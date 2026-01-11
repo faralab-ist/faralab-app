@@ -26,6 +26,7 @@ export default function Path({
   renderPoints = true,
   groupRef: parentGroupRef,
   showLabel = true,
+  glowMultiplier = 1.0,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -47,8 +48,9 @@ export default function Path({
     // positive -> blue, negative -> red
     const glowColor = sign >= 0 ? new THREE.Color(0x6ea8ff) : new THREE.Color(0xff6e6e)
     const magnitude = Math.min(4, Math.max(0.2, Math.abs(charge)))
-    const baseGlowScale = 1 + magnitude * 0.6
-    return { glowColor, baseGlowScale }
+    const baseGlowScale = (1 + magnitude * 0.6) * glowMultiplier
+    const glowIntensity = (0.6 + Math.min(2.0, Math.abs(charge) * 0.15)) * glowMultiplier;
+    return { glowColor, baseGlowScale, glowIntensity }
   }, [charge])
 
   // apply static glow (no pulsing) — user requested no inner sphere and no pulsing
@@ -103,10 +105,10 @@ export default function Path({
     tex.magFilter = THREE.LinearFilter
 
     const magnitude = Math.min(4, Math.max(0.2, Math.abs(charge)))
-    const baseGlowScale = 1 + magnitude * 0.6
+    const baseGlowScale = (1 + magnitude * 0.6) * glowMultiplier
     const opacity = Math.min(1, 0.65 + Math.abs(charge) * 0.22)
     return { tex, scale: baseGlowScale, opacity, charge }
-  }, [charge])
+  }, [charge, glowMultiplier])
 
   const catmullCurve = useMemo(() => {
     if (!Array.isArray(points) || points.length < 2) {
