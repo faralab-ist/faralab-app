@@ -1,10 +1,12 @@
 import React, { useMemo, useCallback } from 'react'
 import * as THREE from 'three'
 import BaseCoil from './BaseCoil'
+import { color } from 'three/tsl'
 
 // just a big solenoid
 export default function Solenoid({
   id,
+  name,
   position = [0, 0, 0],
   selectedId,
   setSelectedId,
@@ -63,6 +65,8 @@ export default function Solenoid({
   return (
     <BaseCoil
       id={id}
+      showLabel={showLabel}
+      name={name}
       position={position}
       selectedId={selectedId}
       setSelectedId={setSelectedId}
@@ -90,6 +94,10 @@ export default function Solenoid({
       showLabel={showLabel}
       coilGeometry={
         null
+      }
+      hitboxGeometry={
+        
+        <cylinderGeometry args={[radius * 2, radius * 2, length * 1.1, 16]} />
       }
     />
   )

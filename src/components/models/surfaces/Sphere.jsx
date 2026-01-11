@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from 'react'
+import React, { useRef, useMemo, useLayoutEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
@@ -25,6 +25,7 @@ export default function Sphere({
   radius = 2,
   fluxValue = 0,
   opacity = 0.5,
+  name,
   selectedId,
   setSelectedId,
   setIsDragging,
@@ -37,21 +38,31 @@ export default function Sphere({
   useSlice,
   slicePlaneFlip,
   isHovered,
-  showOnlyGaussianField
+  showOnlyGaussianField,
+  showLabel = true,
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
   const pivotRef = useRef()
   const rootRef = useRef() // 👈 move this group, not just the mesh
+  const isDraggingRef = useRef(false)
   const center = useMemo(() => [0, 0, 0], [])
   const clickArmed = useRef(false)
   const shape = useMemo(() => new SphereShape({ radius }), [radius])
   const representativeNormals = useMemo(() => shape.getRepresentativeNormals(), [shape])
   const arrowLen = useMemo(() => Math.max(0.1, radius * 0.35), [radius])
 
-  // 👇 sync world position via root group so gizmo + arrow follow
-  useEffect(() => {
-    if (rootRef.current) rootRef.current.position.set(...position)
+  // Sync PivotControls matrix from state and keep child group at origin
+  useLayoutEffect(() => {
+    if (isDraggingRef.current || !pivotRef.current) return
+    const pos = new THREE.Vector3(...position)
+    const mat = new THREE.Matrix4().setPosition(pos)
+    if (pivotRef.current.matrix) pivotRef.current.matrix.copy(mat)
+    // sphere has no rotation; keep group at identity
+    if (rootRef.current) {
+      rootRef.current.position.set(0, 0, 0)
+      rootRef.current.quaternion.identity()
+    }
   }, [position])
 
   const clippingPlanes = useMemo(() => {
@@ -70,21 +81,22 @@ export default function Sphere({
   return (
     <PivotControls
       ref={pivotRef}
+      scale={0.86}
+      lineWidth={2.5}
       anchor={center} // ✅ gizmo centrado geometricamente
       visible={isSelected}
-      enabled={!fixed && (dragOwnerId === null || dragOwnerId === id) && creativeMode} // 👈 ativa se não houver drag de outro
+      enabled={!fixed && (dragOwnerId === null || dragOwnerId === id) && creativeMode} 
       disableRotations={true}
       disableScaling={true}
       depthTest={false}
-      onDragStart={() => setIsDragging(true)}
+      onDragStart={() => { isDraggingRef.current = true; setIsDragging(true) }}
       onDrag={(matrix) => {
         const newPos = new THREE.Vector3().setFromMatrixPosition(matrix)
         updatePosition(id, [newPos.x, newPos.y, newPos.z])
-        if (rootRef.current) rootRef.current.position.copy(newPos) // keep gizmo + arrow together
       }}
-      onDragEnd={() => setIsDragging(false)}
+      onDragEnd={() => { isDraggingRef.current = false; setIsDragging(false) }}
     >
-      <group ref={rootRef} position={position}>
+      <group ref={rootRef} position={[0, 0, 0]}>
         <mesh
           ref={meshRef}
           userData={{ id, type: 'surface' }}
@@ -124,10 +136,10 @@ export default function Sphere({
             clippingPlanes={clippingPlanes}
           />
         </mesh>
-{showOnlyGaussianField && (
+{(showOnlyGaussianField && showLabel)  &&(
         <Label
           position={[0, radius, 0]}
-          name="Flux"
+          objectName={name}
           value={`Φ = ${fluxValue.toExponential(2)} N⋅m²/C`}
           offsetY={0}
           distanceFactor={10}

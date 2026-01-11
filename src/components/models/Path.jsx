@@ -8,13 +8,13 @@ import Label from '../ui/labels/Label'
 export default function Path({
   id,
   position,
+  name,
   selectedId,
   setSelectedId,
   setIsDragging,
   updatePosition,
   points,
   charges,
-  setCharges,
   chargeCount,
   charge,
   velocity,
@@ -24,8 +24,6 @@ export default function Path({
   isChild,
   renderCharges = true,
   renderPoints = true,
-  parentRotation,
-  parentQuaternion,
   groupRef: parentGroupRef,
   showLabel = true,
   glowMultiplier = 1.0,
@@ -45,7 +43,7 @@ export default function Path({
   }, []);
 
   // compute glow color and base scale from charge
-  const { glowColor, baseGlowScale, glowIntensity } = useMemo(() => {
+  const { glowColor, baseGlowScale } = useMemo(() => {
     const sign = charge >= 0 ? 1 : -1
     // positive -> blue, negative -> red
     const glowColor = sign >= 0 ? new THREE.Color(0x6ea8ff) : new THREE.Color(0xff6e6e)
@@ -196,7 +194,7 @@ export default function Path({
     // If this is a child of a rotated parent (like a coil), apply parent's rotation
 
     const curveLength = catmullCurve.getLength();
-    const nCharges = pos.length;
+    const _nCharges = pos.length;
     const timePerLoop = curveLength / Math.max(0.1, Math.abs(velocity));
     const currLoopTime = clockRef.current ? clockRef.current.getElapsedTime() % timePerLoop : 0;
     let currLoopt = currLoopTime / timePerLoop;
@@ -204,7 +202,7 @@ export default function Path({
       //console.log("aaaaa")
       const parentQuat = parentGroupRef.current.quaternion;
       
-      // Transform charge positions and tangents by parent rotation
+      // Transform charge positions and tangents by parent rotation for backend/state
       const rotatedPositions = pos.map(p => {
         const vec = new THREE.Vector3(p[0], p[1], p[2]);
         vec.applyQuaternion(parentQuat);
@@ -223,9 +221,10 @@ export default function Path({
         tangents.push([rotatedTangent.x, rotatedTangent.y, rotatedTangent.z]);
       }
   
-      // Store in local state instead of updating parent on every frame
-      setChargePositions(rotatedPositions);
+      // Send rotated positions to backend/state for calculations
       updateObject?.(id, { charges: rotatedPositions, tangents: tangents });
+      // But render unrotated positions (parent groupRef will apply rotation visually)
+      setChargePositions(pos);
     } else {
   
       // Original behavior for non-rotated paths
@@ -270,9 +269,9 @@ export default function Path({
     >
       {showLabel && (
         <Label
+          objectName={name}
           
-          name="Electrical Current"
-          value={`${electricCurrent.toExponential(2)} A`}
+          value={`I = ${electricCurrent.toExponential(2)} A`}
           offsetY={0.5}
         />
       )}

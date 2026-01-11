@@ -56,6 +56,7 @@ export default function Sidebar({
   changePathChargeCount,
   changePathCharge,
   changePathVelocity,
+  showFlux,
 
 }) {
   const [expandId, setExpandId] = useState(null);
@@ -277,6 +278,7 @@ export default function Sidebar({
 
             <ObjectList
               items={objects}
+              showFlux={showFlux}
               updateObject={updateObject}
               removeObject={removeObject}
               expandId={expandId}

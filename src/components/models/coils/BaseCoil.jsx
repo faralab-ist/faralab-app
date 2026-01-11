@@ -33,6 +33,7 @@ export default function BaseCoil({
   updateObject,
   creativeMode,
   isHovered,
+  name,
 
   // Coil-specific visual props
   coilRadius,           // main coil size (radius for ring, side length for polygons)
@@ -184,6 +185,7 @@ export default function BaseCoil({
         {pathPoints.length > 0 && (
           <Path
             id={id}
+            name = {name}
             position={[0, 0, 0]}
             selectedId={selectedId}
             setSelectedId={setSelectedId}

@@ -10,6 +10,7 @@ function Wire({
   charge_density,
   infinite,
   material,
+  name,
   selectedId,
   setSelectedId,
   setIsDragging,
@@ -106,7 +107,7 @@ function Wire({
       depthTest={false}
       enabled={isSelected && creativeMode}
       disableScaling={true}
-      disableRotations={true}
+      disableRotations={false}
       // prevent gizmo from also transforming children
       onDragStart={(activeAxes) => {
         isDraggingRef.current = true;
@@ -142,8 +143,8 @@ function Wire({
     >
     {showLabel && (
       <Label
-        name="Linear Density"
-        value={`λ = ${charge_density.toExponential(2)} C/m`}
+        objectName={name}
+        value={`λ = ${charge_density === undefined ? 0..toExponential(2) : charge_density.toExponential(2)} C/m`}
         offsetY={0.5}
       />
     )}

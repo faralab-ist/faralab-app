@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
   import { Canvas, useThree } from '@react-three/fiber'
   import { OrbitControls } from '@react-three/drei'
   import './App.css'
@@ -19,6 +19,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   import Toolbar from './components/ui/Toolbar/Toolbar'
+import CreativeObjectsMenu from './components/ui/CreativeObjectsMenu'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
   import DockSidebar from './components/ui/DockSidebar/DockSidebar'
@@ -129,12 +130,21 @@ function LoadingOverlay() {
   return <primitive object={axes} />
 }
 
+
   // small bridge used inside <Canvas /> to forward hover -> App state
   function SceneHoverBridge({ onChange }) {
     // useSceneHover runs inside the fiber renderer (uses useThree)
-    useSceneHover((id) => {
-      onChange?.(id ?? null)
-    })
+    const lastIdRef = useRef(null)
+    
+    const handleHover = useCallback((id) => {
+      const newId = id ?? null
+      if (lastIdRef.current !== newId) {
+        lastIdRef.current = newId
+        onChange?.(newId)
+      }
+    }, [onChange])
+    
+    useSceneHover(handleHover)
     return null
   }
 
@@ -180,7 +190,7 @@ function LoadingOverlay() {
     const [isPanelMinimized, setIsPanelMinimized] = useState(false)
     const [isSidebarMinimized, setIsSidebarMinimized] = useState(false)
 
-    const [creativeMode, setCreativeMode] = useState(false)  // stays here (single source)
+    const [pivotControlsEnabled, setPivotControlsEnabled] = useState(true)  // Control for object movement
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
     const [vectorStep, setVectorStep] = useState(1) 
@@ -208,6 +218,9 @@ function LoadingOverlay() {
     const [ensureActiveCallback, setEnsureActiveCallback] = useState(null)
     const [undockPositions, setUndockPositions] = useState({}) // Store positions for undocked windows
 
+    const onHoverChange = useCallback((id) => {
+      setHoveredId(id)
+    }, [])
     // Docker functions
     const handleDock = (windowName) => {
       setDockedWindows(prev => ({ ...prev, [windowName]: true }))
@@ -329,7 +342,6 @@ function LoadingOverlay() {
       setFluxResults(results)
       
       if (results.length) {
-        console.log('[Flux] Gaussian surface results:')
         results.forEach(result => {
           const label = result.name ?? result.id
           const value = Number.isFinite(result.flux) ? result.flux : 0
@@ -443,9 +455,9 @@ function LoadingOverlay() {
         updatePosition={updatePosition}
         sceneObjects={sceneObjects}
         counts={counts}
-        creativeMode={creativeMode}
-        setCreativeMode={setCreativeMode} 
-        setSceneObjects={setSceneObjects} 
+        setSceneObjects={setSceneObjects}
+        pivotControlsEnabled={pivotControlsEnabled}
+        onTogglePivotControls={() => setPivotControlsEnabled(v => !v)} 
         useSlice={useSlice} setUseSlice={setUseSlice}
         showSliceHelper={showSlicePlaneHelper} 
         setShowSliceHelper={setShowSlicePlaneHelper}
@@ -560,7 +572,6 @@ function LoadingOverlay() {
           onToggleBField: () => setShowMagField(v => !v),
         }}
         gaussianProps={{
-          creativeMode,
           addObject,
           sceneObjects,
           setSceneObjects,
@@ -577,8 +588,6 @@ function LoadingOverlay() {
           setSceneObjects={setSceneObjects}
           sceneObjects={sceneObjects}
           counts={counts}
-          creativeMode={creativeMode}
-          setCreativeMode={setCreativeMode}
           sidebarOpen={sidebarOpen}
           sidebarMinimized={isSidebarMinimized}
           onApplyPreset={applyPreset}
@@ -602,17 +611,6 @@ function LoadingOverlay() {
             showSlicePlaneHelper
           }}
         />
-        <div className="field-legend" aria-label="Field color legend">
-          <div className="legend-row">
-            <span className="legend-swatch legend-electric" />
-            <span className="legend-label">Eletric Field</span>
-          </div>
-          <div className="legend-row">
-            <span className="legend-swatch legend-magnetic" />
-            <span className="legend-label">Magnetic Field</span>
-          </div>
-        </div>
-
 
        {/* <ObjectPopup
           selectedObject={sceneObjects.find(o => o.id === selectedId)}
@@ -654,12 +652,13 @@ function LoadingOverlay() {
           changePathChargeCount={changePathChargeCount}
           changePathCharge={changePathCharge}
           changePathVelocity={changePathVelocity}
+          showFlux={showOnlyGaussianField}
         />
 
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
           <CameraFnsMount onReady={setCamFns} />
           <CameraStateCapture onCameraUpdate={setCameraState} />
-          <SceneHoverBridge onChange={setHoveredId} />
+          <SceneHoverBridge onChange={onHoverChange} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[2, 2, 5]} />
           <OrbitControls enabled={!isDragging} />
@@ -717,7 +716,7 @@ function LoadingOverlay() {
                 key={obj.id}
                 {...obj}
                 objects={sceneObjects}
-                creativeMode={creativeMode}           
+                creativeMode={pivotControlsEnabled}           
                 selectedId={selectedId}
                 setSelectedId={handleSelect}
                 setIsDragging={handleDragging}
@@ -834,7 +833,6 @@ function LoadingOverlay() {
           setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
           setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
           setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
-          creativeMode={creativeMode}
           addObject={addObject}
           sceneObjects={sceneObjects}
           setSceneObjects={setSceneObjects}
@@ -859,6 +857,11 @@ function LoadingOverlay() {
           setWavePropagationEnabled={setWavePropagationEnabled}
           waveDuration={waveDuration}
           setWaveDuration={setWaveDuration}
+        />
+
+        {/* Creative Objects Menu - always visible in bottom left */}
+        <CreativeObjectsMenu 
+          addObject={addObject}
         />
       </div>
     </div>

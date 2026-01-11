@@ -9,6 +9,7 @@ export default function Sphere({
   position, 
   charge_density,
   material,
+  name,
   selectedId, 
   setSelectedId, 
   setIsDragging,
@@ -95,8 +96,8 @@ export default function Sphere({
     >
       {showLabel && (
         <Label
-          name="Volume Density"
-          value={`${charge_density.toExponential(2)} C/m³`}
+          objectName={name}
+          value={`ρ = ${charge_density === undefined ? 0..toExponential(2) : charge_density.toExponential(2)} C/m³`}
           offsetY={radius + 0.5}
         />
       )}

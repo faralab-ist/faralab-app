@@ -10,6 +10,7 @@ import Label from '../../ui/labels/Label'
 export default function TestCoil({
   objects,
   id,
+  name,
   position,
   selectedId,
   setSelectedId,
@@ -23,6 +24,7 @@ export default function TestCoil({
   creativeMode,
   updateObject,
   tubeRadius = 0.05,
+  showLabel = true,
 }) {
   const radialSamples = 10;
   const angularSamples = 10;
@@ -176,17 +178,17 @@ export default function TestCoil({
       scale={0.86}
       lineWidth={2.5}
     >
-      <Label
+      {showLabel &&  <Label
         position={[0, 0, 0]}
-        name="Info"
+        objectName={name}
         value={[
-          `B-flux = ${displayFlux != null ? displayFlux.toExponential(3) : '—'} Wb`,
-          `EMF: ${displayEmf != null ? displayEmf.toExponential(3) + ' V' : '—'}`,
+          `B-Flux = ${displayFlux != null ? displayFlux.toExponential(3) : '—'} Wb`,
+          `ε: ${displayEmf != null ? displayEmf.toExponential(3) + ' V' : '—'}`,
           `E-Flux = ${displayEFlux != null ? displayEFlux.toExponential(3) : '—'} V·m`,
         ]}
         offsetY={0.5}
         distanceFactor={8}
-      />
+      />}
       <group ref={groupRef}>
         <mesh 
           geometry={coilGeom} 
