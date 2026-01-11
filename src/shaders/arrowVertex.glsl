@@ -2,6 +2,8 @@ attribute vec3 instancePosition;
 attribute vec3 instanceDirection;
 attribute float instanceScale;
 attribute vec3 instanceColor;
+attribute float instanceDelay;
+uniform float uProgress;
 
 varying vec3 vColor;
 
@@ -24,6 +26,13 @@ vec3 rotateToDirection(vec3 v, vec3 dir){
 }
 
 void main(){
+    // Skip instances whose delay has not been reached yet
+    if (instanceDelay > uProgress) {
+        vColor = vec3(0.0);
+        gl_Position = vec4(2e6, 2e6, 2e6, 1.0);
+        return;
+    }
+
     vec3 transformed = position;
     transformed = rotateToDirection(transformed, normalize(instanceDirection));
     transformed *= instanceScale;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
   import { Canvas, useThree } from '@react-three/fiber'
   import { OrbitControls } from '@react-three/drei'
   import './App.css'
@@ -169,12 +169,29 @@ function LoadingOverlay() {
 
     const [fieldVersion, setFieldVersion] = useState(0)
     const [fieldChangeType, setFieldChangeType] = useState('full')
+    const draggingRef = useRef(false)
+    const pendingFieldRefreshRef = useRef(false)
 
     const applyPresetWithFieldReset = (...args) => {
       applyPreset(...args)
       setFieldChangeType('full')     // 🔁
       setFieldVersion(v => v + 1)
     }
+
+    // Wrap updatePosition to defer field refresh until drag ends
+    const updatePositionWithFieldUpdate = useCallback((id, position) => {
+      updatePosition(id, position)
+
+      if (draggingRef.current) {
+        // While dragging, just mark that a refresh is needed later
+        pendingFieldRefreshRef.current = true
+        return
+      }
+
+      // Not dragging: refresh immediately
+      setFieldChangeType('incremental')
+      setFieldVersion(v => v + 1)
+    }, [updatePosition])
     
     const [selectedId, setSelectedId] = useState(null)
     const [isDragging, setIsDragging] = useState(false)
@@ -207,8 +224,8 @@ function LoadingOverlay() {
     const [showSlicePlaneHelper, setShowSlicePlaneHelper] = useState(true)
     const [slicePlaneFlip, setSlicePlaneFlip] = useState(false)
       // Wave propagation settings for field arrows
-      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(false)
-      const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
+      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(true)
+      const [waveDuration, setWaveDuration] = useState(1.5) // seconds for full wave
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
     
     // Docker sidebar state
@@ -255,11 +272,19 @@ function LoadingOverlay() {
 
     const handleDragging = (dragging) => {
       setIsDragging(dragging)
+      draggingRef.current = dragging
+
       if (dragging) {
         setDragOwnerId(selectedId)
         setIsPanelMinimized(true)
       } else {
         setDragOwnerId(null)
+        // Drag ended: if there were position changes, bump field version once
+        if (pendingFieldRefreshRef.current) {
+          pendingFieldRefreshRef.current = false
+          setFieldChangeType('incremental')
+          setFieldVersion(v => v + 1)
+        }
       }
     }
 
@@ -449,7 +474,7 @@ function LoadingOverlay() {
       <div className="toolbar-root">     {/* new same-container wrapper */}
      <Toolbar 
         addObject={addObject}
-        updatePosition={updatePosition}
+        updatePosition={updatePositionWithFieldUpdate}
         sceneObjects={sceneObjects}
         counts={counts}
         creativeMode={creativeMode}
@@ -583,6 +608,8 @@ function LoadingOverlay() {
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
         <CreateButtons
           addObject={addObject}
+          setFieldChangeType={setFieldChangeType}
+          setFieldVersion={setFieldVersion}
           setSceneObjects={setSceneObjects}
           sceneObjects={sceneObjects}
           counts={counts}
@@ -729,7 +756,7 @@ function LoadingOverlay() {
                 selectedId={selectedId}
                 setSelectedId={handleSelect}
                 setIsDragging={handleDragging}
-                updatePosition={updatePosition}
+                updatePosition={updatePositionWithFieldUpdate}
                 updateChargeDensity={updateChargeDensity}
                 updateDirection={updateDirection}
                 updateObject={updateObject}
@@ -778,7 +805,7 @@ function LoadingOverlay() {
             slicePos={slicePos}
             useSlice={useSlice}
             slicePlaneFlip={slicePlaneFlip}
-            propagationSpeed={waveDuration}
+            waveDuration={waveDuration}
             enablePropagation={wavePropagationEnabled && !sceneObjects.some((o) => o.type === 'path')}
           />
         )}
