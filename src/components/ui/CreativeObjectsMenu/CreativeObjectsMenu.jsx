@@ -89,14 +89,14 @@ const CREATIVE_OBJECTS = [
   }
 ]
 
-export default function CreativeObjectsMenu({ addObject }) {
+export default function CreativeObjectsMenu({ addObject, sidebarState }) {
   const [isExpanded, setIsExpanded] = useState(false)
   
   const handleAddObject = (obj) => {
     addObject?.(obj.type, obj.defaultProps)
   }
 
-  const handleMouseEnter = () => {
+  const handleToggleMenu = () => {
     setIsExpanded(true)
   }
 
@@ -109,24 +109,27 @@ export default function CreativeObjectsMenu({ addObject }) {
   const magneticObjects = CREATIVE_OBJECTS.filter(obj => obj.category === 'magnetic')
   const testObjects = CREATIVE_OBJECTS.filter(obj => obj.category === 'test')
 
+  // Calculate left offset based on sidebar state
+  const sidebarWidth = sidebarState?.width || 0;
+  const leftOffset = 20 + sidebarWidth;
+
   return (
     <div 
       className="creative-objects-menu"
-      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      style={{ left: `${leftOffset}px` }}
     >
       <div className={`creative-menu-panel ${isExpanded ? 'expanded' : 'collapsed'}`}>
         
         {!isExpanded && (
-          <button className="creative-menu-toggle-button" title="Add Objects">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3L19 7.5V16.5L12 21L5 16.5V7.5L12 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-              <path d="M12 12V21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M12 12L19 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M12 12L5 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              <circle cx="19" cy="5" r="3" fill="currentColor"/>
-              <line x1="19" y1="3.5" x2="19" y2="6.5" stroke="rgba(19, 19, 19, 0.92)" strokeWidth="1.5" strokeLinecap="round"/>
-              <line x1="17.5" y1="5" x2="20.5" y2="5" stroke="rgba(19, 19, 19, 0.92)" strokeWidth="1.5" strokeLinecap="round"/>
+          <button 
+            className="creative-menu-toggle-button" 
+            title="Add Objects"
+            onClick={handleToggleMenu}
+          >
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="11" y1="4" x2="11" y2="18" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+              <line x1="4" y1="11" x2="18" y2="11" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
             </svg>
           </button>
         )}

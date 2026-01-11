@@ -6,7 +6,7 @@ import Label from '../../ui/labels/Label'
 import { InlineDecimalInput } from '../../ui/io/decimalInput'
 import { POS_MIN, POS_MAX } from '../../ui/Sidebar/utils'
 
-export default function TestCharge({position = [0, 0, 0], sceneObjects, updateObject, showLabel = true, ...props }) {
+export default function TestCharge({position = [0, 0, 0], sceneObjects, updateObject, showLabel = true, onHideLabel, ...props }) {
   
   // Fixed visuals for a test charge - subtle glow to prevent recording bloom
   const visuals = useMemo(() => ({
@@ -99,6 +99,8 @@ export default function TestCharge({position = [0, 0, 0], sceneObjects, updateOb
           ]}
           offsetY={0.5}
           distanceFactor={8}
+          objectId={props.id}
+          onHideLabel={onHideLabel}
         />
       )}
     </group>

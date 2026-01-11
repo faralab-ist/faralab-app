@@ -40,6 +40,7 @@ export default function BarMagnet({
     freq,
     dragOwnerId = null,
     showLabel = true,
+    onHideLabel,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -379,6 +380,8 @@ export default function BarMagnet({
                   ]}
                   offsetY={0.5 + radius}
                   distanceFactor={8}
+                  objectId={id}
+                  onHideLabel={onHideLabel}
                 />
               )}
         {/* Invisible hitbox for selection */}

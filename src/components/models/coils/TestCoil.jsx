@@ -25,6 +25,7 @@ export default function TestCoil({
   updateObject,
   tubeRadius = 0.05,
   showLabel = true,
+  onHideLabel,
 }) {
   const radialSamples = 10;
   const angularSamples = 10;
@@ -188,6 +189,8 @@ export default function TestCoil({
         ]}
         offsetY={0.5}
         distanceFactor={8}
+        objectId={id}
+        onHideLabel={onHideLabel}
       />}
       <group ref={groupRef}>
         <mesh 

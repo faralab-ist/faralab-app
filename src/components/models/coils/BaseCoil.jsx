@@ -61,6 +61,7 @@ export default function BaseCoil({
   showLabel = true,
 
   glowMultiplier,
+  onHideLabel,
 
 }) {
   const isSelected = id === selectedId
@@ -206,6 +207,7 @@ export default function BaseCoil({
             groupRef={groupRef}
             showLabel={showLabel}
             glowMultiplier={glowMultiplier}
+            onHideLabel={onHideLabel}
           />
         )}
 
