@@ -26,8 +26,9 @@ vec3 rotateToDirection(vec3 v, vec3 dir){
 }
 
 void main(){
-    // Skip instances whose delay has not been reached yet
-    if (instanceDelay > uProgress) {
+    // delay = -1 means always visible (old frozen vectors)
+    // otherwise skip instances whose delay has not been reached yet
+    if (instanceDelay >= 0.0 && instanceDelay > uProgress) {
         vColor = vec3(0.0);
         gl_Position = vec4(2e6, 2e6, 2e6, 1.0);
         return;

@@ -807,6 +807,7 @@ function LoadingOverlay() {
             slicePlaneFlip={slicePlaneFlip}
             waveDuration={waveDuration}
             enablePropagation={wavePropagationEnabled && !sceneObjects.some((o) => o.type === 'path')}
+            isDragging={isDragging}
           />
         )}
 

@@ -32,8 +32,14 @@ export default function FieldArrows({
   useSlice,
   slicePlaneFlip,
   enablePropagation = true,
-  waveDuration = 1.0
+  waveDuration = 1.0,
+  isDragging = false
 }) {
+  // Refs need to be declared early to use in useMemo
+  const wasDraggingRef = useRef(false)
+  const frozenVectorsRef = useRef(null)
+  const oldVectorsAttrsRef = useRef(null) // Store old field to show during propagation
+
   /* -----------------------------
    * 1) Campo no grid
    * ----------------------------- */
@@ -48,6 +54,20 @@ export default function FieldArrows({
     ),
     [vectorsUnfiltered, slicePlane, slicePos, useSlice, slicePlaneFlip]
   )
+
+  // Freeze vectors during drag - use frozen version if dragging
+  const effectiveVectors = useMemo(() => {
+    if (isDragging) {
+      // First time dragging starts, freeze current vectors
+      if (!wasDraggingRef.current) {
+        frozenVectorsRef.current = vectors
+      }
+      return frozenVectorsRef.current || vectors
+    }
+    // Not dragging - return current vectors but DON'T clear frozen yet
+    // (effect will clear it after using old data)
+    return vectors
+  }, [vectors, isDragging])
 
   /* -----------------------------
    * 2) Magnitude máx (cores)
@@ -199,6 +219,7 @@ export default function FieldArrows({
   const lastChangeTypeRef = useRef(fieldChangeType)
   const lastSignatureRef = useRef(0)
   const newFieldDataRef = useRef(null)  // Store new field data for incremental updates
+  const forceFullRestartRef = useRef(false) // Force full restart on next update
   const isDebug = useCallback(() => (typeof window !== 'undefined' && window.__FIELD_DEBUG__) || false, [])
 
   const setInstanceCount = useCallback((mesh, value) => {
@@ -214,14 +235,29 @@ export default function FieldArrows({
     const mesh = meshRef.current
     if (!mesh) return
 
-    const attrs = createInstancedAttributes(vectors)
+    // Detect when drag ends (drop)
+    const justDropped = wasDraggingRef.current && !isDragging
+    if (justDropped) {
+      forceFullRestartRef.current = true
+      console.log('[FieldArrows] Charge dropped - will force full restart')
+    }
+    wasDraggingRef.current = isDragging
+
+    // Freeze field updates while dragging
+    if (isDragging) {
+      return
+    }
+
+    const attrs = createInstancedAttributes(effectiveVectors)
     const maxCount = attrs.count || 0
     const previousCount = lastAttrsCountRef.current
     const previousVersion = lastFieldVersionRef.current
     const previousChangeType = lastChangeTypeRef.current
     const previousSignature = lastSignatureRef.current
     const signatureChanged = attrs.signature !== previousSignature
+    const forceRestart = forceFullRestartRef.current
     const shouldRestartWave = enablePropagation && (
+      forceRestart ||
       fieldVersion !== previousVersion ||
       maxCount !== previousCount ||
       fieldChangeType !== previousChangeType ||
@@ -233,20 +269,95 @@ export default function FieldArrows({
       return
     }
 
-    const mustRebuild = fieldChangeType === 'full' || !mesh.geometry
+    const mustRebuild = forceRestart || fieldChangeType === 'full' || !mesh.geometry
 
     // Use precomputed ring boundaries (already sorted by distance)
     distanceRingsRef.current = attrs.ringBoundaries || []
 
     if (mustRebuild) {
+      let finalAttrs = attrs
+      
+      // If this is a force restart (drop), combine old frozen vectors with new ones
+      if (forceRestart && frozenVectorsRef.current && frozenVectorsRef.current !== vectors) {
+        console.log('[FieldArrows] Creating old field from frozen vectors')
+        const oldAttrs = createInstancedAttributes(frozenVectorsRef.current)
+        const oldCount = oldAttrs.count
+        
+        if (oldCount > 0) {
+          console.log('[FieldArrows] Combining vectors:', { oldCount, newCount: maxCount, total: oldCount + maxCount })
+          
+          // Combine old and new
+          const totalCount = oldCount + maxCount
+          const combinedPos = new Float32Array(totalCount * 3)
+          const combinedDir = new Float32Array(totalCount * 3)
+          const combinedScale = new Float32Array(totalCount)
+          const combinedColor = new Float32Array(totalCount * 3)
+          const combinedDelay = new Float32Array(totalCount)
+          
+          // Old vectors: delay = -1 (always visible)
+          for (let i = 0; i < oldCount; i++) {
+            combinedPos[i * 3] = oldAttrs.positions[i * 3]
+            combinedPos[i * 3 + 1] = oldAttrs.positions[i * 3 + 1]
+            combinedPos[i * 3 + 2] = oldAttrs.positions[i * 3 + 2]
+            combinedDir[i * 3] = oldAttrs.directions[i * 3]
+            combinedDir[i * 3 + 1] = oldAttrs.directions[i * 3 + 1]
+            combinedDir[i * 3 + 2] = oldAttrs.directions[i * 3 + 2]
+            combinedScale[i] = oldAttrs.scales[i]
+            combinedColor[i * 3] = oldAttrs.colors[i * 3]
+            combinedColor[i * 3 + 1] = oldAttrs.colors[i * 3 + 1]
+            combinedColor[i * 3 + 2] = oldAttrs.colors[i * 3 + 2]
+            combinedDelay[i] = -1 // Always visible
+          }
+          
+          // New vectors: normal delays (propagate)
+          for (let i = 0; i < maxCount; i++) {
+            const offset = oldCount + i
+            combinedPos[offset * 3] = attrs.positions[i * 3]
+            combinedPos[offset * 3 + 1] = attrs.positions[i * 3 + 1]
+            combinedPos[offset * 3 + 2] = attrs.positions[i * 3 + 2]
+            combinedDir[offset * 3] = attrs.directions[i * 3]
+            combinedDir[offset * 3 + 1] = attrs.directions[i * 3 + 1]
+            combinedDir[offset * 3 + 2] = attrs.directions[i * 3 + 2]
+            combinedScale[offset] = attrs.scales[i]
+            combinedColor[offset * 3] = attrs.colors[i * 3]
+            combinedColor[offset * 3 + 1] = attrs.colors[i * 3 + 1]
+            combinedColor[offset * 3 + 2] = attrs.colors[i * 3 + 2]
+            combinedDelay[offset] = attrs.delays[i]
+          }
+          
+          // Log sample delays to verify
+          console.log('[FieldArrows] Sample delays:', {
+            old: [combinedDelay[0], combinedDelay[Math.floor(oldCount/2)]],
+            new: [combinedDelay[oldCount], combinedDelay[oldCount + Math.floor(maxCount/2)], combinedDelay[totalCount - 1]]
+          })
+          
+          finalAttrs = {
+            positions: combinedPos,
+            directions: combinedDir,
+            scales: combinedScale,
+            colors: combinedColor,
+            delays: combinedDelay,
+            count: totalCount
+          }
+          
+          // Store info for cleanup
+          oldVectorsAttrsRef.current = { oldCount }
+        }
+        
+        // Clear frozen vectors now that we've used them
+        frozenVectorsRef.current = null
+      }
+      
       const geom = arrowGeometry.clone()
-      geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(attrs.positions, 3))
-      geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(attrs.directions, 3))
-      geom.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(attrs.scales, 1))
-      geom.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(attrs.colors, 3))
-      geom.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(attrs.delays, 1))
+      geom.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(finalAttrs.positions, 3))
+      geom.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(finalAttrs.directions, 3))
+      geom.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(finalAttrs.scales, 1))
+      geom.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(finalAttrs.colors, 3))
+      geom.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(finalAttrs.delays, 1))
       mesh.geometry = geom
       mesh.frustumCulled = false
+      
+      setInstanceCount(mesh, finalAttrs.count)
     } else {
       // incremental: check if count changed (threshold filtering may add/remove instances)
       const g = mesh.geometry
@@ -331,9 +442,10 @@ export default function FieldArrows({
       }
     }
 
-    // Reset animation state for propagation
-    // Always keep instanced capacity at maxCount; shader uniform controls visibility
-    setInstanceCount(mesh, maxCount)
+    // For non-rebuild paths, set instance count
+    if (!mustRebuild) {
+      setInstanceCount(mesh, maxCount)
+    }
 
     const u = getProgressUniform()
     if (!u) return
@@ -343,8 +455,13 @@ export default function FieldArrows({
     lastChangeTypeRef.current = fieldChangeType
     lastSignatureRef.current = attrs.signature
 
-    const isFullRebuild = fieldChangeType === 'full'
+    const isFullRebuild = forceRestart || fieldChangeType === 'full'
     currentChangeTypeRef.current = isFullRebuild ? 'full' : 'incremental'
+    
+    // Clear force restart flag after using it
+    if (forceRestart) {
+      forceFullRestartRef.current = false
+    }
 
     if (!enablePropagation) {
       u.value = 1
@@ -354,21 +471,22 @@ export default function FieldArrows({
     }
 
     if (shouldRestartWave) {
-      startTimeRef.current = Date.now()
+      const now = Date.now()
+      startTimeRef.current = now
       animationCompleteRef.current = false
       lastLoggedProgressRef.current = -1
 
       if (isFullRebuild) {
         // Hide everything, let the shader reveal rings by delay/uProgress
         u.value = 0
-        console.log('[FieldArrows] Propagation wave started (full)', { maxCount, waveDuration })
+        console.log('[FieldArrows] Propagation wave started (full)', { maxCount, waveDuration, startTime: now, forceRestart })
       } else {
         // Keep arrows visible while attributes morph forward along the wave
         u.value = 1
         console.log('[FieldArrows] Propagation wave started (incremental)', { maxCount, waveDuration })
       }
     }
-  }, [fieldVersion, fieldChangeType, vectors, objects, createInstancedAttributes, arrowGeometry, step, setInstanceCount])
+  }, [fieldVersion, fieldChangeType, effectiveVectors, objects, createInstancedAttributes, arrowGeometry, step, setInstanceCount, isDragging, enablePropagation, getProgressUniform, waveDuration])
 
   /* -----------------------------
    * 7) Propagation
@@ -380,6 +498,11 @@ export default function FieldArrows({
     const u = getProgressUniform()
     if (!u) {
       console.warn('[FieldArrows] missing uProgress uniform')
+      return
+    }
+
+    // Freeze animation while dragging
+    if (isDragging) {
       return
     }
 
@@ -470,8 +593,73 @@ export default function FieldArrows({
     if (progress >= 1) {
       animationCompleteRef.current = true
       newFieldDataRef.current = null  // Clear stored data when complete
+      
+      // Remove old vectors if they were present
+      if (oldVectorsAttrsRef.current && mode === 'full') {
+        const oldCount = oldVectorsAttrsRef.current.oldCount
+        console.log('[FieldArrows] Propagation complete - removing', oldCount, 'old vectors')
+        
+        // Rebuild geometry with only new vectors
+        const g = mesh.geometry
+        const currentCount = g.attributes.instancePosition?.count || 0
+        const newCount = currentCount - oldCount
+        
+        if (newCount > 0) {
+          const oldPos = g.attributes.instancePosition.array
+          const oldDir = g.attributes.instanceDirection.array
+          const oldScale = g.attributes.instanceScale.array
+          const oldColor = g.attributes.instanceColor.array
+          const oldDelay = g.attributes.instanceDelay.array
+          
+          // Extract only the new vectors (after oldCount)
+          const newPos = new Float32Array(newCount * 3)
+          const newDir = new Float32Array(newCount * 3)
+          const newScale = new Float32Array(newCount)
+          const newColor = new Float32Array(newCount * 3)
+          const newDelay = new Float32Array(newCount)
+          
+          for (let i = 0; i < newCount; i++) {
+            const srcIdx = oldCount + i
+            newPos[i * 3] = oldPos[srcIdx * 3]
+            newPos[i * 3 + 1] = oldPos[srcIdx * 3 + 1]
+            newPos[i * 3 + 2] = oldPos[srcIdx * 3 + 2]
+            newDir[i * 3] = oldDir[srcIdx * 3]
+            newDir[i * 3 + 1] = oldDir[srcIdx * 3 + 1]
+            newDir[i * 3 + 2] = oldDir[srcIdx * 3 + 2]
+            newScale[i] = oldScale[srcIdx]
+            newColor[i * 3] = oldColor[srcIdx * 3]
+            newColor[i * 3 + 1] = oldColor[srcIdx * 3 + 1]
+            newColor[i * 3 + 2] = oldColor[srcIdx * 3 + 2]
+            newDelay[i] = oldDelay[srcIdx]
+          }
+          
+          g.attributes.instancePosition.array = newPos
+          g.attributes.instancePosition.count = newCount
+          g.attributes.instancePosition.needsUpdate = true
+          
+          g.attributes.instanceDirection.array = newDir
+          g.attributes.instanceDirection.count = newCount
+          g.attributes.instanceDirection.needsUpdate = true
+          
+          g.attributes.instanceScale.array = newScale
+          g.attributes.instanceScale.count = newCount
+          g.attributes.instanceScale.needsUpdate = true
+          
+          g.attributes.instanceColor.array = newColor
+          g.attributes.instanceColor.count = newCount
+          g.attributes.instanceColor.needsUpdate = true
+          
+          g.attributes.instanceDelay.array = newDelay
+          g.attributes.instanceDelay.count = newCount
+          g.attributes.instanceDelay.needsUpdate = true
+          
+          setInstanceCount(mesh, newCount)
+        }
+        
+        oldVectorsAttrsRef.current = null
+      }
     }
   })
 
-  return <instancedMesh ref={meshRef} args={[arrowGeometry, material, vectors.length || 1]} />
+  return <instancedMesh ref={meshRef} args={[arrowGeometry, material, effectiveVectors.length || 1]} />
 }
