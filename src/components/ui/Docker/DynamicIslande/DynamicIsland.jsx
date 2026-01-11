@@ -1,17 +1,20 @@
+/** TTHIS IS  UNUSED, IT IS JUST LOGIC TO BE USED LATER*/
+
+
+
 import React, { useState } from 'react';
-import './DockSidebar.css';
+import './DynamicIsland.css';
 import TestChargeMenu from '../Toolbar/ToolbarPopup/TestChargeMenu';
 import SlicerMenu from '../Toolbar/ToolbarPopup/SlicerMenu';
 import EFieldMenu from '../Toolbar/ToolbarPopup/EFieldMenu';
 import GaussianMenu from '../Toolbar/ToolbarPopup/GaussianMenu';
-import minimizeIcon from '../../../assets/minimize.svg';
-import efieldIcon from '../../../assets/field_view.svg';
-import sliceIcon from '../../../assets/slice.svg';
-import gaussian_icon from '../../../assets/gaussian_surface.svg';
-import test_charge_icon from '../../../assets/lowercase_q2.svg';
+import TestChargeIcon from '../../../assets/lowercase_q2.svg';
+import SliceIcon from '../../../assets/slice.svg';
+import FieldViewIcon from '../../../assets/field_view.svg';
+import GaussianIcon from '../../../assets/gaussian_surface.svg';
 
 /**
- * DockSidebar - Left sidebar "desk" where ToolbarPopup windows can be docked
+ * DockSidebar - Dynamic Island-style floating dock on the left
  * @param {Object} props
  * @param {Object} props.dockedWindows - { TestCharge: true, Slice: false, ... }
  * @param {Function} props.onUndock - Callback to undock a window back to floating
@@ -19,6 +22,8 @@ import test_charge_icon from '../../../assets/lowercase_q2.svg';
  * @param {Function} props.setTabOrder - Update tab order
  * @param {Object} props.testChargeProps - Props for TestChargeMenu
  * @param {Object} props.slicerProps - Props for SlicerMenu
+ * @param {Object} props.efieldProps - Props for EFieldMenu
+ * @param {Object} props.gaussianProps - Props for GaussianMenu
  */
 export default function DockSidebar({
   dockedWindows,
@@ -28,39 +33,31 @@ export default function DockSidebar({
   testChargeProps,
   slicerProps,
   efieldProps,
-  gaussianProps
+  gaussianProps,
 }) {
   const [draggedTab, setDraggedTab] = useState(null);
   const [dragOverTab, setDragOverTab] = useState(null);
   const [dropPosition, setDropPosition] = useState(null); // 'before' or 'after'
-const [expandedWindows, setExpandedWindows] = useState({ 
+  const [expandedWindows, setExpandedWindows] = useState({ 
     TestCharge: true, 
     Slice: true, 
     EField: true, 
     Gaussian: true 
-  });
-   const [isMinimized, setIsMinimized] = useState(false); // Track minimize state
+  }); // Track which windows are expanded
+  const [isHovered, setIsHovered] = useState(false); // Track hover state for island expansion
   
   // Get list of docked window names in user-defined order
   const dockedWindowNames = tabOrder.filter(name => dockedWindows[name]);
 
-  // If no windows docked, show collapsed state
+  // If no windows docked, show collapsed state (minimal island)
   const isCollapsed = dockedWindowNames.length === 0;
-
-  // Map window names to icons
-  const getWindowIcon = (windowName) => {
-    switch (windowName) {
-      case 'Gaussian':
-        return gaussian_icon;
-      case 'TestCharge':
-        return test_charge_icon
-      case 'Slice':
-        return sliceIcon;
-      case 'EField':
-        return efieldIcon;
-      default:
-        return null;
-    }
+  
+  // Window icons mapping
+  const windowIcons = {
+    TestCharge: TestChargeIcon,
+    Slice: SliceIcon,
+    EField: FieldViewIcon,
+    Gaussian: GaussianIcon
   };
 
   // Toggle expanded state for a window
@@ -132,14 +129,20 @@ const [expandedWindows, setExpandedWindows] = useState({
   const handleTabDragEnd = (e) => {
     // If dragged outside docker area, undock it
     const dockerRect = e.currentTarget.closest('.dock-sidebar').getBoundingClientRect();
-    const isOutsideDock = e.clientX > dockerRect.right || e.clientX < dockerRect.left;
+    const isOutsideDock = 
+      e.clientX > dockerRect.right || 
+      e.clientX < dockerRect.left ||
+      e.clientY > dockerRect.bottom ||
+      e.clientY < dockerRect.top;
     
     if (isOutsideDock && draggedTab) {
-      // Pass the position where the drag ended
+      // Pass the position where the drag ended, clamped to keep window visible
       const position = {
-        left: e.clientX - 150, // Center the popup on cursor
-        top: e.clientY - 20
+        left: Math.max(20, e.clientX - 150),
+        top: Math.max(20, e.clientY - 20)
       };
+      setExpandedWindows(prev => ({ ...prev, [draggedTab]: false }));
+      setIsHovered(false);
       onUndock(draggedTab, position);
     }
     
@@ -170,26 +173,40 @@ const [expandedWindows, setExpandedWindows] = useState({
   };
 
   return (
-    <div className={`dock-sidebar ${isCollapsed ? 'collapsed' : ''} ${isMinimized ? 'minimized' : ''}`}>
-      {/* Minimize button */}
-      {!isCollapsed && (
-        <div className="dock-header-bar">
-          <button
-            className="dock-minimize-btn"
-            onClick={() => setIsMinimized(!isMinimized)}
-            title={isMinimized ? 'Expand' : 'Minimize'}
-          >
-            {isMinimized ? '▶' : '◀'}
-          </button>
+    <div 
+      className={`dock-sidebar ${isCollapsed ? 'collapsed' : ''} ${isHovered ? 'expanded' : ''}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Icon badges container (visible when NOT expanded) */}
+      {!isHovered && !isCollapsed && (
+        <div className="dock-island-badges">
+          {dockedWindowNames.map((windowName) => (
+            <div
+              key={windowName}
+              className="dock-badge"
+              title={windowName}
+            >
+              <img src={windowIcons[windowName]} alt={windowName} className="dock-badge-icon" />
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Docked windows list */}
-      <div 
-        className="dock-content"
-        onDragOver={handleContentDragOver}
-        onDrop={handleDrop}
-      >
+      {/* Collapsed empty state */}
+      {isCollapsed && (
+        <div className="dock-island-badges">
+          <div className="dock-empty-indicator">∅</div>
+        </div>
+      )}
+
+      {/* Expanded content (visible on hover) */}
+      {isHovered && !isCollapsed && (
+        <div 
+          className="dock-content"
+          onDragOver={handleContentDragOver}
+          onDrop={handleDrop}
+        >
         {dockedWindowNames.map((windowName) => (
           <div key={windowName} className="dock-window-section">
             {/* Drop line indicator above */}
@@ -215,6 +232,7 @@ const [expandedWindows, setExpandedWindows] = useState({
                 className="dock-window-undock"
                 onClick={(e) => {
                   e.stopPropagation();
+                  setExpandedWindows(prev => ({ ...prev, [windowName]: false }));
                   onUndock(windowName);
                 }}
                 title="Pop out"
@@ -236,36 +254,12 @@ const [expandedWindows, setExpandedWindows] = useState({
             )}
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Drop zone indicator (shown when dragging) */}
       <div className="dock-drop-indicator">
-        
       </div>
-
-      {/* Minimized icon bar */}
-      {isMinimized && !isCollapsed && (
-        <div className="dock-icon-bar">
-          {dockedWindowNames.map((windowName) => (
-            <div
-              key={`icon-${windowName}`}
-              className="dock-icon"
-              onClick={() => {
-                setIsMinimized(false);
-                setExpandedWindows(prev => ({ ...prev, [windowName]: true }));
-              }}
-              title={windowName}
-              draggable
-              onDragStart={(e) => handleTabDragStart(e, windowName)}
-              onDragOver={(e) => handleTabDragOver(e, windowName)}
-              onDrop={handleDrop}
-              onDragEnd={handleTabDragEnd}
-            >
-              <img src={getWindowIcon(windowName)} alt={windowName} />
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

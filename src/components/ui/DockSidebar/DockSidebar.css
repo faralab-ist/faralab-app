@@ -1,156 +1,71 @@
-/* Dynamic Island-style Dock Sidebar */
 .dock-sidebar {
   position: fixed;
-  left: 16px;
-  top: 50%;
-  display: flex; 
-  flex-direction: column;
-  transform: translateY(-50%);
-  width: 60px; /* Minimal island width */
-  max-height: 85vh;
-  background: rgba(16, 16, 16, 0.85);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 32px;
-
-  z-index: 20;
-  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1), background 0.45s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  box-shadow: 0 8px 32px rgba(14, 14, 14, 0.184);
-  overflow: hidden;
-}
-
-/* Expanded state (on hover) */
-.dock-sidebar.expanded {
+  left: 0;
+  top: 34px;
+  bottom: 0px;
   width: 320px;
-  border-radius: 16px;
-  background: rgba(16, 16, 16, 0.95);
-  transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1), background 0.45s cubic-bezier(0.4, 0, 0.2, 1), border-radius 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Collapsed state (empty dock) */
-.dock-sidebar.collapsed {
-  width: 60px;
-  height: 60px;
-  border-radius: 30px;
-  background: rgba(16, 16, 16, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.dock-sidebar.collapsed.expanded {
-  width: 280px;
-  height: auto;
-  min-height: 60px;
-  border-radius: 30px;
-}
-
-/* Island icon badges (visible when not expanded) */
-.dock-island-badges {
+  background: #101010;
+  border-right: 1px solid #2a2a2a;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 0;
-  opacity: 1;
-  transition: opacity 0.35s ease 0.1s, transform 0.35s ease 0.1s;
-  pointer-events: all;
-  transform: scale(1);
+  z-index: 1;
+  
+  transition: width 0.3s ease;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
 
-.dock-sidebar.expanded .dock-island-badges {
+.dock-sidebar.minimized {
+  width: 60px;
+}
+
+.dock-sidebar.minimized .dock-content {
+  display: none;
+}
+
+.dock-sidebar.collapsed {
+  transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.8);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  border: none;
 }
 
-.dock-badge {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  cursor: pointer;
+.dock-sidebar.minimized.collapsed {
+  transform: translateX(-100%);
 }
 
-.dock-badge:hover {
-  background: rgba(21, 78, 153, 0.3);
-  transform: scale(1.1);
+.dock-sidebar.collapsed .dock-content {
+  opacity: 0;
 }
 
-.dock-badge-icon {
-  width: 18px;
-  height: 18px;
-  filter: brightness(0) invert(1);
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
-}
+/* Show outline when dragging (even if collapsed) */
+.dock-sidebar.collapsed.drag-active {
 
-.dock-badge:hover .dock-badge-icon {
+  transform: translateX(0);
   opacity: 1;
-}
-
-.dock-empty-indicator {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.3);
+  pointer-events: all;
   background: transparent;
-  border: 1px dashed rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
 }
 
-/* Content area (hidden when not expanded) */
+/* When collapsed but dragging over, show just the outline */
+.dock-sidebar.collapsed.drag-over {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: all;
+  background: transparent;
+}
+
+/* Content area */
 .dock-content {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  background: transparent;
+  background: #101010;
   color: #eaeaea;
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 8px;
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.92);
-  transition: opacity 0.35s ease 0.05s, transform 0.35s ease 0.05s;
-  direction: rtl;
-}
-
-.dock-sidebar.expanded .dock-content {
-  opacity: 1;
-  pointer-events: all;
-  transform: scale(1);
-  transition: opacity 0.35s ease 0.15s, transform 0.35s ease 0.15s;
-}
-
-/* Scrollbar styling */
-.dock-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.dock-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.dock-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 3px;
-}
-
-.dock-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  transition: opacity 0.3s ease;
 }
 
 /* Window section */
@@ -158,7 +73,6 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  direction: ltr;
 }
 
 /* Drop line indicator for reordering */
@@ -239,48 +153,168 @@
   background: rgba(21, 78, 153, 0.2);
 }
 
+/* Header bar with minimize button */
+.dock-header-bar {
+  padding: 8px;
+  border-bottom: 1px solid #2a2a2a;
+  display: flex;
+  justify-content: center;
+}
+
+.dock-minimize-btn {
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  color: #bbb;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  line-height: 1;
+  outline: none;
+}
+
+.dock-minimize-btn:hover {
+  background: rgba(21, 78, 153, 0.2);
+  border-color: rgba(21, 78, 153, 0.9);
+  color: rgba(21, 78, 153, 1);
+
+}
+
+.dock-minimize-btn:active {
+  transform: scale(0.95);
+}
+
+.dock-minimize-btn:focus {
+  outline: none;
+}
+
+/* Minimized icon bar */
+.dock-icon-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  overflow-y: auto;
+  background: #101010;
+  align-items: center;
+}
+
+.dock-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #202020;
+  border-radius: 6px;
+  background: #121212;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  font-size: 20px;
+  color: #bbb;
+}
+
+.dock-icon img {
+  width: 24px;
+  height: 24px;
+  filter: invert(1) brightness(0.73);
+  transition: filter 0.2s ease;
+
+}
+
+.dock-icon:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-color: rgba(21, 78, 153, 0.9);
+  transform: translateY(-2px);
+  color: rgba(21, 78, 153, 1);
+}
+
+
+.dock-icon:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+}
+
+.dock-icon[draggable="true"]:active {
+  cursor: grabbing;
+  opacity: 0.5;
+}
+
 /* Window content */
 .dock-window-content {
   margin-top: 4px;
   
   border: 1px solid #222;
   border-radius: 6px;
-
   font-size: 12px;
   line-height: 1.4;
 }
 
-/* Drop indicator (shown when dragging) */
+/* Drop indicator */
 .dock-drop-indicator {
   position: absolute;
   inset: 0;
   display: none;
   align-items: center;
   justify-content: center;
-  background: rgba(21, 78, 153, 0.05);
-  backdrop-filter: blur(10px);
-  border: 2px dashed rgba(21, 78, 153, 0.6);
-  border-radius: inherit;
-  color: rgba(21, 78, 153, 1);
-  font-size: 14px;
+  background: transparent;
+  border: 2px solid rgba(21, 78, 153, 0.9);
+  color: transparent; /* text hidden by default */
+  font-size: 18px;
   font-weight: 600;
   pointer-events: none;
   z-index: 1000;
-  transition: all 0.3s ease;
+  transition: width 0.3s ease, inset 0.3s ease, opacity 0.3s ease, color 0.3s ease;
 }
 
-.dock-sidebar.drag-over .dock-drop-indicator {
+/* Drag active: match dock size when not collapsed (expanded or minimized) */
+.dock-sidebar.drag-active:not(.collapsed) .dock-drop-indicator {
   display: flex;
+  inset: 0;
+  opacity: 0.5;
+  color: transparent;
+}
+
+/* Drag active: narrow indicator when dock is empty (collapsed) */
+.dock-sidebar.collapsed.drag-active .dock-drop-indicator {
+  display: flex;
+  inset: 0;
+  width: 60px; /* narrow strip when empty */
+  right: auto; /* anchor to left side */
+  opacity: 0.5;
+  color: transparent;
+}
+
+/* Drag over: full width for collapsed */
+.dock-sidebar.drag-over.collapsed .dock-drop-indicator {
+  display: flex;
+  width: 320px;
+  inset: 0;
   opacity: 1;
+  color: rgba(21, 78, 153, 1);
 }
 
-.dock-sidebar.collapsed.drag-over {
-  width: 90px;
-  height: 90px;
-  min-height: 90px;
-  border-radius: 45px;
-}
-
-.dock-sidebar.collapsed.drag-over .dock-drop-indicator {
+/* Drag over: match dock width for expanded/minimized */
+.dock-sidebar.drag-over:not(.collapsed) .dock-drop-indicator {
   display: flex;
+  inset: 0;
+  opacity: 1;
+  color: rgba(21, 78, 153, 1);
+}
+
+.dock-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  
+}
+
+.dock-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.dock-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
