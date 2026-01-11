@@ -214,7 +214,11 @@ const objectFactories = {
     multiplier: 1,
     resolution: 10,
     charges: [],
+    turns: 10,
+    chargeCount: 5,
     createdAt: Date.now(),
+    ac: false,
+    velocity: 1,
   }),
   polygonCoil: (index) => ({
     id: `tmp-${index}`,

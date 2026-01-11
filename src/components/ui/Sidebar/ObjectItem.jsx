@@ -500,14 +500,41 @@ export default function ObjectItem({
                  </div>
 
                  <div className="detail-row">
-                    <div className="detail-key">Resolution</div>
+                    <div className="detail-key">Turns</div>
                     <div className="detail-value">
                       <InlineDecimalInput
                         step={1}
-                        value={obj.resolution}
+                        value={obj.turns}
                         min={0.1} max={300}
                         style={{ width: 140 }}
-                        onChange={(v) => updateObject(obj.id, { resolution: v })}
+                        onChange={(v) => updateObject(obj.id, { turns: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+                
+                {/*<div className="detail-row">
+                  <div className="detail-key">AC/DC</div>
+                  <div className="detail-value">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { ac: !obj.ac }); }}
+                      style={{ padding: "6px 8px" }}
+                    >
+                      {obj.ac ? 'AC' : 'DC'}
+                    </button>
+                  </div>
+                </div>*/}
+
+                 <div className="detail-row">
+                    <div className="detail-key">Number of Charges</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        step={1}
+                        value={obj.chargeCount}
+                        min={0.1} max={300}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { chargeCount: v })}
                         onError={setErrorMsg}
                         errorMsg={ERROR_MSG}
                       />
@@ -515,7 +542,24 @@ export default function ObjectItem({
                  </div>
 
                   <div className="detail-row">
-                    <div className="detail-key">Strength</div>
+                    <div className="detail-key">Charge speed</div>
+                    <div className="detail-value">
+                      <InlineDecimalInput
+                        step={1}
+                        value={obj.velocity}
+                        min={0.1} max={300}
+                        style={{ width: 140 }}
+                        onChange={(v) => updateObject(obj.id, { velocity: v })}
+                        onError={setErrorMsg}
+                        errorMsg={ERROR_MSG}
+                      />
+                    </div>
+                 </div>
+
+                 
+
+                  <div className="detail-row">
+                    <div className="detail-key">Charge (per charge)</div>
                     <div className="detail-value">
                       <InlineDecimalInput
                         value={obj.multiplier}
