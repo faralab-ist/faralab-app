@@ -4,12 +4,13 @@ import useCameraSnap from '../../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { calculateMagFluxThroughCircularLoop } from '../../../physics/magFieldCpu'
+import { calculateEFluxThroughCircularLoop } from '../../../physics/electricFieldCpu'
 import Label from '../../ui/labels/Label'
 
-export default function FaradayCoil({
+export default function TestCoil({
   objects,
-  name,
   id,
+  name,
   position,
   selectedId,
   setSelectedId,
@@ -23,9 +24,7 @@ export default function FaradayCoil({
   creativeMode,
   updateObject,
   tubeRadius = 0.05,
-  chargeCount = 12,
   showLabel = true,
-  magneticFlux
 }) {
   const radialSamples = 10;
   const angularSamples = 10;
@@ -36,42 +35,6 @@ export default function FaradayCoil({
   const groupRef = useRef()
   const isDraggingRef = useRef(false)
   
-  // Track accumulated rotation for the charges based on EMF
-  const flowOffset = useRef(0);
-
-  // local value
-  const [emfValue, setEmfValue] = useState(0);
-
-  const glowTexture = useMemo(() => {
-    const size = 128;
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    const cx = size / 2;
-    const cy = size / 2;
-    const r = size / 2;
-    
-    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-    grad.addColorStop(0.0, 'rgba(255, 255, 255, 1)');
-    grad.addColorStop(0.2, 'rgba(255, 255, 255, 0.8)');
-    grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
-    grad.addColorStop(1.0, 'rgba(255, 255, 255, 0)');
-    
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, size, size);
-    
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.needsUpdate = true;
-    return tex;
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      glowTexture.dispose();
-    };
-  }, [glowTexture]);
-
   const coilGeom = useMemo(() => {
     return new THREE.TorusGeometry(
       Math.max(0.001, radius),
@@ -146,10 +109,14 @@ export default function FaradayCoil({
   const lastSampleRef = useRef(0);
   const sampleInterval = 0.05;
 
-  useFrame((state) => {
-    const now = state.clock.getElapsedTime();
-    
-    if (now - lastSampleRef.current > sampleInterval) {
+  const [displayFlux, setDisplayFlux] = useState(null);
+  const [displayEmf, setDisplayEmf] = useState(null);
+  const [displayEFlux, setDisplayEFlux] = useState(null);
+
+   useFrame((state) => {
+     const now = state.clock.getElapsedTime();
+     
+     if (now - lastSampleRef.current > sampleInterval) {
         lastSampleRef.current = now;
         
         const flux = calculateMagFluxThroughCircularLoop(
@@ -160,7 +127,18 @@ export default function FaradayCoil({
             angularSamples,
             objects,
         );
+
+        const eFlux = calculateEFluxThroughCircularLoop(
+            position,
+            direction,
+            radius,
+            radialSamples,
+            angularSamples,
+            objects,
+        );
         
+        setDisplayEFlux(eFlux);
+
         const prevT = prevTimeRef.current;
         const prevFlux = prevFluxRef.current;
         const dt = Math.max(1e-6, now - prevT);
@@ -169,27 +147,13 @@ export default function FaradayCoil({
         
         prevFluxRef.current = flux;
         prevTimeRef.current = now;
-        
-        updateObject(id, { magneticFlux: flux, emf: currentEmf });
-        setEmfValue(currentEmf * 1e6);
-    }
-    
-    const speed = emfValue * 15; 
-    flowOffset.current += speed * state.clock.getDelta();
-  });
-
-  const { glowColor, intensity } = useMemo(() => {
-    const absEmf = Math.abs(emfValue);
-    if (absEmf < 0.01) return { glowColor: new THREE.Color('#444'), intensity: 0 };
-
-    const isPositive = emfValue >= 0;
-    const c = isPositive ? new THREE.Color('#6ea8ff') : new THREE.Color('#ff6e6e');
-    
-    const i = Math.min(1.5, absEmf * 100); 
-    return { glowColor: c, intensity: i };
-  }, [emfValue]);
-
-
+         
+        setDisplayFlux(flux);
+        setDisplayEmf(currentEmf);
+        updateObject(id, { magneticFlux: flux, emf: currentEmf, electricFlux: eFlux });
+     }
+   });
+ 
   return (
     <PivotControls
       ref={pivotRef}
@@ -214,19 +178,18 @@ export default function FaradayCoil({
       scale={0.86}
       lineWidth={2.5}
     >
-      <group ref={groupRef}>
-        {showLabel && (
-                    <Label
-      
-          objectName={name}
-          value={[
-          `B-Flux = ${magneticFlux.toExponential(2)} Wb`,
-          `ε = ${emfValue.toExponential(2)} V`
+      {showLabel &&  <Label
+        position={[0, 0, 0]}
+        objectName={name}
+        value={[
+          `B-Flux = ${displayFlux != null ? displayFlux.toExponential(3) : '—'} Wb`,
+          `ε: ${displayEmf != null ? displayEmf.toExponential(3) + ' V' : '—'}`,
+          `E-Flux = ${displayEFlux != null ? displayEFlux.toExponential(3) : '—'} V·m`,
         ]}
-          offsetY={radius + 0.5}
-          distanceFactor={8}
-          />
-        )}
+        offsetY={0.5}
+        distanceFactor={8}
+      />}
+      <group ref={groupRef}>
         <mesh 
           geometry={coilGeom} 
           material={wireMaterial} 
@@ -234,34 +197,6 @@ export default function FaradayCoil({
           castShadow
           onPointerDown={(e) => { e.stopPropagation(); setSelectedId && setSelectedId(id); }}
         />
-
-        {Array.from({ length: chargeCount }).map((_, i) => {
-          const angleStep = (Math.PI * 2) / chargeCount;
-          const baseAngle = i * angleStep;
-          
-          const currentAngle = baseAngle + flowOffset.current;
-          
-          const x = Math.cos(currentAngle) * radius;
-          const y = Math.sin(currentAngle) * radius;
-
-          return (
-            <sprite 
-                key={i} 
-                position={[x, y, 0]} 
-                scale={[0.4, 0.4, 0.4]}
-            >
-              <spriteMaterial 
-                map={glowTexture} 
-                color={glowColor} 
-                opacity={intensity}
-                transparent
-                blending={THREE.AdditiveBlending}
-                depthWrite={false}
-              />
-            </sprite>
-          )
-        })}
-
       </group>
     </PivotControls>
   )

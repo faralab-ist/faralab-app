@@ -33,6 +33,7 @@ export default function BaseCoil({
   updateObject,
   creativeMode,
   isHovered,
+  name,
 
   // Coil-specific visual props
   coilRadius,           // main coil size (radius for ring, side length for polygons)
@@ -58,6 +59,8 @@ export default function BaseCoil({
   computeNormal = () => [0, 0, 1], // function to compute normal in local space
   getPathPoints = () => [],        // function to generate path points for charges
   showLabel = true,
+
+  glowMultiplier,
 
 }) {
   const isSelected = id === selectedId
@@ -182,6 +185,7 @@ export default function BaseCoil({
         {pathPoints.length > 0 && (
           <Path
             id={id}
+            name = {name}
             position={[0, 0, 0]}
             selectedId={selectedId}
             setSelectedId={setSelectedId}
@@ -201,7 +205,7 @@ export default function BaseCoil({
             parentQuaternion={quaternion}
             groupRef={groupRef}
             showLabel={showLabel}
-
+            glowMultiplier={glowMultiplier}
           />
         )}
 

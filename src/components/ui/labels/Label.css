@@ -42,3 +42,23 @@
   font-size: 13px;
   color: #fff;
 }
+/* Compact inline decimal inputs in labels */
+.label-panel .inline-decimal-wrapper {
+  min-width: 35px;
+  width: 35px;
+  max-width: 50px;
+}
+
+.label-panel #inline-decimal {
+  padding: 2px 4px;
+  background: transparent;
+  border-radius: 3px;
+  font-size: 11px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.label-panel #inline-decimal:focus {
+  
+  border-color: rgba(255, 255, 255, 0.4);
+}

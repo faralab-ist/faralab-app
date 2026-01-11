@@ -2,10 +2,12 @@ import React, { useRef, useLayoutEffect, useEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
+import Label from '../ui/labels/Label'
 
 
 export default function StackedPlanes({ 
   id, 
+  name,
   position, 
   charge_density,
   infinite,
@@ -27,6 +29,7 @@ export default function StackedPlanes({
   rotation,
   quaternion,
   hoveredId,
+  showLabel = true,
 }) {
   const isSelected = id === selectedId
   const isHovered = id === hoveredId
@@ -183,6 +186,14 @@ export default function StackedPlanes({
           })
         })()}
       </group>
+      {showLabel && (
+              <Label
+                objectName={name}
+                value={`ρ = ${charge_density === undefined ? 0..toExponential(2) : charge_density.toExponential(2)} C/m³`}
+                offsetY={spacing * charge_densities.length / 2 + 0.8}
+                distanceFactor={8 * charge_densities.length}
+              />
+            )}
     </PivotControls>
   )
 }

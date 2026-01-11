@@ -10,8 +10,6 @@ export default function CreateButtons({
   counts,
   sceneObjects,
   setSceneObjects,
-  creativeMode,
-  setCreativeMode,
   sidebarOpen = false,
   sidebarMinimized = false,
   onApplyPreset,

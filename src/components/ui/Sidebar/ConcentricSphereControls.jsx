@@ -45,7 +45,7 @@ export default function ConcentricSphereControls({
                 <span style={{ fontSize: "0.8em", opacity: 0.7 }}>R:</span>
                 <NumberInput
                   value={rad}
-                  min={ i === 0 ? DIM_MIN : radiuses[i - 1]}
+                  min={ i <= 0 ? DIM_MIN : radiuses[i - 1]}
                   max={ radiuses[i + 1]}
                   style={{ flex: 1 }}
                   onChange={(val) => {

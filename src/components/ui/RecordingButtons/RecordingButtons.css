@@ -1,62 +1,17 @@
-.recording-buttons {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.rec-btn {
-  position: relative;
-  width: 26px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: #e6eef6;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  padding: 6px;
-  transition: all 120ms ease;
-
-  -webkit-tap-highlight-color: transparent;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-  -webkit-user-drag: none;
-  touch-action: manipulation;
-}
-
-.rec-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.rec-btn:active {
-  transform: translateY(-1px);
-  background: rgba(255,255,255,0.02);
-}
-
-.rec-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.rec-btn.recording {
+/* Estilos específicos para recording usando classes da toolbar */
+.tb-btn.recording {
   transform: translateY(-1px);
   background: rgba(239, 68, 68, 0.06);
   border-color: rgba(239, 68, 68, 0.3);
 }
 
-.rec-btn.recording:hover {
+.tb-btn.recording:hover {
   background: rgba(239, 68, 68, 0.1);
 }
 
-.rec-icon-svg {
-  width: 16px;
-  height: 16px;
-  display: block;
-  pointer-events: none;
-  filter: invert(1) brightness(1.2);
+.tb-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .rec-stop-icon {
@@ -67,11 +22,7 @@
   display: block;
 }
 
-.rec-btn:focus {
-  outline: none;
-}
-
-.rec-btn:focus-visible {
+.tb-btn.recording:focus-visible {
   outline: 2px solid rgba(239, 68, 68, 0.18);
   outline-offset: 2px;
 }

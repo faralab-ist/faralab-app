@@ -3,9 +3,11 @@ import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import { efields } from '../../physics'
 import * as THREE from 'three'
+import Label from '../ui/labels/Label'
 
 export default function ConcentricInfiniteWires({ 
     id, 
+    name,
     position, 
     selectedId, 
     setSelectedId, 
@@ -26,6 +28,7 @@ export default function ConcentricInfiniteWires({
     updateDirection,
     dielectrics,
     charges,
+    showLabel
   
     
 }) {
@@ -188,6 +191,15 @@ useEffect(() => {
             />
         </mesh>)}
       </group> 
+       {showLabel && (
+                  <Label
+                    objectName={name}
+                    position={groupRef.current ? groupRef.current.position.toArray() : position}
+                    value={chargePerSurfaceArr.map((charge, i) => `E-Field${i + 1} = ${charge.toExponential(2)} C`)}
+                    offsetY={radiuses[radiuses.length - 1] + 0.5}
+                    distanceFactor={10 * radiuses.length}
+                  />
+                )}
     </PivotControls>
   )
 }

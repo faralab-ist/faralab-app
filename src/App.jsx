@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
   import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, Path, TestCharge, BarMagnet} from './components/models'
 
   // Coil components
-  import { RingCoil, PolygonCoil, Solenoid, FaradayCoil } from './components/models/coils'
+  import { RingCoil, PolygonCoil, Solenoid, FaradayCoil, TestCoil } from './components/models/coils'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -19,6 +19,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
   import Sidebar from './components/ui/Sidebar/Sidebar'
   import SettingsButtons from './components/ui/SettingsButtons/SettingsButtons'
   import Toolbar from './components/ui/Toolbar/Toolbar'
+import CreativeObjectsMenu from './components/ui/CreativeObjectsMenu'
   //import ScreenPosUpdater from './components/ui/ObjectPopup/ScreenPosUpdater'
   import ToolbarPopup from './components/ui/Toolbar/ToolbarPopup/ToolbarPopup'
   import DockSidebar from './components/ui/DockSidebar/DockSidebar'
@@ -129,12 +130,21 @@ function LoadingOverlay() {
   return <primitive object={axes} />
 }
 
+
   // small bridge used inside <Canvas /> to forward hover -> App state
   function SceneHoverBridge({ onChange }) {
     // useSceneHover runs inside the fiber renderer (uses useThree)
-    useSceneHover((id) => {
-      onChange?.(id ?? null)
-    })
+    const lastIdRef = useRef(null)
+    
+    const handleHover = useCallback((id) => {
+      const newId = id ?? null
+      if (lastIdRef.current !== newId) {
+        lastIdRef.current = newId
+        onChange?.(newId)
+      }
+    }, [onChange])
+    
+    useSceneHover(handleHover)
     return null
   }
 
@@ -166,32 +176,6 @@ function LoadingOverlay() {
       changePathVelocity,
       counts,
     } = useSceneObjects()
-
-    const [fieldVersion, setFieldVersion] = useState(0)
-    const [fieldChangeType, setFieldChangeType] = useState('full')
-    const draggingRef = useRef(false)
-    const pendingFieldRefreshRef = useRef(false)
-
-    const applyPresetWithFieldReset = (...args) => {
-      applyPreset(...args)
-      setFieldChangeType('full')     // 🔁
-      setFieldVersion(v => v + 1)
-    }
-
-    // Wrap updatePosition to defer field refresh until drag ends
-    const updatePositionWithFieldUpdate = useCallback((id, position) => {
-      updatePosition(id, position)
-
-      if (draggingRef.current) {
-        // While dragging, just mark that a refresh is needed later
-        pendingFieldRefreshRef.current = true
-        return
-      }
-
-      // Not dragging: refresh immediately
-      setFieldChangeType('incremental')
-      setFieldVersion(v => v + 1)
-    }, [updatePosition])
     
     const [selectedId, setSelectedId] = useState(null)
     const [isDragging, setIsDragging] = useState(false)
@@ -206,7 +190,7 @@ function LoadingOverlay() {
     const [isPanelMinimized, setIsPanelMinimized] = useState(false)
     const [isSidebarMinimized, setIsSidebarMinimized] = useState(false)
 
-    const [creativeMode, setCreativeMode] = useState(false)  // stays here (single source)
+    const [pivotControlsEnabled, setPivotControlsEnabled] = useState(true)  // Control for object movement
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
     const [vectorStep, setVectorStep] = useState(1) 
@@ -224,18 +208,9 @@ function LoadingOverlay() {
     const [showSlicePlaneHelper, setShowSlicePlaneHelper] = useState(true)
     const [slicePlaneFlip, setSlicePlaneFlip] = useState(false)
       // Wave propagation settings for field arrows
-      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(true)
-      const [waveDuration, setWaveDuration] = useState(1.5) // seconds for full wave
+      const [wavePropagationEnabled, setWavePropagationEnabled] = useState(false)
+      const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
-
-    // Wrapper: when adding first object in an empty scene, ensure field is shown
-    const addObjectWithField = useCallback((...args) => {
-      const id = addObject(...args)
-      if (sceneObjects.length === 0 && !showField) {
-        setShowField(true)
-      }
-      return id
-    }, [addObject, sceneObjects.length, showField])
     
     // Docker sidebar state
     const [dockedWindows, setDockedWindows] = useState({ TestCharge: false, Slice: false, EField: false, Gaussian: false })
@@ -243,6 +218,9 @@ function LoadingOverlay() {
     const [ensureActiveCallback, setEnsureActiveCallback] = useState(null)
     const [undockPositions, setUndockPositions] = useState({}) // Store positions for undocked windows
 
+    const onHoverChange = useCallback((id) => {
+      setHoveredId(id)
+    }, [])
     // Docker functions
     const handleDock = (windowName) => {
       setDockedWindows(prev => ({ ...prev, [windowName]: true }))
@@ -281,19 +259,11 @@ function LoadingOverlay() {
 
     const handleDragging = (dragging) => {
       setIsDragging(dragging)
-      draggingRef.current = dragging
-
       if (dragging) {
         setDragOwnerId(selectedId)
         setIsPanelMinimized(true)
       } else {
         setDragOwnerId(null)
-        // Drag ended: if there were position changes, bump field version once
-        if (pendingFieldRefreshRef.current) {
-          pendingFieldRefreshRef.current = false
-          setFieldChangeType('incremental')
-          setFieldVersion(v => v + 1)
-        }
       }
     }
 
@@ -372,7 +342,6 @@ function LoadingOverlay() {
       setFluxResults(results)
       
       if (results.length) {
-        console.log('[Flux] Gaussian surface results:')
         results.forEach(result => {
           const label = result.name ?? result.id
           const value = Number.isFinite(result.flux) ? result.flux : 0
@@ -482,15 +451,13 @@ function LoadingOverlay() {
       
       <div className="toolbar-root">     {/* new same-container wrapper */}
      <Toolbar 
-          addObject={addObjectWithField}
-          setFieldVersion={setFieldVersion}
-          setFieldChangeType={setFieldChangeType}
-        updatePosition={updatePositionWithFieldUpdate}
+        addObject={addObject}
+        updatePosition={updatePosition}
         sceneObjects={sceneObjects}
         counts={counts}
-        creativeMode={creativeMode}
-        setCreativeMode={setCreativeMode} 
-        setSceneObjects={setSceneObjects} 
+        setSceneObjects={setSceneObjects}
+        pivotControlsEnabled={pivotControlsEnabled}
+        onTogglePivotControls={() => setPivotControlsEnabled(v => !v)} 
         useSlice={useSlice} setUseSlice={setUseSlice}
         showSliceHelper={showSlicePlaneHelper} 
         setShowSliceHelper={setShowSlicePlaneHelper}
@@ -605,8 +572,7 @@ function LoadingOverlay() {
           onToggleBField: () => setShowMagField(v => !v),
         }}
         gaussianProps={{
-          creativeMode,
-          addObject: addObjectWithField,
+          addObject,
           sceneObjects,
           setSceneObjects,
           showOnlyGaussianField,
@@ -618,17 +584,13 @@ function LoadingOverlay() {
        <div id="canvas-container">
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
         <CreateButtons
-          addObject={addObjectWithField}
-          setFieldChangeType={setFieldChangeType}
-          setFieldVersion={setFieldVersion}
+          addObject={addObject}
           setSceneObjects={setSceneObjects}
           sceneObjects={sceneObjects}
           counts={counts}
-          creativeMode={creativeMode}
-          setCreativeMode={setCreativeMode}
           sidebarOpen={sidebarOpen}
           sidebarMinimized={isSidebarMinimized}
-          onApplyPreset={applyPresetWithFieldReset}
+          onApplyPreset={applyPreset}
           camera={cameraState}
           settings={{
             vectorMinTsl,
@@ -649,17 +611,6 @@ function LoadingOverlay() {
             showSlicePlaneHelper
           }}
         />
-        <div className="field-legend" aria-label="Field color legend">
-          <div className="legend-row">
-            <span className="legend-swatch legend-electric" />
-            <span className="legend-label">Eletric Field</span>
-          </div>
-          <div className="legend-row">
-            <span className="legend-swatch legend-magnetic" />
-            <span className="legend-label">Magnetic Field</span>
-          </div>
-        </div>
-
 
        {/* <ObjectPopup
           selectedObject={sceneObjects.find(o => o.id === selectedId)}
@@ -701,12 +652,13 @@ function LoadingOverlay() {
           changePathChargeCount={changePathChargeCount}
           changePathCharge={changePathCharge}
           changePathVelocity={changePathVelocity}
+          showFlux={showOnlyGaussianField}
         />
 
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
           <CameraFnsMount onReady={setCamFns} />
           <CameraStateCapture onCameraUpdate={setCameraState} />
-          <SceneHoverBridge onChange={setHoveredId} />
+          <SceneHoverBridge onChange={onHoverChange} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[2, 2, 5]} />
           <OrbitControls enabled={!isDragging} />
@@ -754,6 +706,7 @@ function LoadingOverlay() {
                 case 'solenoid': ObjectComponent = Solenoid; break // Legacy support
                 case 'barMagnet': ObjectComponent = BarMagnet; break
                 case 'faradayCoil': ObjectComponent = FaradayCoil; break
+                case 'testCoil': ObjectComponent = TestCoil; break
                 default: return null;
               } 
             }
@@ -763,11 +716,11 @@ function LoadingOverlay() {
                 key={obj.id}
                 {...obj}
                 objects={sceneObjects}
-                creativeMode={creativeMode}           
+                creativeMode={pivotControlsEnabled}           
                 selectedId={selectedId}
                 setSelectedId={handleSelect}
                 setIsDragging={handleDragging}
-                updatePosition={updatePositionWithFieldUpdate}
+                updatePosition={updatePosition}
                 updateChargeDensity={updateChargeDensity}
                 updateDirection={updateDirection}
                 updateObject={updateObject}
@@ -803,23 +756,21 @@ function LoadingOverlay() {
 
         {showField && (
           <FieldArrows
-            objects={sceneObjects}
-            fieldVersion={fieldVersion}
-            fieldChangeType={fieldChangeType}
-
-            showOnlyGaussianField={showOnlyGaussianField}
-            minThreshold={vectorMinTsl}
-            scaleMultiplier={vectorScale}
-            step={1 / Number(vectorStep)}
-            planeFilter={activePlane}
-            slicePlane={slicePlane}
-            slicePos={slicePos}
-            useSlice={useSlice}
-            slicePlaneFlip={slicePlaneFlip}
-            waveDuration={waveDuration}
-            enablePropagation={wavePropagationEnabled && !sceneObjects.some((o) => o.type === 'path')}
-            isDragging={isDragging}
-          />
+            key={`arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
+    }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
+        objects={sceneObjects}
+        showOnlyGaussianField={showOnlyGaussianField}
+        minThreshold={vectorMinTsl}
+        scaleMultiplier={vectorScale}
+        step={1 / (Number(vectorStep))} 
+        planeFilter={activePlane}
+        slicePlane={slicePlane}
+        slicePos={slicePos}
+        useSlice={useSlice}
+        slicePlaneFlip={slicePlaneFlip}
+        propagate={wavePropagationEnabled && !sceneObjects.some(o => o.type === 'path')}
+        waveDuration={waveDuration}
+        />
         )}
 
         {showMagField && (
@@ -882,8 +833,7 @@ function LoadingOverlay() {
           setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
           setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
           setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
-          creativeMode={creativeMode}
-          addObject={addObjectWithField}
+          addObject={addObject}
           sceneObjects={sceneObjects}
           setSceneObjects={setSceneObjects}
           selectedObjectId={selectedId}
@@ -907,6 +857,11 @@ function LoadingOverlay() {
           setWavePropagationEnabled={setWavePropagationEnabled}
           waveDuration={waveDuration}
           setWaveDuration={setWaveDuration}
+        />
+
+        {/* Creative Objects Menu - always visible in bottom left */}
+        <CreativeObjectsMenu 
+          addObject={addObject}
         />
       </div>
     </div>

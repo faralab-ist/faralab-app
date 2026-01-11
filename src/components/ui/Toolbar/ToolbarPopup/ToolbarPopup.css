@@ -18,6 +18,8 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   overflow: hidden;
   box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Visual feedback when dragging over dock area */

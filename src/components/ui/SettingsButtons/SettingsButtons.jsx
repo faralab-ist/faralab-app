@@ -20,8 +20,6 @@ export default function SettingsButtons({
   onToggleEquipotentialSurface,
   showOnlyGaussianField,
   setOnlyGaussianField,
-  creativeMode,
-  setCreativeMode,
   addObject,
   sceneObjects,
   setSceneObjects,
@@ -104,7 +102,7 @@ export default function SettingsButtons({
     return sceneObjects.some(o => o.type === 'path' || o.type === 'coil' || o.type === 'barMagnet');
   }, [sceneObjects]);
   
-  const exclusiveActiveType = !creativeMode && gaussianSurfaces.length === 1
+  const exclusiveActiveType = gaussianSurfaces.length === 1
     ? surfaceTypeOf(gaussianSurfaces[0])
     : null
 
@@ -122,18 +120,7 @@ export default function SettingsButtons({
   }
 
   const handleSurfaceButton = (type) => {
-    if (creativeMode) {
-      addSurface(type)
-      return
-    }
-    // exclusive replace: if same single, do nothing
-    if (gaussianSurfaces.length === 1 && surfaceTypeOf(gaussianSurfaces[0]) === type) {
-      ensureFieldVisible()
-      setSceneObjects?.(prev => prev.filter(o => !isGaussian(o)))
-      return
-    }
-    // clear then add
-    setSceneObjects?.(prev => prev.filter(o => !isGaussian(o)))
+    // Always add surface directly
     addSurface(type)
   }
 
@@ -246,13 +233,13 @@ export default function SettingsButtons({
           {open === 'gaussian' && (
                 <div className='gaussian-panel'>
                   <div className="settings-info">
-                {creativeMode ? 'Create multiple Gaussian surfaces.' : 'Create one surface at a time.'}
+                Create Gaussian surfaces for flux calculations.
               </div>
               <div className="surface-buttons-row">
                 <button
                   className={`surface-icon-btn ${exclusiveActiveType === 'sphere' ? 'active' : ''}`}
                   onClick={() => handleSurfaceButton('sphere')}
-                  title={creativeMode ? 'Create Sphere' : 'Use Sphere'}
+                  title="Create Sphere"
                 >
                   <img src={sphereIcon} alt="" />
                   <span>Sphere</span>
@@ -260,7 +247,7 @@ export default function SettingsButtons({
                 <button
                   className={`surface-icon-btn ${exclusiveActiveType === 'cylinder' ? 'active' : ''}`}
                   onClick={() => handleSurfaceButton('cylinder')}
-                  title={creativeMode ? 'Create Cylinder' : 'Use Cylinder'}
+                  title="Create Cylinder"
                 >
                   <img src={cylinderIcon} alt="" />
                   <span>Cylinder</span>
@@ -268,7 +255,7 @@ export default function SettingsButtons({
                 <button
                   className={`surface-icon-btn ${exclusiveActiveType === 'cuboid' ? 'active' : ''}`}
                   onClick={() => handleSurfaceButton('cuboid')}
-                  title={creativeMode ? 'Create Cuboid' : 'Use Cuboid'}
+                  title="Create Cuboid"
                 >
                   <img src={cuboidIcon} alt="" />
                   <span>Cuboid</span>

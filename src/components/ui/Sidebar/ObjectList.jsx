@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ObjectItem from "./ObjectItem";
 import "./Sidebar.css"; // Certifica-te que copiaste o CSS para aqui
+import { add } from "three/tsl";
 
 export default function ObjectList({ 
   items = [], 
@@ -27,9 +28,15 @@ export default function ObjectList({
   setMaterialForLayerInConcentricInfiniteWire,
   setDielectricForLayerInConcentricInfiniteWire,
   setChargeForLayerInConcentricInfiniteWire,
-  toggleOscillation,
-  oscillatingObjects,
-  ...rest
+  addPointToPath,
+  removeLastPointFromPath,
+  setPointInPath,
+  changePathChargeCount,
+  changePathCharge,
+  changePathVelocity,
+  changeRadius,
+  changeSides,
+  showFlux,
 }) {
   const [expandedMap, setExpandedMap] = useState({});
 
@@ -75,9 +82,10 @@ export default function ObjectList({
           expanded={!!expandedMap[obj.id]}
           hovered={hoveredId === obj.id}
           toggleExpand={toggleExpand}
-          setHoveredId={setHoveredId} // Se não passares isto como prop no pai, remove aqui
+          setHoveredId={setHoveredId} 
           updateObject={updateObject}
           removeObject={removeObject}
+          showFlux={showFlux}
 
           stackedPlaneActions={{
             addPlane: addPlaneToStackedPlanes,
@@ -104,9 +112,25 @@ export default function ObjectList({
             setDielectric: setDielectricForLayerInConcentricInfiniteWire,
             setCharge: setChargeForLayerInConcentricInfiniteWire
           }}
-          
-          toggleOscillation={toggleOscillation}
-          isOscillating={oscillatingObjects?.has(obj.id)}
+
+          // path
+          pathActions={{
+            addPoint: addPointToPath,
+            removeLastPoint: removeLastPointFromPath,
+            setPoint: setPointInPath,
+            changeChargeCount: changePathChargeCount,
+            changeCharge: changePathCharge,
+            changeVelocity: changePathVelocity
+          }}
+
+          coilActions={{
+            changeChargeCount: changePathChargeCount,
+            changeCharge: changePathCharge,
+            changeVelocity: changePathVelocity,
+            changeRadius: changeRadius,
+            changeSides: changeSides
+          }}
+            
         />
       ))}
     </ul>

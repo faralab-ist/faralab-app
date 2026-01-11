@@ -110,7 +110,13 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
 
   const startDrag = (ev) => {
     if (pinned) return
-    if (ev.button !== 0) return 
+    if (ev.button !== 0) return
+    
+    // Don't start drag if clicking on interactive elements
+    const target = ev.target
+    const isButton = target.closest('button, input, select, textarea, a, [role="button"]')
+    if (isButton) return
+    
     ev.preventDefault()
     
     dragRef.current.dragging = true
@@ -149,12 +155,13 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
         position: 'absolute',
         left: `${pos.left}px`,
         top: `${pos.top}px`,
-        zIndex: 1200, 
+        zIndex: 1200,
+        cursor: pinned ? 'default' : 'default',
       }}
+      onPointerDown={startDrag}
     >
       <div
         className="toolbar-popup-handle"
-        onPointerDown={startDrag}
       >
         <span style={{ marginLeft: 4, fontWeight: 'bold', fontSize: 12, color: '#ccc' }}>
             {id}
@@ -169,13 +176,7 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
             <img src={Pin} alt="Pin" />
           </button>
 
-          <button
-            className={`tp-icon-btn ${minimized ? 'on' : ''}`}
-            onClick={() => setMinimized(!minimized)}
-            title="Minimize"
-          >
-            <img src={Minimize} alt="Min" />
-          </button>
+         
 
           <button
             className="tp-icon-btn close-btn"
