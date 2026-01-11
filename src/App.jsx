@@ -342,7 +342,6 @@ function LoadingOverlay() {
       setFluxResults(results)
       
       if (results.length) {
-        console.log('[Flux] Gaussian surface results:')
         results.forEach(result => {
           const label = result.name ?? result.id
           const value = Number.isFinite(result.flux) ? result.flux : 0
@@ -653,6 +652,7 @@ function LoadingOverlay() {
           changePathChargeCount={changePathChargeCount}
           changePathCharge={changePathCharge}
           changePathVelocity={changePathVelocity}
+          showFlux={showOnlyGaussianField}
         />
 
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>

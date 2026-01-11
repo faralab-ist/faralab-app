@@ -46,8 +46,8 @@ export default function Cuboid({
   isHovered,
   // flux value
   fluxValue = 0,
-  showOnlyGaussianField
-
+  showOnlyGaussianField,
+  showLabel = true,
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -57,41 +57,29 @@ export default function Cuboid({
   const center = useMemo(() => [0, 0, 0], [])
   const clickArmed = useRef(false) 
 
-  // Sync PivotControls matrix from state and keep child group at origin
+  // Sync PivotControls matrix from state (one-way: state → Three.js)
+  // Child group stays at origin - PivotControls handles all transformation
   useLayoutEffect(() => {
-    if (isDraggingRef.current || !pivotRef.current) return
+    if (isDraggingRef.current || !pivotRef.current || !rootRef.current) return
+    
     const pos = new THREE.Vector3(...position)
-    const mat = new THREE.Matrix4().setPosition(pos)
     let rotQuat = new THREE.Quaternion()
+    
+    // Prefer quaternion over Euler angles
     if (Array.isArray(quaternion) && quaternion.length === 4) {
       rotQuat.set(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
     } else if (Array.isArray(rotation) && rotation.length >= 3) {
       const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
       rotQuat.setFromEuler(e)
     }
-    mat.multiply(new THREE.Matrix4().makeRotationFromQuaternion(rotQuat))
-    if (pivotRef.current.matrix) pivotRef.current.matrix.copy(mat)
+    
+    const mat = new THREE.Matrix4()
+      .makeTranslation(pos.x, pos.y, pos.z)
+      .multiply(new THREE.Matrix4().makeRotationFromQuaternion(rotQuat))
+    
+    pivotRef.current.matrix.copy(mat)
+    rootRef.current.quaternion.copy(rotQuat) // Sync child group rotation for normals
   }, [position, rotation, quaternion])
-
-  // apply quaternion / rotation (skip while dragging)
-  useEffect(() => {
-    if (isDragging || !rootRef.current) return
-    // prefer quaternion
-    if (Array.isArray(quaternion) && quaternion.length === 4) {
-      const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
-      rootRef.current.quaternion.copy(q)
-      return
-    }
-    // fallback to Euler rotation (radians)
-    if (Array.isArray(rotation) && rotation.length >= 3) {
-      const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
-      rootRef.current.rotation.copy(e)
-      return
-    }
-    // otherwise keep identity
-    rootRef.current.rotation.set(0, 0, 0)
-    rootRef.current.quaternion.identity()
-  }, [rotation, quaternion, isDragging])
 
   const cuboid = useMemo(() => new CuboidShape({ width, height, depth }), [width, height, depth])
   const faceNormals = useMemo(() => cuboid.getFaceNormals(), [cuboid])
@@ -179,12 +167,12 @@ export default function Cuboid({
             clippingPlanes={clippingPlanes}
           />
         </mesh>
-    {showOnlyGaussianField && (
+    {(showOnlyGaussianField && showLabel) && (
         <Label
           position={[0, (height / 2) + 0.5, 0]}
           objectName={name}
           value={`${fluxValue.toExponential(2)} N⋅m²/C`}
-          offsetY={0}
+          offsetY={0.5}
           distanceFactor={10}
         />
 )}

@@ -24,6 +24,7 @@ export default function ObjectItem({
   concentricWireActions, 
   pathActions,
   coilActions,
+  showFlux
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
 
@@ -69,8 +70,8 @@ export default function ObjectItem({
     }
     setErrorMsg(null);
     return v;
-  };
-
+  }; 
+  //console.log('showFlux in ObjectItem:', showFlux);
   return (
     <li className="object-row-wrapper" data-objid={obj.id}>
       <div
@@ -420,8 +421,8 @@ export default function ObjectItem({
               </div>
             )}
 
-            {/* Show Label toggle for objects with labels (not surfaces) */}
-            {obj.type != 'surface' && (
+            {/* Show Label toggle for objects with labels */}
+            {((obj.type === 'surface' && showFlux) || obj.type !== 'surface') && (
               <div className="detail-row">
                 <div className="detail-key">Show Label</div>
                 <div className="detail-value">

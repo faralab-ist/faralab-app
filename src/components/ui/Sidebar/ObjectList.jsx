@@ -35,7 +35,8 @@ export default function ObjectList({
   changePathCharge,
   changePathVelocity,
   changeRadius,
-  changeSides 
+  changeSides,
+  showFlux,
 }) {
   const [expandedMap, setExpandedMap] = useState({});
 
@@ -84,6 +85,7 @@ export default function ObjectList({
           setHoveredId={setHoveredId} 
           updateObject={updateObject}
           removeObject={removeObject}
+          showFlux={showFlux}
 
           stackedPlaneActions={{
             addPlane: addPlaneToStackedPlanes,

@@ -45,7 +45,8 @@ export default function Cylinder({
   isHovered,
   // flux value
   fluxValue = 0,
-  showOnlyGaussianField
+  showOnlyGaussianField,
+  showLabel = true,
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -153,7 +154,7 @@ export default function Cylinder({
             clippingPlanes={clippingPlanes}
           />
         </mesh>
-{showOnlyGaussianField && (
+{(showOnlyGaussianField && showLabel)  &&(
         <Label
           position={[0, (height / 2) + 0.7, 0]}
           objectName={name}

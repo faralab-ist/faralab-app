@@ -38,7 +38,8 @@ export default function Sphere({
   useSlice,
   slicePlaneFlip,
   isHovered,
-  showOnlyGaussianField
+  showOnlyGaussianField,
+  showLabel = true,
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -135,7 +136,7 @@ export default function Sphere({
             clippingPlanes={clippingPlanes}
           />
         </mesh>
-{showOnlyGaussianField && (
+{(showOnlyGaussianField && showLabel)  &&(
         <Label
           position={[0, radius, 0]}
           objectName={name}
