@@ -35,6 +35,8 @@ export default function BaseCoil({
   isHovered,
   name,
 
+  ac = false,
+
   // Coil-specific visual props
   coilRadius,           // main coil size (radius for ring, side length for polygons)
   coilColor = '#6ea8ff',    // wire color 
@@ -206,6 +208,7 @@ export default function BaseCoil({
             groupRef={groupRef}
             showLabel={showLabel}
             glowMultiplier={glowMultiplier}
+            ac={ac}
           />
         )}
 
