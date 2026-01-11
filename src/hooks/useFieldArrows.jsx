@@ -39,12 +39,37 @@ export default function FieldArrows({
   const wasDraggingRef = useRef(false)
   const frozenVectorsRef = useRef(null)
   const oldVectorsAttrsRef = useRef(null) // Store old field to show during propagation
+  const previousVectorsRef = useRef(null) // Store previous vectors for any full rebuild
+  const lastRenderedVectorsRef = useRef(null) // Track last vectors that were actually rendered
 
   /* -----------------------------
    * 1) Campo no grid
    * ----------------------------- */
   const vectorsUnfiltered = useMemo(
-    () => getFieldVector3(objects, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter),
+    () => {
+      const vecs = getFieldVector3(objects, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter)
+      
+      // If no objects and no vectors, create zero-field placeholder vectors
+      if (vecs.length === 0 && objects.length === 0) {
+        const placeholderVecs = []
+        // Create a small grid of zero vectors as placeholders
+        const size = 3
+        const spacing = 2
+        for (let x = -size; x <= size; x++) {
+          for (let y = -size; y <= size; y++) {
+            for (let z = -size; z <= size; z++) {
+              placeholderVecs.push({
+                position: new THREE.Vector3(x * spacing, y * spacing, z * spacing),
+                field: new THREE.Vector3(0, 0, 0)
+              })
+            }
+          }
+        }
+        return placeholderVecs
+      }
+      
+      return vecs
+    },
     [objects, fieldVersion, gridSize, step, showOnlyGaussianField, minThreshold, planeFilter]
   )
 
@@ -235,6 +260,34 @@ export default function FieldArrows({
     const mesh = meshRef.current
     if (!mesh) return
 
+    // First, check if signature will change (new object added/removed)
+    const attrs = createInstancedAttributes(effectiveVectors)
+    const prevSig = lastSignatureRef.current
+    const signatureChanged = attrs.signature !== prevSig
+    
+    // If signature changed and we have last rendered vectors, save them as OLD VECTORS for transition
+    // Only if we had vectors before (not first render)
+    if (signatureChanged && lastRenderedVectorsRef.current && lastRenderedVectorsRef.current.length > 0 && enablePropagation && !isDragging) {
+      // Freeze the last rendered field (same as drag freeze logic)
+      frozenVectorsRef.current = lastRenderedVectorsRef.current
+      previousVectorsRef.current = lastRenderedVectorsRef.current
+
+      // Save the attributes for the old vectors so we can display them during propagation
+      const oldAttrs = createInstancedAttributes(lastRenderedVectorsRef.current)
+      oldVectorsAttrsRef.current = oldAttrs
+
+      // Force a full restart so uProgress starts at 0 and we reveal rings
+      forceFullRestartRef.current = true
+
+      console.log('[FieldArrows] Signature changed - saved', oldAttrs.count, 'old vectors for transition (freeze on add)')
+    }
+    
+    // If this is the first render (no previous signature), treat as full rebuild
+    const isFirstRender = prevSig === 0 && attrs.signature !== 0
+    
+    // Update last rendered vectors at the END of this effect
+    // (after we've used the previous ones)
+
     // Detect when drag ends (drop)
     const justDropped = wasDraggingRef.current && !isDragging
     if (justDropped) {
@@ -248,13 +301,13 @@ export default function FieldArrows({
       return
     }
 
-    const attrs = createInstancedAttributes(effectiveVectors)
+    // attrs already calculated above
     const maxCount = attrs.count || 0
     const previousCount = lastAttrsCountRef.current
     const previousVersion = lastFieldVersionRef.current
     const previousChangeType = lastChangeTypeRef.current
     const previousSignature = lastSignatureRef.current
-    const signatureChanged = attrs.signature !== previousSignature
+    // signatureChanged already calculated above
     const forceRestart = forceFullRestartRef.current
     const shouldRestartWave = enablePropagation && (
       forceRestart ||
@@ -266,10 +319,11 @@ export default function FieldArrows({
 
     if (maxCount === 0) {
       mesh.count = 0
+      lastRenderedVectorsRef.current = effectiveVectors
       return
     }
 
-    const mustRebuild = forceRestart || fieldChangeType === 'full' || !mesh.geometry
+    const mustRebuild = forceRestart || fieldChangeType === 'full' || !mesh.geometry || signatureChanged || isFirstRender
 
     // Use precomputed ring boundaries (already sorted by distance)
     distanceRingsRef.current = attrs.ringBoundaries || []
@@ -277,11 +331,18 @@ export default function FieldArrows({
     if (mustRebuild) {
       let finalAttrs = attrs
       
-      // If this is a force restart (drop), combine old frozen vectors with new ones
-      if (forceRestart && frozenVectorsRef.current && frozenVectorsRef.current !== vectors) {
-        console.log('[FieldArrows] Creating old field from frozen vectors')
-        const oldAttrs = createInstancedAttributes(frozenVectorsRef.current)
+      // Determine which old attributes to use - use the pre-saved attributes
+      const oldAttrs = forceRestart 
+        ? (frozenVectorsRef.current?.length > 0 ? createInstancedAttributes(frozenVectorsRef.current) : oldVectorsAttrsRef.current)
+        : oldVectorsAttrsRef.current
+      
+      const shouldCombine = oldAttrs && oldAttrs.count > 0 && enablePropagation
+      
+      // Combine old vectors with new ones for smooth transition
+      if (shouldCombine) {
+        const source = forceRestart ? 'frozen (drop)' : 'previous (add object)'
         const oldCount = oldAttrs.count
+        console.log('[FieldArrows] Creating old field from', source, '- count:', oldCount)
         
         if (oldCount > 0) {
           console.log('[FieldArrows] Combining vectors:', { oldCount, newCount: maxCount, total: oldCount + maxCount })
@@ -340,12 +401,16 @@ export default function FieldArrows({
             count: totalCount
           }
           
-          // Store info for cleanup
-          oldVectorsAttrsRef.current = { oldCount }
+          // Store info for cleanup - save oldCount separately
+          oldVectorsAttrsRef.current = { ...oldVectorsAttrsRef.current, oldCount }
         }
         
-        // Clear frozen vectors now that we've used them
-        frozenVectorsRef.current = null
+        // DON'T clear the oldVectorsAttrsRef yet - we need it for cleanup after propagation
+        // Clear the vectors we just used
+        if (forceRestart) {
+          frozenVectorsRef.current = null
+        }
+        // Keep previousVectorsRef for now, will be cleared after propagation completes
       }
       
       const geom = arrowGeometry.clone()
@@ -455,7 +520,7 @@ export default function FieldArrows({
     lastChangeTypeRef.current = fieldChangeType
     lastSignatureRef.current = attrs.signature
 
-    const isFullRebuild = forceRestart || fieldChangeType === 'full'
+    const isFullRebuild = mustRebuild || forceRestart || fieldChangeType === 'full'
     currentChangeTypeRef.current = isFullRebuild ? 'full' : 'incremental'
     
     // Clear force restart flag after using it
@@ -479,13 +544,24 @@ export default function FieldArrows({
       if (isFullRebuild) {
         // Hide everything, let the shader reveal rings by delay/uProgress
         u.value = 0
-        console.log('[FieldArrows] Propagation wave started (full)', { maxCount, waveDuration, startTime: now, forceRestart })
+        console.log('[FieldArrows] Propagation wave started (full)', { 
+          maxCount, 
+          waveDuration, 
+          startTime: now, 
+          forceRestart,
+          signatureChanged,
+          previousVectorsStored: !!previousVectorsRef.current,
+          frozenVectorsStored: !!frozenVectorsRef.current
+        })
       } else {
         // Keep arrows visible while attributes morph forward along the wave
         u.value = 1
         console.log('[FieldArrows] Propagation wave started (incremental)', { maxCount, waveDuration })
       }
     }
+    
+    // Store current effective vectors as last rendered (for next change)
+    lastRenderedVectorsRef.current = effectiveVectors
   }, [fieldVersion, fieldChangeType, effectiveVectors, objects, createInstancedAttributes, arrowGeometry, step, setInstanceCount, isDragging, enablePropagation, getProgressUniform, waveDuration])
 
   /* -----------------------------
@@ -543,6 +619,10 @@ export default function FieldArrows({
 
         for (let i = 0; i < delayAttr.count; i++) {
           const delay = delayAttr.array[i]
+          
+          // Skip old vectors (delay = -1, they should stay frozen)
+          if (delay < 0) continue
+          
           if (progress >= delay) {
             posAttr.array[i * 3] = newData.positions[i * 3]
             posAttr.array[i * 3 + 1] = newData.positions[i * 3 + 1]
@@ -595,7 +675,7 @@ export default function FieldArrows({
       newFieldDataRef.current = null  // Clear stored data when complete
       
       // Remove old vectors if they were present
-      if (oldVectorsAttrsRef.current && mode === 'full') {
+      if (oldVectorsAttrsRef.current && oldVectorsAttrsRef.current.oldCount > 0 && mode === 'full') {
         const oldCount = oldVectorsAttrsRef.current.oldCount
         console.log('[FieldArrows] Propagation complete - removing', oldCount, 'old vectors')
         
@@ -656,7 +736,9 @@ export default function FieldArrows({
           setInstanceCount(mesh, newCount)
         }
         
+        // Clear old vectors ref and previous vectors ref
         oldVectorsAttrsRef.current = null
+        previousVectorsRef.current = null
       }
     }
   })

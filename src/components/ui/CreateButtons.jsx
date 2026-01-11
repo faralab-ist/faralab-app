@@ -162,15 +162,27 @@ export default function CreateButtons({
               <button
                 onClick={() => {
                   addObject('charge', { position: [0, 0, 0], charge: 1 })
-                  setFieldChangeType('incremental')
+                  setFieldChangeType('full')
                   setFieldVersion((v) => v + 1)
                 }}
               >
                 Add Charge
               </button>
-              <button onClick={() => addObject('wire', { position: [0, 0, 0] })}>Add Wire</button>
-              <button onClick={() => addObject('plane', { position: [0, 0, 0] })}>Add Plane</button>
-              <button onClick={() => addObject('chargedSphere', { position: [0, 0, 0] })}>Add Charged Sphere</button>
+              <button onClick={() => {
+                addObject('wire', { position: [0, 0, 0] })
+                setFieldChangeType('full')
+                setFieldVersion((v) => v + 1)
+              }}>Add Wire</button>
+              <button onClick={() => {
+                addObject('plane', { position: [0, 0, 0] })
+                setFieldChangeType('full')
+                setFieldVersion((v) => v + 1)
+              }}>Add Plane</button>
+              <button onClick={() => {
+                addObject('chargedSphere', { position: [0, 0, 0] })
+                setFieldChangeType('full')
+                setFieldVersion((v) => v + 1)
+              }}>Add Charged Sphere</button>
             </div>
           </div>
         )}
