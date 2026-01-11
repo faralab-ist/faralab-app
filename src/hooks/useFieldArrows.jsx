@@ -146,24 +146,52 @@ export default function FieldArrows({
       unique.push({ position: v.position, field: v.field })
     }
 
-    const centers = (objects || []).map(o => new THREE.Vector3(...(o.position || [0, 0, 0])))
+    const sources = (objects || []).map(o => ({
+      type: o?.type,
+      pos: new THREE.Vector3(...(o.position || [0, 0, 0])),
+      dir: o?.direction ? new THREE.Vector3(...o.direction).normalize() : null
+    }))
 
     // Build list with distances and filter by threshold
     const filtered = []
     let maxDist = 0
+    let fallbackMaxDist = 0
     for (const { position, field } of unique) {
       const mag = field.length()
       if (mag <= fieldThreshold) continue
 
       let minD = Infinity
-      for (const c of centers) {
-        const d = position.distanceTo(c)
-        if (d < minD) minD = d
+      for (const s of sources) {
+        if (!s) continue
+        switch (s.type) {
+          case 'plane': {
+            const n = s.dir && s.dir.lengthSq() > 0 ? s.dir : new THREE.Vector3(0, 1, 0)
+            const rel = position.clone().sub(s.pos)
+            // Planar propagation: use perpendicular distance to the plane (wavefronts are planes)
+            const d = Math.abs(rel.dot(n))
+            if (d < minD) minD = d
+            break
+          }
+          case 'wire': {
+            const dir = s.dir && s.dir.lengthSq() > 0 ? s.dir : new THREE.Vector3(0, 0, 1)
+            const rel = position.clone().sub(s.pos)
+            const cross = rel.clone().cross(dir)
+            const d = cross.length()
+            if (d < minD) minD = d
+            break
+          }
+          default: {
+            const d = position.distanceTo(s.pos)
+            if (d < minD) minD = d
+          }
+        }
       }
-      if (!isFinite(minD)) minD = position.length()
+      const fallbackDist = position.length()
+      if (!isFinite(minD)) minD = fallbackDist
       if (minD > maxDist) maxDist = minD
+      if (fallbackDist > fallbackMaxDist) fallbackMaxDist = fallbackDist
 
-      filtered.push({ position, field, dist: minD, mag })
+      filtered.push({ position, field, dist: minD, fallbackDist, mag })
     }
 
     // Sort by distance so mesh.count reveals nearer arrows first
@@ -179,10 +207,13 @@ export default function FieldArrows({
     // Build ring boundaries (cumulative counts) based on distance bands
     const ringSize = step * 0.8
     const ringBoundaries = []
-    let ringStartDist = filtered[0]?.dist ?? 0
+    const useFallback = maxDist < 1e-4
+    const normMax = useFallback ? Math.max(fallbackMaxDist, 1) : Math.max(maxDist, 1)
+
+    let ringStartDist = filtered[0] ? (useFallback ? filtered[0].fallbackDist : filtered[0].dist) : 0
 
     let i = 0
-    for (const { position, field, dist, mag } of filtered) {
+    for (const { position, field, dist, fallbackDist, mag } of filtered) {
       const logMag = Math.log1p(mag)
       const t = logMax > 0 ? Math.min(logMag / logMax, 1) : 0
 
@@ -193,12 +224,14 @@ export default function FieldArrows({
       directions.set([dir.x, dir.y, dir.z], i * 3)
       scales[i] = Math.min(Math.max(1 - Math.exp(-logMag), 0), 1)
       colors.set([color.r, color.g, color.b], i * 3)
-      // Delay driven by physical distance so waves expand radially
-      delays[i] = dist / maxDistSafe
+      // Delay driven by physical distance; fallback if maxDist collapsed (e.g., all points coplanar)
+      const distForDelay = useFallback ? fallbackDist : dist
+      const normDelay = distForDelay / normMax
+      delays[i] = normDelay
 
-      if (Math.abs(dist - ringStartDist) > ringSize) {
+      if (Math.abs(distForDelay - ringStartDist) > ringSize) {
         ringBoundaries.push(i)
-        ringStartDist = dist
+        ringStartDist = distForDelay
       }
 
       i++
@@ -690,7 +723,7 @@ export default function FieldArrows({
           const oldScale = g.attributes.instanceScale.array
           const oldColor = g.attributes.instanceColor.array
           const oldDelay = g.attributes.instanceDelay.array
-          
+
           // Extract only the new vectors (after oldCount)
           const newPos = new Float32Array(newCount * 3)
           const newDir = new Float32Array(newCount * 3)
@@ -712,27 +745,14 @@ export default function FieldArrows({
             newColor[i * 3 + 2] = oldColor[srcIdx * 3 + 2]
             newDelay[i] = oldDelay[srcIdx]
           }
-          
-          g.attributes.instancePosition.array = newPos
-          g.attributes.instancePosition.count = newCount
-          g.attributes.instancePosition.needsUpdate = true
-          
-          g.attributes.instanceDirection.array = newDir
-          g.attributes.instanceDirection.count = newCount
-          g.attributes.instanceDirection.needsUpdate = true
-          
-          g.attributes.instanceScale.array = newScale
-          g.attributes.instanceScale.count = newCount
-          g.attributes.instanceScale.needsUpdate = true
-          
-          g.attributes.instanceColor.array = newColor
-          g.attributes.instanceColor.count = newCount
-          g.attributes.instanceColor.needsUpdate = true
-          
-          g.attributes.instanceDelay.array = newDelay
-          g.attributes.instanceDelay.count = newCount
-          g.attributes.instanceDelay.needsUpdate = true
-          
+
+          // Rebuild attributes to avoid WebGL resize errors
+          g.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(newPos, 3))
+          g.setAttribute('instanceDirection', new THREE.InstancedBufferAttribute(newDir, 3))
+          g.setAttribute('instanceScale', new THREE.InstancedBufferAttribute(newScale, 1))
+          g.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(newColor, 3))
+          g.setAttribute('instanceDelay', new THREE.InstancedBufferAttribute(newDelay, 1))
+
           setInstanceCount(mesh, newCount)
         }
         

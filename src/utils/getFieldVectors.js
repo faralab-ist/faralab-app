@@ -63,8 +63,11 @@ function allocateSamplesByArea(areas, totalSamples) {
 export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1, onlyGaussianField = false, minThreshold = 0, planeFilter = null) {
   const threshold = minThreshold ?? 0
   const objs = Array.isArray(chargedObjects) ? chargedObjects : []
+  const surfaces = objs.filter((o) => o && o.type === 'surface')
+  const useGaussianMode = onlyGaussianField && surfaces.length > 0
 
-  if (!onlyGaussianField) {
+  // If Gaussian mode is requested but there are no surfaces yet, fall back to normal field
+  if (!useGaussianMode) {
     const nSteps = Math.floor(gridSize / step)
     const range = (n) => Array.from({ length: 2 * n + 1 }, (_, i) => (i - n) * step)
     const xVals = planeFilter === 'yz' ? [0] : range(nSteps)
@@ -85,8 +88,7 @@ export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1,
 
   const fieldVectors = []
 
-  for (const obj of objs) {
-    if (!obj || obj.type !== 'surface') continue
+  for (const obj of surfaces) {
 
     const sampleCount = Math.max(1, obj.sampleCount || 64)
     const objPos = new THREE.Vector3(...(obj.position || [0, 0, 0]))
@@ -174,7 +176,8 @@ export default function getFieldVector3(chargedObjects, gridSize = 10, step = 1,
     }
 
     for (const pointVector3 of gridVector3) {
-      const fieldAtPoint = calculateFieldAtPoint([obj], pointVector3)
+      // Use all scene objects so field on the Gaussian surface accounts for external charges
+      const fieldAtPoint = calculateFieldAtPoint(objs, pointVector3)
       if (fieldAtPoint.length() <= threshold) continue
       fieldVectors.push({ position: pointVector3, field: fieldAtPoint, sourceObject: obj })
     }

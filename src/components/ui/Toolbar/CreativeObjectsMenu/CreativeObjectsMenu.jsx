@@ -82,11 +82,13 @@ const CREATIVE_OBJECTS = [
   }
 ]
 
-export default function CreativeObjectsMenu({ addObject, isVisible }) {
+export default function CreativeObjectsMenu({ addObject, setFieldVersion, setFieldChangeType, isVisible }) {
   if (!isVisible) return null
 
   const handleAddObject = (obj) => {
     addObject?.(obj.type, obj.defaultProps)
+    setFieldChangeType?.('full')
+    setFieldVersion?.((v) => v + 1)
   }
 
   // Group objects by category

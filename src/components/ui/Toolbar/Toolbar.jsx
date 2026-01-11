@@ -22,6 +22,8 @@ export default function Toolbar({
   setSceneObjects,
 
   addObject,
+  setFieldVersion,
+  setFieldChangeType,
   updatePosition,
   sceneObjects,
   counts,
@@ -317,6 +319,8 @@ export default function Toolbar({
       {/* Creative Objects Menu - appears below toolbar when creative mode is active */}
       <CreativeObjectsMenu 
         addObject={addObject}
+        setFieldVersion={setFieldVersion}
+        setFieldChangeType={setFieldChangeType}
         isVisible={creativeMode}
       />
 

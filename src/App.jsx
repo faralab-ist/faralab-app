@@ -227,6 +227,15 @@ function LoadingOverlay() {
       const [wavePropagationEnabled, setWavePropagationEnabled] = useState(true)
       const [waveDuration, setWaveDuration] = useState(1.5) // seconds for full wave
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
+
+    // Wrapper: when adding first object in an empty scene, ensure field is shown
+    const addObjectWithField = useCallback((...args) => {
+      const id = addObject(...args)
+      if (sceneObjects.length === 0 && !showField) {
+        setShowField(true)
+      }
+      return id
+    }, [addObject, sceneObjects.length, showField])
     
     // Docker sidebar state
     const [dockedWindows, setDockedWindows] = useState({ TestCharge: false, Slice: false, EField: false, Gaussian: false })
@@ -473,7 +482,9 @@ function LoadingOverlay() {
       
       <div className="toolbar-root">     {/* new same-container wrapper */}
      <Toolbar 
-        addObject={addObject}
+          addObject={addObjectWithField}
+          setFieldVersion={setFieldVersion}
+          setFieldChangeType={setFieldChangeType}
         updatePosition={updatePositionWithFieldUpdate}
         sceneObjects={sceneObjects}
         counts={counts}
@@ -595,7 +606,7 @@ function LoadingOverlay() {
         }}
         gaussianProps={{
           creativeMode,
-          addObject,
+          addObject: addObjectWithField,
           sceneObjects,
           setSceneObjects,
           showOnlyGaussianField,
@@ -607,7 +618,7 @@ function LoadingOverlay() {
        <div id="canvas-container">
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
         <CreateButtons
-          addObject={addObject}
+          addObject={addObjectWithField}
           setFieldChangeType={setFieldChangeType}
           setFieldVersion={setFieldVersion}
           setSceneObjects={setSceneObjects}
@@ -872,7 +883,7 @@ function LoadingOverlay() {
           setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
           setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
           creativeMode={creativeMode}
-          addObject={addObject}
+          addObject={addObjectWithField}
           sceneObjects={sceneObjects}
           setSceneObjects={setSceneObjects}
           selectedObjectId={selectedId}
