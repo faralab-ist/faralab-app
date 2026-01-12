@@ -10,6 +10,7 @@ export default function PathControls({
   changePathChargeCount,
   changePathCharge,
   changePathVelocity,
+  showChargeRow = true,
   updateObject,
   setErrorMsg
 }) {
@@ -62,113 +63,130 @@ export default function PathControls({
 
   return (
     <>
-      <div className="detail-row" style={{ flexDirection: "column", gap: 8 }}>
-        <div className="detail-key">Velocity (m/s)</div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <InlineDecimalInput
-            value={velocity}
-            step={0.01}
-            onChange={(v) => onSetVelocity(v)}
-            inputStyle={{ width: 120 }}
-          />
-        </div>
-      </div>
-
-      <div className="detail-row" style={{ marginTop: 6 }}>
-        <div className="detail-key">Charge count</div>
-        <div className="detail-value">
-          <InlineDecimalInput
-            value={chargeCount}
-            min={0}
-            step={1}
-            onChange={(v) => onSetChargeCount(v)}
-            inputStyle={{ width: 120 }}
-          />
-        </div>
-      </div>
-
-      <div className="detail-row" style={{ flexDirection: "column", gap: 8, marginTop: 6 }}>
-        <div className="detail-key">Charge (global)</div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <InlineDecimalInput
-            value={globalCharge}
-            step={0.1}
-            onChange={(v) => onSetCharge(v)}
-            onError={setErrorMsg}
-            inputStyle={{ width: 120 }}
-          />
-        </div>
-      </div>
-
-
-      {obj.type === 'path' && (
-  <> 
-    <div className="detail-row" style={{ marginTop: 8 }}>
-      <div className="detail-key">Closed path</div>
-      <div className="detail-value">
-        <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
-          <input
-            type="checkbox"
-            checked={!!obj.isClosedPath}
-            onChange={(e) => {
-              e.stopPropagation();
-              updateObject?.(obj.id, { isClosedPath: e.target.checked });
-            }}
-            onMouseDown={(e) => e.stopPropagation()}
-          />
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>Loop</span>
-        </label>
-      </div>
-    </div>
-
-    <div className="detail-row" style={{ marginTop: 8 }}>
-      <div className="detail-key">Path points</div>
-      <div className="detail-value" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {points.map((pt, idx) => (
-          <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ width: 36, fontSize: 12, opacity: 0.8 }}>#{idx + 1}</div>
+      <div
+        className="detail-row"
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
+      >
+        <div>
+          <div className="detail-key">Velocity (m/s)</div>
+          <div className="detail-value">
             <InlineDecimalInput
-              value={(pt && pt[0]) ?? 0}
-              step={0.1}
-              onChange={(v) => onSetPoint(idx, 0, v)}
-              inputStyle={{ width: 80 }}
-            />
-            <InlineDecimalInput
-              value={(pt && pt[1]) ?? 0}
-              step={0.1}
-              onChange={(v) => onSetPoint(idx, 1, v)}
-              inputStyle={{ width: 80 }}
-            />
-            <InlineDecimalInput
-              value={(pt && pt[2]) ?? 0}
-              step={0.1}
-              onChange={(v) => onSetPoint(idx, 2, v)}
-              inputStyle={{ width: 80 }}
+              value={velocity}
+              step={0.01}
+              onChange={(v) => onSetVelocity(v)}
             />
           </div>
-        ))}
+        </div>
 
-        <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
-          <button
-            onClick={(e) => { e.stopPropagation(); addPoint?.(obj.id); }}
-            className="action-btn"
-            style={{ flex: 1, padding: 6 }}
-          >
-            + Point
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); removeLastPoint?.(obj.id); }}
-            className="action-btn"
-            style={{ flex: 1, padding: 6 }}
-            disabled={points.length === 0}
-          >
-            - Remove
-          </button>
+        <div>
+          <div className="detail-key">Charge count</div>
+          <div className="detail-value">
+            <InlineDecimalInput
+              value={chargeCount}
+              min={0}
+              step={1}
+              onChange={(v) => onSetChargeCount(v)}
+            />
+          </div>
         </div>
       </div>
-    </div>
-  </> 
-)}
+
+      {showChargeRow && (
+        obj.type === "path" ? (
+          <div
+            className="detail-row"
+            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
+          >
+            <div>
+              <div className="detail-key">Charge (global)</div>
+              <div className="detail-value">
+                <InlineDecimalInput
+                  value={globalCharge}
+                  step={0.1}
+                  onChange={(v) => onSetCharge(v)}
+                  onError={setErrorMsg}
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="detail-key">Closed path</div>
+              <div className="detail-value">
+                <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+                  <input
+                    type="checkbox"
+                    checked={!!obj.isClosedPath}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      updateObject?.(obj.id, { isClosedPath: e.target.checked });
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  />
+                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>Loop</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="detail-row">
+            <div className="detail-key">Charge (global)</div>
+            <div className="detail-value">
+              <InlineDecimalInput
+                value={globalCharge}
+                step={0.1}
+                onChange={(v) => onSetCharge(v)}
+                onError={setErrorMsg}
+              />
+            </div>
+          </div>
+        )
+      )}
+
+      {obj.type === "path" && (
+        <div className="detail-row" style={{ marginTop: 8 }}>
+          <div className="detail-key">Path points</div>
+          <div className="detail-value" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {points.map((pt, idx) => (
+              <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <div style={{ width: 36, fontSize: 12, opacity: 0.8 }}>{idx + 1}</div>
+                <InlineDecimalInput
+                  value={(pt && pt[0]) ?? 0}
+                  step={0.1}
+                  onChange={(v) => onSetPoint(idx, 0, v)}
+                />
+                <InlineDecimalInput
+                  value={(pt && pt[1]) ?? 0}
+                  step={0.1}
+                  onChange={(v) => onSetPoint(idx, 1, v)}
+                />
+                <InlineDecimalInput
+                  value={(pt && pt[2]) ?? 0}
+                  step={0.1}
+                  onChange={(v) => onSetPoint(idx, 2, v)}
+                />
+              </div>
+            ))}
+
+            <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+              <button
+                onClick={(e) => { e.stopPropagation(); addPoint?.(obj.id); }}
+                className="action-btn"
+                style={{ flex: 1, padding: 6 }}
+              >
+                + Point
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); removeLastPoint?.(obj.id); }}
+                className="action-btn"
+                style={{ flex: 1, padding: 6 }}
+                disabled={points.length === 0}
+              >
+                - Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

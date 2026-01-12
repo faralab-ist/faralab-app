@@ -63,16 +63,18 @@ export default function RotationControls({ obj, updateObject }) {
   return (
     <div className="detail-row">
       <div className="detail-key">Rotation (deg)</div>
-      <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+      <div className="detail-value" style={{ display: "flex", gap: 18 }}>
         {["θx", "θy", "θz"].map((label, i) => (
-          <div key={label} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>{label}</div>
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>
+              {label}
+            </div>
+            <span style={{ opacity: 0.7 }}>=</span>
             <InlineDecimalInput
               value={Number((localDegs[i] ?? 0).toFixed(2))}
               // do not pass min/max so InlineDecimalInput always forwards input
               step={1}
               decimals={2}
-              inputStyle={{ width: 50 }}
               onChange={(n) => handleLiveChange(i, n)}
               onCommit={(n) => handleCommit(i, n)}
             />
