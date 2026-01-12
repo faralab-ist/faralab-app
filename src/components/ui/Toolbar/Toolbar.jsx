@@ -221,6 +221,7 @@ export default function Toolbar({
 
       <div className="tb-group">
         {/* Criação */}
+        <span className="tb-label tb-label-presets">Presets</span>
         <button
           ref={presetsBtnRef}
           className={`tb-btn tb-btn-preset ${presetsMenuVisible ? 'active' : ''}`}
