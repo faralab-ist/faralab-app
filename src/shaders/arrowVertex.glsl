@@ -2,8 +2,12 @@ attribute vec3 instancePosition;
 attribute vec3 instanceDirection;
 attribute float instanceScale;
 attribute vec3 instanceColor;
+attribute float instanceDelay;
+
+uniform float uProgress;
 
 varying vec3 vColor;
+varying float vVisible;
 
 vec3 rotateToDirection(vec3 v, vec3 dir){
     vec3 up = vec3(0.0, 1.0, 0.0);
@@ -24,6 +28,10 @@ vec3 rotateToDirection(vec3 v, vec3 dir){
 }
 
 void main(){
+    // Determine if this instance should be visible at the current wave progress
+    bool isVisible = (instanceDelay < 0.0) || (instanceDelay <= uProgress + 1e-4);
+    vVisible = isVisible ? 1.0 : 0.0;
+
     vec3 transformed = position;
     transformed = rotateToDirection(transformed, normalize(instanceDirection));
     transformed *= instanceScale;

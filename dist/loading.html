@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FaraLab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0f131a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 40px 20px;
+        }
+        
+        .loading-container {
+            position: relative;
+            width: 700px;  /* wider to fit text in one line */
+            height: 400px;
+        }
+        
+        .field-grid {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;   /* fixed size, centered */
+            height: 600px;
+        }
+        
+        .vector {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #0ea5e9, transparent);
+            transform-origin: center left;
+            transition: opacity 0.1s linear, width 0.1s linear;
+        }
+        
+        .wave {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid #0ea5e9;
+            border-radius: 50%;
+            opacity: 0;
+            animation: waveExpand 3s ease-out infinite;
+            pointer-events: none;
+            display: none;
+        }
+        
+        @keyframes waveExpand {
+            0% {
+                width: 0px;
+                height: 0px;
+                opacity: 0;
+            }
+            5% {
+                opacity: 0.8;
+            }
+            100% {
+                width: 600px;
+                height: 600px;
+                opacity: 0;
+            }
+        }
+        
+        .axis {
+            position: absolute;
+            background: rgba(14, 165, 233, 0.15);
+        }
+        
+        .axis-horizontal {
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            transform: translateY(-50%);
+        }
+        
+        .axis-vertical {
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 100%;
+            transform: translateX(-50%);
+        }
+        
+        .loading-text {
+            position: absolute;
+            bottom: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #0ea5e9;
+            font-size: 0.9em;
+            font-weight: 300;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .upper-text {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgb(255, 255, 255);
+            font-size: 0.7em;
+            font-weight: 500;
+            text-align: center;
+            max-width: 1000px;
+            line-height: 1.6;
+        }
+
+        .lower-text {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgb(255, 255, 255);
+            font-size: .8em;
+            font-weight: 500;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+        
+        .footer-text a {
+            color: #0ea5e9;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-text a:hover {
+            color: #38bdf8;
+        }
+        
+        .dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        .title {
+            position: absolute;
+            top: 2%;
+            left: 10%;
+            transform: translateX(-50%);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 48px; /* ajuste conforme necessário */
+            font-weight: 600; /* negrito */
+            color: #ffffff;   /* exemplo de cor */  
+            text-transform: uppercase;
+        }
+    </style>
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <!--<h1 class="title">FARALAB</h1>-->
+    <div class="loading-container">
+        <div class="axis axis-horizontal"></div>
+        <div class="axis axis-vertical"></div>
+        
+        <div class="field-grid" id="fieldGrid"></div>
+        
+        <div class="wave"></div>
+        
+        <!--<div class="loading-text">Carregando<span class="dots"></span></div>-->
+        <div class="upper-text">
+            This is a pre-alpha version made at IST<br>
+        </div>
+        <div class="lower-text">
+            Send us an e-mail at: <a href="mailto:faralab@tecnico.ulisboa.pt">faralab@tecnico.ulisboa.pt</a>
+        </div>
+    </div>
+    
+    <script>
+        const fieldGrid = document.getElementById('fieldGrid');
+        const gridSize = 15;
+        const containerSize = 600;
+        const spacing = containerSize / gridSize;
+        const centerX = containerSize / 2;
+        const centerY = containerSize / 2;
+        
+        const vectors = [];
+        
+        // Criar grade de vetores
+        for (let i = 0; i < gridSize; i++) {
+        for (let j = 0; j < gridSize; j++) {
+            const vector = document.createElement('div');
+            vector.className = 'vector';
+            
+            const x = i * spacing + spacing / 2;
+            const y = j * spacing + spacing / 2;
+            
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // SÓ cria vetores dentro do círculo
+            if (distance > 280) continue;  // 280 é o raio máximo (ajuste conforme necessário)
+            
+            const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+            const baseIntensity = Math.max(0.2, Math.min(1, 100 / (distance + 50)));
+            
+            vector.style.left = x + 'px';
+            vector.style.top = y + 'px';
+            vector.style.transform = `rotate(${angle}deg)`;
+            vector.style.opacity = baseIntensity * 0.5;
+            vector.style.width = (12 + baseIntensity * 8) + 'px';
+            
+            vectors.push({
+                element: vector,
+                x: x,
+                y: y,
+                distance: distance,
+                baseIntensity: baseIntensity,
+                baseWidth: 12 + baseIntensity * 8,
+                baseOpacity: baseIntensity * 0.5
+            });
+            
+            fieldGrid.appendChild(vector);
+        }
+    }
+        
+        // Animação das ondas e vetores
+        let startTime = Date.now();
+        const waveDuration = 3000; // 3 segundos
+        const maxRadius = 300; // Raio máximo da onda
+        
+        function animate() {
+            const currentTime = Date.now();
+            const elapsed = (currentTime - startTime) % waveDuration;
+            
+            // APENAS UMA onda por ciclo
+            const waveRadius = (elapsed / waveDuration) * maxRadius;
+            
+            vectors.forEach(vector => {
+                // Distância do vetor ao raio da onda
+                const distanceToWave = Math.abs(vector.distance - waveRadius);
+                
+                // Largura da frente de onda
+                const influenceRange = 40;
+                let influence = 0;
+                
+                if (distanceToWave < influenceRange) {
+                    influence = 1 - (distanceToWave / influenceRange);
+                }
+                
+                // Atualiza o vetor baseado na influência
+                if (influence > 0.01) {
+                    const intensityBoost = 1 + (influence * 2.5);
+                    vector.element.style.opacity = Math.min(vector.baseOpacity * intensityBoost, 1);
+                    vector.element.style.width = vector.baseWidth * (1 + influence * 0.7) + 'px';
+                } else {
+                    vector.element.style.opacity = vector.baseOpacity;
+                    vector.element.style.width = vector.baseWidth + 'px';
+                }
+            });
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>

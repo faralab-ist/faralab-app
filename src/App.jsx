@@ -195,6 +195,7 @@ function LoadingOverlay() {
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
     const [vectorStep, setVectorStep] = useState(1) 
+    const [fieldVersion, setFieldVersion] = useState(0)
     const [lineMin, setLineMin] = useState(0.1)         //LINE SETTINGS NEW
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
@@ -211,6 +212,14 @@ function LoadingOverlay() {
       // Wave propagation settings for field arrows
       const [wavePropagationEnabled, setWavePropagationEnabled] = useState(false)
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
+    const propagationEnabled = useMemo(
+      () => wavePropagationEnabled && !sceneObjects.some(o => o.type === 'path'),
+      [wavePropagationEnabled, sceneObjects]
+    )
+    const fieldChangeType = useMemo(
+      () => (propagationEnabled ? 'full' : 'incremental'),
+      [propagationEnabled]
+    )
     const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
     
     // Docker sidebar state
@@ -332,6 +341,11 @@ function LoadingOverlay() {
         setShowOnlyGaussianField(false)
       }
     }, [counts.surface, showOnlyGaussianField])
+
+    // Increment a field version whenever scene objects change to force propagation updates
+    useEffect(() => {
+      setFieldVersion(v => v + 1)
+    }, [sceneObjects])
 
     useEffect(() => {
       if (!showOnlyGaussianField) {
@@ -766,19 +780,23 @@ function LoadingOverlay() {
           <FieldArrows
             key={`arrows-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')
     }-${vectorMinTsl}-${vectorScale}-${vectorStep}-${showOnlyGaussianField}-${showField}-${activePlane}`}
-        objects={sceneObjects}
-        showOnlyGaussianField={showOnlyGaussianField}
-        minThreshold={vectorMinTsl}
-        scaleMultiplier={vectorScale}
-        step={1 / (Number(vectorStep))} 
-        planeFilter={activePlane}
-        slicePlane={slicePlane}
-        slicePos={slicePos}
-        useSlice={useSlice}
-        slicePlaneFlip={slicePlaneFlip}
-        propagate={wavePropagationEnabled && !sceneObjects.some(o => o.type === 'path')}
-        waveDuration={waveDuration}
-        />
+            objects={sceneObjects}
+            showOnlyGaussianField={showOnlyGaussianField}
+            minThreshold={vectorMinTsl}
+            fieldThreshold={vectorMinTsl}
+            scaleMultiplier={vectorScale}
+            step={1 / (Number(vectorStep))}
+            planeFilter={activePlane}
+            slicePlane={slicePlane}
+            slicePos={slicePos}
+            useSlice={useSlice}
+            slicePlaneFlip={slicePlaneFlip}
+            enablePropagation={propagationEnabled}
+            fieldVersion={fieldVersion}
+            fieldChangeType={fieldChangeType}
+            waveDuration={waveDuration}
+            isDragging={isDragging}
+          />
         )}
 
         {showMagField && (
