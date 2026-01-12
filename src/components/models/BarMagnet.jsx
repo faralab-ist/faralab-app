@@ -28,19 +28,19 @@ export default function BarMagnet({
   pointsPerCoil,
   velocity,
   creativeMode,
-    updateObject,
-    showDebug = false,
-    slicePlane,
-    slicePos,
-    useSlice,
-    slicePlaneFlip,
-    frozen = true,
-    animated,
-    amplitude,
-    freq,
-    dragOwnerId = null,
-    showLabel = true,
-    onHideLabel,
+  updateObject,
+  showDebug = false,
+  slicePlane,
+  slicePos,
+  useSlice,
+  slicePlaneFlip,
+  frozen = true,
+  animated,
+  amplitude,
+  freq,
+  dragOwnerId = null,
+  showLabel = true,
+  onHideLabel,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -387,6 +387,8 @@ export default function BarMagnet({
             ]}
             offsetY={0.5 + radius}
             distanceFactor={8}
+            objectId={id}
+            onHideLabel={onHideLabel}
           />
         )}
         {/* Invisible hitbox for selection */}
