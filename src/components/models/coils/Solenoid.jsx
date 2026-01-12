@@ -19,8 +19,13 @@ export default function Solenoid({
 
   radius = 1.5,
   length = 4,
-  resolution = 32,
+  resolution = 1,
   multiplier = 1,
+
+  turns = 10,
+  chargeCount = 12,
+  velocity = 5,
+  ac = false,
 
   // Rotation state
   direction = [0, 0, 1],
@@ -40,12 +45,12 @@ export default function Solenoid({
   const getSolenoidPoints = useCallback(() => {
     const points = []
 
-    const turns = resolution
-    const totalPoints = resolution
-
+    const turns2 = turns * Math.PI * 2
+    const totalPoints = turns * resolution * 1
+    //console.log('totalPoints', totalPoints)
     for (let i = 0; i < totalPoints; i++) {
       const t = i / (totalPoints - 1)
-      const theta = t * turns
+      const theta = t * turns2
 
       const y = t * length - length / 2
 
@@ -59,7 +64,7 @@ export default function Solenoid({
     }
 
     return points
-  }, [radius, length, resolution])
+  }, [radius, length, resolution, turns])
 
   //console.log(getSolenoidPoints())
 
@@ -82,9 +87,9 @@ export default function Solenoid({
       direction={direction}
       rotation={rotation}
       quaternion={quaternion}
-      chargeCount={resolution}
+      chargeCount={chargeCount}
       charge={multiplier * 0.1}
-      velocity={1}
+      velocity={velocity}
       renderCharges={true}
       charges={charges}
       glowMultiplier={0.6}
@@ -93,6 +98,7 @@ export default function Solenoid({
       getPathPoints={getSolenoidPoints}
       showLabel={showLabel}
       onHideLabel={onHideLabel}
+      ac={ac}
       coilGeometry={
         null
       }
