@@ -7,6 +7,7 @@ export function InlineDecimalInput({
   max = Number.POSITIVE_INFINITY,
   onChange,
   value,
+  spinners = true,
 }) {
   const spanRef = useRef(null);
   const spinRef = useRef(null);
@@ -270,6 +271,7 @@ export function InlineDecimalInput({
         onBlur={handleBlur}
         style={{ paddingRight: 22 }}
       />
+      {spinners && (
       <div className="inline-decimal-arrows">
         <div
           className="inline-decimal-arrow"
@@ -288,6 +290,7 @@ export function InlineDecimalInput({
           ▼
         </div>
       </div>
+      )}
     </div>
   );
 }

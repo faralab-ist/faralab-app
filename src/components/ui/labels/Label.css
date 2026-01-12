@@ -3,6 +3,7 @@
   user-select: none;
   display: flex;
   justify-content: center;
+  z-index:0;
 }
 
 .label-panel {
@@ -20,6 +21,7 @@
   position: relative;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   pointer-events: auto;
+  z-index: 0;
 }
 
 .label-panel.label-hovered {
@@ -29,14 +31,14 @@
 
 .label-close-btn {
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: 0px;
+  right: 0px;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #ff4444;
+  background: transparent;
   color: white;
-  border: 2px solid white;
+  border: transparent;
   font-size: 16px;
   font-weight: bold;
   line-height: 1;
@@ -48,16 +50,21 @@
   transition: all 0.2s ease;
   z-index: 10;
   pointer-events: auto;
+  opacity: 30%;
+  
 }
 
 .label-close-btn:hover {
-  background: #cc0000;
+  opacity: 100%;
+  background: transparent;
   transform: scale(1.1);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .label-close-btn:active {
   transform: scale(0.95);
+  border: none;
+  outline: none;
 }
 
 .label-header {

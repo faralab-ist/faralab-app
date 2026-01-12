@@ -66,7 +66,6 @@ export default function Solenoid({
   return (
     <BaseCoil
       id={id}
-      showLabel={showLabel}
       name={name}
       position={position}
       selectedId={selectedId}

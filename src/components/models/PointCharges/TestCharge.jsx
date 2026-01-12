@@ -68,6 +68,7 @@ export default function TestCharge({position = [0, 0, 0], sceneObjects, updateOb
                 max={POS_MAX}
                 step={0.01}
                 onChange={(val) => handlePosChange(axis, val)}
+                spinners={false}
               />
             </div>
           ))}
