@@ -301,7 +301,8 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 .polygonCoil-icon-btn,
 .solenoid-icon-btn,
 .barMagnet-icon-btn,
-.faradayCoil-icon-btn {
+.faradayCoil-icon-btn,
+.testCoil-icon-btn {
   background: none;
   border: none;
   padding: 4px;

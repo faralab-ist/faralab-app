@@ -187,7 +187,7 @@ export default function TestCoil({
           `ε: ${displayEmf != null ? displayEmf.toExponential(3) + ' V' : '—'}`,
           `E-Flux = ${displayEFlux != null ? displayEFlux.toExponential(3) : '—'} V·m`,
         ]}
-        offsetY={0.5}
+        offsetY={radius + 0.2}
         distanceFactor={8}
         objectId={id}
         onHideLabel={onHideLabel}
