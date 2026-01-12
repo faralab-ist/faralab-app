@@ -115,12 +115,11 @@ export default function CreativeObjectsMenu({ addObject, sidebarState }) {
 
   return (
     <div 
-      className="creative-objects-menu"
+      className={`creative-objects-menu ${isExpanded ? 'expanded' : 'collapsed'}`}
       onMouseLeave={handleMouseLeave}
       style={{ left: `${leftOffset}px` }}
     >
       <div className={`creative-menu-panel ${isExpanded ? 'expanded' : 'collapsed'}`}>
-        {!isExpanded && <span className="creative-menu-label">Objects</span>}
         
         {!isExpanded && (
           <button 

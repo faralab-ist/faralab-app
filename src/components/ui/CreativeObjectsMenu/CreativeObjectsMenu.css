@@ -28,7 +28,6 @@
   background: rgba(19, 19, 19, 0.92);
   border: 1px solid #333;
   border-radius: 10px;
-  position: relative;
   padding: 12px;
   backdrop-filter: blur(6px);
   display: flex;
@@ -37,25 +36,8 @@
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.3, 1);
 }
 
-.creative-menu-panel.expanded {
-  padding: 12px;
-}
-
 .creative-menu-panel.collapsed {
-  padding: 18px 6px 6px;
-}
-
-.creative-menu-label {
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #76baff;
-  pointer-events: none;
-  user-select: none;
+  padding: 4px 6px;
 }
 
 .creative-menu-toggle-button {
