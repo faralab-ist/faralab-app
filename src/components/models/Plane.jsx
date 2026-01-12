@@ -25,6 +25,7 @@ function Plane({
   quaternion,
   isHovered,
   showLabel = true,
+  onHideLabel,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -142,6 +143,8 @@ function Plane({
           value={`σ = ${charge_density.toExponential(2)} C/m²`}
           offsetY={0.5}
           distanceFactor={12}
+          objectId={id}
+          onHideLabel={onHideLabel}
         />
       )}
       <mesh

@@ -40,6 +40,7 @@ export default function Sphere({
   isHovered,
   showOnlyGaussianField,
   showLabel = true,
+  onHideLabel,
 }) {
   const isSelected = id === selectedId
   const meshRef = useRef()
@@ -143,6 +144,8 @@ export default function Sphere({
           value={`Φ = ${fluxValue.toExponential(2)} N⋅m²/C`}
           offsetY={0}
           distanceFactor={10}
+          objectId={id}
+          onHideLabel={onHideLabel}
         />
 )}
 

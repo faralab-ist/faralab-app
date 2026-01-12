@@ -16,6 +16,7 @@ import PathIcon from "../../../assets/path1.svg";
 import BarMagnetIcon from "../../../assets/bar_magnet.svg";
 import SolenoidIcon from "../../../assets/solenoid.svg";
 import FaradayCoilIcon from "../../../assets/faraday_coil.svg";
+import TestCoilIcon from "../../../assets/test_coil.svg";
 
 /**
  * Sidebar agora suporta 3 estados:
@@ -141,7 +142,7 @@ export default function Sidebar({
   
 
   const pillObjects = (objects || []).filter(o => 
-    ['testCoil', 'path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires', 'coil', 'barMagnet', 'faradayCoil'].includes(o.type));
+    ['testCoil', 'path', 'charge', 'testPointCharge','wire', 'plane', 'surface','chargedSphere', 'stackedPlanes', 'concentricSpheres', 'concentricInfWires', 'coil', 'barMagnet','testCoil', 'faradayCoil'].includes(o.type));
   const typeCounters = {};
   const subtypeCounters = {};
 
@@ -207,7 +208,7 @@ export default function Sidebar({
                   <button
                     key={item.id}
                     className={`${
-                      ['pos_charge','neg_charge','testPointCharge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires', 'ringCoil', 'polygonCoil', 'solenoid', 'barMagnet', 'faradayCoil', 'path'].includes(item.type)
+                      ['pos_charge','neg_charge','testPointCharge','wire','plane','surface','charged_sphere', 'stackedPlanes','concentricSpheres', 'concentricInfWires', 'ringCoil', 'polygonCoil', 'solenoid', 'barMagnet', 'faradayCoil', 'testCoil', 'path'].includes(item.type)
                         ? `${item.subtype || item.type}-icon-btn ${item.polarity || ''}`
                         : `pill ${item.subtype || item.type} minibar-pill`
                     } ${hoveredId === item.id || selectedId === item.id ? 'hovered' : ''}`}
@@ -257,6 +258,8 @@ export default function Sidebar({
                       <img src={BarMagnetIcon} alt="Bar Magnet" className="sidebar-icon" />
                     ) : item.type === 'faradayCoil' ? (
                       <img src={FaradayCoilIcon} alt="Faraday Coil" className="sidebar-icon" />
+                    ) : item.type === 'testCoil' ? (
+                      <img src={TestCoilIcon} alt="Test Coil" className="sidebar-icon" />
                     ) : item.type === 'path' ? (
                       <img src={PathIcon} alt="Path" className="sidebar-icon" />
                     ) : (

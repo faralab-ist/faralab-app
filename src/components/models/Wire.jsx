@@ -26,6 +26,7 @@ function Wire({
   rotation,
   isHovered,
   showLabel = true,
+  onHideLabel,
 }) {
   const isSelected = id === selectedId
   
@@ -146,6 +147,8 @@ function Wire({
         objectName={name}
         value={`λ = ${charge_density === undefined ? 0..toExponential(2) : charge_density.toExponential(2)} C/m`}
         offsetY={0.5}
+        objectId={id}
+        onHideLabel={onHideLabel}
       />
     )}
       <group ref={groupRef}>

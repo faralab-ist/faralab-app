@@ -13,6 +13,7 @@ import PathIcon from "../../../assets/path1.svg";
 import BarMagnetIcon from "../../../assets/bar_magnet.svg";
 import SolenoidIcon from "../../../assets/solenoid.svg";
 import FaradayCoilIcon from "../../../assets/faraday_coil.svg";
+import TestCoilIcon from "../../../assets/test_coil.svg";
 
 export const POS_MIN = -10, POS_MAX = 10;
 export const VAL_MIN = -5, VAL_MAX = 5;
@@ -41,6 +42,7 @@ export const TYPE_CONFIG = {
   barMagnet: { icon: BarMagnetIcon, alt: "Bar Magnet" },
   solenoid: { icon: SolenoidIcon, alt: "Solenoid" },
   faradayCoil: { icon: FaradayCoilIcon, alt: "Faraday Coil" },
+  testCoil: { icon: TestCoilIcon, alt: "Test Coil" },
   coil: {
     resolve: (obj) => {
       if (obj.coilType === 'ring') return { icon: RingCoilIcon, alt: "Ring Coil", subtype: 'ringCoil' };

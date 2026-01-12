@@ -25,6 +25,7 @@ export default function TestCoil({
   updateObject,
   tubeRadius = 0.05,
   showLabel = true,
+  onHideLabel,
 }) {
   const radialSamples = 10;
   const angularSamples = 10;
@@ -186,8 +187,10 @@ export default function TestCoil({
           `ε: ${displayEmf != null ? displayEmf.toExponential(3) + ' V' : '—'}`,
           `E-Flux = ${displayEFlux != null ? displayEFlux.toExponential(3) : '—'} V·m`,
         ]}
-        offsetY={0.5}
+        offsetY={radius + 0.2}
         distanceFactor={8}
+        objectId={id}
+        onHideLabel={onHideLabel}
       />}
       <group ref={groupRef}>
         <mesh 

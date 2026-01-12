@@ -1,8 +1,9 @@
 .label-wrap {
-  pointer-events: none;
+  pointer-events: auto;
   user-select: none;
   display: flex;
   justify-content: center;
+  z-index:0;
 }
 
 .label-panel {
@@ -17,6 +18,53 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: auto;
+  z-index: 0;
+}
+
+.label-panel.label-hovered {
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.label-close-btn {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: transparent;
+  color: white;
+  border: transparent;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.2s ease;
+  z-index: 10;
+  pointer-events: auto;
+  opacity: 30%;
+  
+}
+
+.label-close-btn:hover {
+  opacity: 100%;
+  background: transparent;
+  transform: scale(1.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.label-close-btn:active {
+  transform: scale(0.95);
+  border: none;
+  outline: none;
 }
 
 .label-header {

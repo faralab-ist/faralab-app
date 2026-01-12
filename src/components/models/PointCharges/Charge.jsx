@@ -3,7 +3,7 @@ import * as THREE from 'three'
 import BaseCharge from './BaseCharge'
 import Label from '../../ui/labels/Label'
 
-export default function Charge({ charge, position = [0, 0, 0], showLabel = true, ...props }) {
+export default function Charge({ charge, position = [0, 0, 0], showLabel = true, onHideLabel, ...props }) {
   const radius = props.radius
   const { glowColor, glowString, visualScale, visualOpacity } = useMemo(() => {
     const sign = charge >= 0 ? 1 : -1
@@ -39,6 +39,8 @@ export default function Charge({ charge, position = [0, 0, 0], showLabel = true,
         objectName={props.name}
         value={`Q = ${charge > 0 ? '+' : ''}${charge} C`}
         offsetY={0.6}
+        objectId={props.id}
+        onHideLabel={onHideLabel}
       />
     )}
     </group>

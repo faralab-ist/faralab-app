@@ -5,7 +5,7 @@
   right: 0;
   height: 100vh;
   width: 0;
-  z-index: 1;
+  z-index: 5;
   pointer-events: none;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
 }
@@ -301,7 +301,8 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 .polygonCoil-icon-btn,
 .solenoid-icon-btn,
 .barMagnet-icon-btn,
-.faradayCoil-icon-btn {
+.faradayCoil-icon-btn,
+.testCoil-icon-btn {
   background: none;
   border: none;
   padding: 4px;

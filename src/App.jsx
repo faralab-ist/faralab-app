@@ -189,6 +189,7 @@ function LoadingOverlay() {
     const [dragOwnerId, setDragOwnerId] = useState(null)
     const [isPanelMinimized, setIsPanelMinimized] = useState(false)
     const [isSidebarMinimized, setIsSidebarMinimized] = useState(false)
+    const [dockSidebarState, setDockSidebarState] = useState({ isMinimized: false, isCollapsed: true, width: 0 })
 
     const [pivotControlsEnabled, setPivotControlsEnabled] = useState(true)  // Control for object movement
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
@@ -221,6 +222,11 @@ function LoadingOverlay() {
     const onHoverChange = useCallback((id) => {
       setHoveredId(id)
     }, [])
+
+    // Handle hiding labels by setting showLabel to false
+    const handleHideLabel = useCallback((objectId) => {
+      updateObject(objectId, { showLabel: false })
+    }, [updateObject])
     // Docker functions
     const handleDock = (windowName) => {
       setDockedWindows(prev => ({ ...prev, [windowName]: true }))
@@ -580,6 +586,7 @@ function LoadingOverlay() {
           showField,
           onToggleField: toggleField,
         }}
+        onSidebarStateChange={setDockSidebarState}
       />
        <div id="canvas-container">
         {/* render popup from App so it is outside the toolbar DOM and inside canvas-container */}
@@ -725,6 +732,7 @@ function LoadingOverlay() {
                 updateDirection={updateDirection}
                 updateObject={updateObject}
                 removeObject={removeObject}
+                onHideLabel={handleHideLabel}
                 addRadiusToChargedSphere={addRadiusToChargedSphere}
                 removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
                 setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
@@ -862,6 +870,7 @@ function LoadingOverlay() {
         {/* Creative Objects Menu - always visible in bottom left */}
         <CreativeObjectsMenu 
           addObject={addObject}
+          sidebarState={dockSidebarState}
         />
       </div>
     </div>

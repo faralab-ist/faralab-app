@@ -22,7 +22,8 @@ export default function ConcentricSpheres({
     dielectrics,
     charges,
     name,
-    showLabel = true
+    showLabel = true,
+    onHideLabel,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -116,6 +117,8 @@ export default function ConcentricSpheres({
               value={chargePerSphereSurfaceArr.map((charge, i) => `E-Field${i + 1} = ${charge.toExponential(2)} C`)}
               offsetY={radiuses[radiuses.length - 1] + 0.5}
               distanceFactor={10 * radiuses.length}
+              objectId={id}
+              onHideLabel={onHideLabel}
             />
           )}
     </PivotControls>
