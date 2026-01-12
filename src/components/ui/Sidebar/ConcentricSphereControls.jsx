@@ -1,7 +1,6 @@
 import React from "react";
-import NumberInput from "./NumberInput";
+import { InlineDecimalInput } from "../io/decimalInput";
 import { VAL_MIN, VAL_MAX, DIM_MIN, ERROR_MSG, DIM_MAX } from "./utils";
-import { min } from "three/tsl";
 
 export default function ConcentricSphereControls({ 
   obj, 
@@ -43,10 +42,11 @@ export default function ConcentricSphereControls({
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: "0.8em", opacity: 0.7, width: 20 }}>#{i + 1}</span>
                 <span style={{ fontSize: "0.8em", opacity: 0.7 }}>R:</span>
-                <NumberInput
+                <InlineDecimalInput
                   value={rad}
                   min={ i === 0 ? DIM_MIN : radiuses[i - 1]}
                   max={ radiuses[i + 1]}
+                  step={0.1}
                   style={{ flex: 1 }}
                   onChange={(val) => {
                      if (setRadius && rad >= radiuses[i-1] && rad <= radiuses[i+1]) setRadius(obj.id, i, val);
@@ -86,9 +86,10 @@ export default function ConcentricSphereControls({
                 </span>
                 
                 {isConductor ? (
-                  <NumberInput
+                  <InlineDecimalInput
                     value={charges[i]}
                     min={VAL_MIN} max={VAL_MAX}
+                    step={0.1}
                     style={{ flex: 1 }}
                     onChange={(val) => {
                       if (setCharge) setCharge(obj.id, i, val);
@@ -101,9 +102,10 @@ export default function ConcentricSphereControls({
                     onError={setErrorMsg}
                   />
                 ) : (
-                  <NumberInput
+                  <InlineDecimalInput
                     value={dielectrics[i]}
                     min={1} 
+                    step={0.1}
                     style={{ flex: 1 }}
                     onChange={(val) => {
                       if (setDielectric) setDielectric(obj.id, i, val);

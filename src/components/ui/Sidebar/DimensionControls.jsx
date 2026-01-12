@@ -1,15 +1,15 @@
 import React from "react";
-import NumberInput from "./NumberInput";
+import { InlineDecimalInput } from "../io/decimalInput";
 import { DIM_MIN, DIM_MAX } from "./utils";
 
 // Componente auxiliar definido FORA para evitar re-criação e perda de foco
 const DimInput = ({ value, onChange }) => (
-  <NumberInput 
+  <InlineDecimalInput 
     value={value} 
     onChange={onChange} 
     min={DIM_MIN} 
     max={DIM_MAX}
-    style={{ width: 72 }} 
+    step={0.1}
     
   />
 );
@@ -29,7 +29,7 @@ export default function DimensionControls({ obj, updateObject }) {
     return (
       <div className="detail-row">
         <div className="detail-key">Dimensions (W x H)</div>
-        <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+        <div className="detail-value" style={{ display: "flex", gap: 20 }}>
           <DimInput value={obj.dimensions[0]} onChange={(v) => update("dimensions", [v, obj.dimensions[1]])} />
           <DimInput value={obj.dimensions[1]} onChange={(v) => update("dimensions", [obj.dimensions[0], v])} />
         </div>
@@ -44,7 +44,13 @@ export default function DimensionControls({ obj, updateObject }) {
       <div className="detail-row">
         <div className="detail-key">Length</div>
         <div className="detail-value">
-          <DimInput value={obj.height ?? 5} onChange={(v) => update("height", v)} />
+          <DimInput 
+            value={obj.height ?? 5}
+            onChange={(v) => {
+              const safe = clampWithError(v, DIM_MIN, DIM_MAX);
+              update("height", safe);
+            }}
+            />
         </div>
       </div>
     );
@@ -62,7 +68,7 @@ export default function DimensionControls({ obj, updateObject }) {
 
   return (
     <div className="detail-row">
-      <div className="detail-key">Dimensions</div>
+      <div className="detail-key">Radius</div>
       <div className="detail-value" style={{ display: "flex", gap: 6 }}>
         {inputs}
       </div>

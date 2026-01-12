@@ -1,5 +1,5 @@
 import React from "react";
-import NumberInput from "./NumberInput";
+import { InlineDecimalInput } from "../io/decimalInput";
 import { DIM_MIN, VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
 export default function ConcentricInfiniteWireControls({ 
@@ -55,7 +55,7 @@ export default function ConcentricInfiniteWireControls({
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <span style={{ fontSize: "0.75em", opacity: 0.5, width: 20 }}>#{i + 1}</span>
                 <span style={{ fontSize: "0.8em", opacity: 0.8 }}>R:</span>
-                <NumberInput
+                <InlineDecimalInput
                   value={r}
                   min={ i === 0 ? DIM_MIN : radiuses[i - 1]}
                    max= {radiuses[i + 1]}
@@ -95,7 +95,7 @@ export default function ConcentricInfiniteWireControls({
 
                 {/* Input Variável (Lambda ou K) */}
                 {isConductor ? (
-                  <NumberInput
+                  <InlineDecimalInput
                     value={chargeVal}
                     min={VAL_MIN} max={VAL_MAX}
                     step={0.1}
@@ -111,7 +111,7 @@ export default function ConcentricInfiniteWireControls({
                     onError={setErrorMsg}
                   />
                 ) : (
-                  <NumberInput
+                  <InlineDecimalInput
                     value={dielectrics[i] ?? 1.0}
                     min={1.0} 
                     step={0.1}

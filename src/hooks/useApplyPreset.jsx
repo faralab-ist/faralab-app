@@ -111,7 +111,12 @@ export default function useApplyPreset({
             return
           }
           if (type === 'coil') {
-            const coilType = props?.coilType === 'polygon' ? 'polygonCoil' : 'ringCoil'
+            const coilType =
+              props?.coilType === 'polygon'
+                ? 'polygonCoil'
+                : props?.coilType === 'solenoid'
+                  ? 'solenoid'
+                  : 'ringCoil'
             addObject?.(coilType, props)
             return
           }

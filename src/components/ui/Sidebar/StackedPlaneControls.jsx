@@ -1,5 +1,5 @@
 import React from "react";
-import NumberInput from "./NumberInput";
+import { InlineDecimalInput } from "../io/decimalInput";
 import { VAL_MIN, VAL_MAX, ERROR_MSG } from "./utils";
 
 export default function StackedPlaneControls({ 
@@ -18,20 +18,45 @@ export default function StackedPlaneControls({
 
   return (
     <>
-      {/* 1. Spacing Control */}
-      <div className="detail-row">
-        <div className="detail-key">Spacing</div>
-        <div className="detail-value">
-          <NumberInput
-            value={obj.spacing ?? 1.0}
-            min={0.01}
-            step={0.1}
-            style={{ width: 140 }}
-            onChange={(val) => {
-              if (setSpacing) setSpacing(obj.id, val);
-              else updateObject(obj.id, { spacing: val });
-            }}
-          />
+      {/* 1. Spacing + Infinite */}
+      <div
+        className="detail-row"
+        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
+      >
+        <div>
+          <div className="detail-key">Spacing</div>
+          <div className="detail-value">
+            <InlineDecimalInput
+              value={obj.spacing ?? 1.0}
+              min={0.01}
+              step={0.1}
+              onChange={(val) => {
+                if (setSpacing) setSpacing(obj.id, val);
+                else updateObject(obj.id, { spacing: val });
+              }}
+            />
+          </div>
+        </div>
+        <div>
+          <div className="detail-key">Infinite</div>
+          <div className="detail-value">
+            <label
+              style={{
+                display: "inline-flex",
+                gap: 8,
+                alignItems: "center"
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={obj.infinite || false}
+                onChange={(e) =>
+                  updateObject(obj.id, { infinite: e.target.checked })
+                }
+                onClick={(e) => e.stopPropagation()}
+              />
+            </label>
+          </div>
         </div>
       </div>
 
@@ -41,10 +66,11 @@ export default function StackedPlaneControls({
         
         {densities.map((density, index) => (
           <div key={index} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>
-            <span style={{ fontSize: "0.8em", opacity: 0.7, width: 20 }}>#{index + 1}</span>
-            <NumberInput
+            <span style={{ fontSize: "0.8em", opacity: 0.7, width: 20 }}>{index + 1}</span>
+            <InlineDecimalInput
               value={density}
               min={VAL_MIN} max={VAL_MAX}
+              step={0.1}
               style={{ flex: 1 }}
               onChange={(val) => {
                 if (setChargeDensity) setChargeDensity(obj.id, index, val);
