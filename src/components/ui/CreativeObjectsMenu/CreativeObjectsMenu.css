@@ -6,6 +6,7 @@
   animation: creativeMenuSlideIn 0.22s cubic-bezier(0.25, 0.8, 0.3, 1);
   will-change: transform, opacity;
   pointer-events: auto;
+  transition: left 0.3s ease;
 }
 
 @keyframes creativeMenuSlideIn {
@@ -62,7 +63,7 @@
   color: #76baff;
   border: none;
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
@@ -71,7 +72,8 @@
 }
 
 .creative-menu-toggle-button:hover {
-  background: #2a2a2a;
+  transform: scale(1.2);
+  border: 1px solid #76baff;
 }
 
 
@@ -132,13 +134,12 @@
     bottom: 10px;
   }
 
-    flex-direction: column;
+    
   }
 
   .creative-menu-grid {
     grid-template-columns: repeat(2, minmax(100px, 1fr));
     grid-auto-flow: row
-  .creative-menu-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  }
+
+ 
 }

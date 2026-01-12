@@ -30,6 +30,7 @@ export default function StackedPlanes({
   quaternion,
   hoveredId,
   showLabel = true,
+  onHideLabel,
 }) {
   const isSelected = id === selectedId
   const isHovered = id === hoveredId
@@ -192,6 +193,8 @@ export default function StackedPlanes({
                 value={`ρ = ${charge_density === undefined ? 0..toExponential(2) : charge_density.toExponential(2)} C/m³`}
                 offsetY={spacing * charge_densities.length / 2 + 0.8}
                 distanceFactor={8 * charge_densities.length}
+                objectId={id}
+                onHideLabel={onHideLabel}
               />
             )}
     </PivotControls>

@@ -23,7 +23,8 @@ export default function Sphere({
   useSlice,
   creativeMode,        
   isHovered,
-  showLabel = true
+  showLabel = true,
+  onHideLabel,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -99,6 +100,8 @@ export default function Sphere({
           objectName={name}
           value={`ρ = ${charge_density === undefined ? 0..toExponential(2) : charge_density.toExponential(2)} C/m³`}
           offsetY={radius + 0.5}
+          objectId={id}
+          onHideLabel={onHideLabel}
         />
       )}
       <mesh

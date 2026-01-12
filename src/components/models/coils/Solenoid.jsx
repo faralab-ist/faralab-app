@@ -35,6 +35,7 @@ export default function Solenoid({
   // Path props (charges)
   charges = [],
   showLabel = true,
+  onHideLabel,
 }) {
   const computeSolenoidNormal = useCallback(() => {
     // Local normal is +Z (for solenoid along Z axis)
@@ -70,7 +71,6 @@ export default function Solenoid({
   return (
     <BaseCoil
       id={id}
-      showLabel={showLabel}
       name={name}
       position={position}
       selectedId={selectedId}
@@ -96,6 +96,8 @@ export default function Solenoid({
       isClosedPath={false}
       computeNormal={computeSolenoidNormal}
       getPathPoints={getSolenoidPoints}
+      showLabel={showLabel}
+      onHideLabel={onHideLabel}
       ac={ac}
       coilGeometry={
         null
