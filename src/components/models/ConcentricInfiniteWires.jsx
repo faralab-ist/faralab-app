@@ -28,8 +28,8 @@ export default function ConcentricInfiniteWires({
     updateDirection,
     dielectrics,
     charges,
-    showLabel
-  
+    showLabel,
+    onHideLabel,
     
 }) {
     const groupRef = useRef()
@@ -198,6 +198,8 @@ useEffect(() => {
                     value={chargePerSurfaceArr.map((charge, i) => `E-Field${i + 1} = ${charge.toExponential(2)} C`)}
                     offsetY={radiuses[radiuses.length - 1] + 0.5}
                     distanceFactor={10 * radiuses.length}
+                    objectId={id}
+                    onHideLabel={onHideLabel}
                   />
                 )}
     </PivotControls>

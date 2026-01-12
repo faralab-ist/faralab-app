@@ -27,6 +27,7 @@ export default function Path({
   groupRef: parentGroupRef,
   showLabel = true,
   glowMultiplier = 1.0,
+  onHideLabel,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -273,6 +274,8 @@ export default function Path({
           
           value={`I = ${electricCurrent.toExponential(2)} A`}
           offsetY={0.5}
+          objectId={id}
+          onHideLabel={onHideLabel}
         />
       )}
       <group ref={groupRef}>

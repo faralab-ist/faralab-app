@@ -25,7 +25,8 @@ export default function FaradayCoil({
   tubeRadius = 0.05,
   chargeCount = 12,
   showLabel = true,
-  magneticFlux
+  magneticFlux,
+  onHideLabel,
 }) {
   const radialSamples = 10;
   const angularSamples = 10;
@@ -225,6 +226,8 @@ export default function FaradayCoil({
         ]}
           offsetY={radius + 0.5}
           distanceFactor={8}
+          objectId={id}
+          onHideLabel={onHideLabel}
           />
         )}
         <mesh 

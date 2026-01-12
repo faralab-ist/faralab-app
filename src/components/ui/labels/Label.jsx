@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Html } from '@react-three/drei'
 import './Label.css'
 
@@ -13,6 +13,8 @@ import './Label.css'
  * @param {number} offsetY - Vertical offset from position (default: 0.5)
  * @param {number} distanceFactor - Scale factor for distance-based sizing (default: 8)
  * @param {string} className - Additional CSS class for custom styling
+ * @param {string} objectId - ID of the object to hide label for
+ * @param {Function} onHideLabel - Callback to hide this label
  */
 export default function Label({ 
   position = [0, 0, 0], 
@@ -22,8 +24,12 @@ export default function Label({
   value, 
   offsetY = 0.5,
   distanceFactor = 8,
-  className = ''
+  className = '',
+  objectId,
+  onHideLabel
  }) {
+  const [isHovered, setIsHovered] = useState(false)
+  
   // Support both single and multiple name-value pairs
   const isSingleHeader = typeof name === 'string' && Array.isArray(value)
   const renderSingleHeader = !objectName && isSingleHeader
@@ -32,7 +38,14 @@ export default function Label({
 
   const labelPosition = [position[0], position[1] + offsetY, position[2]]
 
-  const interactive = Boolean(headerContent)
+  const interactive = Boolean(headerContent) || Boolean(onHideLabel)
+
+  const handleCloseClick = (e) => {
+    e.stopPropagation()
+    if (onHideLabel && objectId) {
+      onHideLabel(objectId)
+    }
+  }
 
   return (
     <Html
@@ -41,13 +54,26 @@ export default function Label({
       zIndexRange={[0, 100]}
       style={{ 
         transform: 'translate3d(-50%, -100%, 0)',
-        pointerEvents: interactive ? 'auto' : 'none',
-        userSelect: interactive ? 'auto' : 'none',
+        pointerEvents: 'auto',
+        userSelect: 'auto',
         paddingBottom: '10px'
       }}
     >
-      <div className={`label-wrap ${className}`}>
-        <div className="label-panel">
+      <div 
+        className={`label-wrap ${className}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className={`label-panel ${isHovered ? 'label-hovered' : ''}`}>
+          {isHovered && onHideLabel && objectId && (
+            <button 
+              className="label-close-btn"
+              onClick={handleCloseClick}
+              title="Hide label"
+            >
+              ×
+            </button>
+          )}
           {/* Custom header content (e.g., editable POS for test charges) */}
           {headerContent ? (
             <div className="label-header">{headerContent}</div>

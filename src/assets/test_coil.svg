@@ -1,0 +1,24 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circle outline (wire) -->
+  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1" fill="none"/>
+  
+  <!-- 5 beads distributed around the circle wire -->
+  <!-- Bead 1 (top) -->
+  <circle cx="12" cy="3" r="1.8" fill="currentColor"/>
+  
+  <!-- Bead 2 (upper right) -->
+  <circle cx="20.46" cy="8.16" r="1.8" fill="currentColor"/>
+  
+  <!-- Bead 3 (lower right) -->
+  <circle cx="18.36" cy="17.84" r="1.8" fill="currentColor"/>
+  
+  <!-- Bead 4 (lower left) -->
+  <circle cx="5.64" cy="17.84" r="1.8" fill="currentColor"/>
+  
+  <!-- Bead 5 (upper left) -->
+  <circle cx="3.54" cy="8.16" r="1.8" fill="currentColor"/>
+  
+  <!-- Test marker (small cross in center) -->
+  <line x1="12" y1="9.5" x2="12" y2="14.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+  <line x1="9.5" y1="12" x2="14.5" y2="12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

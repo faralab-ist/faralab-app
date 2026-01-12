@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './DockSidebar.css';
 import TestChargeMenu from '../Toolbar/ToolbarPopup/TestChargeMenu';
 import SlicerMenu from '../Toolbar/ToolbarPopup/SlicerMenu';
@@ -19,6 +19,7 @@ import test_charge_icon from '../../../assets/lowercase_q2.svg';
  * @param {Function} props.setTabOrder - Update tab order
  * @param {Object} props.testChargeProps - Props for TestChargeMenu
  * @param {Object} props.slicerProps - Props for SlicerMenu
+ * @param {Function} props.onSidebarStateChange - Callback when sidebar state changes
  */
 export default function DockSidebar({
   dockedWindows,
@@ -28,7 +29,8 @@ export default function DockSidebar({
   testChargeProps,
   slicerProps,
   efieldProps,
-  gaussianProps
+  gaussianProps,
+  onSidebarStateChange
 }) {
   const [draggedTab, setDraggedTab] = useState(null);
   const [dragOverTab, setDragOverTab] = useState(null);
@@ -46,6 +48,14 @@ const [expandedWindows, setExpandedWindows] = useState({
 
   // If no windows docked, show collapsed state
   const isCollapsed = dockedWindowNames.length === 0;
+
+  // Notify parent when sidebar state changes
+  useEffect(() => {
+    if (onSidebarStateChange) {
+      const sidebarWidth = isCollapsed ? 0 : (isMinimized ? 60 : 320);
+      onSidebarStateChange({ isMinimized, isCollapsed, width: sidebarWidth });
+    }
+  }, [isMinimized, isCollapsed, onSidebarStateChange]);
 
   // Map window names to icons
   const getWindowIcon = (windowName) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ObjectItem from "./ObjectItem";
-import "./Sidebar.css"; // Certifica-te que copiaste o CSS para aqui
+import "./Sidebar.css"; 
 import { add } from "three/tsl";
 
 export default function ObjectList({ 
