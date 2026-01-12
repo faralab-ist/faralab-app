@@ -116,6 +116,7 @@ export default function CreativeObjectsMenu({ addObject }) {
       onMouseLeave={handleMouseLeave}
     >
       <div className={`creative-menu-panel ${isExpanded ? 'expanded' : 'collapsed'}`}>
+        {!isExpanded && <span className="creative-menu-label">Objects</span>}
         
         {!isExpanded && (
           <button className="creative-menu-toggle-button" title="Add Objects">
