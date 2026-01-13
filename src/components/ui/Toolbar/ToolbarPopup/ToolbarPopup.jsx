@@ -114,7 +114,7 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
     
     // Don't start drag if clicking on interactive elements
     const target = ev.target
-    const isButton = target.closest('button, input, select, textarea, a, [role="button"]')
+    const isButton = target.closest('button, input, select, textarea, a, [role="button"], .inline-decimal-wrapper, #inline-decimal, .inline-decimal-arrow')
     if (isButton) return
     
     ev.preventDefault()

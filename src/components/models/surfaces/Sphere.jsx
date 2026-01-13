@@ -142,7 +142,7 @@ export default function Sphere({
           position={[0, radius, 0]}
           objectName={name}
           value={`Φ = ${fluxValue.toExponential(2)} N⋅m²/C`}
-          offsetY={0}
+          offsetY={0.5}
           distanceFactor={10}
           objectId={id}
           onHideLabel={onHideLabel}

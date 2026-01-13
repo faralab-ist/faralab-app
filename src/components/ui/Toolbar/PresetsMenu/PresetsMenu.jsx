@@ -64,12 +64,18 @@ const PRESETS = [
     label: 'Induction',
     name: 'induction',
     category: 'magnetostatic'
+  },
+  {
+    id: 'solenoid',
+    label: 'Solenoid',
+    name: 'solenoid',
+    category: 'magnetostatic'
   }
 ]
-
-const PresetsMenu = ({ 
-  isVisible, 
-  onApplyPreset,
+  
+  const PresetsMenu = ({ 
+    isVisible, 
+    onApplyPreset,
   sceneObjects,
   camera,
   settings

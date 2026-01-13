@@ -618,6 +618,17 @@ function LoadingOverlay() {
             showSlicePlaneHelper
           }}
         />
+       {/*  <div className="field-legend" aria-label="Field color legend">
+          <div className="legend-row">
+            <span className="legend-swatch legend-electric" />
+            <span className="legend-label">Electric Field</span>
+          </div>
+          <div className="legend-row">
+            <span className="legend-swatch legend-magnetic" />
+            <span className="legend-label">Magnetic Field</span>
+          </div>
+        </div>*/}
+
 
        {/* <ObjectPopup
           selectedObject={sceneObjects.find(o => o.id === selectedId)}

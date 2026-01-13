@@ -202,7 +202,67 @@ export function exportPreset({ sceneObjects, camera, settings, name = 'custom-pr
               charge: obj.charge ?? 1,
               velocity: obj.velocity ?? 1,
               renderCharges: obj.renderCharges ?? true,
+              charges: obj.charges ?? [],
+              ...(obj.coilType === 'solenoid' && {
+                length: obj.length ?? 3,
+                radius: obj.radius ?? 0.3,
+                multiplier: obj.multiplier ?? 1,
+                resolution: obj.resolution ?? 10
+              })
+            }
+          }
+
+        case 'solenoid':
+          return {
+            type: 'solenoid',
+            props: {
+              ...baseProps,
+              length: obj.length ?? 3,
+              radius: obj.radius ?? 0.3,
+              direction: obj.direction || [0, 1, 0],
+              rotation: obj.rotation || [0, 0, 0],
+              multiplier: obj.multiplier ?? 1,
+              resolution: obj.resolution ?? 10,
               charges: obj.charges ?? []
+            }
+          }
+
+        case 'barMagnet':
+          return {
+            type: 'barMagnet',
+            props: {
+              ...baseProps,
+              length: obj.length ?? 3,
+              radius: obj.radius ?? 0.3,
+              numOfCoils: obj.numOfCoils ?? 10,
+              chargesPerCoil: obj.chargesPerCoil ?? 10,
+              pointsPerCoil: obj.pointsPerCoil ?? 20,
+              charge: obj.charge ?? 1,
+              velocity: obj.velocity ?? 1,
+              charges: obj.charges ?? [],
+              direction: obj.direction || [0, 1, 0],
+              rotation: obj.rotation || [0, 0, 0],
+              frozen: obj.frozen ?? true,
+              animated: obj.animated ?? false,
+              amplitude: obj.amplitude ?? 0.5,
+              freq: obj.freq ?? 1
+            }
+          }
+
+        case 'faradayCoil':
+          return {
+            type: 'faradayCoil',
+            props: {
+              ...baseProps,
+              radius: obj.radius ?? 1,
+              tubeRadius: obj.tubeRadius ?? 0.01,
+              coilColor: obj.coilColor ?? '#6ea8ff',
+              direction: obj.direction || [0, 1, 0],
+              rotation: obj.rotation || [0, 0, 0],
+              chargeCount: obj.chargeCount ?? 5,
+              numOfPoints: obj.numOfPoints ?? 20,
+              magneticFlux: obj.magneticFlux ?? 0,
+              emf: obj.emf ?? 0
             }
           }
         
