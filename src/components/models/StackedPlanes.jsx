@@ -3,6 +3,7 @@ import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import * as THREE from 'three'
 import Label from '../ui/labels/Label'
+import LayerLabel from '../ui/labels/LayerLabel'
 
 
 export default function StackedPlanes({ 
@@ -158,31 +159,33 @@ export default function StackedPlanes({
             const offset = (i) * s - center * s
             const color = (q ?? 0) > 0 ? 'blue' : (q ?? 0) < 0 ?'red' : 'gray'
             return (
-              <mesh
-                key={i}
-                ref={i === 0 ? meshRef : undefined}
-                rotation={baseEuler}               // lay plane flat
-                userData={{
-                  id,
-                  type: 'stackedPlanes',
-                  idx: i,
-                  charge_density: q,
-                  infinite,
-                  material
-                }}
-                position={[0, offset, 0]}
-                onPointerDown={(e) => {
-                  if (e.button !== undefined && e.button !== 0) return
-                  e.stopPropagation()
-                  setSelectedId(id)
-                }}
-              >
-                <planeGeometry args={[width, height, 10, 6]} />
-                <meshStandardMaterial
-                  color={color}
-                  side={THREE.DoubleSide}
-                />
-              </mesh>
+              <group key={i}>
+                <mesh
+                  ref={i === 0 ? meshRef : undefined}
+                  rotation={baseEuler}               // lay plane flat
+                  userData={{
+                    id,
+                    type: 'stackedPlanes',
+                    idx: i,
+                    charge_density: q,
+                    infinite,
+                    material
+                  }}
+                  position={[0, offset, 0]}
+                  onPointerDown={(e) => {
+                    if (e.button !== undefined && e.button !== 0) return
+                    e.stopPropagation()
+                    setSelectedId(id)
+                  }}
+                >
+                  <planeGeometry args={[width, height, 10, 6]} />
+                  <meshStandardMaterial
+                    color={color}
+                    side={THREE.DoubleSide}
+                  />
+                </mesh>
+                <LayerLabel layerIndex={i} position={[width / 2 + 0.3, offset, 0]} />
+              </group>
             )
           })
         })()}
@@ -190,7 +193,7 @@ export default function StackedPlanes({
       {showLabel && (
               <Label
                 objectName={name}
-                value={`ρ = ${charge_density === undefined ? 0..toExponential(2) : charge_density.toExponential(2)} C/m³`}
+                value={charge_densities.map((charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`)}
                 offsetY={spacing * charge_densities.length / 2 + 0.8}
                 distanceFactor={8 * charge_densities.length}
                 objectId={id}

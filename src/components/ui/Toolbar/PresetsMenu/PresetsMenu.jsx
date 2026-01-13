@@ -9,61 +9,61 @@ const PRESETS = [
     id: 'monopole',
     label: 'Monopole',
     name: 'monopole',
-    category: 'basic'
+    category: 'electrostatic'
   },
   {
     id: 'dipole',
     label: 'Dipole',
     name: 'dipole',
-    category: 'basic'
+    category: 'electrostatic'
   },
   {
     id: 'tripole',
     label: 'Tripole',
     name: 'tripole',
-    category: 'basic'
+    category: 'electrostatic'
   },
   {
-    id: 'infiniteWire',
+    id: 'wire_w_gaussian',
     label: 'Wire',
-    name: 'infiniteWire',
-    category: 'basic'
-  },
-  {
-    id: 'currentLoop',
-    label: 'Current Loop',
-    name: 'currentLoop',
-    category: 'magnetic'
+    name: 'wire_w_gaussian',
+    category: 'electrostatic'
   },
   {
     id: 'singlePlane',
     label: '1 Plane',
     name: 'singlePlane',
-    category: 'plane'
+    category: 'electrostatic'
   },
   {
-    id: 'parallelPlanes',
-    label: '2 Planes',
-    name: 'parallelPlanes',
-    category: 'plane'
+    id: 'capacitor',
+    label: 'Plate Capacitor',
+    name: 'capacitor',
+    category: 'electrostatic'
   },
   {
     id: 'sphericalCapacitor',
-    label: 'Spherical Capacitor',
+    label: 'Sphere Capacitor',
     name: 'sphericalCapacitor',
-    category: 'geometry'
+    category: 'electrostatic'
   },
   /*{
     id: 'cylinder',
     label: 'Cylinder',
     name: 'cylinder',
-    category: 'geometry'
+    category: 'electrostatic'
   },*/
+  {
+    id: 'currentLoop',
+    label: 'Current Loop',
+    name: 'currentLoop',
+    category: 'magnetostatic'
+  },
   {
     id: 'induction',
     label: 'Induction',
     name: 'induction',
-    category: 'magnetic'
+    category: 'magnetostatic'
   }
 ]
 
@@ -117,26 +117,54 @@ const PresetsMenu = ({
     input.click()
   }
 
+  // Group presets by category
+  const groupedPresets = {
+    electrostatic: PRESETS.filter(p => p.category === 'electrostatic'),
+    magnetostatic: PRESETS.filter(p => p.category === 'magnetostatic')
+  }
+
   return (
     <>
       <div className="presets-menu">
         <div className="presets-menu-panel">
           
-          {/* All Presets */}
-          <div className="presets-menu-section">
-            <div className="presets-menu-grid">
-              {PRESETS.map(preset => (
-                <button
-                  key={preset.id}
-                  className="presets-menu-item"
-                  onClick={() => handleLoadPreset(preset.name)}
-                  title={`Load ${preset.label} preset`}
-                >
-                  {preset.label}
-                </button>
-              ))}
+          {/* Electrostatic Presets */}
+          {groupedPresets.electrostatic.length > 0 && (
+            <div className="presets-menu-section">
+              <div className="presets-menu-category-label">Electrostatic</div>
+              <div className="presets-menu-grid">
+                {groupedPresets.electrostatic.map(preset => (
+                  <button
+                    key={preset.id}
+                    className="presets-menu-item"
+                    onClick={() => handleLoadPreset(preset.name)}
+                    title={`Load ${preset.label} preset`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Magnetostatic Presets */}
+          {groupedPresets.magnetostatic.length > 0 && (
+            <div className="presets-menu-section">
+              <div className="presets-menu-category-label">Magnetostatic</div>
+              <div className="presets-menu-grid">
+                {groupedPresets.magnetostatic.map(preset => (
+                  <button
+                    key={preset.id}
+                    className="presets-menu-item"
+                    onClick={() => handleLoadPreset(preset.name)}
+                    title={`Load ${preset.label} preset`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Separator */}
           <div className="presets-menu-separator" />

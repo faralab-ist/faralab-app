@@ -172,7 +172,7 @@ export default function Cuboid({
         <Label
           position={[0, (height / 2) + 0.5, 0]}
           objectName={name}
-          value={`${fluxValue.toExponential(2)} N⋅m²/C`}
+          value={`Φ = ${fluxValue.toExponential(2)} N⋅m²/C`}
           offsetY={0.5}
           distanceFactor={10}
           objectId={id}

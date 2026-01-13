@@ -40,21 +40,21 @@ const CREATIVE_OBJECTS = [
   },
    {
     id: 'testCoil',
-    label: 'Test Coil',
+    label: 'Test Loop',
     type: 'testCoil',
     defaultProps: { position: [0, 0, 0] },
     category: 'test'
   },
   {
     id: 'ringCoil',
-    label: 'Ring Coil',
+    label: 'Ring Loop',
     type: 'ringCoil',
     defaultProps: { position: [0, 0, 0] },
     category: 'magnetic'
   },
   {
     id: 'polygonCoil',
-    label: 'Polygon Coil',
+    label: 'Polygon Loop',
     type: 'polygonCoil',
     defaultProps: { position: [0, 0, 0] },
     category: 'magnetic'
@@ -68,7 +68,7 @@ const CREATIVE_OBJECTS = [
   },
   {
     id: 'faradayCoil',
-    label: 'Faraday Coil',
+    label: 'Faraday Loop',
     type: 'faradayCoil',
     defaultProps: { position: [0, 0, 0] },
     category: 'magnetic'

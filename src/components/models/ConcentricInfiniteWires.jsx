@@ -4,6 +4,7 @@ import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import { efields } from '../../physics'
 import * as THREE from 'three'
 import Label from '../ui/labels/Label'
+import LayerLabel from '../ui/labels/LayerLabel'
 
 export default function ConcentricInfiniteWires({ 
     id, 
@@ -156,8 +157,8 @@ useEffect(() => {
       lineWidth={2.5}
     >
      <group ref={groupRef}>
-        {radiuses.map((rad, i) => <mesh
-            key={i}
+        {radiuses.map((rad, i) => <group key={i}>
+            <mesh
             ref={meshRef}
             userData={{
             id,
@@ -189,7 +190,9 @@ useEffect(() => {
               depthWrite={true}
               clippingPlanes={clippingPlanes}
             />
-        </mesh>)}
+        </mesh>
+        <LayerLabel layerIndex={i} position={[rad + 0.3, 0.1, 0]} />
+        </group>)}
       </group> 
        {showLabel && (
                   <Label

@@ -1,0 +1,70 @@
+{
+  "capacitor": {
+    "context": {},
+    "camera": {
+      "position": [
+        17.137196206702004,
+        1,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        0
+      ]
+    },
+    "settings": {
+      "vectorMinTsl": 30,
+      "vectorScale": 2.1,
+      "vectorStep": 0.6,
+      "lineMin": 0.12,
+      "lineNumber": 28,
+      "showField": true,
+      "showBField": false,
+      "showLines": false,
+      "showEquipotentialSurface": false,
+      "showOnlyGaussianField": false,
+      "planeFilter": null,
+      "slicePlane": null,
+      "slicePos": 0,
+      "useSlice": false,
+      "slicePlaneFlip": false,
+      "showSlicePlaneHelper": true
+    },
+    "objects": [
+      {
+        "type": "stackedPlanes",
+        "props": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "charge_densities": [
+            2,
+            -2
+          ],
+          "spacing": 1.81,
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            1,
+            2.220446049250313e-16
+          ],
+          "dimensions": [
+            8,
+            8,
+            0.1
+          ],
+          "planeWidth": 5,
+          "planeHeight": 5,
+          "infinite": true
+        }
+      }
+    ]
+  }
+}

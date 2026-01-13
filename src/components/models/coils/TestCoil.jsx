@@ -47,8 +47,8 @@ export default function TestCoil({
 
   const wireMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
-      color: '#444',
-      metalness: 0.8,
+      color: '#ffffff',
+      metalness: 0.5,
       roughness: 0.2,
     });
   }, []);
