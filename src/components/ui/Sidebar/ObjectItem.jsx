@@ -143,9 +143,7 @@ export default function ObjectItem({
             />
             <circle cx="16.5" cy="7.5" r="1.5" fill="currentColor" />
           </svg>
-          <span className="label-toggle-text">Label</span>
         </button>
-        <div className="expand-btn">{expanded ? "▾" : "▸"}</div>
       </div>
 
       <div

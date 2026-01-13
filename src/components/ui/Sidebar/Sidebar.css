@@ -72,7 +72,7 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 /*deixa as filas de cada objeto bonitinhas na sidebar maximizada ##### É USADO ######*/
 .object-row {
   display: grid;
-  grid-template-columns: auto 1fr auto auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: clamp(8px, 0.5rem, 10px);
   padding: clamp(8px, 0.5rem, 10px) clamp(10px, 0.625rem, 12px);
@@ -88,8 +88,8 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   align-items: center;
   justify-content: center;
   gap: 2px;
-  width: 45px;
-  height: 38px;
+  width: 40px;
+  height: 36px;
   border-radius: 8px;
   border: 1px solid #2a2a2a;
   background: #141414;
@@ -108,8 +108,8 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 }
 
 .label-toggle-icon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   display: block;
 }
 
