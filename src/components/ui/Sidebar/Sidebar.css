@@ -165,8 +165,8 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   box-sizing: border-box;
   opacity: 0;
   overflow: hidden;
-  will-change: height, opacity, padding;
-  transition: height 0.35s ease, opacity 0.2s ease, padding 0.35s ease;
+  will-change: height, opacity;
+  transition: height 0.35s ease, opacity 0.2s ease;
 }
 
 .object-row-wrapper.expanded .object-details {
@@ -178,7 +178,6 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 
 /* keep expanded class for compatibility, but wrapper drives animation */
 .object-details.expanded {
-  padding: 8px 12px;        /* tighter */
   opacity: 1;
 }
 
@@ -187,6 +186,12 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.object-details.expanded .details-grid {
+  padding: 8px 12px;
 }
 
 /* quando apago, ele apaga as linhas entra os detalhes do objeto ##### É USADO ###### */

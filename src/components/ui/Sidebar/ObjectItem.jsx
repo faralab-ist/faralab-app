@@ -27,20 +27,33 @@ export default function ObjectItem({
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
   const detailsRef = useRef(null);
+  const detailsContentRef = useRef(null);
   const [detailsHeight, setDetailsHeight] = useState(0);
 
   useLayoutEffect(() => {
-    const el = detailsRef.current;
-    if (!el) return;
+    const el = detailsContentRef.current;
+    if (!el) return undefined;
 
-    if (expanded) {
-      // Measure after layout so the expand animation has a target height.
-      const next = el.scrollHeight;
-      setDetailsHeight(next + 12);
-    } else {
+    if (!expanded) {
       setDetailsHeight(0);
+      return undefined;
     }
-  }, [expanded, obj]);
+
+    const updateHeight = () => {
+      const next = el.scrollHeight;
+      setDetailsHeight((prev) => (prev === next ? prev : next));
+    };
+
+    updateHeight();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(() => updateHeight());
+      observer.observe(el);
+      return () => observer.disconnect();
+    }
+
+    return undefined;
+  }, [expanded]);
 
   // ícone
   let iconData = { icon: null, alt: "", subtype: obj.type };
@@ -115,7 +128,7 @@ export default function ObjectItem({
         className={`object-details ${expanded ? "expanded" : ""}`}
         style={{ height: expanded ? detailsHeight : 0 }}
       >
-        <div className="details-grid">
+        <div ref={detailsContentRef} className="details-grid">
             {/* Position com InlineDecimalInput */}
             {Array.isArray(obj.position)  && (
               <div className="detail-row">
