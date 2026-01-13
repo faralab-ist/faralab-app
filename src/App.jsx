@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
   import { Canvas, useThree } from '@react-three/fiber'
-  import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Html } from '@react-three/drei'
   import './App.css'
   import * as THREE from 'three'
 
@@ -119,7 +119,10 @@ function LoadingOverlay() {
   }
 
   function WhiteAxes({ size = 1 }) {
+  const [hovered, setHovered] = useState(false)
   const axes = useMemo(() => new THREE.AxesHelper(size), [size])
+  const hitRadius = 0.08
+  const labelOffset = 0.2
 
   useEffect(() => {
     if (axes.setColors) {
@@ -127,7 +130,49 @@ function LoadingOverlay() {
     }
   }, [axes])
 
-  return <primitive object={axes} />
+  return (
+    <group>
+      <primitive object={axes} />
+
+      {/* Invisible hit areas for hover */}
+      <mesh
+        position={[size / 2, 0, 0]}
+        rotation={[0, 0, Math.PI / 2]}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
+        onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
+      >
+        <cylinderGeometry args={[hitRadius, hitRadius, size, 6]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+      <mesh
+        position={[0, size / 2, 0]}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
+        onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
+      >
+        <cylinderGeometry args={[hitRadius, hitRadius, size, 6]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+      <mesh
+        position={[0, 0, size / 2]}
+        rotation={[Math.PI / 2, 0, 0]}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
+        onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
+      >
+        <cylinderGeometry args={[hitRadius, hitRadius, size, 6]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
+
+      <Html position={[size + labelOffset, 0, 0]} center>
+        <span className={`axis-label ${hovered ? 'axis-label--visible' : ''}`}>x</span>
+      </Html>
+      <Html position={[0, size + labelOffset, 0]} center>
+        <span className={`axis-label ${hovered ? 'axis-label--visible' : ''}`}>y</span>
+      </Html>
+      <Html position={[0, 0, size + labelOffset]} center>
+        <span className={`axis-label ${hovered ? 'axis-label--visible' : ''}`}>z</span>
+      </Html>
+    </group>
+  )
 }
 
 
@@ -372,7 +417,7 @@ function LoadingOverlay() {
         position: [1.133, 0.794, 3.477],
         target: cameraState.target,
         up: [0, 1, 0],
-        duration: 1.2
+        duration: 0.7
       })
 
       initialCameraApplied.current = true
