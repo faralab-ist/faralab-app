@@ -211,7 +211,7 @@ function LoadingOverlay() {
       // Wave propagation settings for field arrows
       const [wavePropagationEnabled, setWavePropagationEnabled] = useState(false)
       const [waveDuration, setWaveDuration] = useState(0.1) // seconds per instance reveal
-    const [cameraState, setCameraState] = useState({ position: [15, 15, 15], target: [0, 0, 0] })
+    const [cameraState, setCameraState] = useState({ position: [1.133, 0.794, 3.477], target: [0, 0, 0] })
     
     // Docker sidebar state
     const [dockedWindows, setDockedWindows] = useState({ TestCharge: false, Slice: false, EField: false, Gaussian: false })
@@ -356,6 +356,27 @@ function LoadingOverlay() {
       }
     }, [showOnlyGaussianField, sceneObjects])
     const [camFns, setCamFns] = useState(null)
+    const initialCameraApplied = useRef(false)
+
+    useEffect(() => {
+      if (!camFns?.setCameraPreset || !camFns?.animateCameraPreset) return
+      if (initialCameraApplied.current) return
+
+      camFns.setCameraPreset({
+        position: [0, 0, 4],
+        target: cameraState.target,
+        up: [0, 1, 0]
+      })
+
+      camFns.animateCameraPreset({
+        position: [1.133, 0.794, 3.477],
+        target: cameraState.target,
+        up: [0, 1, 0],
+        duration: 1.2
+      })
+
+      initialCameraApplied.current = true
+    }, [camFns, cameraState.target])
 
     const handlePlaneSelect = (plane) => {
       // Toggle: se clicar no mesmo plano, desativa
