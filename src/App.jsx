@@ -372,7 +372,7 @@ function LoadingOverlay() {
         position: [1.133, 0.794, 3.477],
         target: cameraState.target,
         up: [0, 1, 0],
-        duration: 1.2
+        duration: 0.7
       })
 
       initialCameraApplied.current = true
