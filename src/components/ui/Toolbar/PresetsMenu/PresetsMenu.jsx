@@ -65,12 +65,12 @@ const PRESETS = [
     name: 'induction',
     category: 'magnetostatic'
   },
-  {
+  /*{
     id: 'solenoid',
     label: 'Solenoid',
     name: 'solenoid',
     category: 'magnetostatic'
-  }
+  }*/ 
 ]
   
   const PresetsMenu = ({ 
