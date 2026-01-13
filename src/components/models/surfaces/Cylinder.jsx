@@ -159,7 +159,7 @@ export default function Cylinder({
         <Label
           position={[0, (height / 2) + 0.7, 0]}
           objectName={name}
-          value={`${fluxValue.toExponential(2)} N⋅m²/C`}
+          value={`Φ = ${fluxValue.toExponential(2)} N⋅m²/C`}
           offsetY={0}
           distanceFactor={10}
           objectId={id}

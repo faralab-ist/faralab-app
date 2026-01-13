@@ -4,6 +4,7 @@ import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import { efields } from '../../physics'
 import * as THREE from 'three'
 import Label from '../ui/labels/Label'
+import LayerLabel from '../ui/labels/LayerLabel'
 export default function ConcentricSpheres({ 
     id, 
     position, 
@@ -82,8 +83,8 @@ export default function ConcentricSpheres({
       scale={0.86}
       lineWidth={2.5}
     >
-      {radiuses.map((rad, i) => <mesh
-         key={i}
+      {radiuses.map((rad, i) => <group key={i}>
+        <mesh
          ref={meshRef}
         userData={{
           id,
@@ -110,12 +111,14 @@ export default function ConcentricSpheres({
           depthWrite={true}
           clippingPlanes={clippingPlanes}
         />
-      </mesh>)}
+      </mesh>
+      <LayerLabel layerIndex={i} position={[rad + 0.1, 0, 0]} />
+      </group>)}
        {showLabel && (
             <Label
               objectName={name}
-              value={chargePerSphereSurfaceArr.map((charge, i) => `E-Field${i + 1} = ${charge.toExponential(2)} C`)}
-              offsetY={radiuses[radiuses.length - 1] + 0.5}
+              value={chargePerSphereSurfaceArr.map((charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`)}
+              offsetY={radiuses[radiuses.length - 1] + 0.}
               distanceFactor={10 * radiuses.length}
               objectId={id}
               onHideLabel={onHideLabel}

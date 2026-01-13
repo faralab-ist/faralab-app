@@ -1,0 +1,99 @@
+{
+  "wire_w_gaussian": {
+  "context": {},
+  "camera": {
+    "position": [
+      2.996232897187296,
+      1.518242688592041,
+      8.121243299279946
+    ],
+    "target": [
+      0,
+      0,
+      0
+    ]
+  },
+  "settings": {
+    "vectorMinTsl": 0.08,
+    "vectorScale": 1.2,
+    "vectorStep": 1,
+    "lineMin": 0.12,
+    "lineNumber": 28,
+    "showField": true,
+    "showBField": false,
+    "showLines": false,
+    "showEquipotentialSurface": false,
+    "showOnlyGaussianField": true,
+    "planeFilter": null,
+    "slicePlane": null,
+    "slicePos": 0,
+    "useSlice": false,
+    "slicePlaneFlip": false,
+    "showSlicePlaneHelper": true
+  },
+  "objects": [
+    {
+      "type": "wire",
+      "props": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "direction": [
+          0,
+          0,
+          1
+        ],
+        "charge_density": 0.1,
+        "charge": 1,
+        "infinite": false,
+        "height": 15,
+        "radius": 0.03,
+        "material": "Dielectric"
+      }
+    },
+    {
+      "type": "testPointCharge",
+      "props": {
+        "position": [
+          3.0998063765737496,
+          2.3592259267004847,
+          2
+        ],
+        "charge": 0,
+        "radius": 0.03
+      }
+    },
+    {
+      "type": "surface",
+      "surfaceType": "cylinder",
+      "props": {
+        "position": [
+          0,
+          -5.295567513400988e-18,
+          -0.023849115880067995
+        ],
+        "charge_density": 0,
+        "opacity": 0.5,
+        "deformable": true,
+        "fixed": false,
+        "rotation": [
+          1.5707963267948963,
+          0,
+          0
+        ],
+        "quaternion": [
+          0.7071067811865475,
+          0,
+          0,
+          0.7071067811865476
+        ],
+        "sampleCount": 64,
+        "radius": 2,
+        "height": 6
+      }
+    }
+  ]
+  }
+}
