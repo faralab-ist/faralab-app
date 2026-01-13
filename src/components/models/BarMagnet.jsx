@@ -28,19 +28,19 @@ export default function BarMagnet({
   pointsPerCoil,
   velocity,
   creativeMode,
-    updateObject,
-    showDebug = false,
-    slicePlane,
-    slicePos,
-    useSlice,
-    slicePlaneFlip,
-    frozen = true,
-    animated,
-    amplitude,
-    freq,
-    dragOwnerId = null,
-    showLabel = true,
-    onHideLabel,
+  updateObject,
+  showDebug = false,
+  slicePlane,
+  slicePos,
+  useSlice,
+  slicePlaneFlip,
+  frozen = true,
+  animated,
+  amplitude,
+  freq,
+  dragOwnerId = null,
+  showLabel = true,
+  onHideLabel,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -111,10 +111,10 @@ export default function BarMagnet({
   // Sync PivotControls matrix when position changes externally (preset load)
   useLayoutEffect(() => {
     if (isDraggingRef.current || !pivotRef.current) return
-    
+
     const pos = new THREE.Vector3(position[0], position[1], position[2])
     const mat = new THREE.Matrix4().setPosition(pos)
-    
+
     // Update PivotControls internal state
     if (pivotRef.current.matrix) {
       pivotRef.current.matrix.copy(mat)
@@ -149,9 +149,9 @@ export default function BarMagnet({
 
   const clippingPlanes = useMemo(() => {
     if (!useSlice) return [];
-      let sliceFlip = -1;
-      if(slicePlaneFlip) sliceFlip = 1;
-      switch (slicePlane) {
+    let sliceFlip = -1;
+    if (slicePlaneFlip) sliceFlip = 1;
+    switch (slicePlane) {
       case 'xy': return [new THREE.Plane(new THREE.Vector3(0, 0, -sliceFlip), sliceFlip * slicePos)];
       case 'yz': return [new THREE.Plane(new THREE.Vector3(-sliceFlip, 0, 0), sliceFlip * slicePos)];
       case 'xz': return [new THREE.Plane(new THREE.Vector3(0, -sliceFlip, 0), sliceFlip * slicePos)];
@@ -159,52 +159,52 @@ export default function BarMagnet({
     }
   }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
 
-    useLayoutEffect(() => {
-      if (!groupRef.current || isDraggingRef.current) return
-  
-      // Prefer quaternion if available (most accurate)
-      if (quaternion && quaternion.length === 4) {
-        const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
-        groupRef.current.quaternion.copy(q)
-  
-        // keep direction in sync with quaternion: local Z is our "forward"
-        if (typeof updateDirection === 'function') {
-          const dirWorld = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
-          const [dx = 0, dy = 0, dz = 0] = direction || []
-          const eps = 1e-6
-          if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
-            updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
-          }
+  useLayoutEffect(() => {
+    if (!groupRef.current || isDraggingRef.current) return
+
+    // Prefer quaternion if available (most accurate)
+    if (quaternion && quaternion.length === 4) {
+      const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+      groupRef.current.quaternion.copy(q)
+
+      // keep direction in sync with quaternion: local Z is our "forward"
+      if (typeof updateDirection === 'function') {
+        const dirWorld = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
+        const [dx = 0, dy = 0, dz = 0] = direction || []
+        const eps = 1e-6
+        if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
+          updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
         }
-        return
       }
-  
-      // If rotation Euler (radians) is provided, apply it (XYZ) and keep direction in sync
-      if (Array.isArray(rotation) && rotation.length >= 3) {
-        const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
-        groupRef.current.rotation.copy(e)
-        // compute resulting forward direction (local Z) and update object if changed
-        if (typeof updateDirection === 'function') {
-          const dirWorld = new THREE.Vector3(0, 0, 1).applyEuler(e).normalize()
-          const [dx = 0, dy = 0, dz = 0] = direction || []
-          const eps = 1e-6
-          if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
-            updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
-          }
+      return
+    }
+
+    // If rotation Euler (radians) is provided, apply it (XYZ) and keep direction in sync
+    if (Array.isArray(rotation) && rotation.length >= 3) {
+      const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
+      groupRef.current.rotation.copy(e)
+      // compute resulting forward direction (local Z) and update object if changed
+      if (typeof updateDirection === 'function') {
+        const dirWorld = new THREE.Vector3(0, 0, 1).applyEuler(e).normalize()
+        const [dx = 0, dy = 0, dz = 0] = direction || []
+        const eps = 1e-6
+        if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
+          updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
         }
-        return
       }
-  
-      // Fallback to direction vector -> quaternion using local Z as base
-      if (direction) {
-        const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
-        if (dir.lengthSq() === 0) return
-        dir.normalize()
-        const from = new THREE.Vector3(0, 0, 1) // use Z as cylinder "neutral" axis
-        const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
-        groupRef.current.quaternion.copy(q)
-      }
-    }, [direction, quaternion, rotation, updateDirection, id])
+      return
+    }
+
+    // Fallback to direction vector -> quaternion using local Z as base
+    if (direction) {
+      const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
+      if (dir.lengthSq() === 0) return
+      dir.normalize()
+      const from = new THREE.Vector3(0, 0, 1) // use Z as cylinder "neutral" axis
+      const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
+      groupRef.current.quaternion.copy(q)
+    }
+  }, [direction, quaternion, rotation, updateDirection, id])
 
   const getChargePositions = () => {
     const outPos = positionsRef.current
@@ -275,8 +275,8 @@ export default function BarMagnet({
           outPos[idx][2] = tmpVec.current.z - (position[2] ?? 0)
         } else {
           outPos[idx] = [tmpVec.current.x - (position[0] ?? 0),
-                         tmpVec.current.y - (position[1] ?? 0),
-                         tmpVec.current.z - (position[2] ?? 0)]
+          tmpVec.current.y - (position[1] ?? 0),
+          tmpVec.current.z - (position[2] ?? 0)]
         }
 
         if (outTan[idx]) {
@@ -344,6 +344,14 @@ export default function BarMagnet({
     }
   });
 
+  const magnetization = useMemo(() => {
+    if (radius === 0 || length === 0) return 0;
+    if (!charge || !chargesPerCoil || !velocity) return 0;
+
+    return (numOfCoils * charge * chargesPerCoil * Math.abs(velocity)) /
+      (2 * Math.PI * radius * length);
+  }, [numOfCoils, charge, chargesPerCoil, velocity, radius, length]);
+
   return (
     <PivotControls
       ref={pivotRef}
@@ -368,22 +376,21 @@ export default function BarMagnet({
       scale={0.86}
       lineWidth={2.5}
     >
-      
-      <group ref={groupRef}>
-         {showLabel && (
-                <Label
 
-                  objectName={name}
-                  value={[
-                    `A = ${amplitude.toExponential(2)}`,
-                    `Freq: ${freq.toExponential(2)} Hz`,
-                  ]}
-                  offsetY={0.5 + radius}
-                  distanceFactor={8}
-                  objectId={id}
-                  onHideLabel={onHideLabel}
-                />
-              )}
+      <group ref={groupRef}>
+        {showLabel && (
+          <Label
+
+            objectName={name}
+            value={[
+              `M = ${magnetization.toExponential(2)} A/m`,
+            ]}
+            offsetY={0.5 + radius}
+            distanceFactor={8}
+            objectId={id}
+            onHideLabel={onHideLabel}
+          />
+        )}
         {/* Invisible hitbox for selection */}
         <mesh
           ref={meshRef}
@@ -413,17 +420,17 @@ export default function BarMagnet({
           <boxGeometry args={[radius * 2.2, radius * 2.2, length * 1.1]} />
           <meshBasicMaterial visible={false} />
         </mesh>
-        
+
         <group>
           {/* negative side (blue) - left half */}
-          <mesh position={[0, 0, -(length/4)]} castShadow receiveShadow>
+          <mesh position={[0, 0, -(length / 4)]} castShadow receiveShadow>
             <boxGeometry args={[radius * 2, radius * 2, Math.max(0.001, length / 2)]} />
-            <meshStandardMaterial color={'#2e86ff'} metalness={0.6} roughness={0.35} clippingPlanes={clippingPlanes}/>
+            <meshStandardMaterial color={'#2e86ff'} metalness={0.6} roughness={0.35} clippingPlanes={clippingPlanes} />
           </mesh>
           {/* positive side (red) - right half */}
-          <mesh position={[0, 0, (length/4)]} castShadow receiveShadow>
+          <mesh position={[0, 0, (length / 4)]} castShadow receiveShadow>
             <boxGeometry args={[radius * 2, radius * 2, Math.max(0.001, length / 2)]} />
-            <meshStandardMaterial color={'#ff4d4d'} metalness={0.6} roughness={0.35} clippingPlanes={clippingPlanes}/>
+            <meshStandardMaterial color={'#ff4d4d'} metalness={0.6} roughness={0.35} clippingPlanes={clippingPlanes} />
           </mesh>
         </group>
         {showDebug && catmullCurves.map((curve, idx) => {
@@ -434,7 +441,7 @@ export default function BarMagnet({
           return <primitive key={`curve-${idx}`} object={line} />;
         })}
       </group>
-      
+
     </PivotControls>
   )
 }
