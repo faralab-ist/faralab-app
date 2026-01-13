@@ -47,15 +47,20 @@ export function finitePlaneEField(planePos, planeNormal, planeDimensions, charge
     const uVec = new THREE.Vector3(1, 0, 0);
     if (Math.abs(normal.dot(uVec)) > 0.99) uVec.set(0, 1, 0); // avoid parallel
     const vVec = new THREE.Vector3().crossVectors(normal, uVec).normalize();
-    uVec.crossVectors(vVec, normal).normalize();
-
-    const dist = rVec.dot(normal);
-    if (Math.abs(dist) < 1e-6)
-        return new THREE.Vector3(0, 0, 0);
+    uVec.crossVectors(vVec, normal).normalize();    
 
     const xPrime = rVec.dot(uVec);
     const yPrime = rVec.dot(normal);
     const zPrime = rVec.dot(vVec);
+
+    const halfW = width / 2;
+    const halfH = height / 2;
+    const onPlane = (Math.abs(yPrime) < 1e-9);
+    const insideRect = (Math.abs(xPrime) <= halfW) && (Math.abs(zPrime) <= halfH);
+
+    if (onPlane && insideRect) {
+        return new THREE.Vector3(0, 0, 0);
+    }
 
     const xCorners = [-width / 2, width / 2];
     const zCorners = [-height / 2, height / 2];

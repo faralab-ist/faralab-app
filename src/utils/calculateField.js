@@ -14,6 +14,7 @@ function getPathChargePositions(obj) {
 }
 
 function getStackedPlanePositions(obj) {
+  //console.log(obj)
   const numPlanes = Array.isArray(obj.charge_densities) ? obj.charge_densities.length : 0;
   if (numPlanes === 0) return [];
   const spacing = Number(obj.spacing) || 1;
@@ -23,7 +24,7 @@ function getStackedPlanePositions(obj) {
   const positions = [];
   for (let i = 0; i < numPlanes; i++) {
     const offset = (i * spacing) - centerOffset;
-    positions.push(base.clone().add(dir.clone().multiplyScalar(offset)));
+    positions.push(base.clone().add(dir.clone().normalize().multiplyScalar(offset)));
   }
   return positions;
 }
@@ -59,7 +60,9 @@ const handlers = {
   plane: (obj, targetPos, acc) => {
     const p = worldPos(obj);
     const sigma = obj.charge_density || 0;
+    //console.log("plane sigma:", sigma);
     if (obj.infinite) {
+      //console.log("calculating infinite plane field");
       acc.add(efields.infinitePlaneEField(p.toArray(), sigma, targetPos.toArray(), obj.direction));
     } else {
       acc.add(efields.finitePlaneEField(p.toArray(), obj.direction, obj.dimensions || [1, 1], sigma, targetPos.toArray()));
@@ -98,12 +101,17 @@ handlers.coil = handlers.path;
 export default function calculateFieldAtPoint(objects = [], targetPosArr) {
   const targetPos = toVec3(targetPosArr);
   let result = new THREE.Vector3(0, 0, 0);
-
+  //console.log("a");
   for (const obj of objects) {
     if (!obj || !obj.type) continue;
     const handler = handlers[obj.type];
     if (typeof handler === 'function') {
+      /*if (targetPos.y === 0){
+        console.log("calling handler for obj:", obj);
+        console.log("handler:", handler);
+      }*/
       handler(obj, targetPos, result);
+      //console.log(handler);
     } else {
       // default 
       continue;

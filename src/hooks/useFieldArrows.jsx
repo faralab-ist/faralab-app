@@ -41,6 +41,7 @@ export default function FieldArrows({
         () => showVectorField(objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter),
         [objects, gridSize, step, showOnlyPlane, showOnlyGaussianField, minThreshold, planeFilter]
     );
+    //console.log(vectorsUnfiltered.filter(v => v.field.y === 0));
     const vectors = vectorsUnfiltered.filter(({position, field}) => 
         sliceByPlane(position, slicePlane, slicePos, useSlice, slicePlaneFlip)
     );

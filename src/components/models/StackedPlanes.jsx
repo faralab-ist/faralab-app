@@ -155,7 +155,7 @@ export default function StackedPlanes({
           const center = (n - 1) / 2
 
           return planes.map((q, i) => {
-            const offset = (i) * s
+            const offset = (i) * s - center * s
             const color = (q ?? 0) > 0 ? 'blue' : (q ?? 0) < 0 ?'red' : 'gray'
             return (
               <mesh

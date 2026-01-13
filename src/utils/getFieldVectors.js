@@ -51,7 +51,9 @@ export default function showVectorField(
 
           const targetPos = new THREE.Vector3(x, y, z)
           const fieldAtPoint = calculateFieldAtPoint(chargedObjects, targetPos)
-
+          /*if (targetPos.y === 0) {
+            console.log('fieldAtPoint=', fieldAtPoint);
+          }*/
           if (fieldAtPoint.length() > minThreshold)
             fieldVectors.push({ position: targetPos, field: fieldAtPoint })
         }
