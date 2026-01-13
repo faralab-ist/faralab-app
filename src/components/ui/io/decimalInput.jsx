@@ -7,7 +7,6 @@ export function InlineDecimalInput({
   max = Number.POSITIVE_INFINITY,
   onChange,
   value,
-  spinners = true,
   className,
   decimals = 2,
   onCommit,
@@ -246,20 +245,6 @@ export function InlineDecimalInput({
   const handleBlur = () => {
     normalizeOnBlur();
   };
-  const handleArrowUpMouseDown = (e) => {
-    e.preventDefault();
-    startSpin(step);
-  };
-
-  const handleArrowDownMouseDown = (e) => {
-    e.preventDefault();
-    startSpin(-step);
-  };
-
-  const handleArrowMouseUpLeave = () => {
-    stopSpin();
-  };
-
   useEffect(() => {
     const v = value !== undefined ? value : initialValue;
     writeValue(v);
@@ -287,26 +272,6 @@ export function InlineDecimalInput({
         onBlur={handleBlur}
         style={{ paddingRight: 2, display: "inline-block", ...inputStyle }}
       />
-      {spinners && (
-      <div className="inline-decimal-arrows">
-        <div
-          className="inline-decimal-arrow"
-          onMouseDown={handleArrowUpMouseDown}
-          onMouseUp={handleArrowMouseUpLeave}
-          onMouseLeave={handleArrowMouseUpLeave}
-        >
-          ▲
-        </div>
-        <div
-          className="inline-decimal-arrow"
-          onMouseDown={handleArrowDownMouseDown}
-          onMouseUp={handleArrowMouseUpLeave}
-          onMouseLeave={handleArrowMouseUpLeave}
-        >
-          ▼
-        </div>
-      </div>
-      )}
     </div>
   );
 }

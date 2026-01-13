@@ -76,6 +76,20 @@
   touch-action: manipulation;
 }
 
+.tb-btn-with-label {
+  width: auto;
+  height: auto;
+  padding: 6px 10px;
+  gap: 6px;
+}
+
+.tb-btn-text {
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  user-select: none;
+  pointer-events: none;
+}
+
 /* remove outline for mouse clicks but keep keyboard focus (accessibility) */
 .tb-btn:focus {
   outline: none;
@@ -149,16 +163,8 @@
   filter: invert(63%) sepia(61%) saturate(3550%) hue-rotate(250deg) brightness(96%) contrast(100%);
 }
 
-.tb-label {
-  font-size: 15px;
-  letter-spacing: 0.02em;
-  user-select: none;
-  pointer-events: none;
-}
-
-.tb-label-presets {
+.tb-btn-preset .tb-btn-text {
   color: #c396fa;
-  margin-left: 3px;
 }
 
 /* Lock button - red tint when locked */

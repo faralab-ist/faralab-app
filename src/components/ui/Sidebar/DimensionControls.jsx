@@ -10,7 +10,6 @@ const DimInput = ({ value, onChange }) => (
     min={DIM_MIN} 
     max={DIM_MAX}
     step={0.1}
-    
   />
 );
 

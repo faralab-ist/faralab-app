@@ -15,7 +15,8 @@ export default function CoilControls({
   changeSides,
   updateObject,
   setErrorMsg,
-  labelControl
+  labelControl,
+  columnOnly = false
 }) {
   const isRing = obj.subtype === 'ringCoil' || obj.coilType === 'ring';
   const isPolygon = obj.subtype === 'polygonCoil' || obj.coilType === 'polygon';
@@ -40,17 +41,55 @@ export default function CoilControls({
     }
   };
 
+  if (columnOnly && isRing) {
+    return (
+      <div>
+        <div className="detail-key">Coil Radius</div>
+        <div className="detail-value">
+          <InlineDecimalInput
+            value={radius}
+            min={DIM_MIN}
+            max={DIM_MAX}
+            step={0.1}
+            onChange={onSetRadius}
+            onError={setErrorMsg}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (columnOnly && isPolygon) {
+    return (
+      <div>
+        <div className="detail-key">Number of Sides</div>
+        <div className="detail-value">
+          <InlineDecimalInput
+            value={sides}
+            min={3}
+            max={12}
+            step={1}
+            onChange={onSetSides}
+            onError={setErrorMsg}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (columnOnly) return null;
+
   return (
     <>
       {/* Ring Coil: Radius */}
       {isRing && (
         <div
           className="detail-row"
-          style={
-            labelControl
-              ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }
-              : undefined
-          }
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+            gap: 10
+          }}
         >
           <div>
             <div className="detail-key">Coil Radius</div>
@@ -65,7 +104,7 @@ export default function CoilControls({
               />
             </div>
           </div>
-          {labelControl}
+          {labelControl || <div aria-hidden="true" />}
         </div>
       )}
 
@@ -73,11 +112,11 @@ export default function CoilControls({
       {isPolygon && (
         <div
           className="detail-row"
-          style={
-            labelControl
-              ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }
-              : undefined
-          }
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+            gap: 10
+          }}
         >
           <div>
             <div className="detail-key">Number of Sides</div>
@@ -92,7 +131,7 @@ export default function CoilControls({
               />
             </div>
           </div>
-          {labelControl}
+          {labelControl || <div aria-hidden="true" />}
         </div>
       )}
     </>

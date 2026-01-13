@@ -11,6 +11,7 @@ export default function PathControls({
   changePathCharge,
   changePathVelocity,
   showChargeRow = true,
+  chargeRowRight,
   updateObject,
   setErrorMsg
 }) {
@@ -68,18 +69,19 @@ export default function PathControls({
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
       >
         <div>
-          <div className="detail-key">Velocity (m/s)</div>
+          <div className="detail-key">Velocity </div>
           <div className="detail-value">
             <InlineDecimalInput
               value={velocity}
               step={0.01}
               onChange={(v) => onSetVelocity(v)}
             />
+            <span style={{ fontSize: 12, opacity: 0.7 }}>m/s</span>
           </div>
         </div>
 
         <div>
-          <div className="detail-key">Charge count</div>
+          <div className="detail-key">Charge density</div>
           <div className="detail-value">
             <InlineDecimalInput
               value={chargeCount}
@@ -106,6 +108,7 @@ export default function PathControls({
                   onChange={(v) => onSetCharge(v)}
                   onError={setErrorMsg}
                 />
+                <span style={{ fontSize: 12, opacity: 0.7 }}>C</span>
               </div>
             </div>
 
@@ -128,17 +131,39 @@ export default function PathControls({
             </div>
           </div>
         ) : (
-          <div className="detail-row">
-            <div className="detail-key">Charge (global)</div>
-            <div className="detail-value">
-              <InlineDecimalInput
-                value={globalCharge}
-                step={0.1}
-                onChange={(v) => onSetCharge(v)}
-                onError={setErrorMsg}
-              />
+          chargeRowRight ? (
+            <div
+              className="detail-row"
+              style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
+            >
+              <div>
+                <div className="detail-key">Charge (global)</div>
+                <div className="detail-value">
+                  <InlineDecimalInput
+                    value={globalCharge}
+                    step={0.1}
+                    onChange={(v) => onSetCharge(v)}
+                    onError={setErrorMsg}
+                  />
+                  <span style={{ fontSize: 12, opacity: 0.7 }}>C</span>
+                </div>
+              </div>
+              {chargeRowRight}
             </div>
-          </div>
+          ) : (
+            <div className="detail-row">
+              <div className="detail-key">Charge (global)</div>
+              <div className="detail-value">
+                <InlineDecimalInput
+                  value={globalCharge}
+                  step={0.1}
+                  onChange={(v) => onSetCharge(v)}
+                  onError={setErrorMsg}
+                />
+                <span style={{ fontSize: 12, opacity: 0.7 }}>C</span>
+              </div>
+            </div>
+          )
         )
       )}
 

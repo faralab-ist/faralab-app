@@ -72,7 +72,7 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 /*deixa as filas de cada objeto bonitinhas na sidebar maximizada ##### É USADO ######*/
 .object-row {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   gap: clamp(8px, 0.5rem, 10px);
   padding: clamp(8px, 0.5rem, 10px) clamp(10px, 0.625rem, 12px);
@@ -82,6 +82,50 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   cursor: pointer;  
 }
 
+.label-toggle {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 45px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  background: #141414;
+  color: #cfcfcf;
+  font-size: 12px;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.label-toggle:focus,
+.label-toggle:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.label-toggle-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.label-toggle.active {
+  border-color: rgba(21, 78, 153, 0.9);
+  color: #ffffff;
+  background: #151c2c;
+}
+
+.object-row:hover .label-toggle:not(.active),
+.object-row:focus-visible .label-toggle:not(.active) {
+  border-color: #2a2a2a;
+  background: #141414;
+  color: #bdbdbd;
+}
+
 /* Highlight whole row on hover and visible focus (keyboard) ##### É USADO ###### */
 .object-row:hover,
 .object-row.selected,
@@ -89,9 +133,19 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
   border-color:rgba(21, 78, 153, 0.9);
   transform: translateY(-2px);
- /* filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);*/
+}
+
+/* Keep hover glow on core elements without brightening the label toggle */
+.object-row:hover .name,
+.object-row.selected .name,
+.object-row:focus-visible .name,
+.object-row:hover .pill img,
+.object-row.selected .pill img,
+.object-row:focus-visible .pill img,
+.object-row:hover .expand-btn,
+.object-row.selected .expand-btn,
+.object-row:focus-visible .expand-btn {
   filter: invert(63%) sepia(61%) saturate(3550%) hue-rotate(180deg) brightness(96%) contrast(100%);
-/* Don't know which one is better*/
 }
 
 /* Name highlight when row is hovered ##### É USADO ###### */
@@ -242,6 +296,17 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   border-radius: 4px;
   box-sizing: border-box;
   outline: none;
+}
+
+.object-details input[type="number"]::-webkit-outer-spin-button,
+.object-details input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.object-details input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* estilos dos inputs dos detalhes do objeto ##### ACHO QUE NÃO É USADO ######*/

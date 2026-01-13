@@ -82,7 +82,6 @@ export default function ObjectItem({
     (obj.subtype === "ringCoil" || obj.coilType === "ring");
   const isPolygonCoil = obj.type === "coil" &&
     (obj.subtype === "polygonCoil" || obj.coilType === "polygon");
-
   const canRotate =
     expanded &&
     obj &&
@@ -121,6 +120,31 @@ export default function ObjectItem({
           {iconData.icon && <img src={iconData.icon} alt={iconData.alt} />}
         </span>
         <span className="name">{obj.name || obj.id}</span>
+        <button
+          type="button"
+          className={`label-toggle ${obj.showLabel ?? true ? "active" : ""}`}
+          aria-pressed={obj.showLabel ?? true}
+          onClick={(e) => {
+            e.stopPropagation();
+            updateObject(obj.id, { showLabel: !(obj.showLabel ?? true) });
+          }}
+        >
+          <svg
+            className="label-toggle-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              d="M3 11l8-8h6l4 4v6l-8 8-10-10z"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinejoin="round"
+            />
+            <circle cx="16.5" cy="7.5" r="1.5" fill="currentColor" />
+          </svg>
+          <span className="label-toggle-text">Label</span>
+        </button>
         <div className="expand-btn">{expanded ? "▾" : "▸"}</div>
       </div>
 
@@ -291,19 +315,6 @@ export default function ObjectItem({
                     </label>
                   </div>
                 </div>
-
-                <div>
-                  <div className="detail-key">Show Label</div>
-                  <div className="detail-value">
-                    <input
-                      type="checkbox"
-                      checked={obj.showLabel ?? true}
-                      onChange={(e) =>
-                        updateObject(obj.id, { showLabel: e.target.checked })
-                      }
-                    />
-                  </div>
-                </div>
               </div>
             )}
 
@@ -385,43 +396,27 @@ export default function ObjectItem({
                     changeVelocity={coilActions?.changeVelocity}
                     updateObject={updateObject}
                     setErrorMsg={setErrorMsg}
-                />
-                <CoilControls
-                    obj={obj}
-                    changeRadius={coilActions?.changeRadius}
-                    changeSides={coilActions?.changeSides}
-                    updateObject={updateObject}
-                    setErrorMsg={setErrorMsg}
-                    labelControl={
+                    chargeRowRight={
                       (isRingCoil || isPolygonCoil) ? (
-                        <div>
-                          <div className="detail-key">Show Label</div>
-                          <div className="detail-value">
-                            <input
-                              type="checkbox"
-                              checked={obj.showLabel ?? true}
-                              onChange={(e) =>
-                                updateObject(obj.id, { showLabel: e.target.checked })
-                              }
-                            />
-                          </div>
-                        </div>
+                        <CoilControls
+                          obj={obj}
+                          changeRadius={coilActions?.changeRadius}
+                          changeSides={coilActions?.changeSides}
+                          updateObject={updateObject}
+                          setErrorMsg={setErrorMsg}
+                          columnOnly
+                        />
                       ) : null
                     }
                 />
                 {!(isRingCoil || isPolygonCoil) && (
-                  <div className="detail-row">
-                    <div className="detail-key">Show Label</div>
-                    <div className="detail-value">
-                      <input
-                        type="checkbox"
-                        checked={obj.showLabel ?? true}
-                        onChange={(e) =>
-                          updateObject(obj.id, { showLabel: e.target.checked })
-                        }
-                      />
-                    </div>
-                  </div>
+                  <CoilControls
+                      obj={obj}
+                      changeRadius={coilActions?.changeRadius}
+                      changeSides={coilActions?.changeSides}
+                      updateObject={updateObject}
+                      setErrorMsg={setErrorMsg}
+                  />
                 )}
               </>
             )}
@@ -535,19 +530,6 @@ export default function ObjectItem({
                       />
                     </div>
                   </div>
-
-                  <div>
-                    <div className="detail-key">Show Label</div>
-                    <div className="detail-value">
-                      <input
-                        type="checkbox"
-                        checked={obj.showLabel ?? true}
-                        onChange={(e) =>
-                          updateObject(obj.id, { showLabel: e.target.checked })
-                        }
-                      />
-                    </div>
-                  </div>
                 </div>
               </>
             )}
@@ -574,18 +556,6 @@ export default function ObjectItem({
                     <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>C</span>
                   </div>
                 </div>
-                <div>
-                  <div className="detail-key">Show Label</div>
-                  <div className="detail-value">
-                    <input
-                      type="checkbox"
-                      checked={obj.showLabel ?? true}
-                      onChange={(e) =>
-                        updateObject(obj.id, { showLabel: e.target.checked })
-                      }
-                    />
-                  </div>
-                </div>
               </div>
             )}
 
@@ -609,26 +579,6 @@ export default function ObjectItem({
                 </div>
 
               </>
-            )}
-
-            {/* Show Label toggle for objects with labels (only for types that don't have their own) */}
-            {((obj.type === 'surface' && showFlux) || 
-              (obj.type !== 'surface' && 
-               obj.type !== 'wire' && 
-               obj.type !== 'charge' && 
-               obj.type !== 'chargedSphere' && 
-               obj.type !== 'coil')|| (obj.coilType === 'solenoid')) && (
-            
-              <div className="detail-row">
-                <div className="detail-key">Show Label</div>
-                <div className="detail-value">
-                  <input
-                    type="checkbox"
-                    checked={obj.showLabel ?? true}
-                    onChange={(e) => updateObject(obj.id, { showLabel: e.target.checked })}
-                  />
-                </div>
-              </div>
             )}
 
             {errorMsg && (
@@ -912,15 +862,20 @@ export default function ObjectItem({
 
             {obj.type === 'testCoil' && (
                <>
-                 <div className="detail-row">
-                    <div className="detail-key">Radius</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        initialValue={obj.radius}
-                        min={0.01} max={10}
-                        step={0.01}
-                        onChange={(v) => updateObject(obj.id, { radius: v })}
-                      />
+                 <div
+                   className="detail-row"
+                   style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
+                 >
+                    <div>
+                      <div className="detail-key">Radius</div>
+                      <div className="detail-value">
+                        <InlineDecimalInput
+                          initialValue={obj.radius}
+                          min={0.01} max={10}
+                          step={0.01}
+                          onChange={(v) => updateObject(obj.id, { radius: v })}
+                        />
+                      </div>
                     </div>
                  </div>
 

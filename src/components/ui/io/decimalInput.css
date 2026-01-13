@@ -15,38 +15,3 @@
 #inline-decimal:focus {
   outline: none;
 }
-
-.inline-decimal-arrows {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 18px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  opacity: 0;
-  padding-left: 10px;
-  transition: opacity 0.15s;
-  font-size: 12px;
-  user-select: none;
-  pointer-events: none;
-}
-
-.inline-decimal-wrapper:hover .inline-decimal-arrows {
-  opacity: 0.35;
-  pointer-events: auto;
-}
-
-.inline-decimal-arrow {
-  line-height: 10px;
-  text-align: center;
-  padding: 1px 0;
-  cursor: pointer;
-  transition: background 0.15s, opacity 0.15s;
-}
-
-.inline-decimal-arrow:hover {
-  background: #ccc;
-  opacity: 0.9;
-}

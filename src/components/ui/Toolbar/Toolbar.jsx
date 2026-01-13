@@ -221,15 +221,15 @@ export default function Toolbar({
 
       <div className="tb-group">
         {/* Criação */}
-        <span className="tb-label tb-label-presets">Presets</span>
         <button
           ref={presetsBtnRef}
-          className={`tb-btn tb-btn-preset ${presetsMenuVisible ? 'active' : ''}`}
+          className={`tb-btn tb-btn-preset tb-btn-with-label ${presetsMenuVisible ? 'active' : ''}`}
           onClick={() => setPresetsMenuVisible(v => !v)}
           title="Presets"
           aria-pressed={presetsMenuVisible}
         >
           <img className="tb-icon" src={PresetIcon} alt="" />
+          <span className="tb-btn-text">Presets</span>
         </button>
 
         <div className="tb-divider"></div>

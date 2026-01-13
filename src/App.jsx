@@ -142,7 +142,13 @@ function LoadingOverlay() {
         onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
       >
         <cylinderGeometry args={[hitRadius, hitRadius, size, 6]} />
-        <meshBasicMaterial transparent opacity={0} />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          depthWrite={false}
+          depthTest={false}
+          colorWrite={false}
+        />
       </mesh>
       <mesh
         position={[0, size / 2, 0]}
@@ -150,7 +156,13 @@ function LoadingOverlay() {
         onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
       >
         <cylinderGeometry args={[hitRadius, hitRadius, size, 6]} />
-        <meshBasicMaterial transparent opacity={0} />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          depthWrite={false}
+          depthTest={false}
+          colorWrite={false}
+        />
       </mesh>
       <mesh
         position={[0, 0, size / 2]}
@@ -159,7 +171,13 @@ function LoadingOverlay() {
         onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
       >
         <cylinderGeometry args={[hitRadius, hitRadius, size, 6]} />
-        <meshBasicMaterial transparent opacity={0} />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          depthWrite={false}
+          depthTest={false}
+          colorWrite={false}
+        />
       </mesh>
 
       <Html position={[size + labelOffset, 0, 0]} center>
