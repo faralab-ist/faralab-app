@@ -246,20 +246,6 @@ export function InlineDecimalInput({
     normalizeOnBlur();
   };
 
-  const handleArrowUpMouseDown = (e) => {
-    e.preventDefault();
-    startSpin(step);
-  };
-
-  const handleArrowDownMouseDown = (e) => {
-    e.preventDefault();
-    startSpin(-step);
-  };
-
-  const handleArrowMouseUpLeave = () => {
-    stopSpin();
-  };
-
   useEffect(() => {
     const v = value !== undefined ? value : initialValue;
     writeValue(v);
@@ -285,26 +271,8 @@ export function InlineDecimalInput({
         onKeyUp={handleKeyUp}
         onInput={handleInput}
         onBlur={handleBlur}
-        style={{ paddingRight: 22, display: "inline-block", ...inputStyle }}
+        style={{ paddingRight: 2, display: "inline-block", ...inputStyle }}
       />
-      <div className="inline-decimal-arrows">
-        <div
-          className="inline-decimal-arrow"
-          onMouseDown={handleArrowUpMouseDown}
-          onMouseUp={handleArrowMouseUpLeave}
-          onMouseLeave={handleArrowMouseUpLeave}
-        >
-          ▲
-        </div>
-        <div
-          className="inline-decimal-arrow"
-          onMouseDown={handleArrowDownMouseDown}
-          onMouseUp={handleArrowMouseUpLeave}
-          onMouseLeave={handleArrowMouseUpLeave}
-        >
-          ▼
-        </div>
-      </div>
     </div>
   );
 }

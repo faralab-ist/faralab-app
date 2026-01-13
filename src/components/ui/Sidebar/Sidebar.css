@@ -59,6 +59,16 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   gap: clamp(4px, 0.25rem, 5px);
 }
 
+.object-row-wrapper.expanded {
+  gap: 0;
+}
+
+.object-row-wrapper.expanded .object-row {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: #222;
+}
+
 /*deixa as filas de cada objeto bonitinhas na sidebar maximizada ##### É USADO ######*/
 .object-row {
   display: grid;
@@ -142,16 +152,34 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 
 /* Detalhes expandidos ##### É USADO ###### talvez mudar */
 .object-details {
-  margin-top: -5px;
-  margin-right: 12px;
+  margin-top: 0;
+  margin-right: 0;
   border: 1px solid #222;
   border-radius: 6px;
   background: #181818;
-  padding: 8px 12px;        /* tighter */
+  padding: 0;
   font-size: 12px;
   line-height: 1.4;
-  max-width: 295px;        /* narrower */
-  width: calc(100% + 12px);
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  opacity: 0;
+  overflow: hidden;
+  will-change: height, opacity, padding;
+  transition: height 0.35s ease, opacity 0.2s ease, padding 0.35s ease;
+}
+
+.object-row-wrapper.expanded .object-details {
+  border-top: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  opacity: 1;
+}
+
+/* keep expanded class for compatibility, but wrapper drives animation */
+.object-details.expanded {
+  padding: 8px 12px;        /* tighter */
+  opacity: 1;
 }
 
 /* aumenta o espaço das linhas dos detalhes dos objetos ##### É USADO ###### */
@@ -379,9 +407,3 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   transform: scale(1.1);
   filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);
 }
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import { InlineDecimalInput } from "../io/decimalInput";
 import "../io/decimalInput.css";
 
@@ -26,6 +26,21 @@ export default function ObjectItem({
   coilActions,
 }) {
   const [errorMsg, setErrorMsg] = useState(null);
+  const detailsRef = useRef(null);
+  const [detailsHeight, setDetailsHeight] = useState(0);
+
+  useLayoutEffect(() => {
+    const el = detailsRef.current;
+    if (!el) return;
+
+    if (expanded) {
+      // Measure after layout so the expand animation has a target height.
+      const next = el.scrollHeight;
+      setDetailsHeight(next + 12);
+    } else {
+      setDetailsHeight(0);
+    }
+  }, [expanded, obj]);
 
   // ícone
   let iconData = { icon: null, alt: "", subtype: obj.type };
@@ -76,7 +91,10 @@ export default function ObjectItem({
   };
 
   return (
-    <li className="object-row-wrapper" data-objid={obj.id}>
+    <li
+      className={`object-row-wrapper ${expanded ? "expanded" : ""}`}
+      data-objid={obj.id}
+    >
       <div
         className={`object-row ${hovered ? "hovered" : ""} ${
           expanded ? "selected" : ""
@@ -92,23 +110,26 @@ export default function ObjectItem({
         <div className="expand-btn">{expanded ? "▾" : "▸"}</div>
       </div>
 
-      {expanded && (
-        <div className="object-details">
-          <div className="details-grid">
+      <div
+        ref={detailsRef}
+        className={`object-details ${expanded ? "expanded" : ""}`}
+        style={{ height: expanded ? detailsHeight : 0 }}
+      >
+        <div className="details-grid">
             {/* Position com InlineDecimalInput */}
             {Array.isArray(obj.position)  && (
               <div className="detail-row">
-                <div className="detail-key">Position</div>
                 <div
                   className="detail-value"
-                  style={{ display: "flex", gap: 27 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 10 }}
                 >
+                  <span className="detail-key" style={{ margin: 0, fontSize: 11 }}>pos:</span>
                   {["x", "y", "z"].map((axis, idx) => (
-                    <div key={axis} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div key={axis} style={{ display: "flex", alignItems: "center"}}>
                       <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>
                         {axis}
                       </span>
-                      <span style={{ opacity: 0.7 }}>=</span>
+                      <span style={{ opacity: 0.7 }}>:</span>
                       <InlineDecimalInput
                         initialValue={obj.position[idx]}
                         min={POS_MIN}
@@ -122,6 +143,7 @@ export default function ObjectItem({
                           updateObject(obj.id, { position: newPos });
                         }}
                       />
+                      {axis !== "z" && <span style={{ opacity: 0.6 }}>,</span>}
                     </div>
                   ))}
                 </div>
@@ -523,8 +545,8 @@ export default function ObjectItem({
                 style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
               >
                 <div>
-                  <div className="detail-key">Intensity C</div>
-                  <div className="detail-value">
+                  <div className="detail-key">Intensity</div>
+                  <div className="detail-value" style={{ display: "flex", alignItems: "center", gap: 4 }}>
                     <InlineDecimalInput
                       initialValue={obj.charge ?? 0}
                       min={VAL_MIN}
@@ -535,6 +557,7 @@ export default function ObjectItem({
                         updateObject(obj.id, { charge: safe });
                       }}
                     />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>C</span>
                   </div>
                 </div>
                 <div>
@@ -869,7 +892,6 @@ export default function ObjectItem({
             </div>
           </div>
         </div>
-      )}
     </li>
   );
 }
