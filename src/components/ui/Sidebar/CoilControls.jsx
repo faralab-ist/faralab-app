@@ -1,5 +1,5 @@
 import React from "react";
-import NumberInput from "./NumberInput";
+import { InlineDecimalInput } from "../io/decimalInput";
 import { DIM_MIN, DIM_MAX } from "./utils";
 
 /**
@@ -14,7 +14,8 @@ export default function CoilControls({
   changeRadius,
   changeSides,
   updateObject,
-  setErrorMsg
+  setErrorMsg,
+  labelControl
 }) {
   const isRing = obj.subtype === 'ringCoil' || obj.coilType === 'ring';
   const isPolygon = obj.subtype === 'polygonCoil' || obj.coilType === 'polygon';
@@ -43,37 +44,55 @@ export default function CoilControls({
     <>
       {/* Ring Coil: Radius */}
       {isRing && (
-        <div className="detail-row">
-          <div className="detail-key">Coil Radius</div>
-          <div className="detail-value">
-            <NumberInput
-              value={radius}
-              min={DIM_MIN}
-              max={DIM_MAX}
-              step={0.1}
-              onChange={onSetRadius}
-              onError={setErrorMsg}
-              style={{ width: 120 }}
-            />
+        <div
+          className="detail-row"
+          style={
+            labelControl
+              ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }
+              : undefined
+          }
+        >
+          <div>
+            <div className="detail-key">Coil Radius</div>
+            <div className="detail-value">
+              <InlineDecimalInput
+                value={radius}
+                min={DIM_MIN}
+                max={DIM_MAX}
+                step={0.1}
+                onChange={onSetRadius}
+                onError={setErrorMsg}
+              />
+            </div>
           </div>
+          {labelControl}
         </div>
       )}
 
       {/* Polygon Coil: Number of Sides */}
       {isPolygon && (
-        <div className="detail-row">
-          <div className="detail-key">Number of Sides</div>
-          <div className="detail-value">
-            <NumberInput
-              value={sides}
-              min={3}
-              max={12}
-              step={1}
-              onChange={onSetSides}
-              onError={setErrorMsg}
-              style={{ width: 120 }}
-            />
+        <div
+          className="detail-row"
+          style={
+            labelControl
+              ? { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }
+              : undefined
+          }
+        >
+          <div>
+            <div className="detail-key">Number of Sides</div>
+            <div className="detail-value">
+              <InlineDecimalInput
+                value={sides}
+                min={3}
+                max={12}
+                step={1}
+                onChange={onSetSides}
+                onError={setErrorMsg}
+              />
+            </div>
           </div>
+          {labelControl}
         </div>
       )}
     </>

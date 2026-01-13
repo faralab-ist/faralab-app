@@ -2,11 +2,14 @@
   display: inline-flex;
   align-items: center;
   position: relative;
+  
 }
 
 #inline-decimal {
   font: inherit;
-  display: inline;
+  display: inline-block;
+  min-width: 6ch;
+  text-align: left;
 }
 
 #inline-decimal:focus {
@@ -23,6 +26,7 @@
   flex-direction: column;
   justify-content: center;
   opacity: 0;
+  padding-left: 10px;
   transition: opacity 0.15s;
   font-size: 12px;
   user-select: none;

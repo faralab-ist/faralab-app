@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react'
-import NumberInput from '../../Sidebar/NumberInput'
 import './TestChargeMenu.css'
 import Reset from '../../../../assets/reset.svg'
 import Confirm from '../../../../assets/confirm.svg'
@@ -8,9 +7,8 @@ import '../../io/decimalInput.css'
 import { POS_MIN, POS_MAX} from "../../Sidebar/utils";
 
 
-
 export default function TestChargeMenu({ addObject, updatePosition, sceneObjects = [] }) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(true)
   const [position, setPosition] = useState([0, 0, 0])
 
   const testCharges = useMemo(() => {
@@ -53,23 +51,29 @@ const clampWithError = (val, min, max) => {
           
           <div className="config-inputs">
             <label className="section-title">Position (x, y, z)</label>
-            <div className="xyz-grid">
-              <NumberInput 
+            
+              <InlineDecimalInput 
                 value={position[0]} 
+                min={POS_MIN}
+                max={POS_MAX}
                 onChange={(v) => updatePos(0, v)} 
                 decimals={2} step={0.1} 
               />
-              <NumberInput 
+              <InlineDecimalInput 
                 value={position[1]} 
+                min={POS_MIN}
+                max={POS_MAX}
                 onChange={(v) => updatePos(1, v)} 
                 decimals={2} step={0.1} 
               />
-              <NumberInput 
+              <InlineDecimalInput 
                 value={position[2]} 
+                min={POS_MIN}
+                max={POS_MAX}
                 onChange={(v) => updatePos(2, v)} 
                 decimals={2} step={0.1} 
               />
-            </div>
+            
           </div>
 
           <div className="config-actions">
