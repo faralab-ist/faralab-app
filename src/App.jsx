@@ -288,9 +288,9 @@ function LoadingOverlay() {
         '.create-buttons-container',
         '.presets-btn',
         '.preset-dropdown',
+        '.export-dialog',
         '.plane-buttons-container',
         '.settings-buttons-root',
-        '.export-dialog',
         '.object-popup',
         '.preset-expand-list'
       ]

@@ -51,7 +51,7 @@ const clampWithError = (val, min, max) => {
           
           <div className="config-inputs">
             <label className="section-title">Position (x, y, z)</label>
-            
+            <div className='position-inputs'>
               <InlineDecimalInput 
                 value={position[0]} 
                 min={POS_MIN}
@@ -73,7 +73,7 @@ const clampWithError = (val, min, max) => {
                 onChange={(v) => updatePos(2, v)} 
                 decimals={2} step={0.1} 
               />
-            
+            </div>
           </div>
 
           <div className="config-actions">

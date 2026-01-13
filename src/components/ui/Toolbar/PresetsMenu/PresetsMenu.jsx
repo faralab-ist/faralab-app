@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './PresetsMenu.css'
 import { exportPreset, importPreset } from '../../../../utils/presetIO'
 import ExportDialog from '../../ExportDialog/ExportDialog'
@@ -82,6 +82,13 @@ const PRESETS = [
 }) => {
   const [showExportDialog, setShowExportDialog] = useState(false)
 
+  // When the menu is closed externally, also close the export dialog
+  useEffect(() => {
+    if (!isVisible && showExportDialog) {
+      setShowExportDialog(false)
+    }
+  }, [isVisible, showExportDialog])
+
   if (!isVisible) return null
 
   const handleLoadPreset = (presetName) => {
@@ -133,44 +140,45 @@ const PRESETS = [
     <>
       <div className="presets-menu">
         <div className="presets-menu-panel">
-          
-          {/* Electrostatic Presets */}
-          {groupedPresets.electrostatic.length > 0 && (
-            <div className="presets-menu-section">
-              <div className="presets-menu-category-label">Electrostatic</div>
-              <div className="presets-menu-grid">
-                {groupedPresets.electrostatic.map(preset => (
-                  <button
-                    key={preset.id}
-                    className="presets-menu-item"
-                    onClick={() => handleLoadPreset(preset.name)}
-                    title={`Load ${preset.label} preset`}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+          <div className="presets-menu-sections">
+            {/* Electrostatic Presets */}
+            {groupedPresets.electrostatic.length > 0 && (
+              <div className="presets-menu-section">
+                <div className="presets-menu-category-label">Electrostatic</div>
+                <div className="presets-menu-grid">
+                  {groupedPresets.electrostatic.map(preset => (
+                    <button
+                      key={preset.id}
+                      className="presets-menu-item"
+                      onClick={() => handleLoadPreset(preset.name)}
+                      title={`Load ${preset.label} preset`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Magnetostatic Presets */}
-          {groupedPresets.magnetostatic.length > 0 && (
-            <div className="presets-menu-section">
-              <div className="presets-menu-category-label">Magnetostatic</div>
-              <div className="presets-menu-grid">
-                {groupedPresets.magnetostatic.map(preset => (
-                  <button
-                    key={preset.id}
-                    className="presets-menu-item"
-                    onClick={() => handleLoadPreset(preset.name)}
-                    title={`Load ${preset.label} preset`}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+            {/* Magnetostatic Presets */}
+            {groupedPresets.magnetostatic.length > 0 && (
+              <div className="presets-menu-section">
+                <div className="presets-menu-category-label">Magnetostatic</div>
+                <div className="presets-menu-grid">
+                  {groupedPresets.magnetostatic.map(preset => (
+                    <button
+                      key={preset.id}
+                      className="presets-menu-item"
+                      onClick={() => handleLoadPreset(preset.name)}
+                      title={`Load ${preset.label} preset`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Separator */}
           <div className="presets-menu-separator" />

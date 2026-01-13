@@ -617,7 +617,7 @@ export default function ObjectItem({
                obj.type !== 'wire' && 
                obj.type !== 'charge' && 
                obj.type !== 'chargedSphere' && 
-               obj.type !== 'coil')) && (
+               obj.type !== 'coil')|| (obj.coilType === 'solenoid')) && (
             
               <div className="detail-row">
                 <div className="detail-key">Show Label</div>

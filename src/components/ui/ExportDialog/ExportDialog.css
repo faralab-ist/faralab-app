@@ -2,6 +2,7 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
+  top: 198px;
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -58,13 +59,13 @@
 }
 
 .export-dialog-close {
+  outline: none;
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.5);
   font-size: 28px;
   line-height: 1;
   cursor: pointer;
-  padding: 0;
   width: 32px;
   height: 32px;
   display: flex;
@@ -75,6 +76,7 @@
 }
 
 .export-dialog-close:hover {
+  outline:none;
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.9);
 }
