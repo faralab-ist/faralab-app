@@ -105,19 +105,20 @@ export default function Path({
     const positions = []
     const tangents = []
 
+    const curveLength = catmullCurve.getLength()
+    const segLen = catmullCurve.closed ? (curveLength / n) : ((n === 1) ? curveLength : (curveLength / (n - 1)))
+
     for (let i = 0; i < n; i++) {
-      let t
-      if (catmullCurve.closed) {
-        t = i / n
-      } else {
-        t = (n === 1) ? 0 : i / (n - 1)
-      }
+      let t = catmullCurve.closed ? (i / n) : ((n === 1) ? 0 : i / (n - 1))
       const p = catmullCurve.getPointAt(t)
-      const tan = catmullCurve.getTangentAt(t)
+      const tan = catmullCurve.getTangentAt(t).multiplyScalar(segLen) // scaled dL
       positions.push([p.x, p.y, p.z])
       tangents.push([tan.x, tan.y, tan.z])
     }
 
+    //updateObject?.(id, { pathLength: curveLength })
+
+    // rotate if child etc...
     if (isChild && parentGroupRef?.current) {
       const parentQuat = parentGroupRef.current.quaternion
       const rotatedPositions = positions.map(p => {

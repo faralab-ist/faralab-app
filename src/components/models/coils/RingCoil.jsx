@@ -91,6 +91,7 @@ export default function RingCoil({
 
   return (
     <BaseCoil
+    segments={300}
       id={id}
       name = {name}
       position={position}
