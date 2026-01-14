@@ -38,7 +38,7 @@ export default function BarMagnet({
     dragOwnerId = null,
     showLabel = true,
     onHideLabel,
-    segments = 24, // NEW: samples per coil curve (fixed sampling)
+    segments = 100,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -182,7 +182,8 @@ export default function BarMagnet({
       return
     }
 
-    const n = Math.max(1, Math.floor(segments))
+    const n = 50 // override segments it breaks after a bit
+    // maybe floating point precision issues
     const positions = []
     const tangents = []
 
@@ -190,15 +191,13 @@ export default function BarMagnet({
       const curve = catmullCurves[c]
       if (!curve || curve.points.length === 0) continue
 
+      const curveLength = curve.getLength()
+      const segLen = curve.closed ? (curveLength / n) : ((n === 1) ? curveLength : (curveLength / (n - 1)))
+
       for (let i = 0; i < n; i++) {
-        let t
-        if (curve.closed) {
-          t = i / n
-        } else {
-          t = (n === 1) ? 0 : i / (n - 1)
-        }
+        let t = curve.closed ? (i / (n)) : ((n === 1) ? 0 : i / (n - 1))
         const p = curve.getPointAt(t)
-        const tan = curve.getTangentAt(t)
+        const tan = curve.getTangentAt(t).multiplyScalar(segLen)
         positions.push([p.x, p.y, p.z])
         tangents.push([tan.x, tan.y, tan.z])
       }

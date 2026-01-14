@@ -14,9 +14,9 @@
       ]
     },
     "settings": {
-      "vectorMinTsl": 0.1,
+      "vectorMinTsl": 0.5,
       "vectorScale": 1,
-      "vectorStep": 1,
+      "vectorStep": 0.5,
       "lineMin": 0.1,
       "lineNumber": 20,
       "showField": false,
@@ -42,10 +42,10 @@
           ],
           "length": 3,
           "radius": 0.3,
-          "charge": 1,
+          "current": 1,
           "animated": true,
           "amplitude": 1.5,
-          "freq": 0.25
+          "freq": 0.15
         }
       },
       {

@@ -43,6 +43,7 @@ export default function BaseCoil({
 
   glowMultiplier,
   onHideLabel,
+  segments = 500,
 
 }) {
   const isSelected = id === selectedId
@@ -166,6 +167,7 @@ export default function BaseCoil({
         {/* Path handles charge animation */}
         {pathPoints.length > 0 && (
           <Path
+          segments={segments}
             id={id}
             name = {name}
             position={[0, 0, 0]}
