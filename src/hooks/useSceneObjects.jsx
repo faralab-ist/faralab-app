@@ -177,6 +177,7 @@ const objectFactories = {
     tangents: [],
     chargeCount: 1, // number of point charges
     charge: 1, // charge of each charge
+    current: 0.1,
     velocity: 1, //speed of charges
     isClosedPath: false,
     showLabel: true,
@@ -191,11 +192,10 @@ const objectFactories = {
     coilRadius: 1.5,
     tubeRadius: 0.01,
     coilColor: '#6ea8ff',
-    direction: [0, 1, 0],     // normal vector (area direction)
-    rotation: [0, 0, 0],      // Euler angles for rotation
-    chargeCount: 5,
-    charge: 1,
-    velocity: 1,
+    direction: [0, 1, 0],
+    rotation: [0, 0, 0],
+    // unified: only current
+    current: 0.1,
     renderCharges: true,
     charges: [],
     showLabel: true,
@@ -207,18 +207,18 @@ const objectFactories = {
     coilType: 'solenoid',
     name: `Solenoid Coil ${index}`,
     position: [0, 0, 0],
-    length: 3,
+    length: 4,
     radius: 0.3,
-    direction: [0, 1, 0],     // normal vector (area direction)
-    rotation: [0, 0, 0],      // Euler angles for rotation
+    direction: [0, 1, 0],
+    rotation: [0, 0, 0],
     multiplier: 1,
-    resolution: 10,
+    pointsPerTurn: 10,
     charges: [],
-    turns: 10,
-    chargeCount: 5,
+    turns: 200,
+    // unified
+    current: 0.1,
     createdAt: Date.now(),
     ac: false,
-    velocity: 1,
   }),
   polygonCoil: (index) => ({
     id: `tmp-${index}`,
@@ -229,12 +229,11 @@ const objectFactories = {
     coilRadius: 1.5,
     tubeRadius: 0.01,
     coilColor: '#6ea8ff',
-    direction: [0, 1, 0],     // normal vector (area direction)
-    rotation: [0, 0, 0],      // Euler angles for rotation
-    sides: 3,                 // default to square
-    chargeCount: 5,
-    charge: 1,
-    velocity: 1,
+    direction: [0, 1, 0],
+    rotation: [0, 0, 0],
+    sides: 3,
+    // unified
+    current: 0.1,
     renderCharges: true,
     charges: [],
     showLabel: true,
@@ -250,11 +249,11 @@ const objectFactories = {
     numOfCoils: 10,
     chargesPerCoil: 10,
     pointsPerCoil: 20,
-    charge: 1,
-    velocity: 1,
+    // unified
+    current: 0.1,
     charges: [],
-    direction: [0, 1, 0],     // normal vector (area direction)
-    rotation: [0, 0, 0],      // Euler angles for rotation
+    direction: [0, 1, 0],
+    rotation: [0, 0, 0],
     frozen: true,
     animated: false,
     amplitude: 0.5,

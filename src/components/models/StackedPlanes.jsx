@@ -141,7 +141,7 @@ export default function StackedPlanes({
         isDraggingRef.current = false
         setIsDragging(false)
       }}
-      scale={0.86}
+      scale={infinite? 1.5 : 0.86 }
       lineWidth={2.5}
     >
       {/* Render a stack of planes centered at origin, spaced along local normal (Y in local space after baseEuler).
@@ -184,7 +184,13 @@ export default function StackedPlanes({
                     side={THREE.DoubleSide}
                   />
                 </mesh>
-                <LayerLabel layerIndex={i} position={[width / 2 + 0.3, offset, 0]} />
+                {/* Show label between this layer and next layer (skip for last layer) */}
+                           {i < planes.length - 1 && (
+                             <LayerLabel 
+                               layerIndex={i} 
+                               position={[width / 2 + 0.3, (planes[i] + planes[i + 1]) / 2, 0]} 
+                             />
+                           )}
               </group>
             )
           })

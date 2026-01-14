@@ -5,23 +5,6 @@ import Path from '../Path'
 
 import * as THREE from 'three'
 
-/**
- * BaseCoil - Reusable parent component for all coil types (Ring, Square, Pentagon, Hexagon, etc.)
- *
- * Handles shared functionality:
- * - Position dragging via PivotControls
- * - Selection highlighting
- * - Normal vector (area direction) calculation and visual
- * - Path-based charge animation
- * - Color management (coil wire + normal arrow)
- * - Collision detection for interactions
- *
- * Child components (RingCoil, PolygonCoil, etc.) should pass:
- * - coilGeometry: JSX element to render the coil shape itself
- * - computeNormal: function to calculate the area normal vector [x, y, z]
- * - getPathPoints: function that returns array of [x, y, z] points for the charge path
- * - normalLength: length of the visual normal arrow (default: 1.5)
- */
 export default function BaseCoil({
   id,
   position = [0, 0, 0],
@@ -29,7 +12,7 @@ export default function BaseCoil({
   setSelectedId,
   setIsDragging,
   updatePosition,
-  updateDirection, // callback to save normal direction
+  updateDirection,
   updateObject,
   creativeMode,
   isHovered,
@@ -37,29 +20,25 @@ export default function BaseCoil({
 
   ac = false,
 
-  // Coil-specific visual props
-  coilRadius,           // main coil size (radius for ring, side length for polygons)
-  coilColor = '#6ea8ff',    // wire color 
-  normalLength = 1.5,       // length of the visual normal arrow
-  wireThickness = 0.05,     // thickness of the coil wire
+  coilRadius,
+  coilColor = '#6ea8ff',
+  normalLength = 1.5,
+  wireThickness = 0.05,
 
-  // Direction state
-  direction = [0, 0, 1],    // normal vector (area direction)
-  rotation = [0, 0, 0],     // Euler angles for rotation
-  quaternion,               // quaternion for full rotation state
+  direction = [0, 0, 1],
+  rotation = [0, 0, 0],
+  quaternion,
 
-  // Path animation props (charges)
-  chargeCount = 5,
-  charge = 1,
-  velocity = 1,
+  // unified API: only current for coils
+  current = 1,
+
   renderCharges = true,
   charges = [],
   isClosedPath = true,
 
-  // Child rendering function
-  coilGeometry,             // JSX: the actual coil geometry (Ring, Polygon, etc.)
-  computeNormal = () => [0, 0, 1], // function to compute normal in local space
-  getPathPoints = () => [],        // function to generate path points for charges
+  coilGeometry,
+  computeNormal = () => [0, 0, 1],
+  getPathPoints = () => [],
   showLabel = true,
 
   glowMultiplier,
@@ -134,6 +113,11 @@ export default function BaseCoil({
     }
   }, [direction, normalLength])
 
+  // set object's current so the scene/store knows this coil's current
+  useEffect(() => {
+    updateObject?.(id, { current })
+  }, [current, id, updateObject])
+
   // Generate path points using the provided function
   const pathPoints = useMemo(() => {
     return getPathPoints()
@@ -161,11 +145,6 @@ export default function BaseCoil({
     e.stopPropagation()
     setSelectedId(id)
   }
-
-  //set objects velocity and charge
-  useEffect(() => {
-    updateObject?.(id, { velocity, charge })
-  }, [velocity, charge, id, updateObject])
 
   return (
     <PivotControls
@@ -196,11 +175,8 @@ export default function BaseCoil({
             updateObject={updateObject}
             creativeMode={creativeMode}
             points={pathPoints}
-            charges={charges}
-            chargeCount={chargeCount}
-            charge={charge}
-            velocity={velocity}
-            isClosedPath={isClosedPath}
+            // unified: pass current instead of charge/chargeCount/velocity
+            current={current}
             renderCharges={renderCharges}
             renderPoints={false}
             isChild={true}

@@ -19,20 +19,18 @@ export default function Solenoid({
 
   radius = 1.5,
   length = 4,
-  resolution = 1,
+  pointsPerTurn = 10,
   multiplier = 1,
 
   turns = 10,
-  chargeCount = 12,
-  velocity = 5,
+  // unified API: only current
+  current = 1,
   ac = false,
 
-  // Rotation state
   direction = [0, 0, 1],
   rotation = [0, 0, 0],
   quaternion,
   
-  // Path props (charges)
   charges = [],
   showLabel = true,
   onHideLabel,
@@ -46,7 +44,7 @@ export default function Solenoid({
     const points = []
 
     const turns2 = turns * Math.PI * 2
-    const totalPoints = turns * resolution * 1
+    const totalPoints = turns * pointsPerTurn * 1
     //console.log('totalPoints', totalPoints)
     for (let i = 0; i < totalPoints; i++) {
       const t = i / (totalPoints - 1)
@@ -64,7 +62,7 @@ export default function Solenoid({
     }
 
     return points
-  }, [radius, length, resolution, turns])
+  }, [radius, length, pointsPerTurn, turns])
 
   //console.log(getSolenoidPoints())
 
@@ -82,14 +80,11 @@ export default function Solenoid({
       creativeMode={creativeMode}
       isHovered={isHovered}
       coilRadius={radius}
-      //coilColor='white'
-      //wireThickness={1}
       direction={direction}
       rotation={rotation}
       quaternion={quaternion}
-      chargeCount={chargeCount}
-      charge={multiplier * 0.1}
-      velocity={velocity}
+      // unified: pass current (preserve previous multiplier -> current mapping if desired)
+      current={current}
       renderCharges={true}
       charges={charges}
       glowMultiplier={0.6}

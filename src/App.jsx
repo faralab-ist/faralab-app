@@ -118,17 +118,27 @@ function LoadingOverlay() {
     return null
   }
 
-  function WhiteAxes({ size = 1 }) {
+  function WhiteAxes({ size = 1, cameraMoving = false }) {
   const [hovered, setHovered] = useState(false)
+  const [initialVisible, setInitialVisible] = useState(true)
   const axes = useMemo(() => new THREE.AxesHelper(size), [size])
   const hitRadius = 0.08
+  const labelHitRadius = 0.45
   const labelOffset = 0.2
+  const labelHoverOffset = 0.00
 
   useEffect(() => {
     if (axes.setColors) {
       axes.setColors(0xffffff, 0xffffff, 0xffffff)
     }
   }, [axes])
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setInitialVisible(false), 1500)
+    return () => clearTimeout(timeout)
+  }, [])
+
+  const showLabels = hovered || cameraMoving || initialVisible
 
   return (
     <group>
@@ -180,14 +190,58 @@ function LoadingOverlay() {
         />
       </mesh>
 
+      {/* Invisible hit areas around labels */}
+      <mesh
+        position={[size + labelHoverOffset, 0, 0]}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
+        onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
+      >
+        <sphereGeometry args={[labelHitRadius, 8, 8]} />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          depthWrite={false}
+          depthTest={false}
+          colorWrite={false}
+        />
+      </mesh>
+      <mesh
+        position={[0, size + labelHoverOffset, 0]}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
+        onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
+      >
+        <sphereGeometry args={[labelHitRadius, 8, 8]} />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          depthWrite={false}
+          depthTest={false}
+          colorWrite={false}
+        />
+      </mesh>
+      <mesh
+        position={[0, 0, size + labelHoverOffset]}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
+        onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
+      >
+        <sphereGeometry args={[labelHitRadius, 8, 8]} />
+        <meshBasicMaterial
+          transparent
+          opacity={0}
+          depthWrite={false}
+          depthTest={false}
+          colorWrite={false}
+        />
+      </mesh>
+
       <Html position={[size + labelOffset, 0, 0]} center>
-        <span className={`axis-label ${hovered ? 'axis-label--visible' : ''}`}>x</span>
+        <span className={`axis-label ${showLabels ? 'axis-label--visible' : ''}`}>x</span>
       </Html>
       <Html position={[0, size + labelOffset, 0]} center>
-        <span className={`axis-label ${hovered ? 'axis-label--visible' : ''}`}>y</span>
+        <span className={`axis-label ${showLabels ? 'axis-label--visible' : ''}`}>y</span>
       </Html>
       <Html position={[0, 0, size + labelOffset]} center>
-        <span className={`axis-label ${hovered ? 'axis-label--visible' : ''}`}>z</span>
+        <span className={`axis-label ${showLabels ? 'axis-label--visible' : ''}`}>z</span>
       </Html>
     </group>
   )
@@ -253,11 +307,21 @@ function LoadingOverlay() {
     const [isPanelMinimized, setIsPanelMinimized] = useState(false)
     const [isSidebarMinimized, setIsSidebarMinimized] = useState(false)
     const [dockSidebarState, setDockSidebarState] = useState({ isMinimized: false, isCollapsed: true, width: 0 })
+    const [isCameraMoving, setIsCameraMoving] = useState(false)
+    const cameraMoveTimeoutRef = useRef(null)
 
     const [pivotControlsEnabled, setPivotControlsEnabled] = useState(true)  // Control for object movement
     const [vectorMinTsl, setVectorMinTsl] = useState(0.1)
     const [vectorScale, setVectorScale] = useState(1)
     const [vectorStep, setVectorStep] = useState(1) 
+
+    useEffect(() => {
+      return () => {
+        if (cameraMoveTimeoutRef.current) {
+          clearTimeout(cameraMoveTimeoutRef.current)
+        }
+      }
+    }, [])
     const [lineMin, setLineMin] = useState(0.1)         //LINE SETTINGS NEW
     const [lineNumber, setLineNumber] = useState(20)          //LINE SETTINGS NEW
     const [activePlane, setActivePlane] = useState(null) // null, 'xy', 'yz', 'xz'
@@ -763,8 +827,19 @@ function LoadingOverlay() {
           <SceneHoverBridge onChange={onHoverChange} />
           <ambientLight intensity={0.5} />
           <directionalLight position={[2, 2, 5]} />
-          <OrbitControls enabled={!isDragging} />
-          <WhiteAxes args={[20]} />
+          <OrbitControls
+            enabled={!isDragging}
+            onChange={() => {
+              setIsCameraMoving(true)
+              if (cameraMoveTimeoutRef.current) {
+                clearTimeout(cameraMoveTimeoutRef.current)
+              }
+              cameraMoveTimeoutRef.current = setTimeout(() => {
+                setIsCameraMoving(false)
+              }, 200)
+            }}
+          />
+          <WhiteAxes args={[20]} cameraMoving={isCameraMoving} />
           <group position={[0,-0.001,0]}>
             
           </group>

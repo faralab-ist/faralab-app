@@ -15,9 +15,8 @@ export default function BarMagnet({
   setIsDragging,
   updatePosition,
   updateDirection,
-  charges,
-  setCharges,
-  charge,
+  // removed charge/velocity, use current
+  current = 1,
   length,
   radius,
   numOfCoils,
@@ -26,21 +25,20 @@ export default function BarMagnet({
   quaternion,
   chargesPerCoil,
   pointsPerCoil,
-  velocity,
   creativeMode,
-  updateObject,
-  showDebug = false,
-  slicePlane,
-  slicePos,
-  useSlice,
-  slicePlaneFlip,
-  frozen = true,
-  animated,
-  amplitude,
-  freq,
-  dragOwnerId = null,
-  showLabel = true,
-  onHideLabel,
+    updateObject,
+    showDebug = false,
+    slicePlane,
+    slicePos,
+    useSlice,
+    slicePlaneFlip,
+    animated,
+    amplitude,
+    freq,
+    dragOwnerId = null,
+    showLabel = true,
+    onHideLabel,
+    segments = 24, // NEW: samples per coil curve (fixed sampling)
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -50,17 +48,12 @@ export default function BarMagnet({
   const isDraggingRef = useRef(false)
   const clickArmed = useRef(false)
 
-  // --- small: reusable temporaries to avoid allocations every frame ---
   const tmpVec = useRef(new THREE.Vector3())
   const tmpTangent = useRef(new THREE.Vector3())
   const tmpQuat = useRef(new THREE.Quaternion())
   const tmpEuler = useRef(new THREE.Euler())
   const tmpNormalMat = useRef(new THREE.Matrix3())
   const Z_VEC = useRef(new THREE.Vector3(0, 0, 1))
-
-  const positionsRef = useRef([])    // array of [x,y,z] (reused)
-  const tangentsRef = useRef([])     // array of [x,y,z] (reused)
-  const lastSetPositionsRef = useRef(null) // to compare before calling setState
 
   const clockRef = useRef(null);
   useEffect(() => {
@@ -70,7 +63,6 @@ export default function BarMagnet({
     }
   }, []);
 
-  // animated motion state
   const animBasePosRef = useRef([position[0], position[1], position[2]]);
   const isAnimatingRef = useRef(false);
 
@@ -86,42 +78,25 @@ export default function BarMagnet({
       }
       animBasePosRef.current = worldPos;
       isAnimatingRef.current = true;
-      updateObject?.(id, { frozen: true });
       clockRef.current?.start();
     } else {
       if (isAnimatingRef.current) {
         isAnimatingRef.current = false;
-        updateObject?.(id, { frozen: frozen });
         clockRef.current?.stop();
       }
     }
   }, [animated, id, updateObject]);
 
-  // stop clock when frozen
-  useEffect(() => {
-    if (clockRef.current) {
-      if (frozen) {
-        clockRef.current.stop();
-      } else {
-        clockRef.current.start();
-      }
-    }
-  }, [frozen]);
-
-  // Sync PivotControls matrix when position changes externally (preset load)
   useLayoutEffect(() => {
     if (isDraggingRef.current || !pivotRef.current) return
-
+    
     const pos = new THREE.Vector3(position[0], position[1], position[2])
     const mat = new THREE.Matrix4().setPosition(pos)
-
-    // Update PivotControls internal state
+    
     if (pivotRef.current.matrix) {
       pivotRef.current.matrix.copy(mat)
     }
   }, [position])
-
-  const [chargePositions, setChargePositions] = useState(() => Array.isArray(charges) ? charges : [])
 
   const catmullCurves = useMemo(() => {
     const curves = [];
@@ -146,12 +121,11 @@ export default function BarMagnet({
     return curves;
   }, [length, radius, pointsPerCoil, numOfCoils, direction, position, quaternion, rotation]);
 
-
   const clippingPlanes = useMemo(() => {
     if (!useSlice) return [];
-    let sliceFlip = -1;
-    if (slicePlaneFlip) sliceFlip = 1;
-    switch (slicePlane) {
+      let sliceFlip = -1;
+      if(slicePlaneFlip) sliceFlip = 1;
+      switch (slicePlane) {
       case 'xy': return [new THREE.Plane(new THREE.Vector3(0, 0, -sliceFlip), sliceFlip * slicePos)];
       case 'yz': return [new THREE.Plane(new THREE.Vector3(-sliceFlip, 0, 0), sliceFlip * slicePos)];
       case 'xz': return [new THREE.Plane(new THREE.Vector3(0, -sliceFlip, 0), sliceFlip * slicePos)];
@@ -159,156 +133,105 @@ export default function BarMagnet({
     }
   }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
 
-  useLayoutEffect(() => {
-    if (!groupRef.current || isDraggingRef.current) return
 
-    // Prefer quaternion if available (most accurate)
-    if (quaternion && quaternion.length === 4) {
-      const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
-      groupRef.current.quaternion.copy(q)
-
-      // keep direction in sync with quaternion: local Z is our "forward"
-      if (typeof updateDirection === 'function') {
-        const dirWorld = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
-        const [dx = 0, dy = 0, dz = 0] = direction || []
-        const eps = 1e-6
-        if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
-          updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
+    useLayoutEffect(() => {
+      if (!groupRef.current || isDraggingRef.current) return
+  
+      if (quaternion && quaternion.length === 4) {
+        const q = new THREE.Quaternion(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
+        groupRef.current.quaternion.copy(q)
+  
+        if (typeof updateDirection === 'function') {
+          const dirWorld = new THREE.Vector3(0, 0, 1).applyQuaternion(q).normalize()
+          const [dx = 0, dy = 0, dz = 0] = direction || []
+          const eps = 1e-6
+          if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
+            updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
+          }
         }
+        return
       }
+  
+      if (Array.isArray(rotation) && rotation.length >= 3) {
+        const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
+        groupRef.current.rotation.copy(e)
+        if (typeof updateDirection === 'function') {
+          const dirWorld = new THREE.Vector3(0, 0, 1).applyEuler(e).normalize()
+          const [dx = 0, dy = 0, dz = 0] = direction || []
+          const eps = 1e-6
+          if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
+            updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
+          }
+        }
+        return
+      }
+  
+      if (direction) {
+        const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
+        if (dir.lengthSq() === 0) return
+        dir.normalize()
+        const from = new THREE.Vector3(0, 0, 1) // use Z as cylinder "neutral" axis
+        const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
+        groupRef.current.quaternion.copy(q)
+      }
+    }, [direction, quaternion, rotation, updateDirection, id])
+
+  useEffect(() => {
+    if (!Array.isArray(catmullCurves) || catmullCurves.length === 0) {
+      updateObject?.(id, { charges: [], tangents: [] })
       return
     }
 
-    // If rotation Euler (radians) is provided, apply it (XYZ) and keep direction in sync
-    if (Array.isArray(rotation) && rotation.length >= 3) {
-      const e = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ')
-      groupRef.current.rotation.copy(e)
-      // compute resulting forward direction (local Z) and update object if changed
-      if (typeof updateDirection === 'function') {
-        const dirWorld = new THREE.Vector3(0, 0, 1).applyEuler(e).normalize()
-        const [dx = 0, dy = 0, dz = 0] = direction || []
-        const eps = 1e-6
-        if (Math.abs(dx - dirWorld.x) > eps || Math.abs(dy - dirWorld.y) > eps || Math.abs(dz - dirWorld.z) > eps) {
-          updateDirection(id, [dirWorld.x, dirWorld.y, dirWorld.z])
-        }
-      }
-      return
-    }
-
-    // Fallback to direction vector -> quaternion using local Z as base
-    if (direction) {
-      const dir = new THREE.Vector3(direction[0], direction[1], direction[2])
-      if (dir.lengthSq() === 0) return
-      dir.normalize()
-      const from = new THREE.Vector3(0, 0, 1) // use Z as cylinder "neutral" axis
-      const q = new THREE.Quaternion().setFromUnitVectors(from, dir)
-      groupRef.current.quaternion.copy(q)
-    }
-  }, [direction, quaternion, rotation, updateDirection, id])
-
-  const getChargePositions = () => {
-    const outPos = positionsRef.current
-    const outTan = tangentsRef.current
-    if (catmullCurves.length === 0) {
-      outPos.length = 0
-      outTan.length = 0
-      updateObject?.(id, { tangents: outTan })
-      return outPos
-    }
-
-    if (!groupRef.current) {
-      outPos.length = 0
-      outTan.length = 0
-      updateObject?.(id, { tangents: outTan })
-      return outPos
-    }
-
-    groupRef.current.updateWorldMatrix(true, false)
-    const worldMatrix = groupRef.current.matrixWorld
-    tmpNormalMat.current.getNormalMatrix(worldMatrix)
-
-    if (Array.isArray(quaternion) && quaternion.length === 4) {
-      tmpQuat.current.set(quaternion[0], quaternion[1], quaternion[2], quaternion[3])
-    } else if (Array.isArray(rotation) && rotation.length >= 3) {
-      tmpEuler.current.set(rotation[0], rotation[1], rotation[2], 'XYZ')
-      tmpQuat.current.setFromEuler(tmpEuler.current)
-    } else if (Array.isArray(direction) && (direction[0] || direction[1] || direction[2])) {
-      tmpVec.current.set(direction[0], direction[1], direction[2]).normalize()
-      tmpQuat.current.setFromUnitVectors(Z_VEC.current, tmpVec.current)
-    } else {
-      tmpQuat.current.identity()
-    }
-
-    const elapsed = clockRef.current ? clockRef.current.getElapsedTime() : 0
-
-    outPos.length = 0
-    outTan.length = 0
+    const n = Math.max(1, Math.floor(segments))
+    const positions = []
+    const tangents = []
 
     for (let c = 0; c < catmullCurves.length; c++) {
-      const catmullCurve = catmullCurves[c]
-      const nCharges = Math.max(0, Math.floor(chargesPerCoil || 0));
-      if (nCharges === 0) continue
-      if (catmullCurve.points.length === 0) continue;
-      if (radius <= 0) continue;
-      if (length <= 0) continue;
+      const curve = catmullCurves[c]
+      if (!curve || curve.points.length === 0) continue
 
-      const curveLength = catmullCurve.getLength();
-      const timePerLoop = curveLength / Math.max(0.1, Math.abs(velocity));
-      const currLoopTime = clockRef.current ? clockRef.current.getElapsedTime() % timePerLoop : 0;
-      let currLoopt = currLoopTime / timePerLoop;
-
-      for (let i = 0; i < nCharges; i++) {
-        if (velocity === 0) currLoopt = 0;
-        let myt = (i / nCharges + currLoopt) % 1;
-        myt = velocity >= 0 ? myt : (1 - myt);
-
-        catmullCurve.getPointAt(myt, tmpVec.current)
-        catmullCurve.getTangentAt(myt, tmpTangent.current)
-
-        tmpVec.current.applyMatrix4(worldMatrix)
-        tmpTangent.current.applyMatrix3(tmpNormalMat.current).normalize()
-
-        const idx = outPos.length
-        if (outPos[idx]) {
-          outPos[idx][0] = tmpVec.current.x - (position[0] ?? 0)
-          outPos[idx][1] = tmpVec.current.y - (position[1] ?? 0)
-          outPos[idx][2] = tmpVec.current.z - (position[2] ?? 0)
+      for (let i = 0; i < n; i++) {
+        let t
+        if (curve.closed) {
+          t = i / n
         } else {
-          outPos[idx] = [tmpVec.current.x - (position[0] ?? 0),
-          tmpVec.current.y - (position[1] ?? 0),
-          tmpVec.current.z - (position[2] ?? 0)]
+          t = (n === 1) ? 0 : i / (n - 1)
         }
-
-        if (outTan[idx]) {
-          outTan[idx][0] = tmpTangent.current.x
-          outTan[idx][1] = tmpTangent.current.y
-          outTan[idx][2] = tmpTangent.current.z
-        } else {
-          outTan[idx] = [tmpTangent.current.x, tmpTangent.current.y, tmpTangent.current.z]
-        }
-
-        outPos.length = idx + 1
-        outTan.length = idx + 1
+        const p = curve.getPointAt(t)
+        const tan = curve.getTangentAt(t)
+        positions.push([p.x, p.y, p.z])
+        tangents.push([tan.x, tan.y, tan.z])
       }
     }
 
-    updateObject?.(id, { tangents: outTan })
-    return outPos
-  };
-
-  const positionsEqual = (a, b) => {
-    if (a === b) return true
-    if (!a || !b) return false
-    if (a.length !== b.length) return false
-    for (let i = 0; i < a.length; i++) {
-      const ai = a[i], bi = b[i]
-      if (!ai || !bi) return false
-      if (ai.length !== 3 || bi.length !== 3) return false
-      // small epsilon to avoid float jitter triggering state updates
-      if (Math.abs(ai[0] - bi[0]) > 1e-6 || Math.abs(ai[1] - bi[1]) > 1e-6 || Math.abs(ai[2] - bi[2]) > 1e-6) return false
+    if (groupRef.current) {
+      const q = groupRef.current.quaternion
+      const rotatedPositions = positions.map(p => {
+        const v = new THREE.Vector3(p[0], p[1], p[2]).applyQuaternion(q)
+        return [v.x, v.y, v.z]
+      })
+      const rotatedTangents = tangents.map(t => {
+        const v = new THREE.Vector3(t[0], t[1], t[2]).applyQuaternion(q)
+        return [v.x, v.y, v.z]
+      })
+      updateObject?.(id, { charges: rotatedPositions, tangents: rotatedTangents })
+    } else {
+      updateObject?.(id, { charges: positions, tangents: tangents })
     }
-    return true
-  }
+  }, [
+    catmullCurves,
+    segments,
+    quaternion,
+    rotation,
+    direction,
+    position,
+    radius,
+    length,
+    pointsPerCoil,
+    numOfCoils,
+    id,
+    updateObject,
+  ])
 
   useFrame((state) => {
     if (animated && isAnimatingRef.current && !isDraggingRef.current) {
@@ -332,25 +255,20 @@ export default function BarMagnet({
       const newPos = new THREE.Vector3(base[0], base[1], base[2]).addScaledVector(worldDir, disp);
       updatePosition?.(id, [newPos.x, newPos.y, newPos.z]);
     }
-
-    const pos = getChargePositions()
-
-    updateObject?.(id, { charges: pos })
-
-    const last = lastSetPositionsRef.current
-    if (!positionsEqual(last, pos)) {
-      setChargePositions(pos)
-      lastSetPositionsRef.current = pos.slice()
-    }
   });
 
-  const magnetization = useMemo(() => {
-    if (radius === 0 || length === 0) return 0;
-    if (!charge || !chargesPerCoil || !velocity) return 0;
+  // expose current to the scene/store
+  useEffect(() => {
+    updateObject?.(id, { current })
+  }, [current, id, updateObject])
 
-    return (numOfCoils * charge * chargesPerCoil * Math.abs(velocity)) /
-      (2 * Math.PI * radius * length);
-  }, [numOfCoils, charge, chargesPerCoil, velocity, radius, length]);
+   const magnetization = useMemo(() => {
+    if (length === 0 || numOfCoils === 0) return 0;
+
+    // M = n×I where n is turn density (turns/length)
+    // This gives magnetization in A/m (ampere-turns per meter)
+    return (numOfCoils * current) / length;
+  }, [numOfCoils, current, length]);
 
   return (
     <PivotControls
@@ -376,22 +294,20 @@ export default function BarMagnet({
       scale={0.86}
       lineWidth={2.5}
     >
-
+      
       <group ref={groupRef}>
-        {showLabel && (
-          <Label
-
-            objectName={name}
-            value={[
-              `M = ${magnetization.toExponential(2)} A/m`,
-            ]}
-            offsetY={0.5 + radius}
-            distanceFactor={8}
-            objectId={id}
-            onHideLabel={onHideLabel}
-          />
-        )}
-        {/* Invisible hitbox for selection */}
+         {showLabel && (
+                <Label
+                  objectName={name}
+                  value={[
+                    `M = ${magnetization.toExponential(2)} A/m`,
+                  ]}
+                  offsetY={0.5 + radius}
+                  distanceFactor={8}
+                  objectId={id}
+                  onHideLabel={onHideLabel}
+                />
+              )}
         <mesh
           ref={meshRef}
           position={[0, 0, 0]}
@@ -420,17 +336,17 @@ export default function BarMagnet({
           <boxGeometry args={[radius * 2.2, radius * 2.2, length * 1.1]} />
           <meshBasicMaterial visible={false} />
         </mesh>
-
+        
         <group>
           {/* negative side (blue) - left half */}
-          <mesh position={[0, 0, -(length / 4)]} castShadow receiveShadow>
+          <mesh position={[0, 0, -(length/4)]} castShadow receiveShadow>
             <boxGeometry args={[radius * 2, radius * 2, Math.max(0.001, length / 2)]} />
-            <meshStandardMaterial color={'#2e86ff'} metalness={0.6} roughness={0.35} clippingPlanes={clippingPlanes} />
+            <meshStandardMaterial color={'#2e86ff'} metalness={0.6} roughness={0.35} clippingPlanes={clippingPlanes}/>
           </mesh>
           {/* positive side (red) - right half */}
-          <mesh position={[0, 0, (length / 4)]} castShadow receiveShadow>
+          <mesh position={[0, 0, (length/4)]} castShadow receiveShadow>
             <boxGeometry args={[radius * 2, radius * 2, Math.max(0.001, length / 2)]} />
-            <meshStandardMaterial color={'#ff4d4d'} metalness={0.6} roughness={0.35} clippingPlanes={clippingPlanes} />
+            <meshStandardMaterial color={'#ff4d4d'} metalness={0.6} roughness={0.35} clippingPlanes={clippingPlanes}/>
           </mesh>
         </group>
         {showDebug && catmullCurves.map((curve, idx) => {
@@ -441,7 +357,7 @@ export default function BarMagnet({
           return <primitive key={`curve-${idx}`} object={line} />;
         })}
       </group>
-
+      
     </PivotControls>
   )
 }

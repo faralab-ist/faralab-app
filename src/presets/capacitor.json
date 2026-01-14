@@ -14,9 +14,9 @@
       ]
     },
     "settings": {
-      "vectorMinTsl": 30,
-      "vectorScale": 2.1,
-      "vectorStep": 0.6,
+      "vectorMinTsl": 0,
+      "vectorScale": 1,
+      "vectorStep": 1,
       "lineMin": 0.12,
       "lineNumber": 28,
       "showField": true,
@@ -37,14 +37,14 @@
         "props": {
           "position": [
             0,
-            0,
+            -0.01,
             0
           ],
           "charge_densities": [
             2,
             -2
           ],
-          "spacing": 1.81,
+          "spacing": 2,
           "rotation": [
             0,
             0,
@@ -53,7 +53,7 @@
           "direction": [
             0,
             1,
-            2.220446049250313e-16
+            0
           ],
           "dimensions": [
             8,
