@@ -85,8 +85,8 @@ export default function FaradayCoil({
   const wireMaterial = useMemo(() => {
     return new THREE.MeshStandardMaterial({
       color: '#fffdfd',
-      metalness: 0.5,
-      roughness: 0.2,
+      metalness: 0,
+      roughness: 0,
     });
   }, []);
 
