@@ -262,6 +262,8 @@ export default function BarMagnet({
     updateObject?.(id, { current })
   }, [current, id, updateObject])
 
+ 
+
    const magnetization = useMemo(() => {
     if (length === 0 || numOfCoils === 0) return 0;
 
@@ -270,6 +272,12 @@ export default function BarMagnet({
     return (numOfCoils * current) / length;
   }, [numOfCoils, current, length]);
 
+   // Store label info for Data sidebar
+  useEffect(() => {
+    updateObject?.(id, { 
+      labelInfo: [`M = ${magnetization.toExponential(2)} A/m`]
+    })
+  }, [magnetization, id, updateObject])
   return (
     <PivotControls
       ref={pivotRef}

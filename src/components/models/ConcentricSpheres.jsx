@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useMemo } from 'react'
+import React, { useRef, useLayoutEffect, useMemo, useEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import { efields } from '../../physics'
@@ -37,6 +37,7 @@ export default function ConcentricSpheres({
   name,
   showLabel = true,
   onHideLabel,
+  updateObject
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -69,6 +70,14 @@ export default function ConcentricSpheres({
         return []
     }
   }, [slicePlane, slicePos, useSlice, slicePlaneFlip])
+
+  // Store label info for Data sidebar
+  useEffect(() => {
+    const labelInfo = chargePerSphereSurfaceArr.map(
+      (charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`
+    )
+    updateObject?.(id, { labelInfo })
+  }, [chargePerSphereSurfaceArr, id, updateObject])
 
   // Helper handler for clicks to avoid code duplication
   const handleMeshClick = (e) => {

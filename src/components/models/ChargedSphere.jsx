@@ -25,6 +25,7 @@ export default function Sphere({
   isHovered,
   showLabel = true,
   onHideLabel,
+  updateObject
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -95,10 +96,20 @@ export default function Sphere({
       scale={0.86}
       lineWidth={2.5}
     >
+      {/* Store label info for Data sidebar */}
+      {React.useMemo(() => {
+        if (updateObject) {
+          updateObject(id, {
+            labelInfo: [`ρ = ${charge_density === undefined ? (0).toExponential(2) : charge_density.toExponential(2)} C/m³`]
+          })
+        }
+        return null
+      }, [charge_density, id, updateObject])}
+
       {showLabel && (
         <Label
           objectName={name}
-          value={`ρ = ${charge_density === undefined ? 0..toExponential(2) : charge_density.toExponential(2)} C/m³`}
+          value={`ρ = ${charge_density === undefined ? (0).toExponential(2) : charge_density.toExponential(2)} C/m³`}
           offsetY={radius + 0.5}
           objectId={id}
           onHideLabel={onHideLabel}

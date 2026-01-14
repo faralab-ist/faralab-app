@@ -108,6 +108,13 @@ export default function StackedPlanes({
     if (pivotRef.current.matrix) pivotRef.current.matrix.copy(mat)
   }, [position, initialRotation, rotation, quaternion, direction, updateDirection, id])
 
+  // Store label info for Data sidebar
+  useEffect(() => {
+    updateObject?.(id, { 
+      labelInfo: charge_densities.map((charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`)
+    })
+  }, [charge_densities, id, updateObject])
+
   return (
     <PivotControls
       ref={pivotRef}
@@ -209,3 +216,27 @@ export default function StackedPlanes({
     </PivotControls>
   )
 }
+
+// Store label info for Data sidebar
+StackedPlanes = React.forwardRef((props, ref) => {
+  useEffect(() => {
+    const { charge_densities, id, updateObject } = props
+    updateObject?.(id, { 
+      labelInfo: charge_densities.map((charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`)
+    })
+  }, [props.charge_densities, props.id, props.updateObject])
+  
+  return null
+})
+
+// Store label info for Data sidebar
+StackedPlanes = React.forwardRef((props, ref) => {
+  useEffect(() => {
+    const { charge_densities, id, updateObject } = props
+    updateObject?.(id, { 
+      labelInfo: charge_densities.map((charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`)
+    })
+  }, [props.charge_densities, props.id, props.updateObject])
+  
+  return null
+})

@@ -215,6 +215,17 @@ export default function FaradayCoil({
       scale={0.86}
       lineWidth={2.5}
     >
+      {/* Store label info for Data sidebar */}
+      {React.useMemo(() => {
+        updateObject?.(id, {
+          labelInfo: [
+            `B-Flux = ${magneticFlux.toExponential(2)} Wb`,
+            `ε = ${emfValue.toExponential(2)} V`
+          ]
+        })
+        return null
+      }, [magneticFlux, emfValue, id, updateObject])}
+
       <group ref={groupRef}>
         {showLabel && (
                     <Label

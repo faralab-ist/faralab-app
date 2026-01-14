@@ -8,6 +8,7 @@ export default function Path({
   id,
   position,
   name,
+  updateObject,
   selectedId,
   setSelectedId,
   setIsDragging,
@@ -15,7 +16,6 @@ export default function Path({
   points,
   current, // use current for coils
   creativeMode,
-  updateObject,
   isClosedPath,
   isChild,
   renderPoints = true,
@@ -159,6 +159,15 @@ export default function Path({
       scale={0.86}
       lineWidth={2.5}
     >
+      {/* Store label info for Data sidebar */}
+      {React.useMemo(() => {
+        const I = (typeof current !== 'undefined') ? current : 0
+        updateObject?.(id, {
+          labelInfo: [`I = ${I.toExponential(2)} A`]
+        })
+        return null
+      }, [current, id, updateObject])}
+
       {showLabel && (
         <Label
           objectName={name}

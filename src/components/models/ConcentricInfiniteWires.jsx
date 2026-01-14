@@ -57,6 +57,12 @@ useEffect(() => {
     }
 }, [])
 
+  // Store label info for Data sidebar
+  useEffect(() => {
+    const labelInfo = chargePerSurfaceArr.map((charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`)
+    updateObject?.(id, { labelInfo })
+  }, [chargePerSurfaceArr, id, updateObject])
+
   // Apply rotation from saved quaternion or direction
   useLayoutEffect(() => {
     if (!groupRef.current || isDraggingRef.current) return
