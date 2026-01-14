@@ -33,7 +33,6 @@ export default function EfieldButtons({
 }) {
     const disabledTitle_vectors = "Enable the field vectors to use this";
     const disabledTitle_lines = "Enable the field lines to use this";
-
     const content = (
       
        <div className="efield-controls">
@@ -111,7 +110,7 @@ export default function EfieldButtons({
             
             {/* only render Vectors section when active */}
             
-            <div className={`efield-section ${!hasField ? 'disabled' : ''}`} role={ !hasField ? 'presentation' : undefined }>
+            <div className={`efield-section ${!hasField && !hasBField ? 'disabled' : ''}`} role={ !hasField && !hasBField? 'presentation' : undefined }>
                  <div className="efield-section-title">Vectors</div>
                  <div className="efield-row compact">
                      <label className="efield-label">
@@ -123,7 +122,7 @@ export default function EfieldButtons({
                             value={vectorMinTsl}
                             onChange={e => setVectorMinTsl(Number(e.target.value))}
                             disabled={(!hasField || !showField) && (!hasBField || !showBField)}
-                            aria-disabled={!hasField}
+                            aria-disabled={!hasField || !hasBField}
                             title={!hasField || !showField ? disabledTitle_vectors : undefined}
                          />
                      </label>
@@ -158,7 +157,7 @@ export default function EfieldButtons({
                  </div>
              </div>
              
-            {/* Only render Lines section when active */}
+            {/* Only render Lines section when active 
             <div className={`efield-section ${!hasField ? 'disabled' : ''}`} role={ !hasField ? 'presentation' : undefined }>
                  <div className="efield-section-title">Lines</div>
                  <div className="efield-row compact">
@@ -193,7 +192,7 @@ export default function EfieldButtons({
                      </label>
                  </div>
              </div>
-             
+             */}
         </div>
     );
 
