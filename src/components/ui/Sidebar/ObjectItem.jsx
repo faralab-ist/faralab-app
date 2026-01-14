@@ -687,12 +687,12 @@ export default function ObjectItem({
                  <div className="detail-row inline">
                   <div className="detail-key">Animation frequency: </div>
                   <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Hz</span>
                     <InlineDecimalInput
                       value={Number.isFinite(obj.freq) ? obj.freq : (obj.freq === undefined ? 1 : 0)}
                       step={0.1}
                       min={0}
                       max={100}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => {
                         const safe = clampWithError(v, 0.1, 100);
                         updateObject(obj.id, { freq: safe });
@@ -700,6 +700,7 @@ export default function ObjectItem({
                       onError={setErrorMsg}
                       errorMsg={ERROR_MSG}
                     />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Hz</span>
                   </div>
                  </div>
 
