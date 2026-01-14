@@ -283,6 +283,15 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   border-bottom: 1px solid #222;
 }
 
+.detail-row.inline .detail-value {
+  flex: 0 1 auto;
+}
+
+.detail-row.inline .detail-key {
+  margin: 0;
+  font-size: 11px;
+}
+
 /*apaga a linha por debaixo do ultimo detalhe do objeto ##### É USADO ######*/
 .detail-row:last-child {
   border-bottom: none;

@@ -210,7 +210,7 @@ useEffect(() => {
                   <Label
                     objectName={name}
                     position={groupRef.current ? groupRef.current.position.toArray() : position}
-                    value={chargePerSurfaceArr.map((charge, i) => `E-Field${i + 1} = ${charge.toExponential(2)} C`)}
+                    value={chargePerSurfaceArr.map((charge, i) => `λ${i + 1} = ${charge.toExponential(2)} C/m`)}
                     offsetY={radiuses[radiuses.length - 1] + 0.5}
                     distanceFactor={10 * radiuses.length}
                     objectId={id}

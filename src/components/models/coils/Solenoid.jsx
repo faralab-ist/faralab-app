@@ -18,7 +18,6 @@ export default function Solenoid({
   radius = 1.5,
   length = 4,
   pointsPerTurn = 10,
-  multiplier = 1,
 
   turns = 10,
   // unified API: only current
@@ -35,6 +34,7 @@ export default function Solenoid({
   charges = [],
   showLabel = true,
   onHideLabel,
+  segments = 500,
 }) {
   const computeSolenoidNormal = useCallback(() => {
     // Local normal is +Z (for solenoid along Z axis)
@@ -78,6 +78,7 @@ export default function Solenoid({
 
   return (
     <BaseCoil
+    segments={segments}
       id={id}
       name={name}
       position={position}

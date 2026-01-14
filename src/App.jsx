@@ -475,13 +475,13 @@ function LoadingOverlay() {
       const results = calculateFlux(sceneObjects)
       setFluxResults(results)
       
-      if (results.length) {
+      /*if (results.length) {
         results.forEach(result => {
           const label = result.name ?? result.id
           const value = Number.isFinite(result.flux) ? result.flux : 0
-          console.log(`  ${label}: ${value.toExponential(3)} N·m²/C`)
+          //console.log(`  ${label}: ${value.toExponential(3)} N·m²/C`)
         })
-      }
+      }*/
     }, [showOnlyGaussianField, sceneObjects])
     const [camFns, setCamFns] = useState(null)
     const initialCameraApplied = useRef(false)

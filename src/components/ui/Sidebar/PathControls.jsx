@@ -34,24 +34,22 @@ export default function PathControls({
 
   return (
     <>
-      <div
-        className="detail-row"
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-      >
-        <div>
-          <div className="detail-key">Current</div>
-          <div className="detail-value">
-            <InlineDecimalInput
-              value={current}
-              step={0.01}
-              onChange={(v) => onSetCurrent(v)}
-              onError={setErrorMsg}
-            />
-            <span style={{ fontSize: 12, opacity: 0.7 }}>A</span>
-          </div>
+      <div className="detail-row inline">
+        <div className="detail-key">Current:</div>
+        <div className="detail-value">
+          <InlineDecimalInput
+            value={current}
+            step={0.01}
+            inputStyle={{ minWidth: "4ch" }}
+            onChange={(v) => onSetCurrent(v)}
+            onError={setErrorMsg}
+          />
+          <span style={{ fontSize: 12, opacity: 0.7 }}>A</span>
         </div>
+      </div>
 
-        {obj.type === "path" && <div>
+      {obj.type === "path" && (
+        <div className="detail-row inline">
           <div className="detail-key">Closed path</div>
           <div className="detail-value">
             <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
@@ -64,11 +62,10 @@ export default function PathControls({
                 }}
                 onMouseDown={(e) => e.stopPropagation()}
               />
-              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>Loop</span>
             </label>
           </div>
-        </div>}
-      </div>
+        </div>
+      )}
 
       {obj.type === "path" && (
         <div className="detail-row" style={{ marginTop: 8 }}>

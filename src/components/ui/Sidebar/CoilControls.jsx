@@ -43,8 +43,8 @@ export default function CoilControls({
 
   if (columnOnly && isRing) {
     return (
-      <div>
-        <div className="detail-key">Coil Radius</div>
+      <div className="detail-row inline">
+        <div className="detail-key">Coil Radius:</div>
         <div className="detail-value">
           <InlineDecimalInput
             value={radius}
@@ -61,8 +61,8 @@ export default function CoilControls({
 
   if (columnOnly && isPolygon) {
     return (
-      <div>
-        <div className="detail-key">Number of Sides</div>
+      <div className="detail-row inline">
+        <div className="detail-key">Number of Sides: </div>
         <div className="detail-value">
           <InlineDecimalInput
             value={sides}
@@ -83,26 +83,17 @@ export default function CoilControls({
     <>
       {/* Ring Coil: Radius */}
       {isRing && (
-        <div
-          className="detail-row"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-            gap: 10
-          }}
-        >
-          <div>
-            <div className="detail-key">Coil Radius</div>
-            <div className="detail-value">
-              <InlineDecimalInput
-                value={radius}
-                min={DIM_MIN}
-                max={DIM_MAX}
-                step={0.1}
-                onChange={onSetRadius}
-                onError={setErrorMsg}
-              />
-            </div>
+        <div className="detail-row inline">
+          <div className="detail-key">Coil Radius:</div>
+          <div className="detail-value">
+            <InlineDecimalInput
+              value={radius}
+              min={DIM_MIN}
+              max={DIM_MAX}
+              step={0.1}
+              onChange={onSetRadius}
+              onError={setErrorMsg}
+            />
           </div>
           {labelControl || <div aria-hidden="true" />}
         </div>
@@ -110,26 +101,17 @@ export default function CoilControls({
 
       {/* Polygon Coil: Number of Sides */}
       {isPolygon && (
-        <div
-          className="detail-row"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-            gap: 10
-          }}
-        >
-          <div>
-            <div className="detail-key">Number of Sides</div>
-            <div className="detail-value">
-              <InlineDecimalInput
-                value={sides}
-                min={3}
-                max={12}
-                step={1}
-                onChange={onSetSides}
-                onError={setErrorMsg}
-              />
-            </div>
+        <div className="detail-row inline">
+          <div className="detail-key">Number of Sides</div>
+          <div className="detail-value">
+            <InlineDecimalInput
+              value={sides}
+              min={3}
+              max={12}
+              step={1}
+              onChange={onSetSides}
+              onError={setErrorMsg}
+            />
           </div>
           {labelControl || <div aria-hidden="true" />}
         </div>

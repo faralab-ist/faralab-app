@@ -121,7 +121,6 @@ export default function ConcentricSpheres({
 
         return (
           <group key={i}>
-            {/* 1. Material Fill Mesh (The solid volume between layers) */}
             <mesh
               position={[0, 0, 0]}
               onClick={handleMeshClick}
@@ -136,7 +135,6 @@ export default function ConcentricSpheres({
               />
             </mesh>
 
-            {/* 2. Surface Field Mesh (The Red/Blue/Gray Skin) */}
             <mesh
               userData={{ id, type: 'concentricSpheres' }}
               position={[0, 0, 0]}
@@ -150,7 +148,6 @@ export default function ConcentricSpheres({
                   : 'gray'
                 }
                 side={THREE.DoubleSide}
-                // Adjust opacity logic if you want the fill to be more visible through the surface
                 opacity={Math.exp(-0.4 * i)} 
                 transparent={false} // If this is false, opacity prop is ignored. Change to true if you want transparency.
                 depthWrite={true}
@@ -158,7 +155,6 @@ export default function ConcentricSpheres({
                 wireframe={false} // You could set this to true if you only want a wireframe cage over the solid fill
               />
             </mesh>
-              {/* Show label between this layer and next layer (skip for last layer) */}
             {i < radiuses.length - 1 && (
               <LayerLabel 
                 layerIndex={i} 
@@ -173,7 +169,7 @@ export default function ConcentricSpheres({
         <Label
           objectName={name}
           value={chargePerSphereSurfaceArr.map(
-            (charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`
+            (charge, i) => `Charge ${i + 1} = ${charge.toExponential(2)} C`
           )}
           offsetY={radiuses[radiuses.length - 1] + 0.5}
           distanceFactor={10 * radiuses.length}
