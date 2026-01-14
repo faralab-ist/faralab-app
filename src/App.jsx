@@ -123,8 +123,9 @@ function LoadingOverlay() {
   const [initialVisible, setInitialVisible] = useState(true)
   const axes = useMemo(() => new THREE.AxesHelper(size), [size])
   const hitRadius = 0.08
-  const labelHitRadius = 0.6
+  const labelHitRadius = 0.45
   const labelOffset = 0.2
+  const labelHoverOffset = 0.00
 
   useEffect(() => {
     if (axes.setColors) {
@@ -191,7 +192,7 @@ function LoadingOverlay() {
 
       {/* Invisible hit areas around labels */}
       <mesh
-        position={[size + labelOffset, 0, 0]}
+        position={[size + labelHoverOffset, 0, 0]}
         onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
         onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
       >
@@ -205,7 +206,7 @@ function LoadingOverlay() {
         />
       </mesh>
       <mesh
-        position={[0, size + labelOffset, 0]}
+        position={[0, size + labelHoverOffset, 0]}
         onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
         onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
       >
@@ -219,7 +220,7 @@ function LoadingOverlay() {
         />
       </mesh>
       <mesh
-        position={[0, 0, size + labelOffset]}
+        position={[0, 0, size + labelHoverOffset]}
         onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
         onPointerOut={(e) => { e.stopPropagation(); setHovered(false) }}
       >
