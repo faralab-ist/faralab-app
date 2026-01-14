@@ -191,7 +191,13 @@ useEffect(() => {
               clippingPlanes={clippingPlanes}
             />
         </mesh>
-        <LayerLabel layerIndex={i} position={[rad + 0.3, 0.1, 0]} />
+         {/* Show label between this layer and next layer (skip for last layer) */}
+          {i < radiuses.length - 1 && (
+          <LayerLabel 
+            layerIndex={i} 
+            position={[(radiuses[i] + radiuses[i + 1]) / 2, 0, 0]} 
+            />
+          )}
         </group>)}
       </group> 
        {showLabel && (

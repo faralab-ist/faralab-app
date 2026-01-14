@@ -133,6 +133,7 @@ export default function BarMagnet({
     }
   }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
 
+
     useLayoutEffect(() => {
       if (!groupRef.current || isDraggingRef.current) return
   
@@ -261,6 +262,14 @@ export default function BarMagnet({
     updateObject?.(id, { current })
   }, [current, id, updateObject])
 
+   const magnetization = useMemo(() => {
+    if (length === 0 || numOfCoils === 0) return 0;
+
+    // M = n×I where n is turn density (turns/length)
+    // This gives magnetization in A/m (ampere-turns per meter)
+    return (numOfCoils * current) / length;
+  }, [numOfCoils, current, length]);
+
   return (
     <PivotControls
       ref={pivotRef}
@@ -287,13 +296,11 @@ export default function BarMagnet({
     >
       
       <group ref={groupRef}>
-         {showLabel && animated && (
+         {showLabel && (
                 <Label
-
                   objectName={name}
                   value={[
-                    `A = ${amplitude.toExponential(2)}`,
-                    `Freq: ${freq.toExponential(2)} Hz`,
+                    `M = ${magnetization.toExponential(2)} A/m`,
                   ]}
                   offsetY={0.5 + radius}
                   distanceFactor={8}

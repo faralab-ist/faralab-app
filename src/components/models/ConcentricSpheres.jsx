@@ -4,6 +4,7 @@ import useCameraSnap from '../../hooks/useCameraSnapOnSlider'
 import { efields } from '../../physics'
 import * as THREE from 'three'
 import Label from '../ui/labels/Label'
+import LayerLabel from '../ui/labels/LayerLabel'
 
 // Define appearance for materials
 const MATERIAL_COLORS = {
@@ -148,6 +149,13 @@ export default function ConcentricSpheres({
                 wireframe={false} // You could set this to true if you only want a wireframe cage over the solid fill
               />
             </mesh>
+              {/* Show label between this layer and next layer (skip for last layer) */}
+            {i < radiuses.length - 1 && (
+              <LayerLabel 
+                layerIndex={i} 
+                position={[(radiuses[i] + radiuses[i + 1]) / 2, 0, 0]} 
+              />
+            )}
           </group>
         )
       })}
@@ -156,7 +164,7 @@ export default function ConcentricSpheres({
         <Label
           objectName={name}
           value={chargePerSphereSurfaceArr.map(
-            (charge, i) => `E-Field${i + 1} = ${charge.toExponential(2)} C`
+            (charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`
           )}
           offsetY={radiuses[radiuses.length - 1] + 0.5}
           distanceFactor={10 * radiuses.length}
