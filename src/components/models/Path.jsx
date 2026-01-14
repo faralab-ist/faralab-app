@@ -13,9 +13,7 @@ export default function Path({
   setIsDragging,
   updatePosition,
   points,
-  chargeCount,
-  charge,
-  velocity,
+  current, // use current for coils
   creativeMode,
   updateObject,
   isClosedPath,
@@ -34,12 +32,14 @@ export default function Path({
   const isDraggingRef = useRef(false)
 
   const { glowColor, baseGlowIntensity } = useMemo(() => {
-    const sign = charge >= 0 ? 1 : -1
+    // derive visual from current if present, fallback to 0
+    const value = (typeof current !== 'undefined') ? current : 0
+    const sign = value >= 0 ? 1 : -1
     const glowColor = sign >= 0 ? new THREE.Color(0x6ea8ff) : new THREE.Color(0xff6e6e)
-    const magnitude = Math.min(4, Math.max(0.2, Math.abs(charge)))
+    const magnitude = Math.min(4, Math.max(0.2, Math.abs(value)))
     const baseGlowIntensity = (0.5 + magnitude * 0.12) * glowMultiplier
     return { glowColor, baseGlowIntensity }
-  }, [charge, glowMultiplier])
+  }, [current, glowMultiplier])
 
   useLayoutEffect(() => {
     if (isDraggingRef.current || !pivotRef.current) return
@@ -164,8 +164,7 @@ export default function Path({
           objectName={name}
           value={`I = ${(() => {
             try {
-              const curveLength = catmullCurve?.getLength() || 0
-              const I = (curveLength === 0) ? 0 : Math.abs(charge * (chargeCount || 0) * (velocity || 0) / curveLength)
+              const I = (typeof current !== 'undefined') ? current : 0
               return I.toExponential(2)
             } catch (e) {
               return '0.00e+0'

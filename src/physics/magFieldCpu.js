@@ -6,19 +6,23 @@ export function calculateMagFieldAtPoint(objects, point){
     const MU_04PI = MU_0_REAL / (4 * Math.PI);
     for(const obj of objects){
         if(obj.type !== 'barMagnet' && obj.type !== 'coil' && obj.type !== 'path') continue;
-        const basePos = new THREE.Vector3(...obj.position);
-        const charges = obj.charges || [];
-        const tangents = obj.tangents || [];
-        const velocity = obj.velocity || 0;
-        const factor = MU_04PI * obj.charge * velocity;
+        const basePos = new THREE.Vector3(...(Array.isArray(obj.position) ? obj.position : [0,0,0]));
+        const charges = Array.isArray(obj.charges) ? obj.charges : [];
+        const tangents = Array.isArray(obj.tangents) ? obj.tangents : [];
+
+        const current = Number.isFinite(obj.current) ? obj.current : 0;
+        const factor = MU_04PI * current;
+
         for(let i = 0; i < charges.length; i++){
-            const chargePos = new THREE.Vector3(...charges[i]).add(basePos);
+            const segPosArr = charges[i] || [0,0,0];
+            const chargePos = new THREE.Vector3(...segPosArr).add(basePos);
             const rVec = new THREE.Vector3().subVectors(point, chargePos);
             const r2 = rVec.lengthSq();
             if(r2 === 0) continue;
             const rHat = rVec.clone().normalize();
-            const tangent = new THREE.Vector3(...tangents[i]);
-            const dB = tangent.clone().cross(rHat).multiplyScalar(factor / (r2));
+            const tangentArr = tangents[i] || [1,0,0];
+            const tangent = new THREE.Vector3(...tangentArr);
+            const dB = tangent.clone().cross(rHat).multiplyScalar(factor / r2);
             result.add(dB);
         }
     }

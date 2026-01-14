@@ -376,9 +376,6 @@ export default function ObjectItem({
                     addPoint={pathActions?.addPoint}
                     removeLastPoint={pathActions?.removeLastPoint}
                     setPoint={pathActions?.setPoint}
-                    changeChargeCount={pathActions?.changeChargeCount}
-                    changeCharge={pathActions?.changeCharge}
-                    changeVelocity={pathActions?.changeVelocity}
                     updateObject={updateObject}
                     setErrorMsg={setErrorMsg}
                 />
@@ -389,25 +386,23 @@ export default function ObjectItem({
               <>
                 <PathControls
                     obj={obj}
-                    changeChargeCount={coilActions?.changeChargeCount}
-                    changeCharge={coilActions?.changeCharge}
-                    changeVelocity={coilActions?.changeVelocity}
+                    addPoint={coilActions?.addPoint}
+                    removeLastPoint={coilActions?.removeLastPoint}
+                    setPoint={coilActions?.setPoint}
                     updateObject={updateObject}
                     setErrorMsg={setErrorMsg}
-                    chargeRowRight={
-                      (isRingCoil || isPolygonCoil) ? (
-                        <CoilControls
-                          obj={obj}
-                          changeRadius={coilActions?.changeRadius}
-                          changeSides={coilActions?.changeSides}
-                          updateObject={updateObject}
-                          setErrorMsg={setErrorMsg}
-                          columnOnly
-                        />
-                      ) : null
-                    }
                 />
-                {!(isRingCoil || isPolygonCoil) && (
+                {/* Coil-specific controls: for ring/polygon show compact columnOnly variant */}
+                {(isRingCoil || isPolygonCoil) ? (
+                  <CoilControls
+                    obj={obj}
+                    changeRadius={coilActions?.changeRadius}
+                    changeSides={coilActions?.changeSides}
+                    updateObject={updateObject}
+                    setErrorMsg={setErrorMsg}
+                    columnOnly
+                  />
+                ) : (
                   <CoilControls
                       obj={obj}
                       changeRadius={coilActions?.changeRadius}
@@ -630,15 +625,15 @@ export default function ObjectItem({
                    style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
                  >
                     <div>
-                      <div className="detail-key">Resolution</div>
+                      <div className="detail-key">Turns</div>
                       <div className="detail-value">
                         <InlineDecimalInput
-                          value={obj.resolution}
+                          value={obj.turns}
                           min={0.1}
                           max={300}
                           onChange={(v) => {
                             const safe = clampWithError(v, 0.1, 300);
-                            updateObject(obj.id, { resolution: safe });
+                            updateObject(obj.id, { turns: safe });
                           }}
                           onError={setErrorMsg}
                           errorMsg={ERROR_MSG}
@@ -657,15 +652,15 @@ export default function ObjectItem({
                 </div>*/}
                     </div>
                     <div>
-                      <div className="detail-key">Strength</div>
+                      <div className="detail-key">Current</div>
                       <div className="detail-value">
                         <InlineDecimalInput
-                          value={obj.multiplier}
+                          value={obj.current}
                           min={0.1}
                           max={50}
                           onChange={(v) => {
                             const safe = clampWithError(v, 0.1, 50);
-                            updateObject(obj.id, { multiplier: safe });
+                            updateObject(obj.id, { current: safe });
                           }}
                           onError={setErrorMsg}
                           errorMsg={ERROR_MSG}
@@ -724,7 +719,7 @@ export default function ObjectItem({
                    style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
                  >
                     <div>
-                      <div className="detail-key">Strength</div>
+                      <div className="detail-key">Multiplier</div>
                       <div className="detail-value">
                         <InlineDecimalInput
                           value={obj.charge}
@@ -763,7 +758,7 @@ export default function ObjectItem({
                    style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
                  >
                   <div>
-                    <div className="detail-key">Freq (Hz)</div>
+                    <div className="detail-key">Animation frequency (Hz)</div>
                     <div className="detail-value">
                       <InlineDecimalInput
                         value={Number.isFinite(obj.freq) ? obj.freq : (obj.freq === undefined ? 1 : 0)}
@@ -781,7 +776,7 @@ export default function ObjectItem({
                   </div>
 
                   <div>
-                    <div className="detail-key">Amplitude</div>
+                    <div className="detail-key">Animation amplitude</div>
                     <div className="detail-value">
                       <InlineDecimalInput
                         value={Number.isFinite(obj.amplitude) ? obj.amplitude : (obj.amplitude === undefined ? 0.1 : 0)}
@@ -802,17 +797,6 @@ export default function ObjectItem({
                    className="detail-row"
                    style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
                  >
-                  <div>
-                    <div className="detail-key">Frozen</div>
-                    <div className="detail-value">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { frozen: !obj.frozen }); }}
-                        style={{ padding: "6px 8px" }}
-                      >
-                        {obj.frozen ? "Unfreeze" : "Freeze"}
-                      </button>
-                    </div>
-                  </div>
 
                   <div>
                     <div className="detail-key">Animated</div>
