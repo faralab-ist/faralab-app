@@ -3,13 +3,14 @@ import SlicerMenu from './SlicerMenu'
 import TestChargeMenu from './TestChargeMenu'
 import EFieldMenu from './EFieldMenu'
 import GaussianMenu from './GaussianMenu'
+import { POPUP_DISPLAY_NAMES } from './menuNames'
 import './ToolbarPopup.css'
 import Pin from '../../../../assets/pin.svg'
 import Close from '../../../../assets/close_X.svg'
 import Minimize from '../../../../assets/minimize.svg'
 
 
-export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, undockPosition }) {
+export default function ToolbarPopup({ id, name, onClose, popupProps = {}, onDock, undockPosition }) {
 
   const ref = useRef(null)
   const dragRef = useRef({ dragging: false, startX: 0, startY: 0, origX: 0, origY: 0 })
@@ -46,10 +47,33 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
   const [minimized, setMinimized] = useState(false)
   const [pinned, setPinned] = useState(false)
 
+  // Helper to clamp position within window bounds
+  const clampPositionToBounds = (position) => {
+    if (!ref.current) return position
+    const rect = ref.current.getBoundingClientRect()
+    const width = rect.width || 300 // fallback width estimate
+    const height = rect.height || 400 // fallback height estimate
+    const maxLeft = Math.max(0, window.innerWidth - width)
+    const maxTop = Math.max(0, window.innerHeight - height)
+    return {
+      left: Math.max(0, Math.min(position.left, maxLeft)),
+      top: Math.max(0, Math.min(position.top, maxTop))
+    }
+  }
+
   // 1. Auto-Save position whenever it changes
   useEffect(() => {
      localStorage.setItem(storageKey, JSON.stringify(pos))
   }, [pos, storageKey])
+
+  // 3. Clamp position to window bounds on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setPos(prev => clampPositionToBounds(prev))
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // 2. Handle Global Dragging
   useEffect(() => {
@@ -59,10 +83,11 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
       const dx = ev.clientX - dragRef.current.startX
       const dy = ev.clientY - dragRef.current.startY
       
-      const newLeft = Math.max(0, Math.round(dragRef.current.origX + dx))
-      const newTop = Math.max(0, Math.round(dragRef.current.origY + dy))
+      const rawLeft = Math.round(dragRef.current.origX + dx)
+      const rawTop = Math.round(dragRef.current.origY + dy)
 
-      setPos({ left: newLeft, top: newTop })
+      const clamped = clampPositionToBounds({ left: rawLeft, top: rawTop })
+      setPos(clamped)
       
       // Check if dragging over docker sidebar (left 320px)
       const isOverDock = ev.clientX < 320 && ev.clientY > 0
@@ -164,7 +189,7 @@ export default function ToolbarPopup({ id, onClose, popupProps = {}, onDock, und
         className="toolbar-popup-handle"
       >
         <span style={{ marginLeft: 4, fontWeight: 'bold', fontSize: 12, color: '#ccc' }}>
-            {id}
+            {POPUP_DISPLAY_NAMES[id] || name || id}
         </span>
         
         <div className="toolbar-popup-controls" onPointerDown={e => e.stopPropagation()}>

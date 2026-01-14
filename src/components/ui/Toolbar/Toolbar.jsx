@@ -312,6 +312,7 @@ export default function Toolbar({
         <ToolbarPopup
           key={popupId}
           id={popupId}
+          name={popupId}
           onClose={() => handleClick(popupId)} // Passing the toggle function to close it
           popupProps={sharedPopupProps}
           onDock={onDock}

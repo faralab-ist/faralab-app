@@ -4,6 +4,7 @@ import TestChargeMenu from '../Toolbar/ToolbarPopup/TestChargeMenu';
 import SlicerMenu from '../Toolbar/ToolbarPopup/SlicerMenu';
 import EFieldMenu from '../Toolbar/ToolbarPopup/EFieldMenu';
 import GaussianMenu from '../Toolbar/ToolbarPopup/GaussianMenu';
+import { POPUP_DISPLAY_NAMES } from '../Toolbar/ToolbarPopup/menuNames';
 import minimizeIcon from '../../../assets/minimize.svg';
 import efieldIcon from '../../../assets/field_view.svg';
 import sliceIcon from '../../../assets/slice.svg';
@@ -220,7 +221,7 @@ const [expandedWindows, setExpandedWindows] = useState({
               <span className="dock-window-expand">
                 {expandedWindows[windowName] ? "▾" : "▸"}
               </span>
-              <span className="dock-window-title">{windowName}</span>
+              <span className="dock-window-title">{POPUP_DISPLAY_NAMES[windowName] || windowName}</span>
               <button
                 className="dock-window-undock"
                 onClick={(e) => {
