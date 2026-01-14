@@ -56,8 +56,8 @@ export const TYPE_CONFIG = {
     resolve: (obj) => {
       if (obj.radius && obj.height) return { icon: CylinderIcon, alt: "Cylinder", subtype: 'cylinder' };
       if (obj.width && obj.height && obj.depth) return { icon: CuboidIcon, alt: "Cuboid", subtype: 'cuboid' };
-      if (obj.radius) return { icon: SphereIcon, alt: "Sphere", subtype: 'sphere' };
-      return { icon: SphereIcon, alt: "Sphere", subtype: 'surface' };
+      if (obj.radius) return { icon: SphereIcon, alt: "Gaussian Sphere", subtype: 'sphere' };
+      return { icon: SphereIcon, alt: "Gaussian Sphere", subtype: 'surface' };
     }
   }
 };

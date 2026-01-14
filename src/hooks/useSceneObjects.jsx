@@ -127,7 +127,7 @@ const objectFactories = {
     id: `tmp-${index}`,
     type: 'surface',
     surfaceType: 'sphere',
-    name: `Sphere ${index}`,
+    name: `Gaussian Sphere ${index}`,
     position: [0, 0, 0],
     radius: 2,
     opacity: 0.5,
