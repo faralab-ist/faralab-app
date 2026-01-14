@@ -19,44 +19,39 @@ export default function StackedPlaneControls({
   return (
     <>
       {/* 1. Spacing + Infinite */}
-      <div
-        className="detail-row"
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-      >
-        <div>
-          <div className="detail-key">Spacing</div>
-          <div className="detail-value">
-            <InlineDecimalInput
-              value={obj.spacing ?? 1.0}
-              min={0.01}
-              step={0.1}
-              onChange={(val) => {
-                if (setSpacing) setSpacing(obj.id, val);
-                else updateObject(obj.id, { spacing: val });
-              }}
-            />
-          </div>
+      <div className="detail-row inline">
+        <div className="detail-key">Spacing</div>
+        <div className="detail-value">
+          <InlineDecimalInput
+            value={obj.spacing ?? 1.0}
+            min={0.01}
+            step={0.1}
+            onChange={(val) => {
+              if (setSpacing) setSpacing(obj.id, val);
+              else updateObject(obj.id, { spacing: val });
+            }}
+          />
         </div>
-        <div>
-          <div className="detail-key">Infinite</div>
-          <div className="detail-value">
-            <label
-              style={{
-                display: "inline-flex",
-                gap: 8,
-                alignItems: "center"
-              }}
-            >
-              <input
-                type="checkbox"
-                checked={obj.infinite || false}
-                onChange={(e) =>
-                  updateObject(obj.id, { infinite: e.target.checked })
-                }
-                onClick={(e) => e.stopPropagation()}
-              />
-            </label>
-          </div>
+      </div>
+      <div className="detail-row inline">
+        <div className="detail-key">Infinite</div>
+        <div className="detail-value">
+          <label
+            style={{
+              display: "inline-flex",
+              gap: 8,
+              alignItems: "center"
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={obj.infinite || false}
+              onChange={(e) =>
+                updateObject(obj.id, { infinite: e.target.checked })
+              }
+              onClick={(e) => e.stopPropagation()}
+            />
+          </label>
         </div>
       </div>
 

@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import * as THREE from 'three'
 import BaseCharge from './BaseCharge'
 import Label from '../../ui/labels/Label'
 
-export default function Charge({ charge, position = [0, 0, 0], showLabel = true, onHideLabel, ...props }) {
+export default function Charge({ charge, position = [0, 0, 0], showLabel = true, onHideLabel, updateObject, ...props }) {
   const radius = props.radius
   const { glowColor, glowString, visualScale, visualOpacity } = useMemo(() => {
     const sign = charge >= 0 ? 1 : -1
@@ -20,6 +20,13 @@ export default function Charge({ charge, position = [0, 0, 0], showLabel = true,
 
     return { glowColor, glowString, visualScale: finalScale, visualOpacity: opacity }
   }, [charge, radius])
+
+  // Store label info for Data sidebar
+  useEffect(() => {
+    updateObject?.(props.id, {
+      labelInfo: [`Q = ${charge > 0 ? '+' : ''}${charge} C`]
+    })
+  }, [charge, props.id, updateObject])
 
   return (
     <group>
@@ -41,6 +48,7 @@ export default function Charge({ charge, position = [0, 0, 0], showLabel = true,
         offsetY={0.6}
         objectId={props.id}
         onHideLabel={onHideLabel}
+        isObjectHovered={props.isHovered}
       />
     )}
     </group>

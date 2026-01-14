@@ -101,7 +101,9 @@ export default function ObjectItem({
     }
     setErrorMsg(null);
     return v;
-  }; 
+  };
+  
+  const isSurfaceWithoutFlux = obj.type === 'surface' && !showFlux;
   //console.log('showFlux in ObjectItem:', showFlux);
   return (
     <li
@@ -122,12 +124,16 @@ export default function ObjectItem({
         <span className="name">{obj.name || obj.id}</span>
         <button
           type="button"
-          className={`label-toggle ${obj.showLabel ?? true ? "active" : ""}`}
+          className={`label-toggle ${obj.showLabel ?? true ? "active" : ""} ${isSurfaceWithoutFlux ? "disabled" : ""}`}
           aria-pressed={obj.showLabel ?? true}
+          disabled={isSurfaceWithoutFlux}
           onClick={(e) => {
             e.stopPropagation();
-            updateObject(obj.id, { showLabel: !(obj.showLabel ?? true) });
+            if (!isSurfaceWithoutFlux) {
+              updateObject(obj.id, { showLabel: !(obj.showLabel ?? true) });
+            }
           }}
+          title={isSurfaceWithoutFlux ? "Enable Gaussian Surface mode to view labels" : undefined}
         >
           <svg
             className="label-toggle-icon"
@@ -154,7 +160,7 @@ export default function ObjectItem({
         <div ref={detailsContentRef} className="details-grid">
             {/* Position com InlineDecimalInput */}
             {Array.isArray(obj.position)  && (
-              <div className="detail-row">
+              <div className="detail-row inline">
                 <div
                   className="detail-value"
                   style={{ display: "inline-flex", alignItems: "center", gap: 10 }}
@@ -193,7 +199,7 @@ export default function ObjectItem({
 
                         {/* TOGGLE Planes */}
             {isPlaneVariant && (
-              <div className="detail-row">
+              <div className="detail-row inline">
                 <div className="detail-key">Mode</div>
                 <div className="detail-value">
                   <label
@@ -237,7 +243,7 @@ export default function ObjectItem({
 
             {/* TOGGLE Wires */}
             {isWireVariant && (
-              <div className="detail-row">
+              <div className="detail-row inline">
                 <div className="detail-key">Mode</div>
                 <div className="detail-value">
                   <label
@@ -287,38 +293,11 @@ export default function ObjectItem({
               </div>
             )}
 
-            {obj.type === "wire" && (
-              <div
-                className="detail-row"
-                style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-              >
-                <div>
-                  <div className="detail-key">Infinite</div>
-                  <div className="detail-value">
-                    <label
-                      style={{
-                        display: "inline-flex",
-                        gap: 8,
-                        alignItems: "center"
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={obj.infinite || false}
-                        onChange={(e) =>
-                          updateObject(obj.id, { infinite: e.target.checked })
-                        }
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-            )}
+            
 
             {/* TOGGLE Esferas */}
             {isSphereVariant && (
-              <div className="detail-row">
+              <div className="detail-row inline">
                 <div className="detail-key">Mode</div>
                 <div className="detail-value">
                   <label
@@ -417,49 +396,42 @@ export default function ObjectItem({
             {/* A) Plano Normal */}
             {obj.type === 'plane' && (
               <>
-                <div
-                  className="detail-row"
-                  style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-                >
-                  <div>
-                    <div className="detail-key">Superficial Density σ</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        initialValue={obj.charge_density ?? 0}
-                        min={VAL_MIN}
-                        max={VAL_MAX}
-                        step={0.01}
-                        onChange={(v) => {
-                          const safe = clampWithError(v, VAL_MIN, VAL_MAX);
-                          updateObject(obj.id, { charge_density: safe });
-                        }}
+                <div className="detail-row inline">
+                  <div className="detail-key">Infinite</div>
+                  <div className="detail-value">
+                    <label
+                      style={{
+                        display: "inline-flex",
+                        gap: 8,
+                        alignItems: "center"
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={obj.infinite || false}
+                        onChange={(e) =>
+                          updateObject(obj.id, { infinite: e.target.checked })
+                        }
+                        onClick={(e) => e.stopPropagation()}
                       />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="detail-key">Infinite</div>
-                    <div className="detail-value">
-                      <label
-                        style={{
-                          display: "inline-flex",
-                          gap: 8,
-                          alignItems: "center"
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={obj.infinite || false}
-                          onChange={(e) =>
-                            updateObject(obj.id, { infinite: e.target.checked })
-                          }
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </label>
-                    </div>
+                    </label>
                   </div>
                 </div>
-
+                <div className="detail-row inline">
+                  <div className="detail-key">Superficial Density σ: </div>
+                  <div className="detail-value">
+                    <InlineDecimalInput
+                      initialValue={obj.charge_density ?? 0}
+                      min={VAL_MIN}
+                      max={VAL_MAX}
+                      step={0.01}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, VAL_MIN, VAL_MAX);
+                        updateObject(obj.id, { charge_density: safe });
+                      }}
+                    />
+                  </div>
+                </div>
               </>
             )}
 
@@ -504,24 +476,19 @@ export default function ObjectItem({
             {/* Charged Sphere */}
             {obj.type === "chargedSphere" && (
               <>
-                <div
-                  className="detail-row"
-                  style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-                >
-                  <div>
-                    <div className="detail-key">Volume Density ρ</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        initialValue={obj.charge_density ?? 0}
-                        min={VAL_MIN}
-                        max={VAL_MAX}
-                        step={0.01}
-                        onChange={(v) => {
-                          const safe = clampWithError(v, VAL_MIN, VAL_MAX);
-                          updateObject(obj.id, { charge_density: safe });
-                        }}
-                      />
-                    </div>
+                <div className="detail-row inline">
+                  <div className="detail-key">Volume Density ρ: </div>
+                  <div className="detail-value">
+                    <InlineDecimalInput
+                      initialValue={obj.charge_density ?? 0}
+                      min={VAL_MIN}
+                      max={VAL_MAX}
+                      step={0.01}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, VAL_MIN, VAL_MAX);
+                        updateObject(obj.id, { charge_density: safe });
+                      }}
+                    />
                   </div>
                 </div>
               </>
@@ -529,25 +496,24 @@ export default function ObjectItem({
 
             {/* Point charge */}
             {(obj.type === "charge") && (
-              <div
-                className="detail-row"
-                style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-              >
-                <div>
-                  <div className="detail-key">Intensity</div>
-                  <div className="detail-value" style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <InlineDecimalInput
-                      initialValue={obj.charge ?? 0}
-                      min={VAL_MIN}
-                      max={VAL_MAX}
-                      step={0.25}
-                      onChange={(v) => {
-                        const safe = clampWithError(v, VAL_MIN, VAL_MAX);
-                        updateObject(obj.id, { charge: safe });
-                      }}
-                    />
-                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>C</span>
-                  </div>
+              <div className="detail-row inline">
+                <div
+                  className="detail-value"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+                >
+                  <span className="detail-key" style={{ margin: 0, fontSize: 11 }}>intensity:</span>
+                  <InlineDecimalInput
+                    initialValue={obj.charge ?? 0}
+                    min={VAL_MIN}
+                    max={VAL_MAX}
+                    step={0.25}
+                    inputStyle={{ minWidth: "4ch" }}
+                    onChange={(v) => {
+                      const safe = clampWithError(v, VAL_MIN, VAL_MAX);
+                      updateObject(obj.id, { charge: safe });
+                    }}
+                  />
+                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>C</span>
                 </div>
               </div>
             )}
@@ -555,8 +521,8 @@ export default function ObjectItem({
             {/* Wire simples */}
             {obj.type === "wire" && (
               <>
-                <div className="detail-row">
-                  <div className="detail-key">Linear Density λ</div>
+                <div className="detail-row inline">
+                  <div className="detail-key">Linear Density λ: </div>
                   <div className="detail-value">
                     <InlineDecimalInput
                       initialValue={obj.charge_density ?? 0}
@@ -584,230 +550,191 @@ export default function ObjectItem({
             )}
            {obj.type === 'coil' && obj.coilType === 'solenoid' && (
                <>
-                 <div
-                   className="detail-row"
-                   style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-                 >
-                    <div>
-                      <div className="detail-key">Length</div>
-                      <div className="detail-value">
-                        <InlineDecimalInput
-                          value={obj.length}
-                          min={0.1}
-                          max={100}
-                          step={0.01}
-                          onChange={(v) => {
-                            const safe = clampWithError(v, 0.1, 100);
-                            updateObject(obj.id, { length: safe });
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <div className="detail-key">Radius</div>
-                      <div className="detail-value">
-                        <InlineDecimalInput
-                          value={obj.radius}
-                          min={0.1}
-                          max={50}
-                          onChange={(v) => {
-                            const safe = clampWithError(v, 0.1, 50);
-                            updateObject(obj.id, { radius: safe });
-                          }}
-                          onError={setErrorMsg}
-                          errorMsg={ERROR_MSG}
-                        />
-                      </div>
-                    </div>
-                 </div>
-                 <div
-                   className="detail-row"
-                   style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-                 >
-                    <div>
-                      <div className="detail-key">Turns</div>
-                      <div className="detail-value">
-                        <InlineDecimalInput
-                          value={obj.turns}
-                          min={0.1}
-                          max={300}
-                          onChange={(v) => {
-                            const safe = clampWithError(v, 0.1, 300);
-                            updateObject(obj.id, { turns: safe });
-                          }}
-                          onError={setErrorMsg}
-                          errorMsg={ERROR_MSG}
-                        />
-                      </div>
-                      {/*<div className="detail-row">
-                  <div className="detail-key">AC/DC</div>
-                  <div className="detail-value">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { ac: !obj.ac }); }}
-                      style={{ padding: "6px 8px" }}
-                    >
-                      {obj.ac ? 'AC' : 'DC'}
-                    </button>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Length: </div>
+                  <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <InlineDecimalInput
+                      value={obj.length}
+                      min={0.1}
+                      max={100}
+                      step={0.01}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 100);
+                        updateObject(obj.id, { length: safe });
+                      }}
+                    />
+                    <span style={{ opacity: 0.35, display: "inline-block", width: 10, textAlign: "center", marginLeft: 10 }}>|</span>
+                    <span className="detail-key">Radius: </span>
+                    <InlineDecimalInput
+                      value={obj.radius}
+                      min={0.1}
+                      max={50}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 50);
+                        updateObject(obj.id, { radius: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
                   </div>
-                </div>*/}
-                    </div>
-                    <div>
-                      <div className="detail-key">Current</div>
-                      <div className="detail-value">
-                        <InlineDecimalInput
-                          value={obj.current}
-                          min={0.1}
-                          max={50}
-                          onChange={(v) => {
-                            const safe = clampWithError(v, 0.1, 50);
-                            updateObject(obj.id, { current: safe });
-                          }}
-                          onError={setErrorMsg}
-                          errorMsg={ERROR_MSG}
-                        />
-                      </div>
-                    </div>
+                 </div>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Turns: </div>
+                  <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <InlineDecimalInput
+                      value={obj.turns}
+                      min={0.1}
+                      max={300}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 300);
+                        updateObject(obj.id, { turns: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                    <span style={{ opacity: 0.35, display: "inline-block", width: 10, textAlign: "center", marginLeft: 15 }}>|</span>
+                    <span className="detail-key">Current: </span>
+                    <InlineDecimalInput
+                      value={obj.current}
+                      min={0.1}
+                      max={50}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 50);
+                        updateObject(obj.id, { current: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                  </div>
+                 </div>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Resolution (best results ~ 700): </div>
+                  <div className="detail-value">
+                    <InlineDecimalInput
+                      value={obj.segments}
+                      min={1}
+                      max={3000}
+                      step={1}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 1, 3000);
+                        updateObject(obj.id, { segments: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                  </div>
                  </div>
                </>
-               
             )}
 
 
             {obj.type === 'barMagnet' && (
                <>
-                 <div
-                   className="detail-row"
-                   style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-                 >
-                    <div>
-                      <div className="detail-key">Length</div>
-                      <div className="detail-value">
-                        <InlineDecimalInput
-                          value={obj.length}
-                          min={0.1}
-                          max={100}
-                          onChange={(v) => {
-                            const safe = clampWithError(v, 0.1, 100);
-                            updateObject(obj.id, { length: safe });
-                          }}
-                          onError={setErrorMsg}
-                          errorMsg={ERROR_MSG}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="detail-key">Radius</div>
-                      <div className="detail-value">
-                        <InlineDecimalInput
-                          value={obj.radius}
-                          min={0.1}
-                          max={50}
-                          onChange={(v) => {
-                            const safe = clampWithError(v, 0.1, 50);
-                            updateObject(obj.id, { radius: safe });
-                          }}
-                          onError={setErrorMsg}
-                          errorMsg={ERROR_MSG}
-                        />
-                      </div>
-                    </div>
-                 </div>
-
-                 <div
-                   className="detail-row"
-                   style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-                 >
-                    <div>
-                      <div className="detail-key">Multiplier</div>
-                      <div className="detail-value">
-                        <InlineDecimalInput
-                          value={obj.charge}
-                          min={0.1}
-                          max={50}
-                          onChange={(v) => {
-                            const safe = clampWithError(v, 0.1, 50);
-                            updateObject(obj.id, { charge: safe });
-                          }}
-                          onError={setErrorMsg}
-                          errorMsg={ERROR_MSG}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="detail-key">Resolution</div>
-                      <div className="detail-value">
-                        <InlineDecimalInput
-                          step={1}
-                          value={obj.numOfCoils}
-                          min={1.0}
-                          max={50}
-                          onChange={(v) => {
-                            const safe = clampWithError(v, 0.1, 50);
-                            updateObject(obj.id, { numOfCoils: safe });
-                          }}
-                          onError={setErrorMsg}
-                          errorMsg={ERROR_MSG}
-                        />
-                      </div>
-                    </div>
-                 </div>
-                 <div
-                   className="detail-row"
-                   style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-                 >
-                  <div>
-                    <div className="detail-key">Animation frequency (Hz)</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={Number.isFinite(obj.freq) ? obj.freq : (obj.freq === undefined ? 1 : 0)}
-                        step={0.1}
-                        min={0}
-                        max={100}
-                        onChange={(v) => {
-                          const safe = clampWithError(v, 0.1, 100);
-                          updateObject(obj.id, { freq: safe });
-                        }}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="detail-key">Animation amplitude</div>
-                    <div className="detail-value">
-                      <InlineDecimalInput
-                        value={Number.isFinite(obj.amplitude) ? obj.amplitude : (obj.amplitude === undefined ? 0.1 : 0)}
-                        step={0.01}
-                        min={0}
-                        max={100}
-                        onChange={(v) => {
-                          const safe = clampWithError(v, 0.1, 100);
-                          updateObject(obj.id, { amplitude: safe });
-                        }}
-                        onError={setErrorMsg}
-                        errorMsg={ERROR_MSG}
-                      />
-                    </div>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Length: </div>
+                  <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <InlineDecimalInput
+                      value={obj.length}
+                      min={0.1}
+                      max={100}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 100);
+                        updateObject(obj.id, { length: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                    <span style={{ opacity: 0.35, display: "inline-block", width: 10, textAlign: "center", marginLeft: 23 }}>|</span>
+                    <span className="detail-key">Radius:</span>
+                    <InlineDecimalInput
+                      value={obj.radius}
+                      min={0.1}
+                      max={50}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 50);
+                        updateObject(obj.id, { radius: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
                   </div>
                  </div>
-                 <div
-                   className="detail-row"
-                   style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-                 >
 
-                  <div>
-                    <div className="detail-key">Animated</div>
-                    <div className="detail-value">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { animated: !obj.animated }); }}
-                        style={{ padding: "6px 8px" }}
-                      >
-                        {obj.animated ? "Stop animation" : "Start animation"}
-                      </button>
-                    </div>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Multiplier: </div>
+                  <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <InlineDecimalInput
+                      value={obj.current}
+                      min={0.1}
+                      max={50}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 50);
+                        updateObject(obj.id, { current: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                    <span style={{ opacity: 0.35, display: "inline-block", width: 10, textAlign: "center", marginLeft: 10 }}>|</span>
+                    <span className="detail-key">Resolution: </span>
+                    <InlineDecimalInput
+                      step={1}
+                      value={obj.numOfCoils}
+                      min={1.0}
+                      max={50}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 50);
+                        updateObject(obj.id, { numOfCoils: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                  </div>
+                 </div>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Animation frequency: </div>
+                  <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <InlineDecimalInput
+                      value={Number.isFinite(obj.freq) ? obj.freq : (obj.freq === undefined ? 1 : 0)}
+                      step={0.1}
+                      min={0}
+                      max={100}
+                      inputStyle={{ minWidth: "4ch" }}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 100);
+                        updateObject(obj.id, { freq: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Hz</span>
+                  </div>
+                 </div>
+
+                 <div className="detail-row inline">
+                  <div className="detail-key">Animation amplitude: </div>
+                  <div className="detail-value">
+                    <InlineDecimalInput
+                      value={Number.isFinite(obj.amplitude) ? obj.amplitude : (obj.amplitude === undefined ? 0.1 : 0)}
+                      step={0.01}
+                      min={0}
+                      max={100}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 100);
+                        updateObject(obj.id, { amplitude: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                  </div>
+                 </div>
+                 <div className="detail-row inline">
+                  <div className="detail-value">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); updateObject(obj.id, { animated: !obj.animated }); }}
+                      style={{ padding: "6px 8px" }}
+                    >
+                      {obj.animated ? "Stop animation" : "Start animation"}
+                    </button>
                   </div>
                  </div>
                </>
@@ -815,8 +742,8 @@ export default function ObjectItem({
 
             {obj.type === 'faradayCoil' && (
                <>
-                 <div className="detail-row">
-                    <div className="detail-key">Radius</div>
+                 <div className="detail-row inline">
+                    <div className="detail-key">Radius: </div>
                     <div className="detail-value">
                       <InlineDecimalInput
                         initialValue={obj.radius}
@@ -844,21 +771,16 @@ export default function ObjectItem({
 
             {obj.type === 'testCoil' && (
                <>
-                 <div
-                   className="detail-row"
-                   style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-                 >
-                    <div>
-                      <div className="detail-key">Radius</div>
-                      <div className="detail-value">
-                        <InlineDecimalInput
-                          initialValue={obj.radius}
-                          min={0.01} max={10}
-                          step={0.01}
-                          onChange={(v) => updateObject(obj.id, { radius: v })}
-                        />
-                      </div>
-                    </div>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Radius: </div>
+                  <div className="detail-value">
+                    <InlineDecimalInput
+                      initialValue={obj.radius}
+                      min={0.01} max={10}
+                      step={0.01}
+                      onChange={(v) => updateObject(obj.id, { radius: v })}
+                    />
+                  </div>
                  </div>
 
                   <div className="detail-row">

@@ -137,6 +137,14 @@ function Plane({
       scale={0.86}
       lineWidth={2.5}
     >
+      {/* Store label info for Data sidebar */}
+      {React.useMemo(() => {
+        updateObject?.(id, {
+          labelInfo: [`σ = ${charge_density.toExponential(2)} C/m²`]
+        })
+        return null
+      }, [charge_density, id, updateObject])}
+
       {showLabel && (
         <Label  
           objectName={name}
@@ -145,6 +153,8 @@ function Plane({
           distanceFactor={12}
           objectId={id}
           onHideLabel={onHideLabel}
+          isObjectHovered={isHovered}
+
         />
       )}
       <mesh

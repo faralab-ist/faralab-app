@@ -26,6 +26,7 @@ export default function TestCoil({
   tubeRadius = 0.05,
   showLabel = true,
   onHideLabel,
+  isHovered,
 }) {
   const radialSamples = 10;
   const angularSamples = 10;
@@ -179,6 +180,18 @@ export default function TestCoil({
       scale={0.86}
       lineWidth={2.5}
     >
+      {/* Store label info for Data sidebar */}
+      {React.useMemo(() => {
+        updateObject?.(id, {
+          labelInfo: [
+            `B-Flux = ${displayFlux != null ? displayFlux.toExponential(2) : '—'} Wb`,
+            `ε: ${displayEmf != null ? displayEmf.toExponential(2) + ' V' : '—'}`,
+            `E-Flux = ${displayEFlux != null ? displayEFlux.toExponential(2) : '—'} V·m`,
+          ]
+        })
+        return null
+      }, [displayFlux, displayEmf, displayEFlux, id, updateObject])}
+
       {showLabel &&  <Label
         position={[0, 0, 0]}
         objectName={name}
@@ -191,6 +204,7 @@ export default function TestCoil({
         distanceFactor={8}
         objectId={id}
         onHideLabel={onHideLabel}
+        isObjectHovered={isHovered}
       />}
       <group ref={groupRef}>
         <mesh 
@@ -198,6 +212,7 @@ export default function TestCoil({
           material={wireMaterial} 
           receiveShadow 
           castShadow
+          userData={{ id, type: 'testCoil' }}
           onPointerDown={(e) => { e.stopPropagation(); setSelectedId && setSelectedId(id); }}
         />
       </group>

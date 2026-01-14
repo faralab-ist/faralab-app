@@ -91,6 +91,7 @@ export default function RingCoil({
 
   return (
     <BaseCoil
+    segments={300}
       id={id}
       name = {name}
       position={position}
@@ -127,6 +128,9 @@ export default function RingCoil({
             emissive={coilColor}
           />
         </mesh>
+      }
+      hitboxGeometry={
+        <cylinderGeometry args={[coilRadius, coilRadius, 0.1, 32]} />
       }
     />
   )

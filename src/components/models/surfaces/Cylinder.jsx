@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useLayoutEffect } from 'react'
+import React, { useRef, useMemo, useLayoutEffect, useEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
@@ -87,6 +87,17 @@ export default function Cylinder({
       default: return [];
     }
   }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
+
+
+   // Lift the flux value to the sidebar
+    useEffect(() => {
+        updateObject?.(id, {
+          labelInfo: showOnlyGaussianField 
+            ? [`Φ = ${fluxValue.toExponential(2)} N⋅m²/C`]
+            : ['Enable Gaussian Surface mode to view flux']
+        })
+      }, [fluxValue, id, updateObject, showOnlyGaussianField])
+  
 
   return (
     <PivotControls

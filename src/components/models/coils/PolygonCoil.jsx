@@ -214,6 +214,9 @@ export default function PolygonCoil({
           <meshStandardMaterial color={coilColor} emissive={coilColor} />
         </mesh>
       }
+      hitboxGeometry={
+        <cylinderGeometry args={[coilRadius, coilRadius, 0.1, 32]} />
+      }
     />
   )
 }

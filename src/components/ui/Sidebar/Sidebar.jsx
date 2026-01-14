@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import ObjectList from "./ObjectList";
+import DataList from "./DataList";
 import "./Sidebar.css";
 import PosChargeIcon from "../../../assets/pos_charge.svg";
 import NegChargeIcon from "../../../assets/neg_charge.svg";
@@ -61,6 +62,7 @@ export default function Sidebar({
 
 }) {
   const [expandId, setExpandId] = useState(null);
+  const [activeTab, setActiveTab] = useState("objects"); // 'objects' or 'data'
   const sidebarRootRef = useRef(null)
 
   // preserve previous selectedId while hovering
@@ -277,51 +279,76 @@ export default function Sidebar({
               <div className="header-left">
                 <h3 className="panel-title">Panel</h3>
               </div>
+              <div className="tab-switcher">
+                <button
+                  className={`tab-btn ${activeTab === "objects" ? "active" : ""}`}
+                  onClick={() => setActiveTab("objects")}
+                >
+                  Objects
+                </button>
+                <button
+                  className={`tab-btn ${activeTab === "data" ? "active" : ""}`}
+                  onClick={() => setActiveTab("data")}
+                >
+                  Data
+                </button>
+              </div>
             </header>
 
-            <ObjectList
-              items={objects}
-              showFlux={showFlux}
-              updateObject={updateObject}
-              removeObject={removeObject}
-              expandId={expandId}
-              minimized={minimized}
-              hoveredId={hoveredId}
-              selectedId={selectedId}
-              setSelectedId={setSelectedId}
-              onHoverStart={hoverStart}
-              onHoverEnd={hoverEnd}
-              
-              // --- Esferas ---
-              addRadiusToChargedSphere={addRadiusToChargedSphere}
-              removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
-              setRadiusToChargedSphere={setRadiusToChargedSphere}
-              setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
-              setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
-              setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
-              
-              // --- Planos ---
-              addPlaneToStackedPlanes={addPlaneToStackedPlanes}
-              removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
-              setSpacingForStackedPlanes={setSpacingForStackedPlanes}
-              setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
+            {activeTab === "objects" ? (
+              <ObjectList
+                items={objects}
+                showFlux={showFlux}
+                updateObject={updateObject}
+                removeObject={removeObject}
+                expandId={expandId}
+                minimized={minimized}
+                hoveredId={hoveredId}
+                setHoveredId={setHoveredId}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+                onHoverStart={hoverStart}
+                onHoverEnd={hoverEnd}
+                
+                // --- Esferas ---
+                addRadiusToChargedSphere={addRadiusToChargedSphere}
+                removeLastRadiusFromChargedSphere={removeLastRadiusFromChargedSphere}
+                setRadiusToChargedSphere={setRadiusToChargedSphere}
+                setMaterialForLayerInChargedSphere={setMaterialForLayerInChargedSphere}
+                setDielectricForLayerInChargedSphere={setDielectricForLayerInChargedSphere}
+                setChargeForLayerInChargedSphere={setChargeForLayerInChargedSphere}
+                
+                // --- Planos ---
+                addPlaneToStackedPlanes={addPlaneToStackedPlanes}
+                removeLastPlaneFromStackedPlanes={removeLastPlaneFromStackedPlanes}
+                setSpacingForStackedPlanes={setSpacingForStackedPlanes}
+                setChargeDensityForPlaneInStackedPlanes={setChargeDensityForPlaneInStackedPlanes}
 
-              // --- Fios ---
-              addRadiusToConcentricInfiniteWire={addRadiusToChargedSphere}
-              removeLastRadiusFromConcentricInfiniteWire={removeLastRadiusFromChargedSphere}
-              setRadiusToConcentricInfiniteWire={setRadiusToChargedSphere}
-              setMaterialForLayerInConcentricInfiniteWire={setMaterialForLayerInChargedSphere}
-              setDielectricForLayerInConcentricInfiniteWire={setDielectricForLayerInChargedSphere}
-              setChargeForLayerInConcentricInfiniteWire={setChargeForLayerInChargedSphere}
+                // --- Fios ---
+                addRadiusToConcentricInfiniteWire={addRadiusToChargedSphere}
+                removeLastRadiusFromConcentricInfiniteWire={removeLastRadiusFromChargedSphere}
+                setRadiusToConcentricInfiniteWire={setRadiusToChargedSphere}
+                setMaterialForLayerInConcentricInfiniteWire={setMaterialForLayerInChargedSphere}
+                setDielectricForLayerInConcentricInfiniteWire={setDielectricForLayerInChargedSphere}
+                setChargeForLayerInConcentricInfiniteWire={setChargeForLayerInChargedSphere}
 
-              // --- Path ---
-              addPointToPath={addPointToPath}
-              removeLastPointFromPath={removeLastPointFromPath}
-              setPointInPath={setPointInPath}
-              changePathChargeCount={changePathChargeCount}
-              changePathCharge={changePathCharge}
-              changePathVelocity={changePathVelocity}
-            />
+                // --- Path ---
+                addPointToPath={addPointToPath}
+                removeLastPointFromPath={removeLastPointFromPath}
+                setPointInPath={setPointInPath}
+                changePathChargeCount={changePathChargeCount}
+                changePathCharge={changePathCharge}
+                changePathVelocity={changePathVelocity}
+              />
+            ) : (
+              <DataList items={objects} 
+                updateObject={updateObject}  
+                hoveredId={hoveredId}
+                setHoveredId={setHoveredId}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+                showFlux={showFlux} />
+            )}
           </div>
         )}
       </div>

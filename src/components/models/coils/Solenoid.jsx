@@ -1,8 +1,6 @@
 import React, { useMemo, useCallback } from 'react'
 import * as THREE from 'three'
 import BaseCoil from './BaseCoil'
-import { color } from 'three/tsl'
-
 // just a big solenoid
 export default function Solenoid({
   id,
@@ -20,12 +18,14 @@ export default function Solenoid({
   radius = 1.5,
   length = 4,
   pointsPerTurn = 10,
-  multiplier = 1,
 
   turns = 10,
   // unified API: only current
   current = 1,
   ac = false,
+
+  // visual thickness of the wire (used for geometry + hitbox)
+  wireThickness = 0.05,
 
   direction = [0, 0, 1],
   rotation = [0, 0, 0],
@@ -34,6 +34,7 @@ export default function Solenoid({
   charges = [],
   showLabel = true,
   onHideLabel,
+  segments = 500,
 }) {
   const computeSolenoidNormal = useCallback(() => {
     // Local normal is +Z (for solenoid along Z axis)
@@ -64,10 +65,20 @@ export default function Solenoid({
     return points
   }, [radius, length, pointsPerTurn, turns])
 
+  // Thin hitbox following the wire path so interior stays clickable
+  const hitboxCurve = useMemo(() => {
+    const pts = getSolenoidPoints()
+    const vecs = pts.map(([x, z, y]) => new THREE.Vector3(x, y, z))
+    const curve = new THREE.CatmullRomCurve3(vecs, false)
+    curve.tension = 0.5
+    return curve
+  }, [getSolenoidPoints])
+
   //console.log(getSolenoidPoints())
 
   return (
     <BaseCoil
+    segments={segments}
       id={id}
       name={name}
       position={position}
@@ -98,8 +109,7 @@ export default function Solenoid({
         null
       }
       hitboxGeometry={
-        
-        <cylinderGeometry args={[radius * 2, radius * 2, length * 1.1, 16]} />
+        <tubeGeometry args={[hitboxCurve, 64, 0.05, 16, false]} />
       }
     />
   )

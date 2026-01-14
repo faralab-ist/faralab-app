@@ -27,11 +27,20 @@ export default function DimensionControls({ obj, updateObject, setErrorMsg, clam
   if (obj.type === 'plane' || obj.type === 'stackedPlanes') {
     if (obj.infinite) return null;
     return (
-      <div className="detail-row">
-        <div className="detail-key">Dimensions (W x H)</div>
-        <div className="detail-value" style={{ display: "flex", gap: 20 }}>
-          <DimInput value={obj.dimensions[0]} onChange={(v) => update("dimensions", [v, obj.dimensions[1]])} />
-          <DimInput value={obj.dimensions[1]} onChange={(v) => update("dimensions", [obj.dimensions[0], v])} />
+      <div className="detail-row inline">
+        <div className="detail-key">Dimensions: </div>
+        <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <div style={{ display: "flex", alignItems: "center", marginLeft: 10 }}>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>W</span>
+            <span style={{ opacity: 0.7 }}>:</span>
+            <DimInput value={obj.dimensions[0]} onChange={(v) => update("dimensions", [v, obj.dimensions[1]])} />
+          </div>
+          <span style={{ opacity: 0.6, marginLeft: -4, marginRight: 5 }}>,</span>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>H</span>
+            <span style={{ opacity: 0.7 }}>:</span>
+            <DimInput value={obj.dimensions[1]} onChange={(v) => update("dimensions", [obj.dimensions[0], v])} />
+          </div>
         </div>
       </div>
     );
@@ -39,18 +48,31 @@ export default function DimensionControls({ obj, updateObject, setErrorMsg, clam
 
   // Wire
   if (obj.type === 'wire' ) {
-    if (obj.infinite) return null;
     return (
-      <div className="detail-row">
-        <div className="detail-key">Length</div>
-        <div className="detail-value">
-          <DimInput 
-            value={obj.height ?? 5}
-            onChange={(v) => {
-              const safe = clampWithError(v, DIM_MIN, DIM_MAX);
-              update("height", safe);
-            }}
+      <div className="detail-row inline">
+        <div className="detail-key">Infinite</div>
+        <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+          <label style={{ display: "inline-flex", alignItems: "center" }}>
+            <input
+              type="checkbox"
+              checked={obj.infinite || false}
+              onChange={(e) => updateObject(obj.id, { infinite: e.target.checked })}
+              onClick={(e) => e.stopPropagation()}
             />
+          </label>
+          {!obj.infinite && (
+            <>
+              <span style={{ opacity: 0.35, marginLeft: 12 }}>|</span>
+              <span className="detail-key">Length: </span>
+              <DimInput 
+                value={obj.height ?? 5}
+                onChange={(v) => {
+                  const safe = clampWithError(v, DIM_MIN, DIM_MAX);
+                  update("height", safe);
+                }}
+              />
+            </>
+          )}
         </div>
       </div>
     );
@@ -67,9 +89,9 @@ export default function DimensionControls({ obj, updateObject, setErrorMsg, clam
   if (inputs.length === 0) return null;
 
   return (
-    <div className="detail-row">
-      <div className="detail-key">Radius</div>
-      <div className="detail-value" style={{ display: "flex", gap: 6 }}>
+    <div className="detail-row inline">
+      <div className="detail-key">Radius: </div>
+      <div className="detail-value" style={{ display: "inline-flex", gap: 6 }}>
         {inputs}
       </div>
     </div>

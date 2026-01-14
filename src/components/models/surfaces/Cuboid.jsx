@@ -101,6 +101,15 @@ export default function Cuboid({
       default: return [];
     }
   }, [slicePlane, slicePos, useSlice, slicePlaneFlip]);
+  
+  // Lift the flux value to the sidebar
+  useEffect(() => {
+      updateObject?.(id, {
+        labelInfo: showOnlyGaussianField 
+          ? [`Φ = ${fluxValue.toExponential(2)} N⋅m²/C`]
+          : ['Enable Gaussian Surface mode to view flux']
+      })
+    }, [fluxValue, id, updateObject, showOnlyGaussianField])
 
   return (
     <PivotControls

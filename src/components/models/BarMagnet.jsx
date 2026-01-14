@@ -10,6 +10,7 @@ export default function BarMagnet({
   id,
   name,
   position,
+  hoveredId,
   selectedId,
   setSelectedId,
   setIsDragging,
@@ -23,6 +24,7 @@ export default function BarMagnet({
   direction = [0, 0, 1],
   rotation,
   quaternion,
+  isHovered,
   chargesPerCoil,
   pointsPerCoil,
   creativeMode,
@@ -38,7 +40,7 @@ export default function BarMagnet({
     dragOwnerId = null,
     showLabel = true,
     onHideLabel,
-    segments = 24, // NEW: samples per coil curve (fixed sampling)
+    segments = 100,
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -182,7 +184,8 @@ export default function BarMagnet({
       return
     }
 
-    const n = Math.max(1, Math.floor(segments))
+    const n = 50 // override segments it breaks after a bit
+    // maybe floating point precision issues
     const positions = []
     const tangents = []
 
@@ -190,15 +193,13 @@ export default function BarMagnet({
       const curve = catmullCurves[c]
       if (!curve || curve.points.length === 0) continue
 
+      const curveLength = curve.getLength()
+      const segLen = curve.closed ? (curveLength / n) : ((n === 1) ? curveLength : (curveLength / (n - 1)))
+
       for (let i = 0; i < n; i++) {
-        let t
-        if (curve.closed) {
-          t = i / n
-        } else {
-          t = (n === 1) ? 0 : i / (n - 1)
-        }
+        let t = curve.closed ? (i / (n)) : ((n === 1) ? 0 : i / (n - 1))
         const p = curve.getPointAt(t)
-        const tan = curve.getTangentAt(t)
+        const tan = curve.getTangentAt(t).multiplyScalar(segLen)
         positions.push([p.x, p.y, p.z])
         tangents.push([tan.x, tan.y, tan.z])
       }
@@ -262,6 +263,8 @@ export default function BarMagnet({
     updateObject?.(id, { current })
   }, [current, id, updateObject])
 
+ 
+
    const magnetization = useMemo(() => {
     if (length === 0 || numOfCoils === 0) return 0;
 
@@ -270,6 +273,12 @@ export default function BarMagnet({
     return (numOfCoils * current) / length;
   }, [numOfCoils, current, length]);
 
+   // Store label info for Data sidebar
+  useEffect(() => {
+    updateObject?.(id, { 
+      labelInfo: [`M = ${magnetization.toExponential(2)} A/m`]
+    })
+  }, [magnetization, id, updateObject])
   return (
     <PivotControls
       ref={pivotRef}
@@ -302,10 +311,12 @@ export default function BarMagnet({
                   value={[
                     `M = ${magnetization.toExponential(2)} A/m`,
                   ]}
+                  hoveredId={hoveredId}
                   offsetY={0.5 + radius}
                   distanceFactor={8}
                   objectId={id}
                   onHideLabel={onHideLabel}
+                  isObjectHovered={isHovered}
                 />
               )}
         <mesh

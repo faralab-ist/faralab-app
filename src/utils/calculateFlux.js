@@ -21,6 +21,8 @@ function computeFieldAtPoint(objects, targetPos) {
   for (const obj of objects) {
     if (!obj) continue
     const sourcePosition = new THREE.Vector3(...(obj.position ?? [0, 0, 0]))
+    const sourceArray = sourcePosition.toArray()
+    const targetArray = target.toArray()
     const charge = Number(obj.charge ?? 0)
     const chargeDensity = Number(obj.charge_density ?? 0)
 
@@ -32,26 +34,30 @@ function computeFieldAtPoint(objects, targetPos) {
       field.addScaledVector(rVec.normalize(), fieldMagnitude)
     } else if (obj.infinite && (obj.type === 'plane' || obj.type === 'wire')) {
       if (obj.type === 'wire') {
-        const contrib = efields.infiniteWireEField(sourcePosition, chargeDensity, target, obj.direction)
+        const contrib = efields.infiniteWireEField(sourceArray, chargeDensity, targetArray, obj.direction)
         field.add(contrib)
       } else if (obj.type === 'plane') {
-        const contrib = efields.infinitePlaneEField(sourcePosition, chargeDensity, target, obj.direction)
+        const contrib = efields.infinitePlaneEField(sourceArray, chargeDensity, targetArray, obj.direction)
         field.add(contrib)
       }
     } else if (obj.type === 'plane') {
-      const contrib = efields.finitePlaneEField(sourcePosition, obj.direction, obj.dimensions, chargeDensity, target)
+      const contrib = efields.finitePlaneEField(sourceArray, obj.direction, obj.dimensions, chargeDensity, targetArray)
       field.add(contrib)
     } else if (obj.type === 'wire') {
-      const contrib = efields.finiteWireEField(sourcePosition, obj.direction, obj.height, obj.radius, chargeDensity, target)
+      const contrib = efields.finiteWireEField(sourceArray, obj.direction, obj.height, obj.radius, chargeDensity, targetArray)
       field.add(contrib)
     } else if (obj.type === 'chargedSphere') {
-      const contrib = efields.chargedSphereEField(sourcePosition, obj.radius, chargeDensity, obj.isHollow, target)
+      const contrib = efields.chargedSphereEField(sourceArray, obj.radius, chargeDensity, obj.isHollow, targetArray)
       field.add(contrib)
     } else if (obj.type === 'concentricSpheres') {
-      const contrib = efields.concentricSpheresField(sourcePosition, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, target)
+      if (!Array.isArray(obj.radiuses) || obj.radiuses.length === 0) continue
+      if (!Array.isArray(obj.charges) || obj.charges.length === 0) continue
+      const contrib = efields.concentricSpheresEField(sourceArray, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, targetArray)
       field.add(contrib)
     } else if (obj.type === 'concentricInfWires') {
-      const contrib = efields.concentricInfiniteWiresField(sourcePosition, obj.direction, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, target)
+      if (!Array.isArray(obj.radiuses) || obj.radiuses.length === 0) continue
+      if (!Array.isArray(obj.charges) || obj.charges.length === 0) continue
+      const contrib = efields.concentricInfiniteWiresEField(sourceArray, obj.direction, obj.radiuses, obj.materials, obj.dielectrics, obj.charges, targetArray)
       field.add(contrib)
     } else if (obj.type === 'stackedPlanes') {
       const numPlanes = Array.isArray(obj.charge_densities) ? obj.charge_densities.length : 0
@@ -140,7 +146,12 @@ function computeEnclosedDiscreteCharge(surface, objects) {
       continue
     }
 
-    if (Array.isArray(obj.charges) && obj.charges.length > 0) {
+    if (
+      Array.isArray(obj.charges) &&
+      obj.charges.length > 0 &&
+      obj.type !== 'concentricSpheres' &&
+      obj.type !== 'concentricInfWires'
+    ) {
       const basePos = toVector3(obj.position || [0, 0, 0])
       
       // For paths/coils, charges array contains positions [x,y,z] and charge magnitude is in obj.charge
@@ -196,6 +207,44 @@ function computeEnclosedDiscreteCharge(surface, objects) {
       break
     }
 
+    if (obj.type === 'concentricSpheres') {
+      if (surface.surfaceType !== 'sphere') {
+        canUseGauss = false
+        break
+      }
+
+      const surfaceCenter = toVector3(surface.position || [0, 0, 0])
+      const sphereCenter = toVector3(obj.position || [0, 0, 0])
+      if (surfaceCenter.distanceTo(sphereCenter) > 1e-3) {
+        canUseGauss = false
+        break
+      }
+
+      const radiuses = Array.isArray(obj.radiuses) ? obj.radiuses : []
+      if (!radiuses.length) {
+        evaluatedAny = true
+        continue
+      }
+
+      const charges = Array.isArray(obj.charges) ? obj.charges : []
+      const materials = Array.isArray(obj.materials) ? obj.materials : []
+      const normalizedCharges = radiuses.map((_, i) => Number(charges[i] ?? 0))
+      const normalizedMaterials = radiuses.map((_, i) => materials[i] ?? 'conductor')
+      const useDirectCharges = materials.length < radiuses.length
+      const chargesPerSurface = useDirectCharges
+        ? normalizedCharges
+        : efields.chargePerSphereSurface(radiuses, normalizedCharges, normalizedMaterials)
+      const surfaceRadius = Math.abs(surface.radius ?? 0)
+      const epsilon = 1e-6
+      let enclosed = 0
+      for (let i = 0; i < radiuses.length; i++) {
+        if (surfaceRadius + epsilon >= radiuses[i]) enclosed += chargesPerSurface[i] ?? 0
+      }
+      evaluatedAny = true
+      enclosedCharge += enclosed
+      continue
+    }
+
     canUseGauss = false
     break
   }
@@ -205,7 +254,13 @@ function computeEnclosedDiscreteCharge(surface, objects) {
 
 // Computes electric flux for every Gaussian surface in the scene.
 export default function calculateFlux(sceneObjects = []) {
-  const surfaces = sceneObjects.filter(obj => obj?.type === 'surface')
+  const surfaces = sceneObjects
+    .filter(obj => obj && (obj.type === 'surface' || ['sphere', 'cylinder', 'cuboid'].includes(obj.type)))
+    .map(obj => (
+      obj.type === 'surface'
+        ? obj
+        : { ...obj, type: 'surface', surfaceType: obj.surfaceType ?? obj.type }
+    ))
   const results = []
 
   for (const surface of surfaces) {

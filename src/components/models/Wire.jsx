@@ -142,13 +142,22 @@ function Wire({
       scale={0.86}
       lineWidth={2.5}
     >
+    {/* Store label info for Data sidebar */}
+    {React.useMemo(() => {
+      updateObject?.(id, {
+        labelInfo: [`λ = ${charge_density === undefined ? (0).toExponential(2) : charge_density.toExponential(2)} C/m`]
+      })
+      return null
+    }, [charge_density, id, updateObject])}
+
     {showLabel && (
       <Label
         objectName={name}
-        value={`λ = ${charge_density === undefined ? 0..toExponential(2) : charge_density.toExponential(2)} C/m`}
+        value={`λ = ${charge_density === undefined ? (0).toExponential(2) : charge_density.toExponential(2)} C/m`}
         offsetY={0.5}
         objectId={id}
         onHideLabel={onHideLabel}
+        isObjectHovered={isHovered}
       />
     )}
       <group ref={groupRef}>
