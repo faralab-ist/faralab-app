@@ -57,7 +57,6 @@ export default function ObjectList({
         const isOpen = !!prev[id];
         const next = { ...prev, [id]: !isOpen };
         
-        // Sincronizar com a seleção externa (opcional, baseado no teu código original)
         if (!isOpen && setSelectedId) setSelectedId(id);
         else if (isOpen && setSelectedId && selectedId === id) setSelectedId(null);
         

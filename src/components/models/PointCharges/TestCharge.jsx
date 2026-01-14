@@ -106,6 +106,7 @@ export default function TestCharge({position = [0, 0, 0], sceneObjects, updateOb
           distanceFactor={8}
           objectId={props.id}
           onHideLabel={onHideLabel}
+          isObjectHovered={props.isHovered}
         />
       )}
     </group>

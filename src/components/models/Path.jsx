@@ -24,6 +24,8 @@ export default function Path({
   glowMultiplier = 1.0,
   onHideLabel,
   segments = 500,
+  hoveredId,
+  isHovered
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
@@ -181,7 +183,10 @@ export default function Path({
           })()} A`}
           offsetY={0.5}
           objectId={id}
+          hoveredId={hoveredId}
           onHideLabel={onHideLabel}
+          isObjectHovered={isHovered}
+
         />
       )}
       <group ref={groupRef}>

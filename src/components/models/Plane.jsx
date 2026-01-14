@@ -153,6 +153,8 @@ function Plane({
           distanceFactor={12}
           objectId={id}
           onHideLabel={onHideLabel}
+          isObjectHovered={isHovered}
+
         />
       )}
       <mesh

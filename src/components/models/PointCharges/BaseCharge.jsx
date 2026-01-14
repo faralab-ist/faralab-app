@@ -19,6 +19,7 @@ export default function BaseCharge({
   hitboxRadius,   // Number: size of the selection area
   type = 'charge', // userData type identifier
   radius = 0.06,       // visual radius of the center dot
+  isHovered
 }) {
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()

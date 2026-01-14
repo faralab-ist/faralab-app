@@ -128,6 +128,9 @@ export default function RingCoil({
           />
         </mesh>
       }
+      hitboxGeometry={
+        <cylinderGeometry args={[coilRadius, coilRadius, 0.1, 32]} />
+      }
     />
   )
 }

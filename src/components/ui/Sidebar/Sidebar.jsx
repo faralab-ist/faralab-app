@@ -304,6 +304,7 @@ export default function Sidebar({
                 expandId={expandId}
                 minimized={minimized}
                 hoveredId={hoveredId}
+                setHoveredId={setHoveredId}
                 selectedId={selectedId}
                 setSelectedId={setSelectedId}
                 onHoverStart={hoverStart}

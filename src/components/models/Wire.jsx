@@ -157,6 +157,7 @@ function Wire({
         offsetY={0.5}
         objectId={id}
         onHideLabel={onHideLabel}
+        isObjectHovered={isHovered}
       />
     )}
       <group ref={groupRef}>

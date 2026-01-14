@@ -30,11 +30,11 @@ export default function StackedPlanes({
   rotation,
   quaternion,
   hoveredId,
+  isHovered,
   showLabel = true,
   onHideLabel,
 }) {
   const isSelected = id === selectedId
-  const isHovered = id === hoveredId
   const { handleAxisDragStart } = useCameraSnap()
   const pivotRef = useRef()
   const meshRef = useRef()
@@ -115,6 +115,7 @@ export default function StackedPlanes({
     })
   }, [charge_densities, id, updateObject])
 
+  
   return (
     <PivotControls
       ref={pivotRef}
@@ -192,13 +193,13 @@ export default function StackedPlanes({
                   />
                 </mesh>
                 {/* Show label between this layer and next layer (skip for last layer) */}
-                           {i < planes.length - 1 && (
-                             <LayerLabel 
-                               layerIndex={i} 
-                               position={[width / 2 + 0.3, (planes[i] + planes[i + 1]) / 2, 0]} 
-                             />
-                           )}
-              </group>
+              {i < planes.length - 1 && (
+                <LayerLabel 
+                 layerIndex={i} 
+                  position={[width / 2 + 0.3, (planes[i] + planes[i + 1]) / 2, 0]} 
+               />
+               )}
+             </group>
             )
           })
         })()}
@@ -211,32 +212,12 @@ export default function StackedPlanes({
                 distanceFactor={8 * charge_densities.length}
                 objectId={id}
                 onHideLabel={onHideLabel}
+                isObjectHovered={isHovered}
+              
               />
             )}
     </PivotControls>
   )
 }
 
-// Store label info for Data sidebar
-StackedPlanes = React.forwardRef((props, ref) => {
-  useEffect(() => {
-    const { charge_densities, id, updateObject } = props
-    updateObject?.(id, { 
-      labelInfo: charge_densities.map((charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`)
-    })
-  }, [props.charge_densities, props.id, props.updateObject])
-  
-  return null
-})
 
-// Store label info for Data sidebar
-StackedPlanes = React.forwardRef((props, ref) => {
-  useEffect(() => {
-    const { charge_densities, id, updateObject } = props
-    updateObject?.(id, { 
-      labelInfo: charge_densities.map((charge, i) => `E-Field ${i + 1} = ${charge.toExponential(2)} C`)
-    })
-  }, [props.charge_densities, props.id, props.updateObject])
-  
-  return null
-})

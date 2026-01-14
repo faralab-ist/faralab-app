@@ -48,6 +48,7 @@ export default function Charge({ charge, position = [0, 0, 0], showLabel = true,
         offsetY={0.6}
         objectId={props.id}
         onHideLabel={onHideLabel}
+        isObjectHovered={props.isHovered}
       />
     )}
     </group>

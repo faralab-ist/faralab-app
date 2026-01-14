@@ -10,6 +10,7 @@ export default function BarMagnet({
   id,
   name,
   position,
+  hoveredId,
   selectedId,
   setSelectedId,
   setIsDragging,
@@ -23,6 +24,7 @@ export default function BarMagnet({
   direction = [0, 0, 1],
   rotation,
   quaternion,
+  isHovered,
   chargesPerCoil,
   pointsPerCoil,
   creativeMode,
@@ -310,10 +312,12 @@ export default function BarMagnet({
                   value={[
                     `M = ${magnetization.toExponential(2)} A/m`,
                   ]}
+                  hoveredId={hoveredId}
                   offsetY={0.5 + radius}
                   distanceFactor={8}
                   objectId={id}
                   onHideLabel={onHideLabel}
+                  isObjectHovered={isHovered}
                 />
               )}
         <mesh

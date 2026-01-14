@@ -26,6 +26,7 @@ export default function TestCoil({
   tubeRadius = 0.05,
   showLabel = true,
   onHideLabel,
+  isHovered,
 }) {
   const radialSamples = 10;
   const angularSamples = 10;
@@ -203,6 +204,7 @@ export default function TestCoil({
         distanceFactor={8}
         objectId={id}
         onHideLabel={onHideLabel}
+        isObjectHovered={isHovered}
       />}
       <group ref={groupRef}>
         <mesh 
@@ -210,6 +212,7 @@ export default function TestCoil({
           material={wireMaterial} 
           receiveShadow 
           castShadow
+          userData={{ id, type: 'testCoil' }}
           onPointerDown={(e) => { e.stopPropagation(); setSelectedId && setSelectedId(id); }}
         />
       </group>

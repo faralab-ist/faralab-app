@@ -215,6 +215,7 @@ useEffect(() => {
                     distanceFactor={10 * radiuses.length}
                     objectId={id}
                     onHideLabel={onHideLabel}
+                    isObjectHovered={isHovered}
                   />
                 )}
     </PivotControls>

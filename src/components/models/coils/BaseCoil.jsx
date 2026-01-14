@@ -43,6 +43,7 @@ export default function BaseCoil({
 
   glowMultiplier,
   onHideLabel,
+  hitboxGeometry,
 
 }) {
   const isSelected = id === selectedId
@@ -168,6 +169,7 @@ export default function BaseCoil({
           <Path
             id={id}
             name = {name}
+            isHovered={isHovered}
             position={[0, 0, 0]}
             selectedId={selectedId}
             setSelectedId={setSelectedId}
@@ -192,11 +194,11 @@ export default function BaseCoil({
 
         {/* Invisible hitbox */}
         <mesh
-          rotation={[Math.PI / 2, 0, 0]}
+          rotation={hitboxGeometry ? [0, 0, 0] : [Math.PI / 2, 0, 0]}
           userData={{ id, type: 'coil' }}
           onPointerDown={handleSelect}
         >
-          <torusGeometry args={[coilRadius, coilRadius * 0.15, 8, 32]} />
+          {hitboxGeometry || <torusGeometry args={[coilRadius, coilRadius * 0.15, 8, 32]} />}
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
       </group>

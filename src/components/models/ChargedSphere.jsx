@@ -113,6 +113,7 @@ export default function Sphere({
           offsetY={radius + 0.5}
           objectId={id}
           onHideLabel={onHideLabel}
+          isObjectHovered={isHovered}
         />
       )}
       <mesh
