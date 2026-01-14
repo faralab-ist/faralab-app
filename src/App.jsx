@@ -134,7 +134,7 @@ function LoadingOverlay() {
   }, [axes])
 
   useEffect(() => {
-    const timeout = setTimeout(() => setInitialVisible(false), 4000)
+    const timeout = setTimeout(() => setInitialVisible(false), 1500)
     return () => clearTimeout(timeout)
   }, [])
 
