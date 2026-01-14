@@ -199,7 +199,7 @@ export default function StackedPlanes({
       {showLabel && (
               <Label
                 objectName={name}
-                value={charge_densities.map((charge, i) => `σ${i + 1} = ${charge.toExponential(2)} C`)}
+                value={charge_densities.map((charge, i) => `σ${i + 1} = ${charge.toExponential(2)} C/m²`)}
                 offsetY={spacing * charge_densities.length / 2 + 0.8}
                 distanceFactor={8 * charge_densities.length}
                 objectId={id}
