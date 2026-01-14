@@ -5,6 +5,7 @@ import cuboidIcon from '../../../../assets/cuboid.svg'
 import flux from '../../../../assets/flux.svg'
 import './GaussianMenu.css'
 
+export const GAUSSIAN_MENU_NAME = 'Gaussian Menu'
 
 export default function GaussianMenu({
   minimized,

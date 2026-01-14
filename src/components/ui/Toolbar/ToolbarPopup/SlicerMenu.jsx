@@ -4,6 +4,8 @@ import Flip from '../../../../assets/flip.svg'
 import Slice1 from '../../../../assets/slice.svg'
 import Helper from '../../../../assets/helper.svg'
 
+export const SLICER_MENU_NAME = 'Slicer Menu'
+
 export default function SlicerMenu({
   useSlice,
   setUseSlice,

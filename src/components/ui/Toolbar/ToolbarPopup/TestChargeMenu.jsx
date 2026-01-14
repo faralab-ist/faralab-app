@@ -6,6 +6,7 @@ import { InlineDecimalInput } from '../../io/decimalInput'
 import '../../io/decimalInput.css'
 import { POS_MIN, POS_MAX} from "../../Sidebar/utils";
 
+export const TEST_CHARGE_MENU_NAME = 'Test Charge Menu '
 
 export default function TestChargeMenu({ addObject, updatePosition, sceneObjects = [] }) {
   const [isOpen, setIsOpen] = useState(true)
