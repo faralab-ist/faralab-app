@@ -667,6 +667,24 @@ export default function ObjectItem({
                         />
                       </div>
                     </div>
+                    
+                  </div>
+                  <div>
+                      <div className="detail-key">Resolution (best results ~ 700)</div>
+                      <div className="detail-value">
+                        <InlineDecimalInput
+                          value={obj.segments}
+                          min={1}
+                          max={3000}
+                          step={1}
+                          onChange={(v) => {
+                            const safe = clampWithError(v, 1, 3000);
+                            updateObject(obj.id, { segments: safe });
+                          }}
+                          onError={setErrorMsg}
+                          errorMsg={ERROR_MSG}
+                        />
+                      </div>
                  </div>
                </>
                
@@ -722,12 +740,12 @@ export default function ObjectItem({
                       <div className="detail-key">Multiplier</div>
                       <div className="detail-value">
                         <InlineDecimalInput
-                          value={obj.charge}
+                          value={obj.current}
                           min={0.1}
                           max={50}
                           onChange={(v) => {
                             const safe = clampWithError(v, 0.1, 50);
-                            updateObject(obj.id, { charge: safe });
+                            updateObject(obj.id, { current: safe });
                           }}
                           onError={setErrorMsg}
                           errorMsg={ERROR_MSG}

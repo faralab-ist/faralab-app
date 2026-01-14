@@ -56,14 +56,12 @@ export function buildChargeTextures(objects){
     const MU_04PI = MU_0 / (4 * Math.PI);
 
     for (const obj of objects){
-        // only consider path-like current-carrying objects
         if (obj.type !== 'path' && obj.type !== 'coil' && obj.type !== 'barMagnet') continue;
 
         const basePos = Array.isArray(obj.position) ? obj.position : [0,0,0];
         const positions = Array.isArray(obj.charges) ? obj.charges : [];
         const tangents = Array.isArray(obj.tangents) ? obj.tangents : [];
 
-        // unified API: use current (A)
         const current = Number.isFinite(obj.current) ? obj.current : 0.0;
         const chargeFactor = MU_04PI * current;
 
@@ -76,7 +74,6 @@ export function buildChargeTextures(objects){
             const nTan = normalizeArray(tan);
             tangent.push(nTan[0], nTan[1], nTan[2], 0.0);
 
-            // store scaled current factor per segment
             factor.push(chargeFactor, 0.0, 0.0, 0.0);
         }
     }

@@ -175,7 +175,7 @@ export default function FaradayCoil({
         setEmfValue(currentEmf * 1e6);
     }
     
-    const speed = emfValue * 15; 
+    const speed = emfValue * 150; 
     flowOffset.current += speed * state.clock.getDelta();
   });
 
@@ -222,7 +222,7 @@ export default function FaradayCoil({
           objectName={name}
           value={[
           `B-Flux = ${magneticFlux.toExponential(2)} Wb`,
-          `ε = ${emfValue.toExponential(2)} V`
+          `ε = ${(emfValue*1e-6).toExponential(2)} V`
         ]}
           offsetY={radius + 0.5}
           distanceFactor={8}

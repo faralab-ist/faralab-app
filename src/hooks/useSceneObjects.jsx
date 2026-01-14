@@ -181,6 +181,7 @@ const objectFactories = {
     velocity: 1, //speed of charges
     isClosedPath: false,
     showLabel: true,
+    segments: 500,
     createdAt: Date.now(),
   }),
   ringCoil: (index) => ({
@@ -200,6 +201,7 @@ const objectFactories = {
     charges: [],
     showLabel: true,
     createdAt: Date.now(),
+    segments: 500, // overriden for now in the RingCoil file
   }),
   solenoid: (index) => ({ // just a solenoid
     id: `tmp-${index}`,
@@ -219,6 +221,7 @@ const objectFactories = {
     current: 0.1,
     createdAt: Date.now(),
     ac: false,
+    segments: 500,
   }),
   polygonCoil: (index) => ({
     id: `tmp-${index}`,
@@ -238,6 +241,7 @@ const objectFactories = {
     charges: [],
     showLabel: true,
     createdAt: Date.now(),
+    segments: 500,
   }),
   barMagnet: (index) => ({
     id: `tmp-${index}`,
@@ -259,6 +263,7 @@ const objectFactories = {
     amplitude: 0.5,
     freq: 1,
     createdAt: Date.now(),
+    segments: 50, // overriden for now in the Magnet file
   }),
   faradayCoil: (index) => ({
     id: `tmp-${index}`,
