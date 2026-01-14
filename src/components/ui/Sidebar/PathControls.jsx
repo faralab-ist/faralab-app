@@ -7,21 +7,13 @@ export default function PathControls({
   addPoint,
   removeLastPoint,
   setPoint,
-  changePathChargeCount,
-  changePathCharge,
-  changePathVelocity,
-  showChargeRow = true,
-  chargeRowRight,
   updateObject,
   setErrorMsg
 }) {
   const points = Array.isArray(obj.points) ? obj.points : [];
-  const charges = Array.isArray(obj.charges) ? obj.charges : [];
-  const chargeCount = Number.isFinite(obj.chargeCount) ? obj.chargeCount : charges.length;
-  // velocity is a single float
-  const velocity = Number.isFinite(obj.velocity) ? obj.velocity : 0.0;
-  // single global charge value (not per-point)
-  const globalCharge = Number.isFinite(obj.charge) ? obj.charge : 0.0;
+
+  // unified API: single current value (A)
+  const current = Number.isFinite(obj.current) ? obj.current : 0.0;
 
   const onSetPoint = (idx, coordIdx, val) => {
     const newPoint = [...(points[idx] || [0,0,0]).map((v)=>v)];
@@ -35,31 +27,9 @@ export default function PathControls({
     }
   };
 
-  // set global charge
-  const onSetCharge = (val) => {
-    if (typeof changePathCharge === "function") {
-      changePathCharge(obj.id, val);
-    } else {
-      updateObject?.(obj.id, { charge: val });
-    }
-  };
-
-  const onSetVelocity = (val) => {
+  const onSetCurrent = (val) => {
     const v = Number.isFinite(val) ? val : 0.0;
-    if (typeof changePathVelocity === "function") {
-      changePathVelocity(obj.id, v);
-    } else {
-      updateObject?.(obj.id, { velocity: v });
-    }
-  };
-
-  const onSetChargeCount = (val) => {
-    const n = Math.max(0, Math.floor(val));
-    if (typeof changePathChargeCount === "function") {
-      changePathChargeCount(obj.id, n);
-    } else {
-      updateObject?.(obj.id, { chargeCount: n });
-    }
+    updateObject?.(obj.id, { current: v });
   };
 
   return (
@@ -69,103 +39,36 @@ export default function PathControls({
         style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
       >
         <div>
-          <div className="detail-key">Velocity </div>
+          <div className="detail-key">Current</div>
           <div className="detail-value">
             <InlineDecimalInput
-              value={velocity}
+              value={current}
               step={0.01}
-              onChange={(v) => onSetVelocity(v)}
+              onChange={(v) => onSetCurrent(v)}
+              onError={setErrorMsg}
             />
-            <span style={{ fontSize: 12, opacity: 0.7 }}>m/s</span>
+            <span style={{ fontSize: 12, opacity: 0.7 }}>A</span>
           </div>
         </div>
 
-        <div>
-          <div className="detail-key">Charge density</div>
+        {obj.type === "path" && <div>
+          <div className="detail-key">Closed path</div>
           <div className="detail-value">
-            <InlineDecimalInput
-              value={chargeCount}
-              min={0}
-              step={1}
-              onChange={(v) => onSetChargeCount(v)}
-            />
+            <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
+              <input
+                type="checkbox"
+                checked={!!obj.isClosedPath}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  updateObject?.(obj.id, { isClosedPath: e.target.checked });
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+              />
+              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>Loop</span>
+            </label>
           </div>
-        </div>
+        </div>}
       </div>
-
-      {showChargeRow && (
-        obj.type === "path" ? (
-          <div
-            className="detail-row"
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-          >
-            <div>
-              <div className="detail-key">Charge (global)</div>
-              <div className="detail-value">
-                <InlineDecimalInput
-                  value={globalCharge}
-                  step={0.1}
-                  onChange={(v) => onSetCharge(v)}
-                  onError={setErrorMsg}
-                />
-                <span style={{ fontSize: 12, opacity: 0.7 }}>C</span>
-              </div>
-            </div>
-
-            <div>
-              <div className="detail-key">Closed path</div>
-              <div className="detail-value">
-                <label style={{ display: "inline-flex", gap: 8, alignItems: "center" }}>
-                  <input
-                    type="checkbox"
-                    checked={!!obj.isClosedPath}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      updateObject?.(obj.id, { isClosedPath: e.target.checked });
-                    }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                  />
-                  <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>Loop</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        ) : (
-          chargeRowRight ? (
-            <div
-              className="detail-row"
-              style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}
-            >
-              <div>
-                <div className="detail-key">Charge (global)</div>
-                <div className="detail-value">
-                  <InlineDecimalInput
-                    value={globalCharge}
-                    step={0.1}
-                    onChange={(v) => onSetCharge(v)}
-                    onError={setErrorMsg}
-                  />
-                  <span style={{ fontSize: 12, opacity: 0.7 }}>C</span>
-                </div>
-              </div>
-              {chargeRowRight}
-            </div>
-          ) : (
-            <div className="detail-row">
-              <div className="detail-key">Charge (global)</div>
-              <div className="detail-value">
-                <InlineDecimalInput
-                  value={globalCharge}
-                  step={0.1}
-                  onChange={(v) => onSetCharge(v)}
-                  onError={setErrorMsg}
-                />
-                <span style={{ fontSize: 12, opacity: 0.7 }}>C</span>
-              </div>
-            </div>
-          )
-        )
-      )}
 
       {obj.type === "path" && (
         <div className="detail-row" style={{ marginTop: 8 }}>

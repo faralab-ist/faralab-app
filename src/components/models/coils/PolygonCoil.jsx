@@ -25,27 +25,22 @@ export default function PolygonCoil({
   creativeMode,
   isHovered,
 
-  // Polygon-specific props
-  coilRadius = 1.5,                 // radius from center to vertices
-  tubeRadius = 0.01,                // wire thickness
-  coilColor = '#6ea8ff',            // wire color
-  wireThickness = 0.05,             // thickness of 3D normal arrow visualization
-  sides,                            // number of sides (use factory default, no override)
+  coilRadius = 1.5,
+  tubeRadius = 0.01,
+  coilColor = '#6ea8ff',
+  wireThickness = 0.05,
+  sides,
 
-  // Rotation state
   direction = [0, 1, 0],
   rotation = [0, 0, 0],
   quaternion,
   
-  // Path props (charges)
-  chargeCount = 5,
-  charge = 1,
-  velocity = 1,
+  // unified API: only current
+  current = 1,
+
   renderCharges = true,
   charges = [],
   
-  // Scene objects for E-field calculation
-
   showLabel = true,
   onHideLabel,
 }) {
@@ -205,9 +200,8 @@ export default function PolygonCoil({
       direction={direction}
       rotation={rotation}
       quaternion={quaternion}
-      chargeCount={chargeCount}
-      charge={charge}
-      velocity={velocity}
+      // unified: pass current
+      current={current}
       renderCharges={renderCharges}
       charges={charges}
       isClosedPath={true}

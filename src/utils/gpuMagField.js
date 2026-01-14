@@ -54,27 +54,29 @@ export function buildChargeTextures(objects){
     const tangent = [];
     const factor = [];
     const MU_04PI = MU_0 / (4 * Math.PI);
+
     for (const obj of objects){
-        // Handle both paths and coils (coils use path for charge animation)
-        //console.log(obj.type);
+        // only consider path-like current-carrying objects
         if (obj.type !== 'path' && obj.type !== 'coil' && obj.type !== 'barMagnet') continue;
-        //console.log(obj);
-        //console.log(obj.charges);
-        const basePos = obj.position;
+
+        const basePos = Array.isArray(obj.position) ? obj.position : [0,0,0];
         const positions = Array.isArray(obj.charges) ? obj.charges : [];
-        //console.log(positions);
-        const vel = Number.isFinite(obj.velocity) ? obj.velocity : 0.0;
         const tangents = Array.isArray(obj.tangents) ? obj.tangents : [];
-        const chargeFactor = MU_04PI * obj.charge * vel;
+
+        // unified API: use current (A)
+        const current = Number.isFinite(obj.current) ? obj.current : 0.0;
+        const chargeFactor = MU_04PI * current;
+
         for (let i = 0; i < positions.length; i++){
-            const relPos = positions[i];
-            const wPos = [basePos[0] + relPos[0], basePos[1] + relPos[1], basePos[2] + relPos[2]];
+            const relPos = positions[i] || [0,0,0];
+            const wPos = [basePos[0] + (relPos[0] ?? 0), basePos[1] + (relPos[1] ?? 0), basePos[2] + (relPos[2] ?? 0)];
             chargePos.push(wPos[0], wPos[1], wPos[2], 0.0);
 
             const tan = tangents[i] || [1,0,0];
             const nTan = normalizeArray(tan);
             tangent.push(nTan[0], nTan[1], nTan[2], 0.0);
 
+            // store scaled current factor per segment
             factor.push(chargeFactor, 0.0, 0.0, 0.0);
         }
     }
@@ -92,17 +94,6 @@ export function buildChargeTextures(objects){
             count: 0
         };
     }
-    /*
-    function makeTexture(data, w){
-        const floatArr = new Float32Array(data);
-        const tex = new THREE.DataTexture(floatArr, w, 1, THREE.RGBAFormat, THREE.FloatType);
-        tex.needsUpdate = true;
-        tex.minFilter = THREE.NearestFilter;
-        tex.magFilter = THREE.NearestFilter;
-        tex.wrapS = THREE.ClampToEdgeWrapping;
-        tex.wrapT = THREE.ClampToEdgeWrapping;
-        return tex;
-    }*/
 
     const posPacked = dataToSquareTexture(new Float32Array(chargePos), 4);
     const tanPacked = dataToSquareTexture(new Float32Array(tangent), 4);
