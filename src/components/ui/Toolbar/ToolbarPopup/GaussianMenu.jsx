@@ -61,10 +61,10 @@ export default function GaussianMenu({
         <button
           className={`surface-icon-btn ${exclusiveActiveType === 'sphere' ? 'active' : ''}`}
           onClick={() => handleSurfaceButton('sphere')}
-          title="Create Gaussian Sphere"
+          title="Create Sphere"
         >
           <img src={sphereIcon} alt="" />
-          <span>Guassian Sphere</span>
+          <span>Sphere</span>
         </button>
         <button
           className={`surface-icon-btn ${exclusiveActiveType === 'cylinder' ? 'active' : ''}`}
