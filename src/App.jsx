@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { OrbitControls, Html } from '@react-three/drei'
   import './App.css'
   import * as THREE from 'three'
+  import { HoverProvider } from './hooks/useHoverContext'
 
 
   // Core components
@@ -235,13 +236,13 @@ function LoadingOverlay() {
       </mesh>
 
       <Html position={[size + labelOffset, 0, 0]} center>
-        <span className={`axis-label ${showLabels ? 'axis-label--visible' : ''}`}>x</span>
+        <span className={`axis-label ${showLabels ? 'axis-label--visible' : ''}`} style={{ pointerEvents: 'none', userSelect: 'none' }}>x</span>
       </Html>
       <Html position={[0, size + labelOffset, 0]} center>
-        <span className={`axis-label ${showLabels ? 'axis-label--visible' : ''}`}>y</span>
+        <span className={`axis-label ${showLabels ? 'axis-label--visible' : ''}`} style={{ pointerEvents: 'none', userSelect: 'none' }}>y</span>
       </Html>
       <Html position={[0, 0, size + labelOffset]} center>
-        <span className={`axis-label ${showLabels ? 'axis-label--visible' : ''}`}>z</span>
+        <span className={`axis-label ${showLabels ? 'axis-label--visible' : ''}`} style={{ pointerEvents: 'none', userSelect: 'none' }}>z</span>
       </Html>
     </group>
   )
@@ -822,11 +823,12 @@ function LoadingOverlay() {
         />
 
         <Canvas gl={{localClippingEnabled: true}} onPointerMissed={handleBackgroundClick}>
-          <CameraFnsMount onReady={setCamFns} />
-          <CameraStateCapture onCameraUpdate={setCameraState} />
-          <SceneHoverBridge onChange={onHoverChange} />
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[2, 2, 5]} />
+          <HoverProvider setHoveredId={setHoveredId}>
+            <CameraFnsMount onReady={setCamFns} />
+            <CameraStateCapture onCameraUpdate={setCameraState} />
+            <SceneHoverBridge onChange={onHoverChange} />
+            <ambientLight intensity={0.5} />
+            <directionalLight position={[2, 2, 5]} />
           <OrbitControls
             enabled={!isDragging}
             onChange={() => {
@@ -993,6 +995,7 @@ function LoadingOverlay() {
           {useSlice && showSlicePlaneHelper && (<SlicePlaneHelper 
                 slicePlane={slicePlane}
                 slicePos={slicePos}/>)}
+          </HoverProvider>
         </Canvas>
 
         <SettingsButtons //epa, ya its ugly, i know - yours truly, gabriel; All gud g

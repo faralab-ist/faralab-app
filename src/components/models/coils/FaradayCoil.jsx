@@ -27,10 +27,10 @@ export default function FaradayCoil({
   showLabel = true,
   magneticFlux,
   onHideLabel,
+  isHovered,
 }) {
   const radialSamples = 10;
   const angularSamples = 10;
-
   const isSelected = id === selectedId
   const { handleAxisDragStart } = useCameraSnap()
   const pivotRef = useRef()
@@ -215,10 +215,20 @@ export default function FaradayCoil({
       scale={0.86}
       lineWidth={2.5}
     >
+      {/* Store label info for Data sidebar */}
+      {React.useMemo(() => {
+        updateObject?.(id, {
+          labelInfo: [
+            `B-Flux = ${magneticFlux.toExponential(2)} Wb`,
+            `ε = ${emfValue.toExponential(2)} V`
+          ]
+        })
+        return null
+      }, [magneticFlux, emfValue, id, updateObject])}
+
       <group ref={groupRef}>
         {showLabel && (
                     <Label
-      
           objectName={name}
           value={[
           `B-Flux = ${magneticFlux.toExponential(2)} Wb`,
@@ -228,6 +238,7 @@ export default function FaradayCoil({
           distanceFactor={8}
           objectId={id}
           onHideLabel={onHideLabel}
+          isObjectHovered={isHovered}
           />
         )}
         <mesh 
@@ -235,6 +246,7 @@ export default function FaradayCoil({
           material={wireMaterial} 
           receiveShadow 
           castShadow
+          userData={{ id, type: 'faradayCoil' }}
           onPointerDown={(e) => { e.stopPropagation(); setSelectedId && setSelectedId(id); }}
         />
 

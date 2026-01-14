@@ -58,6 +58,12 @@
   transform: translateY(-1px);
 }
 
+.surface-icon-btn:focus,
+.surface-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 .surface-icon-btn:active:not(:disabled) {
   transform: translateY(1px);
 }
@@ -137,6 +143,12 @@
   background: #2a2a2a;
   border-color: #444;
   transform: translateY(-1px);
+}
+
+.flux-icon-btn:focus,
+.flux-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .flux-icon-btn:active:not(:disabled) {

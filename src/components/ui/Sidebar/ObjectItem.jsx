@@ -101,7 +101,9 @@ export default function ObjectItem({
     }
     setErrorMsg(null);
     return v;
-  }; 
+  };
+  
+  const isSurfaceWithoutFlux = obj.type === 'surface' && !showFlux;
   //console.log('showFlux in ObjectItem:', showFlux);
   return (
     <li
@@ -122,12 +124,16 @@ export default function ObjectItem({
         <span className="name">{obj.name || obj.id}</span>
         <button
           type="button"
-          className={`label-toggle ${obj.showLabel ?? true ? "active" : ""}`}
+          className={`label-toggle ${obj.showLabel ?? true ? "active" : ""} ${isSurfaceWithoutFlux ? "disabled" : ""}`}
           aria-pressed={obj.showLabel ?? true}
+          disabled={isSurfaceWithoutFlux}
           onClick={(e) => {
             e.stopPropagation();
-            updateObject(obj.id, { showLabel: !(obj.showLabel ?? true) });
+            if (!isSurfaceWithoutFlux) {
+              updateObject(obj.id, { showLabel: !(obj.showLabel ?? true) });
+            }
           }}
+          title={isSurfaceWithoutFlux ? "Enable Gaussian Surface mode to view labels" : undefined}
         >
           <svg
             className="label-toggle-icon"

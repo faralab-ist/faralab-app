@@ -22,7 +22,7 @@
   color: #eaeaea;
   border-left: 1px solid #2a2a2a;
   transform: translateX(100%);
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, width 0.3s ease;
   overflow: hidden;
   box-sizing: border-box;
   pointer-events: auto;
@@ -127,6 +127,14 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
   border-color: rgba(21, 78, 153, 0.9);
   color: #ffffff;
   background: #151c2c;
+}
+
+.label-toggle.active.disabled {
+  opacity: 0.3;
+  cursor: not-allowed !important;
+  border-color: #2a2a2a;
+  background: #141414;
+  color: #bdbdbd;
 }
 
 .object-row:hover .label-toggle:not(.active),
@@ -392,6 +400,14 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 /* esconder o conteúdo normal quando minimizado ##### É USADO ######*/
 .sidebar.minimized .panel-content {
   display: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Show panel content when opening */
+.sidebar.open .panel-content {
+  opacity: 1;
+  transition: opacity 0.3s ease 0.1s;
 }
 
 /* layout vertical dos itens na minibar deixa bem espaçados etc ##### É USADO ###### */
@@ -503,4 +519,37 @@ altera as posições e cenas dos objetos na side bar maximiziada*/
 .sidebar.minimized button.hovered img {
   transform: scale(1.1);
   filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);
+}
+/* === TAB SWITCHER === */
+.tab-switcher {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  flex-direction: row;
+  justify-content: center;
+
+  padding-bottom: 8px;
+}
+
+.tab-btn {
+  padding: 6px 12px;
+  background: #1a1a1a;
+  color: #aaa;
+  border: 1px solid #2a2a2a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.tab-btn:hover {
+  color: #ddd;
+  border-color: #3a3a3a;
+}
+
+.tab-btn.active {
+  background: #0d6efd;
+  color: #fff;
+  border-color: #0d6efd;
 }

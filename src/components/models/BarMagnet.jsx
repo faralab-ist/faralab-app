@@ -10,6 +10,7 @@ export default function BarMagnet({
   id,
   name,
   position,
+  hoveredId,
   selectedId,
   setSelectedId,
   setIsDragging,
@@ -23,6 +24,7 @@ export default function BarMagnet({
   direction = [0, 0, 1],
   rotation,
   quaternion,
+  isHovered,
   chargesPerCoil,
   pointsPerCoil,
   creativeMode,
@@ -261,6 +263,8 @@ export default function BarMagnet({
     updateObject?.(id, { current })
   }, [current, id, updateObject])
 
+ 
+
    const magnetization = useMemo(() => {
     if (length === 0 || numOfCoils === 0) return 0;
 
@@ -269,6 +273,12 @@ export default function BarMagnet({
     return (numOfCoils * current) / length;
   }, [numOfCoils, current, length]);
 
+   // Store label info for Data sidebar
+  useEffect(() => {
+    updateObject?.(id, { 
+      labelInfo: [`M = ${magnetization.toExponential(2)} A/m`]
+    })
+  }, [magnetization, id, updateObject])
   return (
     <PivotControls
       ref={pivotRef}
@@ -301,10 +311,12 @@ export default function BarMagnet({
                   value={[
                     `M = ${magnetization.toExponential(2)} A/m`,
                   ]}
+                  hoveredId={hoveredId}
                   offsetY={0.5 + radius}
                   distanceFactor={8}
                   objectId={id}
                   onHideLabel={onHideLabel}
+                  isObjectHovered={isHovered}
                 />
               )}
         <mesh

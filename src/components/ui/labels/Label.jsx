@@ -1,6 +1,8 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Html } from '@react-three/drei'
 import './Label.css'
+import { useSetHoveredId } from '../../../hooks/useHoverContext'
+
 
 /**
  * Reusable 3D label component for displaying info about scene objects.
@@ -26,9 +28,11 @@ export default function Label({
   distanceFactor = 8,
   className = '',
   objectId,
-  onHideLabel
+  onHideLabel,
+  isObjectHovered,
  }) {
   const [isHovered, setIsHovered] = useState(false)
+  const setHoveredId = useSetHoveredId()
   
   // Support both single and multiple name-value pairs
   const isSingleHeader = typeof name === 'string' && Array.isArray(value)
@@ -40,12 +44,22 @@ export default function Label({
 
   const interactive = Boolean(headerContent) || Boolean(onHideLabel)
 
+  // Update hover state when object is hovered
+  useEffect(() => {
+    if (isObjectHovered) {
+      setIsHovered(true)
+    } else {
+      setIsHovered(false)
+    }
+  }, [isObjectHovered])
+
   const handleCloseClick = (e) => {
     e.stopPropagation()
     if (onHideLabel && objectId) {
       onHideLabel(objectId)
     }
   }
+
 
   return (
     <Html
@@ -61,8 +75,14 @@ export default function Label({
     >
       <div 
         className={`label-wrap ${className}`}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => {
+          setIsHovered(true)
+          setHoveredId?.(objectId)
+        }}
+        onMouseLeave={() => {
+          setIsHovered(false)
+          setHoveredId?.(null)
+        }}
       >
         <div className={`label-panel ${isHovered ? 'label-hovered' : ''}`}>
           {isHovered && onHideLabel && objectId && (

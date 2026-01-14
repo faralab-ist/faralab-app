@@ -32,12 +32,16 @@ export default function TestCharge({position = [0, 0, 0], sceneObjects, updateOb
     return { efieldMagnitude: mag, efieldDirection: dir }
   }, [otherObjects, position])
 
-  // Update the object with calculated E-field values
+  // Update the object with calculated E-field values and label info
   useEffect(() => {
     if (updateObject && props.id) {
       updateObject(props.id, {
         eFieldValue: efieldMagnitude,
-        eFieldDirection: efieldDirection
+        eFieldDirection: efieldDirection,
+        labelInfo: [
+          `E = ${efieldMagnitude.toExponential(2)} N/C`,
+          `dir: (${efieldDirection.map(v => v.toFixed(2)).join(', ')})`
+        ]
       })
     }
   }, [efieldMagnitude, efieldDirection, props.id, updateObject])
@@ -102,6 +106,7 @@ export default function TestCharge({position = [0, 0, 0], sceneObjects, updateOb
           distanceFactor={8}
           objectId={props.id}
           onHideLabel={onHideLabel}
+          isObjectHovered={props.isHovered}
         />
       )}
     </group>
