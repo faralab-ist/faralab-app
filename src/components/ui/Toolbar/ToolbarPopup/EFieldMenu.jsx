@@ -4,6 +4,7 @@ import PotButtons from '../../SettingsButtons/SubButtons/PotButtons'
 import PlaneButtons from '../../SettingsButtons/SubButtons/PlaneButtons'
 import './EFieldMenu.css'
 
+export const EFIELD_MENU_NAME = 'Visualization Menu'
 
 export default function EFieldMenu({
   minimized,
@@ -80,7 +81,7 @@ export default function EFieldMenu({
           className={`fieldview-tab ${fieldTab === 'efield' ? 'active' : ''}`}
           onClick={() => setFieldTab('efield')}
         >
-          E-Field
+          Field View
         </button>
         <button
           className={`fieldview-tab ${fieldTab === 'potential' ? 'active' : ''}`}
