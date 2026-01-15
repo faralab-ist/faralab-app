@@ -43,7 +43,7 @@ const PRESETS = [
   },
   {
     id: 'sphericalCapacitor',
-    label: 'Sphere Capacitor',
+    label: 'Spherical Capacitor',
     name: 'sphericalCapacitor',
     category: 'electrostatic'
   },

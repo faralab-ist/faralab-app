@@ -76,6 +76,7 @@
   transition: background 0.15s, border-color 0.15s, transform 0.1s;
   text-align: center;
   white-space: nowrap;
+  outline: none !important;
 }
 
 .presets-menu-item:hover {
@@ -86,6 +87,7 @@
 
 .presets-menu-item:active {
   transform: translateY(0);
+
 }
 
 .presets-menu-separator {
