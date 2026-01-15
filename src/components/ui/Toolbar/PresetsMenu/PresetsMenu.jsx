@@ -29,12 +29,12 @@ const PRESETS = [
     name: 'wire_w_gaussian',
     category: 'electrostatic'
   },
-  {
+ /* {
     id: 'singlePlane',
     label: '1 Plane',
     name: 'singlePlane',
     category: 'electrostatic'
-  },
+  },*/
   {
     id: 'capacitor',
     label: 'Plate Capacitor',
