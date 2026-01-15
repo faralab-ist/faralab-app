@@ -168,17 +168,42 @@
   cursor: pointer;
   font-size: 14px;
   padding: 6px 10px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  border-radius: 6px;
+  transition: all 0.15s ease;
   line-height: 1;
   outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dock-minimize-btn img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) saturate(100%) invert(73%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(88%);
+  transition: filter 0.15s ease, transform 0.15s ease, opacity 0.2s ease;
+  animation: iconFadeIn 0.25s ease;
+}
+
+@keyframes iconFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotate(-90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 .dock-minimize-btn:hover {
-  background: rgba(21, 78, 153, 0.2);
-  border-color: rgba(21, 78, 153, 0.9);
-  color: rgba(21, 78, 153, 1);
+  background: rgba(21, 78, 153, 0.15);
+  border-color: rgba(21, 78, 153, 0.6);
+}
 
+.dock-minimize-btn:hover img {
+  filter: brightness(0) saturate(100%) invert(62%) sepia(81%) saturate(508%) hue-rotate(165deg) brightness(103%) contrast(101%);
+  transform: scale(1.05);
 }
 
 .dock-minimize-btn:active {

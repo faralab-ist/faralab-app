@@ -5,11 +5,12 @@ import SlicerMenu from '../Toolbar/ToolbarPopup/SlicerMenu';
 import EFieldMenu from '../Toolbar/ToolbarPopup/EFieldMenu';
 import GaussianMenu from '../Toolbar/ToolbarPopup/GaussianMenu';
 import { POPUP_DISPLAY_NAMES } from '../Toolbar/ToolbarPopup/menuNames';
-import minimizeIcon from '../../../assets/minimize.svg';
 import efieldIcon from '../../../assets/field_view.svg';
 import sliceIcon from '../../../assets/slice.svg';
 import gaussian_icon from '../../../assets/gaussian_surface.svg';
 import test_charge_icon from '../../../assets/lowercase_q2.svg';
+import minimizeIcon from '../../../assets/minimize.svg';
+import maximizeIcon from '../../../assets/maximize.svg';
 
 /**
  * DockSidebar - Left sidebar "desk" where ToolbarPopup windows can be docked
@@ -190,7 +191,7 @@ const [expandedWindows, setExpandedWindows] = useState({
             onClick={() => setIsMinimized(!isMinimized)}
             title={isMinimized ? 'Expand' : 'Minimize'}
           >
-            {isMinimized ? '▶' : '◀'}
+            <img src={isMinimized ? maximizeIcon : minimizeIcon} alt={isMinimized ? 'Expand' : 'Minimize'} />
           </button>
         </div>
       )}
