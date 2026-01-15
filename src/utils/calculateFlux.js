@@ -316,7 +316,7 @@ export default function calculateFlux(sceneObjects = []) {
       continue
     }
 
-    const effectiveSampleCount = Math.max(surface.sampleCount || 64, 2048*128)
+    const effectiveSampleCount = Math.max(surface.sampleCount || 64, 2048*64)
     const samples = sampleGaussianSurface({ ...surface, sampleCount: effectiveSampleCount }, { includeNormals: true })
     if (!samples.length) {
       results.push({ id: surface.id, name: surface.name, flux: 0 })
