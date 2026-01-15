@@ -78,7 +78,6 @@ export default function RotationControls({ obj, updateObject }) {
               onChange={(n) => handleLiveChange(i, n)}
               onCommit={(n) => handleCommit(i, n)}
             />
-            {i !== 2 && <span style={{ opacity: 0.6 }}>,</span>}
           </div>
         ))}
       </div>

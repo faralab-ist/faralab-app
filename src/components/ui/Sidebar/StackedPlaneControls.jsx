@@ -31,6 +31,7 @@ export default function StackedPlaneControls({
               else updateObject(obj.id, { spacing: val });
             }}
           />
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginLeft: 2 }}>m</span>
         </div>
       </div>
       <div className="detail-row inline">
@@ -57,7 +58,7 @@ export default function StackedPlaneControls({
 
       {/* 2. Lista de Planos (Densidades) */}
       <div className="detail-row" style={{ flexDirection: "column", alignItems: "flex-start", gap: 8 }}>
-        <div className="detail-key" style={{ marginBottom: 4 }}>Planes (Charge Density σ)</div>
+        <div className="detail-key" style={{ marginBottom: 4 }}>Planes (Charge Density σ, C/m^2)</div>
         
         {densities.map((density, index) => (
           <div key={index} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%" }}>

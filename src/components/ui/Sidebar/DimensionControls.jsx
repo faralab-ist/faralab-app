@@ -10,6 +10,7 @@ const DimInput = ({ value, onChange }) => (
     min={DIM_MIN} 
     max={DIM_MAX}
     step={0.1}
+    inputStyle={{ minWidth: "4ch" }}
   />
 );
 
@@ -34,12 +35,14 @@ export default function DimensionControls({ obj, updateObject, setErrorMsg, clam
             <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>W</span>
             <span style={{ opacity: 0.7 }}>:</span>
             <DimInput value={obj.dimensions[0]} onChange={(v) => update("dimensions", [v, obj.dimensions[1]])} />
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginLeft: 2 }}>m</span>
           </div>
           <span style={{ opacity: 0.6, marginLeft: -4, marginRight: 5 }}>,</span>
           <div style={{ display: "flex", alignItems: "center" }}>
             <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>H</span>
             <span style={{ opacity: 0.7 }}>:</span>
             <DimInput value={obj.dimensions[1]} onChange={(v) => update("dimensions", [obj.dimensions[0], v])} />
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginLeft: 2 }}>m</span>
           </div>
         </div>
       </div>
@@ -62,8 +65,7 @@ export default function DimensionControls({ obj, updateObject, setErrorMsg, clam
           </label>
           {!obj.infinite && (
             <>
-              <span style={{ opacity: 0.35, marginLeft: 12 }}>|</span>
-              <span className="detail-key">Length: </span>
+              <span className="detail-key" style={{ marginLeft: 25 }}>Length:</span>
               <DimInput 
                 value={obj.height ?? 5}
                 onChange={(v) => {
@@ -71,10 +73,63 @@ export default function DimensionControls({ obj, updateObject, setErrorMsg, clam
                   update("height", safe);
                 }}
               />
+              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)"}}>m</span>
             </>
           )}
         </div>
       </div>
+    );
+  }
+
+  const isCylinder = typeof obj.radius === 'number'
+    && typeof obj.height === 'number'
+    && typeof obj.width !== 'number'
+    && typeof obj.depth !== 'number';
+
+  if (isCylinder) {
+    return (
+      <div className="detail-row inline">
+        <div className="detail-key">Radius: </div>
+        <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+          <DimInput value={obj.radius} onChange={(v) => update("radius", v)} />
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginLeft: 2 }}>m</span>
+          <span className="detail-key" style={{marginLeft: 27}}>Length: </span>
+          <DimInput value={obj.height} onChange={(v) => update("height", v)} />
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginLeft: 2 }}>m</span>
+        </div>
+      </div>
+    );
+  }
+
+  const isCuboid = typeof obj.width === 'number'
+    && typeof obj.height === 'number'
+    && typeof obj.depth === 'number';
+
+  if (isCuboid) {
+    return (
+      <>
+        <div className="detail-row inline">
+          <div className="detail-key">Width (x): </div>
+          <div className="detail-value">
+            <DimInput value={obj.width} onChange={(v) => update("width", v)} />
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginLeft: 2 }}>m</span>
+          </div>
+        </div>
+        <div className="detail-row inline">
+          <div className="detail-key">Height (y): </div>
+          <div className="detail-value">
+            <DimInput value={obj.height} onChange={(v) => update("height", v)} />
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginLeft: 2 }}>m</span>
+          </div>
+        </div>
+        <div className="detail-row inline">
+          <div className="detail-key">Depth (z): </div>
+          <div className="detail-value">
+            <DimInput value={obj.depth} onChange={(v) => update("depth", v)} />
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginLeft: 2 }}>m</span>
+          </div>
+        </div>
+      </>
     );
   }
 
@@ -91,8 +146,9 @@ export default function DimensionControls({ obj, updateObject, setErrorMsg, clam
   return (
     <div className="detail-row inline">
       <div className="detail-key">Radius: </div>
-      <div className="detail-value" style={{ display: "inline-flex", gap: 6 }}>
+      <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
         {inputs}
+        <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)"}}>m</span>
       </div>
     </div>
   );

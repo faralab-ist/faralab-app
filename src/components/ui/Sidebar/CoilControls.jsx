@@ -51,9 +51,11 @@ export default function CoilControls({
             min={DIM_MIN}
             max={DIM_MAX}
             step={0.1}
+            inputStyle={{ minWidth: "4ch" }}
             onChange={onSetRadius}
             onError={setErrorMsg}
           />
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>m</span>
         </div>
       </div>
     );
@@ -91,9 +93,11 @@ export default function CoilControls({
               min={DIM_MIN}
               max={DIM_MAX}
               step={0.1}
+              inputStyle={{ minWidth: "4ch" }}
               onChange={onSetRadius}
               onError={setErrorMsg}
             />
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)"}}>m</span>
           </div>
           {labelControl || <div aria-hidden="true" />}
         </div>

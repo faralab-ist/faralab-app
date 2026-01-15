@@ -185,7 +185,6 @@ export default function ObjectItem({
                           updateObject(obj.id, { position: newPos });
                         }}
                       />
-                      {axis !== "z" && <span style={{ opacity: 0.6 }}>,</span>}
                     </div>
                   ))}
                 </div>
@@ -425,11 +424,13 @@ export default function ObjectItem({
                       min={VAL_MIN}
                       max={VAL_MAX}
                       step={0.01}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => {
                         const safe = clampWithError(v, VAL_MIN, VAL_MAX);
                         updateObject(obj.id, { charge_density: safe });
                       }}
                     />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>C/m²</span>
                   </div>
                 </div>
               </>
@@ -484,11 +485,13 @@ export default function ObjectItem({
                       min={VAL_MIN}
                       max={VAL_MAX}
                       step={0.01}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => {
                         const safe = clampWithError(v, VAL_MIN, VAL_MAX);
                         updateObject(obj.id, { charge_density: safe });
                       }}
                     />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>C/m³</span>
                   </div>
                 </div>
               </>
@@ -529,11 +532,13 @@ export default function ObjectItem({
                       min={VAL_MIN}
                       max={VAL_MAX}
                       step={0.01}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => {
                         const safe = clampWithError(v, VAL_MIN, VAL_MAX);
                         updateObject(obj.id, { charge_density: safe });
                       }}
                     />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>C/m</span>
                   </div>
                 </div>
 
@@ -558,17 +563,19 @@ export default function ObjectItem({
                       min={0.1}
                       max={100}
                       step={0.01}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => {
                         const safe = clampWithError(v, 0.1, 100);
                         updateObject(obj.id, { length: safe });
                       }}
                     />
-                    <span style={{ opacity: 0.35, display: "inline-block", width: 10, textAlign: "center", marginLeft: 10 }}>|</span>
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginRight: 20}}>m</span>
                     <span className="detail-key">Radius: </span>
                     <InlineDecimalInput
                       value={obj.radius}
                       min={0.1}
                       max={50}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => {
                         const safe = clampWithError(v, 0.1, 50);
                         updateObject(obj.id, { radius: safe });
@@ -576,6 +583,7 @@ export default function ObjectItem({
                       onError={setErrorMsg}
                       errorMsg={ERROR_MSG}
                     />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)"}}>m</span>
                   </div>
                  </div>
                  <div className="detail-row inline">
@@ -592,12 +600,12 @@ export default function ObjectItem({
                       onError={setErrorMsg}
                       errorMsg={ERROR_MSG}
                     />
-                    <span style={{ opacity: 0.35, display: "inline-block", width: 10, textAlign: "center", marginLeft: 15 }}>|</span>
-                    <span className="detail-key">Current: </span>
+                    <span className="detail-key" style={{ marginLeft: 27 }}>Current: </span>
                     <InlineDecimalInput
                       value={obj.current}
-                      min={0.1}
+                      min={0}
                       max={50}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => {
                         const safe = clampWithError(v, 0.1, 50);
                         updateObject(obj.id, { current: safe });
@@ -605,6 +613,7 @@ export default function ObjectItem({
                       onError={setErrorMsg}
                       errorMsg={ERROR_MSG}
                     />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>A</span>
                   </div>
                  </div>
                  <div className="detail-row inline">
@@ -637,6 +646,7 @@ export default function ObjectItem({
                       value={obj.length}
                       min={0.1}
                       max={100}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => {
                         const safe = clampWithError(v, 0.1, 100);
                         updateObject(obj.id, { length: safe });
@@ -644,12 +654,13 @@ export default function ObjectItem({
                       onError={setErrorMsg}
                       errorMsg={ERROR_MSG}
                     />
-                    <span style={{ opacity: 0.35, display: "inline-block", width: 10, textAlign: "center", marginLeft: 23 }}>|</span>
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginRight: 20 }}>m</span>
                     <span className="detail-key">Radius:</span>
                     <InlineDecimalInput
                       value={obj.radius}
                       min={0.1}
                       max={50}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => {
                         const safe = clampWithError(v, 0.1, 50);
                         updateObject(obj.id, { radius: safe });
@@ -657,6 +668,7 @@ export default function ObjectItem({
                       onError={setErrorMsg}
                       errorMsg={ERROR_MSG}
                     />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>m</span>
                   </div>
                  </div>
 
@@ -674,8 +686,7 @@ export default function ObjectItem({
                       onError={setErrorMsg}
                       errorMsg={ERROR_MSG}
                     />
-                    <span style={{ opacity: 0.35, display: "inline-block", width: 10, textAlign: "center", marginLeft: 10 }}>|</span>
-                    <span className="detail-key">Resolution: </span>
+                    <span className="detail-key" style={{ marginLeft: 10 }}>Resolution: </span>
                     <InlineDecimalInput
                       step={1}
                       value={obj.numOfCoils}
@@ -749,22 +760,24 @@ export default function ObjectItem({
                         initialValue={obj.radius}
                         min={0.01} max={10}
                         step={0.01}
+                        inputStyle={{ minWidth: "4ch" }}
                         onChange={(v) => {
                           const safe = clampWithError(v, 0.1, 10);
                           updateObject(obj.id, { radius: safe });
                         }}
                       />
+                      <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>m</span>
                     </div>
                  </div>
 
                   <div className="detail-row">
-                    <div className="detail-key">Magnetic Flux</div>
-                    <div className="detail-value">{obj.magneticFlux}</div>
+                  <div className="detail-key">Magnetic Flux</div>
+                    <div className="detail-value">{obj.magneticFlux} <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Wb</span></div>
                  </div>
 
                  <div className="detail-row">
                     <div className="detail-key">Electromotive Force</div>
-                    <div className="detail-value">{obj.emf}</div>
+                    <div className="detail-value">{obj.emf} <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>V</span></div>
                  </div>
                 </>
             )}
@@ -778,24 +791,26 @@ export default function ObjectItem({
                       initialValue={obj.radius}
                       min={0.01} max={10}
                       step={0.01}
+                      inputStyle={{ minWidth: "4ch" }}
                       onChange={(v) => updateObject(obj.id, { radius: v })}
                     />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>m</span>
                   </div>
                  </div>
 
                   <div className="detail-row">
-                    <div className="detail-key">Magnetic Flux</div>
-                    <div className="detail-value">{obj.magneticFlux}</div>
+                  <div className="detail-key">Magnetic Flux</div>
+                    <div className="detail-value">{obj.magneticFlux} <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Wb</span></div>
                  </div>
 
                  <div className="detail-row">
                     <div className="detail-key">Electromotive Force</div>
-                    <div className="detail-value">{obj.emf}</div>
+                    <div className="detail-value">{obj.emf} <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>V</span></div>
                  </div>
 
                  <div className="detail-row">
                     <div className="detail-key">Electric Flux</div>
-                    <div className="detail-value">{obj.electricFlux}</div>
+                    <div className="detail-value">{obj.electricFlux} <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>V·m</span></div>
                  </div>
                 </>
             )}
