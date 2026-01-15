@@ -115,7 +115,7 @@ function computeFieldAtPoint(objects, targetPos) {
 function computeEnclosedDiscreteCharge(surface, objects) {
   const shape = getSurfaceShape(surface)
   if (!shape || typeof shape.containsPoint !== 'function') {
-    return { canUseGauss: false, enclosedCharge: 0 }
+    return { canUseGauss: false, enclosedCharge: 0, fluxOverride: null }
   }
 
   const position = toVector3(surface.position || [0, 0, 0])
@@ -127,6 +127,7 @@ function computeEnclosedDiscreteCharge(surface, objects) {
   let enclosedCharge = 0
   let evaluatedAny = false
   let canUseGauss = true
+  let fluxOverride = null
 
   const processCharge = (worldPos, chargeValue) => {
     evaluatedAny = true
@@ -138,6 +139,10 @@ function computeEnclosedDiscreteCharge(surface, objects) {
   for (const obj of objects) {
     if (!obj || obj.id === surface.id) continue
     if (obj.type === 'surface') continue
+    if (fluxOverride !== null && obj.type !== 'concentricSpheres') {
+      canUseGauss = false
+      break
+    }
 
     if (obj.type === 'charge' || obj.type === 'testPointCharge') {
       const worldPos = toVector3(obj.position || [0, 0, 0])
@@ -208,6 +213,10 @@ function computeEnclosedDiscreteCharge(surface, objects) {
     }
 
     if (obj.type === 'concentricSpheres') {
+      if (fluxOverride !== null) {
+        canUseGauss = false
+        break
+      }
       if (surface.surfaceType !== 'sphere') {
         canUseGauss = false
         break
@@ -228,20 +237,50 @@ function computeEnclosedDiscreteCharge(surface, objects) {
 
       const charges = Array.isArray(obj.charges) ? obj.charges : []
       const materials = Array.isArray(obj.materials) ? obj.materials : []
+      const dielectrics = Array.isArray(obj.dielectrics) ? obj.dielectrics : []
       const normalizedCharges = radiuses.map((_, i) => Number(charges[i] ?? 0))
       const normalizedMaterials = radiuses.map((_, i) => materials[i] ?? 'conductor')
       const useDirectCharges = materials.length < radiuses.length
       const chargesPerSurface = useDirectCharges
         ? normalizedCharges
         : efields.chargePerSphereSurface(radiuses, normalizedCharges, normalizedMaterials)
+
       const surfaceRadius = Math.abs(surface.radius ?? 0)
       const epsilon = 1e-6
-      let enclosed = 0
+      let layer = -1
       for (let i = 0; i < radiuses.length; i++) {
-        if (surfaceRadius + epsilon >= radiuses[i]) enclosed += chargesPerSurface[i] ?? 0
+        const r = radiuses[i]
+        if (Math.abs(surfaceRadius - r) <= epsilon) {
+          if (i === radiuses.length - 1) {
+            layer = -1
+          } else {
+            layer = i + 1
+          }
+          break
+        }
+        if (surfaceRadius < r - epsilon) {
+          layer = i
+          break
+        }
       }
+
+      if (layer === -1) {
+        const totalCharge = normalizedCharges.reduce((sum, val) => sum + val, 0)
+        fluxOverride = totalCharge / EPSILON_0_REAL
+      } else {
+        let enclosed = 0
+        for (let i = 1; i <= layer; i++) {
+          enclosed += chargesPerSurface[i - 1] ?? 0
+        }
+        const dielectricConst = Number(dielectrics[layer] ?? 1)
+        if (Number.isFinite(dielectricConst) && Math.abs(dielectricConst) > 1e-9) {
+          fluxOverride = enclosed / (EPSILON_0_REAL * dielectricConst)
+        } else {
+          fluxOverride = 0
+        }
+      }
+
       evaluatedAny = true
-      enclosedCharge += enclosed
       continue
     }
 
@@ -249,7 +288,7 @@ function computeEnclosedDiscreteCharge(surface, objects) {
     break
   }
 
-  return { canUseGauss: canUseGauss && evaluatedAny, enclosedCharge }
+  return { canUseGauss: canUseGauss && evaluatedAny, enclosedCharge, fluxOverride }
 }
 
 // Computes electric flux for every Gaussian surface in the scene.
@@ -264,9 +303,9 @@ export default function calculateFlux(sceneObjects = []) {
   const results = []
 
   for (const surface of surfaces) {
-    const { canUseGauss, enclosedCharge } = computeEnclosedDiscreteCharge(surface, sceneObjects)
+    const { canUseGauss, enclosedCharge, fluxOverride } = computeEnclosedDiscreteCharge(surface, sceneObjects)
     if (canUseGauss) {
-      const flux = enclosedCharge / EPSILON_0_REAL
+      const flux = Number.isFinite(fluxOverride) ? fluxOverride : (enclosedCharge / EPSILON_0_REAL)
       results.push({ id: surface.id, name: surface.name, flux })
       continue
     }
