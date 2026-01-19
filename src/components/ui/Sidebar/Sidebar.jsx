@@ -245,7 +245,7 @@ export default function Sidebar({
                     ) : item.type === 'concentricSpheres' ? (
                       <img src={ChargeSphereIcon} alt="Concentric Spheres" className="sidebar-icon" />  
                     ) : item.subtype === 'sphere' ? (
-                      <img src={SphereIcon} alt="Sphere" className="sidebar-icon" />
+                      <img src={SphereIcon} alt="Gaussian Sphere" className="sidebar-icon" />
                     ) : item.subtype === 'cuboid' ? (
                       <img src={CuboidIcon} alt="Cuboid" className="sidebar-icon" />
                     ) : item.subtype === 'cylinder' ? (

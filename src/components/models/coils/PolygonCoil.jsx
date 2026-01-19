@@ -79,7 +79,7 @@ export default function PolygonCoil({
       : new THREE.Quaternion().setFromEuler(new THREE.Euler(rotation[0], rotation[1], rotation[2], 'XYZ'))
     
     const posVec = new THREE.Vector3(position[0], position[1], position[2])
-
+ 
     // Get polygon vertices
     const vertices = []
     for (let i = 0; i < numSides; i++) {
