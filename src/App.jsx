@@ -10,7 +10,7 @@ import { OrbitControls, Html } from '@react-three/drei'
   import { Charge, Wire, Plane, ChargedSphere, SlicePlaneHelper, ConcentricSpheres, ConcentricInfiniteWires, StackedPlanes, Path, TestCharge, BarMagnet} from './components/models'
 
   // Coil components
-  import { RingCoil, PolygonCoil, Solenoid, FaradayCoil, TestCoil } from './components/models/coils'
+  import { RingCoil, PolygonCoil, Solenoid, FaradayCoil, TestCoil, DynamicSolenoid } from './components/models/coils'
 
   // Surface components
   import { Sphere, Cylinder, Cuboid, EquipotentialSurface} from './components/models/surfaces'
@@ -877,6 +877,7 @@ function LoadingOverlay() {
                     case 'solenoid': ObjectComponent = Solenoid; break
                     case 'ring': ObjectComponent = RingCoil; break
                     case 'polygon': ObjectComponent = PolygonCoil; break
+                    case 'dynamicSolenoid': ObjectComponent = DynamicSolenoid; break
                     default: ObjectComponent = RingCoil; break
                   }
                   break

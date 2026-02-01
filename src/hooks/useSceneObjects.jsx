@@ -23,7 +23,7 @@ const objectFactories = {
     showLabel: true,
     createdAt: Date.now(),
   }),
-    testPointCharge: (index) => ({
+  testPointCharge: (index) => ({
     id: `tmp-${index}`, // será sobrescrito
     type: 'testPointCharge',
     name: `Test Charge ${index}`,
@@ -41,8 +41,8 @@ const objectFactories = {
     charge_density: 0.1,
     charge: 1,
     charges: [],
-    direction: [0, 0, 1], 
-    rotation: [0,0,0],
+    direction: [0, 0, 1],
+    rotation: [0, 0, 0],
     height: 5,
     radius: 0.03,
     infinite: false,
@@ -58,9 +58,9 @@ const objectFactories = {
     charge_density: 0.1,
     charge: 1,
     charges: [],
-    rotation: [0,0,0],
+    rotation: [0, 0, 0],
     direction: [0, 1, 0], //normal
-    dimensions: [4 , 4],
+    dimensions: [4, 4],
     planeWidth: 5,
     planeHeight: 5,
     infinite: false,
@@ -75,9 +75,9 @@ const objectFactories = {
     position: [0, 0, 0],
     charge_densities: [0.1],
     spacing: 1,
-    rotation: [0,0,0],
+    rotation: [0, 0, 0],
     direction: [0, 1, 0], //normal
-    dimensions: [4 , 4],
+    dimensions: [4, 4],
     planeWidth: 5,
     planeHeight: 5,
     infinite: false,
@@ -103,9 +103,9 @@ const objectFactories = {
     type: 'concentricSpheres',
     name: `Concentric Sphere ${index}`,
     position: [0, 0, 0],
-    radiuses:[],
-    materials:[], // 'conductor, 'dielectric'
-    dielectrics:[], // 1 for each dielectric delimited volume
+    radiuses: [],
+    materials: [], // 'conductor, 'dielectric'
+    dielectrics: [], // 1 for each dielectric delimited volume
     charges: [], // 1 for each conductor delimited volume
     direction: [0, 1, 0], // normal da esfera
     createdAt: Date.now(),
@@ -115,12 +115,12 @@ const objectFactories = {
     type: 'concentricInfWires',
     name: `Concentric Infinite Wire ${index}`,
     position: [0, 0, 0],
-    radiuses:[],
-    materials:[], // 'conductor, 'dielectric'
-    dielectrics:[], // 1 for each dielectric delimited volume
+    radiuses: [],
+    materials: [], // 'conductor, 'dielectric'
+    dielectrics: [], // 1 for each dielectric delimited volume
     charges: [], // 1 for each conductor delimited volume
     direction: [0, 1, 0], // normal do fio
-    rotation: [0,0,0],
+    rotation: [0, 0, 0],
     createdAt: Date.now(),
   }),
   sphere: (index) => ({
@@ -145,7 +145,7 @@ const objectFactories = {
     radius: 2,
     height: 6,
     opacity: 0.5,
-    rotation: [0,0,0],
+    rotation: [0, 0, 0],
     charges: [],
     deformable: true,
     fixed: false,
@@ -164,7 +164,7 @@ const objectFactories = {
     charges: [],
     deformable: true,
     fixed: false,
-    rotation: [0,0,0],
+    rotation: [0, 0, 0],
     createdAt: Date.now(),
   }),
   path: (index) => ({
@@ -218,6 +218,25 @@ const objectFactories = {
     charges: [],
     turns: 200,
     // unified
+    current: 0.1,
+    createdAt: Date.now(),
+    ac: false,
+    segments: 500,
+  }),
+  dynamicSolenoid: (index) => ({
+    id: `tmp-${index}`,
+    type: 'coil',
+    coilType: 'dynamicSolenoid',
+    name: `Dynamic Solenoid Coil ${index}`,
+    position: [0, 0, 0],
+    length: 4,
+    radius: 0.3,
+    direction: [0, 1, 0],
+    rotation: [0, 0, 0],
+    multiplier: 1,
+    pointsPerTurn: 10,
+    charges: [],
+    turns: 5,
     current: 0.1,
     createdAt: Date.now(),
     ac: false,
@@ -302,15 +321,15 @@ const objectFactories = {
 export default function useSceneObjects(initial = []) {
   const [sceneObjects, setSceneObjects] = useState(initial)
   const [counters, setCounters] = useState({
-    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires:0, concentricSpheres:0, path: 0, 
-    ringCoil: 0, polygonCoil: 0, barMagnet:0, solenoid: 0,
+    charge: 0, wire: 0, plane: 0, sphere: 0, cylinder: 0, cuboid: 0, chargedSphere: 0, concentricInfWires: 0, concentricSpheres: 0, path: 0,
+    ringCoil: 0, polygonCoil: 0, barMagnet: 0, solenoid: 0, dynamicSolenoid: 0
   })
 
   const addPointToPath = useCallback((id) => {
     setSceneObjects(prev => prev.map(o => {
       if (o.id === id) {
-        const newPoints = o.points ? [...o.points, [0,0,0]] : [[0,0,0]];
-        return { ...o, points: newPoints};
+        const newPoints = o.points ? [...o.points, [0, 0, 0]] : [[0, 0, 0]];
+        return { ...o, points: newPoints };
       }
       return o;
     }
@@ -321,7 +340,7 @@ export default function useSceneObjects(initial = []) {
     setSceneObjects(prev => prev.map(o => {
       if (o.id === id) {
         const newPoints = o.points ? o.points.slice(0, -1) : [];
-        return { ...o, points: newPoints};
+        return { ...o, points: newPoints };
       }
       return o;
     }
@@ -333,7 +352,7 @@ export default function useSceneObjects(initial = []) {
       if (o.id === id) {
         const newPoints = o.points ? [...o.points] : [];
         newPoints[pointIndex] = point;
-        return { ...o, points: newPoints};
+        return { ...o, points: newPoints };
       }
       return o;
     }
@@ -343,7 +362,7 @@ export default function useSceneObjects(initial = []) {
   const changePathChargeCount = useCallback((id, newCount) => {
     setSceneObjects(prev => prev.map(o => {
       if (o.id === id) {
-        return { ...o, chargeCount: newCount};
+        return { ...o, chargeCount: newCount };
       }
       return o;
     }
@@ -353,7 +372,7 @@ export default function useSceneObjects(initial = []) {
   const changePathCharge = useCallback((id, newCharge) => {
     setSceneObjects(prev => prev.map(o => {
       if (o.id === id) {
-        return { ...o, charge: newCharge};
+        return { ...o, charge: newCharge };
       }
       return o;
     }
@@ -363,7 +382,7 @@ export default function useSceneObjects(initial = []) {
   const changePathVelocity = useCallback((id, newVelocity) => {
     setSceneObjects(prev => prev.map(o => {
       if (o.id === id) {
-        return { ...o, velocity: newVelocity};
+        return { ...o, velocity: newVelocity };
       }
       return o;
     }
@@ -377,12 +396,12 @@ export default function useSceneObjects(initial = []) {
       // Calculate nextIndex based on object type
       let nextIndex
       let factoryType = type
-      
-      if (type === 'coil' || type === 'ringCoil' || type === 'polygonCoil' || type === 'solenoid') {
+
+      if (type === 'coil' || type === 'ringCoil' || type === 'polygonCoil' || type === 'solenoid' || type === 'dynamicSolenoid') {
         // For coils, count by coilType
-        const coilType = overrides.coilType || (type === 'polygonCoil' ? 'polygon' : (type === 'solenoid' ? 'solenoid' : 'ring'))
+        const coilType = overrides.coilType || (type === 'polygonCoil' ? 'polygon' : (type === 'solenoid' ? 'solenoid' : (type === 'dynamicSolenoid' ? 'dynamicSolenoid' : 'ring')))
         nextIndex = prev.filter(o => o.type === 'coil' && o.coilType === coilType).length + 1
-        factoryType = type === 'polygonCoil' ? 'polygonCoil' : type === 'ringCoil' ? 'ringCoil' : type === 'solenoid' ? 'solenoid' : type
+        factoryType = type === 'polygonCoil' ? 'polygonCoil' : type === 'ringCoil' ? 'ringCoil' : type === 'solenoid' ? 'solenoid' : type === 'dynamicSolenoid' ? 'dynamicSolenoid' : type
       } else if (type === 'sphere' || type === 'cylinder' || type === 'cuboid') {
         // For surfaces, count by surfaceType
         nextIndex = prev.filter(o => o.type === 'surface' && o.surfaceType === type).length + 1
@@ -390,7 +409,7 @@ export default function useSceneObjects(initial = []) {
         // For other types, count by type
         nextIndex = prev.filter(o => o.type === type).length + 1
       }
-      
+
       const base = objectFactories[factoryType](nextIndex)
 
       const newObj = {
@@ -415,41 +434,41 @@ export default function useSceneObjects(initial = []) {
 
   const updateChargeDensity = useCallback((id, charge_density) => {
     setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charge_density } : o)))
-  }, [])  
+  }, [])
 
-const updateDirection = useCallback((id, direction) => {
-  setSceneObjects(prev =>
-    prev.map(o => {
-      if (o.id !== id) return o;
+  const updateDirection = useCallback((id, direction) => {
+    setSceneObjects(prev =>
+      prev.map(o => {
+        if (o.id !== id) return o;
 
-      const same =
-        Array.isArray(o.direction) &&
-        o.direction.length === direction.length &&
-        o.direction.every((v, i) => v === direction[i]);
+        const same =
+          Array.isArray(o.direction) &&
+          o.direction.length === direction.length &&
+          o.direction.every((v, i) => v === direction[i]);
 
-      if (same) {
-        return o;
-      }
+        if (same) {
+          return o;
+        }
 
-      return { ...o, direction };
-    })
-  );
-}, []);
+        return { ...o, direction };
+      })
+    );
+  }, []);
 
 
   const addCharge = useCallback((id, position, charge) => {
-    setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charges:[...o.charges, {position:position, charge:charge}] } : o)))
+    setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charges: [...o.charges, { position: position, charge: charge }] } : o)))
   }, [])
 
   const clearCharges = useCallback((id) => {
-    setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charges:[] } : o)))
+    setSceneObjects(prev => prev.map(o => (o.id === id ? { ...o, charges: [] } : o)))
   }, [])
 
   const addPlaneToStackedPlanes = useCallback((id) => {
     setSceneObjects(prev => prev.map(o => {
       if (o.id === id) {
         const newChargeDensities = o.charge_densities ? [...o.charge_densities, 0.1] : [0.1];
-        return { ...o, charge_densities: newChargeDensities};
+        return { ...o, charge_densities: newChargeDensities };
       }
       return o;
     }
@@ -460,7 +479,7 @@ const updateDirection = useCallback((id, direction) => {
     setSceneObjects(prev => prev.map(o => {
       if (o.id === id) {
         const newChargeDensities = o.charge_densities ? o.charge_densities.slice(0, -1) : [];
-        return { ...o, charge_densities: newChargeDensities};
+        return { ...o, charge_densities: newChargeDensities };
       }
       return o;
     }
@@ -470,7 +489,7 @@ const updateDirection = useCallback((id, direction) => {
   const setSpacingForStackedPlanes = useCallback((id, spacing) => {
     setSceneObjects(prev => prev.map(o => {
       if (o.id === id) {
-        return { ...o, spacing: spacing};
+        return { ...o, spacing: spacing };
       }
       return o;
     }
@@ -482,7 +501,7 @@ const updateDirection = useCallback((id, direction) => {
       if (o.id === id) {
         const newChargeDensities = o.charge_densities ? [...o.charge_densities] : [];
         newChargeDensities[planeIndex] = charge_density;
-        return { ...o, charge_densities: newChargeDensities};
+        return { ...o, charge_densities: newChargeDensities };
       }
       return o;
     }
@@ -500,7 +519,7 @@ const updateDirection = useCallback((id, direction) => {
         const newMaterials = o.materials ? [...o.materials, 'dielectric'] : ['dielectric'];
         const newDielectrics = o.dielectrics ? [...o.dielectrics, 1] : [1];
         const newCharges = o.charges ? [...o.charges, 0] : [0];
-        return { ...o, radiuses: newRadiuses, materials: newMaterials, dielectrics: newDielectrics, charges: newCharges};
+        return { ...o, radiuses: newRadiuses, materials: newMaterials, dielectrics: newDielectrics, charges: newCharges };
       }
       return o;
     }
@@ -512,7 +531,7 @@ const updateDirection = useCallback((id, direction) => {
       if (o.id === id) {
         const newRadiuses = o.radiuses ? [...o.radiuses] : [];
         newRadiuses[layerIndex] = radius;
-        return { ...o, radiuses: newRadiuses};
+        return { ...o, radiuses: newRadiuses };
       }
       return o;
     }
@@ -527,7 +546,7 @@ const updateDirection = useCallback((id, direction) => {
         const newMaterials = o.materials ? o.materials.slice(0, -1) : [];
         const newDielectrics = o.dielectrics ? o.dielectrics.slice(0, -1) : [];
         const newCharges = o.charges ? o.charges.slice(0, -1) : [];
-        return { ...o, radiuses: newRadiuses, materials: newMaterials, dielectrics: newDielectrics, charges: newCharges};
+        return { ...o, radiuses: newRadiuses, materials: newMaterials, dielectrics: newDielectrics, charges: newCharges };
       }
       return o;
     }
@@ -539,7 +558,7 @@ const updateDirection = useCallback((id, direction) => {
       if (o.id === id) {
         const newMaterials = o.materials ? [...o.materials] : [];
         newMaterials[layerIndex] = material;
-        return { ...o, materials: newMaterials};
+        return { ...o, materials: newMaterials };
       }
       return o;
     }
@@ -551,7 +570,7 @@ const updateDirection = useCallback((id, direction) => {
       if (o.id === id) {
         const newDielectrics = o.dielectrics ? [...o.dielectrics] : [];
         newDielectrics[layerIndex] = dielectric;
-        return { ...o, dielectrics: newDielectrics};
+        return { ...o, dielectrics: newDielectrics };
       }
       return o;
     }
@@ -563,7 +582,7 @@ const updateDirection = useCallback((id, direction) => {
       if (o.id === id) {
         const newCharges = o.charges ? [...o.charges] : [];
         newCharges[layerIndex] = charge;
-        return { ...o, charges: newCharges};
+        return { ...o, charges: newCharges };
       }
       return o;
     }
@@ -593,6 +612,7 @@ const updateDirection = useCallback((id, direction) => {
     polygonCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'polygon').length,
     ringCoil: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'ring').length,
     solenoid: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'solenoid').length,
+    dynamicSolenoid: sceneObjects.filter(o => o.type === 'coil' && o.coilType === 'dynamicSolenoid').length,
     barMagnet: sceneObjects.filter(o => o.type === 'barMagnet').length,
     total: sceneObjects.length,
   }), [sceneObjects])

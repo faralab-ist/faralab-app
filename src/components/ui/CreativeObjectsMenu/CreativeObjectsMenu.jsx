@@ -86,6 +86,13 @@ const CREATIVE_OBJECTS = [
     type: 'solenoid',
     defaultProps: { position: [0, 0, 0] },
     category: 'magnetic'
+  },
+    {
+    id: 'dynamicSolenoid',
+    label: 'Dynamic Solenoid',
+    type: 'dynamicSolenoid',
+    defaultProps: { position: [0, 0, 0] },
+    category: 'magnetic'
   }
 ]
 
