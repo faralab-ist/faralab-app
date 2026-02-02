@@ -236,10 +236,10 @@ const objectFactories = {
     multiplier: 1,
     pointsPerTurn: 10,
     charges: [],
-    turns: 5,
+    turns: 1,
     current: 0.1,
     createdAt: Date.now(),
-    ac: false,
+    ac: true,
     segments: 500,
   }),
   polygonCoil: (index) => ({

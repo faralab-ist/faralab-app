@@ -28,7 +28,7 @@ export default function DynamicSolenoid({
     turns = 10,
     // unified API: only current
     current = 1,
-    ac = false,
+    ac = true,
 
     // visual thickness of the wire (used for geometry + hitbox)
     wireThickness = 0.05,
@@ -47,8 +47,8 @@ export default function DynamicSolenoid({
     frequency = 0.05,
     resistance = 5
 }) {
-    const radialSamples = 10;
-    const angularSamples = 10;
+    const radialSamples = 5;
+    const angularSamples = 5;
 
     const computeSolenoidNormal = useCallback(() => {
         // Local normal is +Z (for solenoid along Z axis)
@@ -99,7 +99,7 @@ export default function DynamicSolenoid({
 
 
     const prevCurrentRef = useRef(0);
-    const prevFluxRef = useRef(0);
+    const prevExternalFluxRef = useRef(0);
     const prevTimeRef = useRef(0);
     const lastSampleRef = useRef(0);
     const sampleInterval = 0.05;
@@ -115,34 +115,37 @@ export default function DynamicSolenoid({
             const appliedVoltage = peakVoltage * Math.sin(w * now + phase);
 
             // Calculate flux by breaking solenoid into individual loops and summing
-            var flux;
+            var externalFlux;
             for (let t = 0; t < turns; t++) { 
                 const loopCenterY = -length / 2 + (t + 0.5) * (length / turns);
                 const loopPosition = [position[0], position[1] + loopCenterY, position[2]];
                 const loopDirection = direction;
+                
                 const loopFlux = calculateMagFluxThroughCircularLoop(
                     loopPosition,
                     loopDirection,
                     radius,
                     radialSamples,
                     angularSamples,
-                    objects,
+                    objects.filter(obj => (obj.type !== 'coil' || obj.coilType !== 'dynamicSolenoid'))
                 );
-                flux = (flux || 0) + loopFlux;
+                
+                externalFlux = (externalFlux || 0) + loopFlux;
             }
 
-            const prevCurr = prevCurrentRef.current;
-            const prevT = prevTimeRef.current;
-            const prevFlux = prevFluxRef.current;
+            const prevCurrent = prevCurrentRef.current;
+            const prevTime = prevTimeRef.current;
+            const prevFlux = prevExternalFluxRef.current;
 
-            const dt = Math.max(1e-6, now - prevT);
+            const dt = Math.max(1e-6, now - prevTime);
+            const externalEmf = - (externalFlux - prevFlux) / dt;
 
-            const currentEmf = - (flux - prevFlux) / dt;
+            const L = selfInductance;
 
-            const netCurrent = (selfInductance/dt * prevCurr + appliedVoltage + currentEmf) / (resistance + selfInductance/dt);
+            const netCurrent = (appliedVoltage + externalEmf * 1e6 + (L/dt)*prevCurrent) / (resistance + L/dt);
 
             prevCurrentRef.current = netCurrent;
-            prevFluxRef.current = flux;
+            prevExternalFluxRef.current = externalFlux;
             prevTimeRef.current = now;
 
             updateObject(id, {current: netCurrent });

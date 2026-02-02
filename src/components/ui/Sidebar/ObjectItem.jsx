@@ -636,6 +636,120 @@ export default function ObjectItem({
                </>
             )}
 
+           {obj.type === 'coil' && obj.coilType === 'dynamicSolenoid' && (
+               <>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Length: </div>
+                  <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <InlineDecimalInput
+                      value={obj.length}
+                      min={0.1}
+                      max={100}
+                      step={0.01}
+                      inputStyle={{ minWidth: "4ch" }}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 100);
+                        updateObject(obj.id, { length: safe });
+                      }}
+                    />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginRight: 20}}>m</span>
+                    <span className="detail-key">Radius: </span>
+                    <InlineDecimalInput
+                      value={obj.radius}
+                      min={0.1}
+                      max={50}
+                      inputStyle={{ minWidth: "4ch" }}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 50);
+                        updateObject(obj.id, { radius: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)"}}>m</span>
+                  </div>
+                 </div>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Peak Voltage: </div>
+                  <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <InlineDecimalInput
+                      value={obj.peakVoltage}
+                      min={0}
+                      max={100}
+                      step={0.01}
+                      inputStyle={{ minWidth: "4ch" }}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0, 100);
+                        updateObject(obj.id, { peakVoltage: safe });
+                      }}
+                    />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)", marginRight: 20}}>V</span>
+                    <span className="detail-key">Frequency: </span>
+                    <InlineDecimalInput
+                      value={obj.frequency}
+                      min={0.01}
+                      max={10}
+                      step={0.01}
+                      inputStyle={{ minWidth: "4ch" }}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 50);
+                        updateObject(obj.id, { frequency: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)"}}>Hz</span>
+                  </div>
+                 </div>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Turns: </div>
+                  <div className="detail-value" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                    <InlineDecimalInput
+                      value={obj.turns}
+                      min={0.1}
+                      max={300}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 300);
+                        updateObject(obj.id, { turns: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                    <span className="detail-key" style={{ marginLeft: 27 }}>Resistance: </span>
+                    <InlineDecimalInput
+                      value={obj.resistance}
+                      min={0.1}
+                      max={50000}
+                      inputStyle={{ minWidth: "4ch" }}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 0.1, 50000);
+                        updateObject(obj.id, { resistance: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                    <span style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Ω</span>
+                  </div>
+                 </div>
+                 <div className="detail-row inline">
+                  <div className="detail-key">Resolution (best results ~ 700): </div>
+                  <div className="detail-value">
+                    <InlineDecimalInput
+                      value={obj.segments}
+                      min={1}
+                      max={3000}
+                      step={1}
+                      onChange={(v) => {
+                        const safe = clampWithError(v, 1, 3000);
+                        updateObject(obj.id, { segments: safe });
+                      }}
+                      onError={setErrorMsg}
+                      errorMsg={ERROR_MSG}
+                    />
+                  </div>
+                 </div>
+               </>
+            )}
 
             {obj.type === 'barMagnet' && (
                <>
