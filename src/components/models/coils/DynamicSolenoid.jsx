@@ -4,6 +4,7 @@ import BaseCoil from './BaseCoil'
 import { useFrame } from '@react-three/fiber'
 import { calculateMagFluxThroughCircularLoop } from '../../../physics/magFieldCpu'
 import { MU_0_REAL } from '../../../physics/constants'
+import { useRegisterGeometry, updateCurrent, getMutual, getOthers } from '../../../physics/mutualInductance'
 
 // just a big solenoid
 
@@ -90,6 +91,7 @@ export default function DynamicSolenoid({
 
     //console.log(getSolenoidPoints())
 
+    // Calculate self-inductance of solenoid
     const selfInductance = useMemo(() => {
         const N = turns;
         const A = Math.PI * radius ** 2;
@@ -97,6 +99,8 @@ export default function DynamicSolenoid({
         return (MU_0_REAL * N * N * A) / l;
     }, [turns, radius, length]);
 
+    // Register geometry in global cache for mutual inductance calculations
+    useRegisterGeometry(id, [length, turns, radius, position, direction]);
 
     const prevCurrentRef = useRef(0);
     const prevExternalFluxRef = useRef(0);
@@ -116,23 +120,24 @@ export default function DynamicSolenoid({
 
             // Calculate flux by breaking solenoid into individual loops and summing
             var externalFlux;
-            for (let t = 0; t < turns; t++) { 
+            for (let t = 0; t < turns; t++) {
                 const loopCenterY = -length / 2 + (t + 0.5) * (length / turns);
                 const loopPosition = [position[0], position[1] + loopCenterY, position[2]];
                 const loopDirection = direction;
-                
+
                 const loopFlux = calculateMagFluxThroughCircularLoop(
                     loopPosition,
                     loopDirection,
                     radius,
                     radialSamples,
                     angularSamples,
-                    objects.filter(obj => (obj.type !== 'coil' || obj.coilType !== 'dynamicSolenoid'))
+                    objects.filter(obj => !(obj.type === 'coil' && obj.coilType === 'dynamicSolenoid'))
                 );
-                
+
                 externalFlux = (externalFlux || 0) + loopFlux;
             }
 
+            
             const prevCurrent = prevCurrentRef.current;
             const prevTime = prevTimeRef.current;
             const prevFlux = prevExternalFluxRef.current;
@@ -142,13 +147,23 @@ export default function DynamicSolenoid({
 
             const L = selfInductance;
 
-            const netCurrent = (appliedVoltage + externalEmf * 1e6 + (L/dt)*prevCurrent) / (resistance + L/dt);
+            let mutualEmf = 0;
+            const others = getOthers(id);
+
+            others.forEach(other => {
+                const M = getMutual(id, other.id);
+                const dI_dt = (other.current - other.prevCurrent) / dt;
+                mutualEmf -= M * dI_dt;
+            });
+
+            const netCurrent = (appliedVoltage + externalEmf * 1e6 + mutualEmf + (L / dt) * prevCurrent) / (resistance + L / dt);
 
             prevCurrentRef.current = netCurrent;
             prevExternalFluxRef.current = externalFlux;
             prevTimeRef.current = now;
 
-            updateObject(id, {current: netCurrent });
+            updateCurrent(id, netCurrent);
+            updateObject(id, { current: netCurrent });
         }
     });
 
