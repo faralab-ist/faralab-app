@@ -147,6 +147,7 @@ export default function DynamicSolenoid({
 
             const L = selfInductance;
 
+            // Calculate flux from mutual inductance with other coils
             let mutualEmf = 0;
             const others = getOthers(id);
 
