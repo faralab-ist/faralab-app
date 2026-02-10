@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useMemo, useLayoutEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
-import CuboidShape from '../../../Surfaces/cuboidShape'
+import CuboidShape from '../../../surfaces/cuboidShape'
 
 import { Html } from '@react-three/drei'
 import Label from '../../ui/labels/Label'

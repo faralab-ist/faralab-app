@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { sampleGaussianSurface } from '../Surfaces/gaussianSurfaceSampler'
+import { sampleGaussianSurface } from '../surfaces/gaussianSurfaceSampler'
 import calculateFieldAtPoint from './calculateField'
 import calculateMagFieldAtPoint from './calculateMagField'
 

@@ -2,7 +2,7 @@ import React, { useRef, useMemo, useLayoutEffect, useEffect } from 'react'
 import { PivotControls } from '@react-three/drei'
 import * as THREE from 'three'
 import NormalArrow from './NormalArrow'
-import CylinderShape from '../../../Surfaces/cylinderShape'
+import CylinderShape from '../../../surfaces/cylinderShape'
 
 import { Html } from '@react-three/drei'
 import Label from '../../ui/labels/Label'
