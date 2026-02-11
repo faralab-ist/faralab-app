@@ -5,6 +5,7 @@ import calculateFieldAtPoint from '../../../utils/calculateField'
 import Label from '../../ui/labels/Label'
 import { InlineDecimalInput } from '../../ui/io/decimalInput'
 import { POS_MIN, POS_MAX } from '../../ui/Sidebar/utils'
+import { ELEMENTARY_CHARGE } from '../../../physics/constants'
 
 export default function TestCharge({position = [0, 0, 0], sceneObjects, updateObject, showLabel = true, onHideLabel, ...props }) {
   
@@ -32,7 +33,14 @@ export default function TestCharge({position = [0, 0, 0], sceneObjects, updateOb
     return { efieldMagnitude: mag, efieldDirection: dir }
   }, [otherObjects, position])
 
-  // Update the object with calculated E-field values and label info
+  // Calculate force via E-field
+  const { eforceMagnitude, eforceDirection } = useMemo(() => {
+    const mag = efieldMagnitude * ELEMENTARY_CHARGE
+    const dir = efieldDirection 
+    return {eforceMagnitude: mag, eforceDirection: dir}
+  })
+
+  // Update the object with calculated E-field values
   useEffect(() => {
     if (updateObject && props.id) {
       updateObject(props.id, {
@@ -100,7 +108,9 @@ export default function TestCharge({position = [0, 0, 0], sceneObjects, updateOb
           headerContent={header}
           value={[
             `E = ${efieldMagnitude.toExponential(2)} N/C`,
+            `F = ${eforceMagnitude.toExponential(2)} N`,
             `dir: (${efieldDirection.map(v => v.toFixed(2)).join(', ')})`
+            
           ]}
           offsetY={0.5}
           distanceFactor={8}
