@@ -36,7 +36,7 @@ import CreativeObjectsMenu from './components/ui/CreativeObjectsMenu'
     useSceneHover 
 } from "./hooks"
 import MagFieldArrowsGPU from './hooks/useMagFieldArrowsGPU'
-
+import HeatMap from './hooks/useHeatMaps'
 
 // Fullscreen loading overlay that fades away
 function LoadingOverlay() {
@@ -970,6 +970,15 @@ function LoadingOverlay() {
           waveDuration={waveDuration}
           />
         )}
+
+        {true && <HeatMap
+          key={`heatmap-${sceneObjects.map(o => `${o.id}:${o.type}:${o.charge ?? 0}:${o.charge_density ?? 0}`).join('|')}-${activePlane}-${lineMin}`} //HEATMAP BUGFIX
+          objects={sceneObjects}
+          gridSize={10}
+          resolution={128}
+          plane={'xz'}
+          planeOffset={0}
+        />}
 
         {showLines && (
           <FieldLines key={`field-lines-${sceneObjects.length}-${sceneObjects.map(obj => obj.id)

@@ -16,6 +16,7 @@ function dataToSquareTexture(data, components = 4){
 
     const src = (data instanceof Float32Array) ? data : new Float32Array(data);
 
+    // Pad the data into RGBA format filling missing components with 0
     for (let i = 0; i < count; i++){
         const scrOffset = i * components;
         const dstOffset = i * 4;
@@ -159,6 +160,56 @@ export function buildGridPositions(
                         positions.push(x, y, z, 0);
                     }
                 }
+            }
+        }
+    }
+
+    const count = Math.max(0, Math.floor(positions.length / 4));
+    
+    if (count === 0) {
+        const empty = new Float32Array([0,0,0,0]);
+        const tex = new THREE.DataTexture(empty, 1, 1, THREE.RGBAFormat, THREE.FloatType);
+        tex.needsUpdate = true;
+        return { positionsArr: empty, tex, count: 0, size: 1 };
+    }
+
+    const packed = dataToSquareTexture(new Float32Array(positions), 4);
+    return { positionsArr: packed.padded, tex: packed.tex, count: count, size: packed.texSize };
+}
+
+export function buildPlaneSamplePoints(
+    gridSize = 10,
+    resolution = 128, // num of points per side
+    plane = 'xy',
+    planeOffset = 0,
+    ){
+    const positions = [];
+    const step = gridSize / resolution;
+    if (plane === 'xy') {
+        for (let ix = -gridSize; ix <= gridSize; ix+=step) {
+            const x = ix;
+            for (let iy = -gridSize; iy <= gridSize; iy+=step) {
+                const y = iy;
+                const z = planeOffset;
+                positions.push(x, y, z, 0);
+            }
+        }
+    } else if (plane === 'xz') {
+        for (let ix = -gridSize; ix <= gridSize; ix+=step) {
+            const x = ix;
+            for (let iz = -gridSize; iz <= gridSize; iz+=step) {
+                const z = iz;
+                const y = planeOffset;
+                positions.push(x, y, z, 0);
+            }
+        }
+    } else if (plane === 'yz') {
+        for (let iy = -gridSize; iy <= gridSize; iy+=step) {
+            const y = iy;
+            for (let iz = -gridSize; iz <= gridSize; iz+=step) {
+                const z = iz;
+                const x = planeOffset;
+                positions.push(x, y, z, 0);
             }
         }
     }
